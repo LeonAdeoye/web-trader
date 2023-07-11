@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 
-// Electron's libarray to enable IPC communication snd allow a React process to send events to the Electron process.
+// Electron's library to enable IPC communication snd allow a React process to send events to the Electron process.
 require('@electron/remote/main').initialize();
 
 function createWindow()
@@ -14,6 +14,8 @@ function createWindow()
             enableRemoteModule: true
         }
     });
+
+    win.webContents.openDevTools();
 
     win.loadURL(
         isDev
