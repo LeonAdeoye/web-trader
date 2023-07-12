@@ -15,7 +15,7 @@ async function main()
         await client.connect(url);
         const cmd = new Command("sow_and_delta_subscribe").topic(topicName);
         await client.execute(cmd, onAmpsMessage);
-        console.log("Connected to AMPS using URL: ws://localhost:9008/amps/json.");
+        console.log("Connected to AMPS using URL: ", url);
     }
     catch (e)
     {

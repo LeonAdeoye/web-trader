@@ -1,10 +1,34 @@
 import * as React from 'react';
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import { AgGridReact} from "ag-grid-react";
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-export const TickerApp = () =>
+export const TickerApp = (factory, deps) =>
 {
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
+
+    const [columnDefs, setColumnDefs] = useState([
+        {headerName: "Symbol", field: "symbol", resizable: true},
+        {headerName: "Best Ask", field: "best_ask", resizable: true, cellDataType: "number"},
+        {headerName: "Best Bid", field: "best_bid", resizable: true, cellDataType: "number"},
+        {headerName: "VWAP", field: "vwap_today", resizable: true, cellDataType: "number"},
+        {headerName: "VWAP Last 24h", field: "vwap_24h", resizable: true, cellDataType: "number"},
+        {headerName: "Low", field: "low", resizable: true, cellDataType: "number"},
+        {headerName: "High", field: "high", resizable: true, cellDataType: "number"},
+        {headerName: "Open", field: "open", resizable: true, cellDataType: "number"},
+        {headerName: "Close", field: "close", resizable: true, cellDataType: "number"},
+        {headerNAme: "Volume", field: "vol_today", resizable: true, cellDataType: "number"},
+        {headerName: "Volume Last 24h", field: "vol_24h", resizable: true, cellDataType: "number"},
+        {headerName: "Trades", field: "num_trades", resizable: true, cellDataType: "number"},
+        {headerName: "Trades Last 24h" , field: "num_trades_24h", resizable: true, cellDataType: "number"}]);
+
+    const defaultColDef = useMemo(() => ({filter: true, sortable: true}));
+
+    const celClickedListener = useCallback( event => {
+        console.log(event);
+    });
 
     useEffect(() =>
     {
@@ -27,12 +51,14 @@ export const TickerApp = () =>
         }
     }, [worker]);
 
-    // {prices.map((price, index) => <li key={index}>symbol: {price.symbol} with best ask: {price.best_ask} and best bid: {price.best_bid}</li>)}
     return (
-        <>
-            <ul>
-                {prices.map((price, index) => <li key={index}>data:{JSON.stringify(price)}</li>)}
-            </ul>
-        </>
+        <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
+            <AgGridReact
+                columnDefs={columnDefs}
+                rowData={prices}
+                defaultColDef={defaultColDef}
+                onCellClicked={celClickedListener}
+            />
+        </div>
     );
 };
