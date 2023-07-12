@@ -27,10 +27,11 @@ export const TickerApp = () =>
         }
     }, [worker]);
 
+    // {prices.map((price, index) => <li key={index}>symbol: {price.symbol} with best ask: {price.best_ask} and best bid: {price.best_bid}</li>)}
     return (
         <>
             <ul>
-                {prices.map((price, index) => <li key={index}>symbol: {price.symbol} with best ask: {price.best_ask} and best bid: {price.best_bid}</li>)}
+                {prices.map((price, index) => <li key={index}>data:{JSON.stringify(price)}</li>)}
             </ul>
         </>
     );

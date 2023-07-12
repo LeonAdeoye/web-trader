@@ -2,6 +2,8 @@
   "price-reader":
   {
     "amps-websocket-url": "ws://localhost:9008/amps/json",
-    "amps-client-name": "web-trader-price-reader"
+    "amps-client-name": "web-trader-price-reader",
+    "amps-topic": "prices",
+    "amps-filter": "symbol = 'ETH/USD'"
   }
 }
