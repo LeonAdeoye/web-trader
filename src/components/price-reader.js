@@ -23,6 +23,7 @@ async function main()
     }
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 const onAmpsMessage = (message) =>
 {
     switch (message.header.command())
@@ -31,12 +32,14 @@ const onAmpsMessage = (message) =>
             console.log('--- Begin SOW Results ---');
             break;
         case 'sow':
-            console.log('--- SOW ---');
-            postMessage(message.data);
+            console.log('--- SOW ---'  + JSON.stringify(message.data));
+            sleep(20000);
+            postMessage({ messageType: "snapshot" , price: message.data});
             break;
         case 'p':
-            console.log('--- PUBLISH ---');
-            postMessage(message.data);
+            sleep(20000);
+            console.log('--- PUBLISH ---' + JSON.stringify(message.data));
+            postMessage({ messageType: "update", price: message.data});
             break;
         case 'group_end':
             console.log('--- End SOW Results ---');
