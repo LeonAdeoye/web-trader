@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useState, useRef} from "react";
+import {useEffect, useMemo, useState, useRef} from "react";
 import { AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-export const TickerApp = (factory, deps) =>
+export const TickerApp = () =>
 {
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
@@ -21,7 +21,6 @@ export const TickerApp = (factory, deps) =>
         return true;
     }
 
-    // Put commas in the right places of currency values.
     const formatNumber = (number) =>
     {
         return number.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
@@ -36,13 +35,6 @@ export const TickerApp = (factory, deps) =>
         return isValidParameter(param) ? "$" + formatNumber(param.value) : param.value;
     }
 
-    /*gridApi.current.api.forEachNode((rowNode) =>
-    {
-        const updated = rowNode.data;
-        const symbol = updated.symbol;
-
-    });*/
-
     const [columnDefs] = useState([
         {headerName: "Symbol", field: "symbol"},
         {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter},
@@ -53,12 +45,12 @@ export const TickerApp = (factory, deps) =>
         {headerName: "High", field: "high", cellDataType: "number", valueFormatter: currencyFormatter},
         {headerName: "Open", field: "open", cellDataType: "number", valueFormatter: currencyFormatter},
         {headerName: "Close", field: "close", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerNAme: "Volume", field: "vol_today", cellDataType: "number", valueFormatter: numberFormatter},
+        {headerName: "Volume", field: "vol_today", cellDataType: "number", valueFormatter: numberFormatter},
         {headerName: "Volume Last 24h", field: "vol_24h", cellDataType: "number", valueFormatter: numberFormatter},
         {headerName: "Trades", field: "num_trades", cellDataType: "number", valueFormatter: numberFormatter},
         {headerName: "Trades Last 24h" , field: "num_trades_24h", cellDataType: "number", valueFormatter: numberFormatter}]);
 
-    const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}));
+    const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
 
     useEffect(() =>
     {
@@ -72,24 +64,28 @@ export const TickerApp = (factory, deps) =>
 
     useEffect(() =>
     {
-        if(worker)
+        if (worker)
         {
             worker.onmessage = (event) =>
             {
-                if(event.data.messageType === "snapshot")
-                    setPrices((prices) => [...prices, event.data]);
-                else if(event.data.messageType === "update")
+                const { messageType, price: eventPrice } = event.data;
+
+                setPrices((prevPrices) =>
                 {
-                    const index = prices.findIndex((price) => price.symbol === event.data.symbol);
-                    if(index !== -1)
+                    if (messageType === "update")
                     {
-                        const updatedPrices = [...prices];
-                        updatedPrices[index] = { ...updatedPrices[index], ...event.data };
-                        setPrices(updatedPrices);
+                        const index = prevPrices.findIndex((price) => price.symbol === eventPrice.symbol);
+                        if (index !== -1)
+                            return prevPrices.map((price, i) =>  i === index ? { ...price, ...eventPrice } : price);
+                        else
+                            return [...prevPrices, eventPrice];
                     }
-                    else
-                        setPrices((prices) => [...prices, event.data]);
-                }
+
+                    if (messageType === "snapshot")
+                        return [...prevPrices, eventPrice];
+
+                    return prevPrices;
+                });
             };
         }
     }, [worker]);

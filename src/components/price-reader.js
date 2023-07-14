@@ -1,7 +1,4 @@
 const {Client, Command} = require('amps');
-//const config = require('config');
-//let clientName = config.get('price-reader.amps-client-name');
-//let topic = config.get('price-reader.amps-topic');
 
 async function main()
 {
@@ -23,31 +20,27 @@ async function main()
     }
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const onAmpsMessage = (message) =>
 {
+    const sow = [];
     switch (message.header.command())
     {
-        case 'group_begin':
-            console.log('--- Begin SOW Results ---');
-            break;
         case 'sow':
-            console.log('--- SOW ---'  + JSON.stringify(message.data));
-            sleep(20000);
             postMessage({ messageType: "snapshot" , price: message.data});
             break;
         case 'p':
-            sleep(20000);
-            console.log('--- PUBLISH ---' + JSON.stringify(message.data));
             postMessage({ messageType: "update", price: message.data});
             break;
+        case 'group_begin':
+            break;
         case 'group_end':
-            console.log('--- End SOW Results ---');
             break;
         default:
-            console.log("Unexpected message header: ", message.header.command());
+            break;
     }
 }
+
+
 
 main().then(() => console.log("AMPS subscription completed."));
 
