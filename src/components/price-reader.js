@@ -1,7 +1,5 @@
 const {Client, Command} = require('amps');
 
-let count = 0
-
 async function main()
 {
     try
@@ -9,7 +7,6 @@ async function main()
         const clientName = "web-trader-price-reader";
         const topicName = "prices";
         const url = "ws://localhost:9008/amps/json";
-
         const client = new Client(clientName);
         await client.connect(url);
         const cmd = new Command("sow_and_delta_subscribe").topic(topicName);
@@ -18,13 +15,12 @@ async function main()
     }
     catch (e)
     {
-        console.log(e);
+        console.error(e);
     }
 }
 
 const onAmpsMessage = (message) =>
 {
-    const sow = [];
     switch (message.header.command())
     {
         case 'sow':
@@ -33,16 +29,10 @@ const onAmpsMessage = (message) =>
         case 'p':
             postMessage({ messageType: "update", price: message.data});
             break;
-        case 'group_begin':
-            break;
-        case 'group_end':
-            break;
         default:
             break;
     }
 }
-
-
 
 main().then(() => console.log("AMPS subscription completed."));
 
