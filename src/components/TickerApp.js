@@ -62,25 +62,33 @@ export const TickerApp = () =>
         return () => web_worker.terminate();
     }, []);
 
+    const handleWorkerMessage = (event) =>
+    {
+        const { messageType, price: eventPrice } = event.data;
+        setPrices(prevPrices =>
+        {
+            if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
+            {
+                updateRows(eventPrice);
+                return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
+            }
+            return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
+        });
+    };
+
     useEffect(() =>
     {
         if (worker)
         {
             gridApiRef.current.api.setHeaderHeight(25);
-            worker.onmessage = (event) =>
-            {
-                const { messageType, price: eventPrice } = event.data;
-                setPrices(prevPrices =>
-                {
-                    if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
-                    {
-                        updateRows(eventPrice);
-                        return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
-                    }
-                    return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
-                });
-            };
+            worker.onmessage = handleWorkerMessage;
         }
+
+        return () =>
+        {
+            if (worker)
+                worker.onmessage = null;
+        };
     }, [worker]);
 
     const updateRows = useCallback((price) =>
