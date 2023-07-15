@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useMemo, useState, useRef} from "react";
+import {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import { AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -8,7 +8,8 @@ export const TickerApp = () =>
 {
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
-    const gridApi = useRef();
+    const gridApiRef = useRef();
+    const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
 
     const isValidParameter = (parameter) =>
     {
@@ -36,9 +37,9 @@ export const TickerApp = () =>
     }
 
     const [columnDefs] = useState([
-        {headerName: "Symbol", field: "symbol"},
-        {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter},
+        {headerName: "Symbol", field: "symbol", maxWidth: 215, width: 215},
+        {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
+        {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
         {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter},
         {headerName: "VWAP Last 24h", field: "vwap_24h", cellDataType: "number", valueFormatter: currencyFormatter},
         {headerName: "Low", field: "low", cellDataType: "number", valueFormatter: currencyFormatter},
@@ -52,14 +53,13 @@ export const TickerApp = () =>
 
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
 
+    const getRowId = useMemo(() => (row) => row.data.symbol, []);
+
     useEffect(() =>
     {
         const web_worker = new Worker(new URL("./price-reader.js", import.meta.url));
         setWorker(web_worker);
-        return () =>
-        {
-            web_worker.terminate();
-        };
+        return () => web_worker.terminate();
     }, []);
 
     useEffect(() =>
@@ -69,33 +69,40 @@ export const TickerApp = () =>
             worker.onmessage = (event) =>
             {
                 const { messageType, price: eventPrice } = event.data;
-
-                setPrices((prevPrices) =>
+                setPrices(prevPrices =>
                 {
-                    if (messageType === "update")
+                    if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
                     {
-                        const index = prevPrices.findIndex((price) => price.symbol === eventPrice.symbol);
-                        if (index !== -1)
-                            return prevPrices.map((price, i) =>  i === index ? { ...price, ...eventPrice } : price);
-                        else
-                            return [...prevPrices, eventPrice];
+                        updateRows(eventPrice);
+                        return prevPrices; // No need to updated prices state as updates are made to the grid directly.
                     }
-
-                    if (messageType === "snapshot")
-                        return [...prevPrices, eventPrice];
-
-                    return prevPrices;
+                    return [...prevPrices, eventPrice];
                 });
             };
         }
     }, [worker]);
 
+    const updateRows = useCallback((price) =>
+    {
+        gridApiRef.current.api.forEachNode((rowNode) =>
+        {
+            if (rowNode.data.symbol !== price.symbol)
+                return;
+
+            rowNode.updateData({...rowNode.data, ...price});
+        });
+    }, []);
+
     return (
-        <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
+        <div className="ag-theme-alpine-dark" style={gridDimensions}>
             <AgGridReact
+                ref={gridApiRef}
                 columnDefs={columnDefs}
                 rowData={prices}
                 defaultColDef={defaultColDef}
+                enableCellChangeFlash={true}
+                animateRows={true}
+                getRowId={getRowId}
             />
         </div>
     );

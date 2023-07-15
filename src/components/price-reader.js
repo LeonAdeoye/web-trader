@@ -1,5 +1,7 @@
 const {Client, Command} = require('amps');
 
+let count = 0
+
 async function main()
 {
     try
