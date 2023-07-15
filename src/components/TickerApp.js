@@ -37,7 +37,7 @@ export const TickerApp = () =>
     }
 
     const [columnDefs] = useState([
-        {headerName: "Symbol", field: "symbol", maxWidth: 215, width: 215},
+        {headerName: "Symbol", field: "symbol", maxWidth: 200, width: 200, pinned: "left", cellDataType: "text"},
         {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
         {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
         {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter},
@@ -66,6 +66,7 @@ export const TickerApp = () =>
     {
         if (worker)
         {
+            gridApiRef.current.api.setHeaderHeight(25);
             worker.onmessage = (event) =>
             {
                 const { messageType, price: eventPrice } = event.data;
@@ -74,9 +75,9 @@ export const TickerApp = () =>
                     if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
                     {
                         updateRows(eventPrice);
-                        return prevPrices; // No need to updated prices state as updates are made to the grid directly.
+                        return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
                     }
-                    return [...prevPrices, eventPrice];
+                    return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
                 });
             };
         }
@@ -103,6 +104,7 @@ export const TickerApp = () =>
                 enableCellChangeFlash={true}
                 animateRows={true}
                 getRowId={getRowId}
+                rowHeight={25}
             />
         </div>
     );

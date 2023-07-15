@@ -8,7 +8,9 @@ function createWindow()
 {
     const win = new BrowserWindow({
         width: 1000,
-        height: 700,
+        height: 860,
+        minHeight: 860,
+        maxHeight: 860,
         webPreferences: { enableRemoteModule: true }
     });
 
