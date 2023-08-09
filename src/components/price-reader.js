@@ -1,6 +1,6 @@
 const {Client, Command} = require('amps');
 
-async function main()
+const main = async () =>
 {
     try
     {
