@@ -130,7 +130,6 @@ export const StockTickerApp = ({client}) =>
                         console.error(err);
                     }
                 }}
-                columnDefs={columnDefs}
             />
         </div>
     );
