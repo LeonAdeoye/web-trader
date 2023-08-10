@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {useEffect, useMemo, useState, useRef, useCallback} from "react";
-import { AgGridReact} from "ag-grid-react";
+import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-export const TickerApp = () =>
+export const CryptoTickerApp = () =>
 {
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);

@@ -10,7 +10,7 @@ function createWindow()
         width: 1000,
         height: 860,
         minHeight: 860,
-        maxHeight: 860,
+        maxHeight: 1860,
         webPreferences: { enableRemoteModule: true }
     });
 
