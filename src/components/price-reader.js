@@ -6,7 +6,8 @@ onconnect = (event) =>
 
     const main = async () =>
     {
-        try {
+        try
+        {
             const clientName = "web-trader-price-reader";
             const topicName = "prices";
             const url = "ws://localhost:9008/amps/json";
@@ -15,7 +16,9 @@ onconnect = (event) =>
             const cmd = new Command("sow_and_delta_subscribe").topic(topicName);
             await client.execute(cmd, onAmpsMessage);
             console.log("Connected to AMPS using URL: ", url);
-        } catch (e) {
+        }
+        catch (e)
+        {
             console.error(e);
         }
     }
@@ -32,7 +35,8 @@ onconnect = (event) =>
     const onAmpsMessage = (message) =>
     {
         const timeHHMMSS = timestampToHHMMSS(message.data.timestamp);
-        switch (message.header.command()) {
+        switch (message.header.command())
+        {
             case 'sow':
                 port.postMessage({messageType: "snapshot", price: {...message.data, time: timeHHMMSS}});
                 break;

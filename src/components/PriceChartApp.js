@@ -53,17 +53,14 @@ export const PriceChartApp = () =>
     const handleWorkerMessage = (event) =>
     {
         console.log("Message received from worker in PriceChartApp.js");
-        const { messageType, price: eventPrice } = event.data;
-
-        if (messageType === "update")
-            updateData(eventPrice);
+        updateData(event.data);
     };
 
-    const updateData = useCallback((eventPrice) =>
+    const updateData = useCallback(({price}) =>
     {
         const clone = { ...options };
         clone.data.push({
-            time: eventPrice.time,
+            time: price.time,
             bestAsk: 700 + i++,
             bestBid: 600 + i++
         })
