@@ -64,7 +64,7 @@ export const CryptoTickerApp = () =>
 
     const handleWorkerMessage = (event) =>
     {
-        console.log("Message received from worker  in CryptoTickerApp.js");
+        console.log("Message received from worker in CryptoTickerApp.js");
         const { messageType, price: eventPrice } = event.data;
         setPrices(prevPrices =>
         {

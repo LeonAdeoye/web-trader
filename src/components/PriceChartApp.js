@@ -1,10 +1,31 @@
 import * as React from 'react';
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 
 export const PriceChartApp = () =>
 {
     const [worker, setWorker] = useState(null);
+    const [options, setOptions] = useState({
+        data: data,
+        series: [
+            {
+                xKey: 'time',
+                yKey: 'bestAsk',
+                yName: 'Intra-day Price',
+            },
+            {
+                xKey: 'time',
+                yKey: 'bestBid',
+                yName: 'Intra-day Price',
+            },
+        ],
+        height: 700,
+        width: 1000,
+        theme: { baseTheme:  'ag-default-dark'},
+        legend: {
+            enabled: false,
+        },
+    });
 
     useEffect(() =>
     {
@@ -27,42 +48,27 @@ export const PriceChartApp = () =>
         };
     }, [worker]);
 
+    let i = 0;
+
     const handleWorkerMessage = (event) =>
     {
-        console.log("Message received from worker  in PriceChartApp.js");
+        console.log("Message received from worker in PriceChartApp.js");
         const { messageType, price: eventPrice } = event.data;
-        setPrices(prevPrices =>
-        {
-            if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
-            {
-                updateRows(eventPrice);
-                console.log(eventPrice);
-                return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
-            }
-            return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
-        });
+
+        if (messageType === "update")
+            updateData(eventPrice);
     };
 
-    const [options, setOptions] = useState({data: data,
-        series: [
-            {
-                xKey: 'time',
-                yKey: 'bestAsk',
-                yName: 'Intra-day Price',
-            },
-            {
-                xKey: 'time',
-                yKey: 'bestBid',
-                yName: 'Intra-day Price',
-            },
-        ],
-        height: 700,
-        width: 1000,
-        theme: { baseTheme:  'ag-default-dark'},
-        legend: {
-            enabled: false,
-        },
-    });
+    const updateData = useCallback((eventPrice) =>
+    {
+        const clone = { ...options };
+        clone.data.push({
+            time: eventPrice.time,
+            bestAsk: 700 + i++,
+            bestBid: 600 + i++
+        })
+        setOptions(clone);
+    }, [data, options]);
 
     return <AgChartsReact options={options} />;
 };
