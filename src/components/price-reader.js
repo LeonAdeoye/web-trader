@@ -1,5 +1,9 @@
 const {Client, Command} = require('amps');
 
+onConnect = (event) => {
+    const port = event.ports[0];
+}
+
 const main = async () =>
 {
     try

@@ -1,22 +1,49 @@
 import * as React from 'react';
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 
 export const PriceChartApp = () =>
 {
+    const [worker, setWorker] = useState(null);
+
+    useEffect(() =>
+    {
+        const web_worker = new SharedWorker(new URL("./price-reader.js", import.meta.url));
+        setWorker(web_worker);
+        return () => web_worker.terminate();
+    }, []);
+
+    const handleWorkerMessage = (event) =>
+    {
+        const { messageType, price: eventPrice } = event.data;
+        eventPrice.timeHHMMSS = timestampToHHMMSS(eventPrice.timestamp);
+        setPrices(prevPrices =>
+        {
+            if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
+            {
+                updateRows(eventPrice);
+                console.log(eventPrice);
+                return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
+            }
+            return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
+        });
+    };
+
     const [options, setOptions] = useState({data: data,
         series: [
             {
                 xKey: 'time',
                 yKey: 'bestAsk',
-                yName: 'Intraday Price',
+                yName: 'Intra-day Price',
             },
             {
                 xKey: 'time',
                 yKey: 'bestBid',
-                yName: 'Intraday Price',
+                yName: 'Intra-day Price',
             },
         ],
+        height: 700,
+        width: 1000,
         theme: { baseTheme:  'ag-default-dark'},
         legend: {
             enabled: false,

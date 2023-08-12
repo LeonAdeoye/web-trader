@@ -3,7 +3,7 @@ const { Client, DefaultServerChooser, MemoryPublishStore } = require('amps');
 const HOST = 'localhost';
 const PORT = '9008';
 const TOPIC = 'market_data';
-const PUBLISH_RATE_PER_SECOND = 2000;
+const PUBLISH_RATE_PER_SECOND = 200;
 
 const SYMBOLS = [
     'MMM', 'ABBV', 'ALV', 'GOOGL', 'AMZN', 'AMGN', 'ABI', 'APPL', 'BHP', 'BA', 'BP',
