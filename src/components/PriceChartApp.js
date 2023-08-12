@@ -13,10 +13,24 @@ export const PriceChartApp = () =>
         return () => web_worker.terminate();
     }, []);
 
+    useEffect(() =>
+    {
+        if (worker)
+        {
+            worker.port.onmessage = handleWorkerMessage;
+        }
+
+        return () =>
+        {
+            if (worker)
+                worker.port.onmessage = null;
+        };
+    }, [worker]);
+
     const handleWorkerMessage = (event) =>
     {
+        console.log("Message received from worker  in PriceChartApp.js");
         const { messageType, price: eventPrice } = event.data;
-        eventPrice.timeHHMMSS = timestampToHHMMSS(eventPrice.timestamp);
         setPrices(prevPrices =>
         {
             if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)

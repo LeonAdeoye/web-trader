@@ -11,15 +11,6 @@ export const CryptoTickerApp = () =>
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
 
-    const timestampToHHMMSS = (timestamp) =>
-    {
-        const date = new Date(timestamp);
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const seconds = date.getSeconds().toString().padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-    }
-
     const isValidParameter = (parameter) =>
     {
         if(parameter === null || parameter === undefined)
@@ -73,14 +64,13 @@ export const CryptoTickerApp = () =>
 
     const handleWorkerMessage = (event) =>
     {
+        console.log("Message received from worker  in CryptoTickerApp.js");
         const { messageType, price: eventPrice } = event.data;
-        eventPrice.timeHHMMSS = timestampToHHMMSS(eventPrice.timestamp);
         setPrices(prevPrices =>
         {
             if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
             {
                 updateRows(eventPrice);
-                console.log(eventPrice);
                 return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
             }
             return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
@@ -92,13 +82,13 @@ export const CryptoTickerApp = () =>
         if (worker)
         {
             gridApiRef.current.api.setHeaderHeight(25);
-            worker.onmessage = handleWorkerMessage;
+            worker.port.onmessage = handleWorkerMessage;
         }
 
         return () =>
         {
             if (worker)
-                worker.onmessage = null;
+                worker.port.onmessage = null;
         };
     }, [worker]);
 
