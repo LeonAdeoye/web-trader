@@ -24,18 +24,20 @@ export const PriceChartApp = () =>
             {
                 type: 'time',
                 position: 'bottom',
+                nice: true,
                 tick: {
-                    interval: time.hour,
+                    interval: time.hour
                 },
                 label: {
-                    format: '%H:%M:%S'
+                    format: '%H:%M'
                 }
             },
             {
                 type: 'number',
                 position: 'left',
+                nice: true,
                 label: {
-                    format: '#{.1f}'
+                    format: '#{.2f}'
                 }
             }],
         height: 700,

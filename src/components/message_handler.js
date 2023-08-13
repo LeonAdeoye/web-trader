@@ -9,7 +9,7 @@ export const timestampToHHMMSS = (timestamp) =>
 
 export const onAmpsMessage = (message) =>
 {
-    const dateTime = timestampToHHMMSS(message.data.timestamp);
+    const dateTime = new Date(message.data.timestamp);
     switch (message.header.command())
     {
         case 'sow':
