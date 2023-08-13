@@ -10,12 +10,12 @@ export const PriceChartApp = () =>
         series: [
             {
                 xKey: 'time',
-                yKey: 'bestAsk',
+                yKey: 'best_ask',
                 yName: 'Intra-day Price',
             },
             {
                 xKey: 'time',
-                yKey: 'bestBid',
+                yKey: 'best_bid',
                 yName: 'Intra-day Price',
             },
         ],
