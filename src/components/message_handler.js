@@ -9,14 +9,14 @@ export const timestampToHHMMSS = (timestamp) =>
 
 export const onAmpsMessage = (message) =>
 {
-    const timeHHMMSS = timestampToHHMMSS(message.data.timestamp);
+    const dateTime = timestampToHHMMSS(message.data.timestamp);
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", price: {...message.data, time: timeHHMMSS}});
+            postMessage({messageType: "snapshot", price: {...message.data, time: dateTime}});
             break;
         case 'p':
-            postMessage({messageType: "update", price: {...message.data, time: timeHHMMSS}});
+            postMessage({messageType: "update", price: {...message.data, time: dateTime}});
             break;
         default:
             break;

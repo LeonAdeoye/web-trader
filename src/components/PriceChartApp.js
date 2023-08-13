@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {useState, useEffect, useCallback} from "react";
 import { AgChartsReact } from 'ag-charts-react';
+import {time} from "ag-charts-community";
 
 export const PriceChartApp = () =>
 {
@@ -19,6 +20,24 @@ export const PriceChartApp = () =>
                 yName: 'Intra-day Price',
             },
         ],
+        axes: [
+            {
+                type: 'time',
+                position: 'bottom',
+                tick: {
+                    interval: time.hour,
+                },
+                label: {
+                    format: '%H:%M:%S'
+                }
+            },
+            {
+                type: 'number',
+                position: 'left',
+                label: {
+                    format: '#{.1f}'
+                }
+            }],
         height: 700,
         width: 1000,
         theme: { baseTheme:  'ag-default-dark'},
@@ -53,14 +72,14 @@ export const PriceChartApp = () =>
     const updateData = useCallback(({price}) =>
     {
         const { best_ask, best_bid, time, symbol} = price;
-        if ((best_ask || best_bid) && symbol === "XBT/EUR")
+        if ((best_ask || best_bid) && symbol === "XBT/USD")
         {
             const optionsClone = {...options};
             const newPrice = { time: time, symbol: symbol };
             if(best_ask) newPrice["best_ask"] = best_ask;
             if(best_bid) newPrice["best_bid"] = best_bid ;
             optionsClone.data.push(newPrice);
-            console.log("New BTC price: " + JSON.stringify(optionsClone.data))
+            console.log("New price: " + JSON.stringify(optionsClone.data))
             setOptions(optionsClone);
         }
     }, [options]);
