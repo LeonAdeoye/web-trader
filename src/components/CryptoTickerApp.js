@@ -4,6 +4,7 @@ import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
+
 export const CryptoTickerApp = () =>
 {
     const [prices, setPrices]  = useState([]);
@@ -57,14 +58,13 @@ export const CryptoTickerApp = () =>
 
     useEffect(() =>
     {
-        const web_worker = new SharedWorker(new URL("./price-reader.js", import.meta.url));
+        const web_worker = new Worker(new URL("./price-ticker-reader.js", import.meta.url));
         setWorker(web_worker);
         return () => web_worker.terminate();
     }, []);
 
     const handleWorkerMessage = (event) =>
     {
-        console.log("Message received from worker in CryptoTickerApp.js");
         const { messageType, price: eventPrice } = event.data;
         setPrices(prevPrices =>
         {
@@ -82,13 +82,13 @@ export const CryptoTickerApp = () =>
         if (worker)
         {
             gridApiRef.current.api.setHeaderHeight(25);
-            worker.port.onmessage = handleWorkerMessage;
+            worker.onmessage = handleWorkerMessage;
         }
 
         return () =>
         {
             if (worker)
-                worker.port.onmessage = null;
+                worker.onmessage = null;
         };
     }, [worker]);
 
