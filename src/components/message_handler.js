@@ -1,22 +1,13 @@
-export const timestampToHHMMSS = (timestamp) =>
-{
-    const date = new Date(timestamp);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-}
-
 export const onAmpsMessage = (message) =>
 {
-    const dateTime = new Date(message.data.timestamp);
+    const dateTime = new Date(message.data.time_stamp);
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", price: {...message.data, time: dateTime}});
+            postMessage({messageType: "snapshot", price: {...message.data, time_stamp: dateTime}});
             break;
         case 'p':
-            postMessage({messageType: "update", price: {...message.data, time: dateTime}});
+            postMessage({messageType: "update", price: {...message.data, time_stamp: dateTime}});
             break;
         default:
             break;

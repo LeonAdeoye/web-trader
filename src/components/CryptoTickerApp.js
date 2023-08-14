@@ -3,6 +3,8 @@ import {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import {useRecoilState} from "recoil";
+import {selectedCurrencyState} from "./currency-state";
 
 
 export const CryptoTickerApp = () =>
@@ -11,6 +13,7 @@ export const CryptoTickerApp = () =>
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
+    const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedCurrencyState);
 
     const isValidParameter = (parameter) =>
     {
@@ -63,6 +66,12 @@ export const CryptoTickerApp = () =>
         return () => web_worker.terminate();
     }, []);
 
+    const onSelectionChanged = useCallback(() =>
+    {
+        const selectedRows = gridApiRef.current.api.getSelectedRows();
+        setSelectedCurrency(selectedRows.length === 0 ? null : selectedRows[0].symbol);
+    }, []);
+
     const handleWorkerMessage = (event) =>
     {
         const { messageType, price: eventPrice } = event.data;
@@ -111,6 +120,8 @@ export const CryptoTickerApp = () =>
                 rowData={prices}
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
+                rowSelection={'single'}
+                onSelectionChanged={onSelectionChanged}
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={25}
