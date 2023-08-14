@@ -88,14 +88,14 @@ export const PriceChartApp = () =>
             enabled: true,
         },
     });
+    const [connectionId, setConnectionId] = useState(null);
 
     useEffect(() =>
     {
         const web_worker = new Worker(new URL("./price-chart-reader.js", import.meta.url));
-        web_worker.postMessage({selectedCurrency});
         setWorker(web_worker);
         return () => web_worker.terminate();
-    }, [selectedCurrency]);
+    }, []);
 
     useEffect(() =>
     {
@@ -108,7 +108,7 @@ export const PriceChartApp = () =>
                 optionsClone.title = {text: `Intra-day price chart for ${selectedCurrency}`};
                 return optionsClone;
             });
-            worker.postMessage({selectedCurrency});
+            worker.postMessage({selectedCurrency: selectedCurrency, currentConnectionId: connectionId});
         }
 
     }, [selectedCurrency]);
@@ -127,6 +127,12 @@ export const PriceChartApp = () =>
 
     const handleWorkerMessage = (event) =>
     {
+        if(event.data.messageType === 'connectionId')
+        {
+            setConnectionId(event.data.currentConnectionId);
+            return;
+        }
+
         const { best_ask, best_bid, time_stamp, symbol} = event.data.price;
         if (options.data.length === 0 || options.data[options.data.length - 1].best_bid !== best_bid || options.data[options.data.length - 1].best_ask !== best_ask)
         {
