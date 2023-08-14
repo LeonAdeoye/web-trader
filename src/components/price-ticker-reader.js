@@ -5,7 +5,7 @@ const main = async () =>
 {
     try
     {
-        const clientName = "web-trader-price-reader";
+        const clientName = "web-trader-price-ticker-reader";
         const topicName = "prices";
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState, useEffect, useCallback} from "react";
+import {useState, useEffect} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
 
@@ -10,12 +10,12 @@ export const PriceChartApp = () =>
         data: [],
         series: [
             {
-                xKey: 'time',
+                xKey: 'time_stamp',
                 yKey: 'best_ask',
                 yName: 'Intra-day Price',
             },
             {
-                xKey: 'time',
+                xKey: 'time_stamp',
                 yKey: 'best_bid',
                 yName: 'Intra-day Price',
             },
@@ -40,9 +40,23 @@ export const PriceChartApp = () =>
                     format: '#{.2f}'
                 }
             }],
-        height: 700,
-        width: 1000,
-        theme: { baseTheme:  'ag-default-dark'},
+        theme: {
+            baseTheme:  'ag-default-dark',
+            overrides: {
+                cartesian: {
+                    series: {
+                        line: {
+                            highlightStyle: {
+                                series: {
+                                    dimOpacity: 0.2,
+                                    strokeWidth: 4,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
         legend: {
             enabled: false,
         },
@@ -58,9 +72,7 @@ export const PriceChartApp = () =>
     useEffect(() =>
     {
         if (worker)
-        {
             worker.onmessage = handleWorkerMessage;
-        }
 
         return () =>
         {
@@ -71,20 +83,25 @@ export const PriceChartApp = () =>
 
     const handleWorkerMessage = (event) => updateData(event.data);
 
-    const updateData = useCallback(({price}) =>
+    const updateData = ({price}) =>
     {
-        const { best_ask, best_bid, time, symbol} = price;
-        if ((best_ask || best_bid) && symbol === "XBT/USD")
+        const { best_ask, best_bid, time_stamp, symbol} = price;
+
+        if(symbol !== "XBT/USD")
+            return
+
+        if (options.data.length === 0 || options.data[options.data.length - 1].best_bid !== best_bid || options.data[options.data.length - 1].best_ask !== best_ask)
         {
-            const optionsClone = {...options};
-            const newPrice = { time: time, symbol: symbol };
-            if(best_ask) newPrice["best_ask"] = best_ask;
-            if(best_bid) newPrice["best_bid"] = best_bid ;
-            optionsClone.data.push(newPrice);
-            console.log("New price: " + JSON.stringify(optionsClone.data))
-            setOptions(optionsClone);
+            const newPrice = { time_stamp: time_stamp, symbol: symbol, best_bid: best_bid, best_ask: best_ask};
+
+            setOptions(prevOptions =>
+            {
+                const optionsClone = { ...prevOptions };
+                optionsClone.data.push(newPrice);
+                return optionsClone;
+            });
         }
-    }, [options]);
+    };
 
     return <AgChartsReact options={options} />;
 };
