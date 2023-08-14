@@ -15,7 +15,7 @@ export const PriceChartApp = () =>
             {
                 xKey: 'time_stamp',
                 yKey: 'best_ask',
-                yName: 'Best Ask Intra-day Price',
+                yName: 'Best Ask',
                 stroke: '#8bc24a',
                 marker:
                 {
@@ -28,7 +28,7 @@ export const PriceChartApp = () =>
             {
                 xKey: 'time_stamp',
                 yKey: 'best_bid',
-                yName: 'Best bid Intra-day Price',
+                yName: 'Best Bid',
                 marker:
                 {
                     shape: 'square',
@@ -82,6 +82,7 @@ export const PriceChartApp = () =>
                 },
             },
         },
+        height: 800,
         legend:
         {
             enabled: true,
@@ -104,6 +105,7 @@ export const PriceChartApp = () =>
             {
                 const optionsClone = { ...prevOptions };
                 optionsClone.data = [];
+                optionsClone.title = {text: `Intra-day price chart for ${selectedCurrency}`};
                 return optionsClone;
             });
             worker.postMessage({selectedCurrency});

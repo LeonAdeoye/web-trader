@@ -12,7 +12,7 @@ export const CryptoTickerApp = () =>
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
-    const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
+    const gridDimensions = useMemo(() => ({ height: '60%', width: '100%' }), []);
     const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedCurrencyState);
 
     const isValidParameter = (parameter) =>
