@@ -142,8 +142,7 @@ export const PriceChartApp = () =>
                 optionsClone.data.push({ time_stamp: time_stamp, symbol: symbol, best_bid: best_bid, best_ask: best_ask});
                 return optionsClone;
             }
-            else
-                return prevOptions;
+            return prevOptions;
         });
     };
 
