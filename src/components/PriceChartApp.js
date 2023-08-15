@@ -134,16 +134,17 @@ export const PriceChartApp = () =>
         }
 
         const { best_ask, best_bid, time_stamp, symbol} = event.data.price;
-        if (options.data.length === 0 || options.data[options.data.length - 1].best_bid !== best_bid || options.data[options.data.length - 1].best_ask !== best_ask)
+        setOptions(prevOptions =>
         {
-            const newPrice = { time_stamp: time_stamp, symbol: symbol, best_bid: best_bid, best_ask: best_ask};
-            setOptions(prevOptions =>
+            if (prevOptions.data.length === 0 || prevOptions.data[prevOptions.data.length - 1].best_bid !== best_bid || prevOptions.data[prevOptions.data.length - 1].best_ask !== best_ask)
             {
                 const optionsClone = { ...prevOptions };
-                optionsClone.data.push(newPrice);
+                optionsClone.data.push({ time_stamp: time_stamp, symbol: symbol, best_bid: best_bid, best_ask: best_ask});
                 return optionsClone;
-            });
-        }
+            }
+            else
+                return prevOptions;
+        });
     };
 
     return <AgChartsReact options={options} />;
