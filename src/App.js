@@ -34,8 +34,10 @@ const App = () =>
         };
     }, []);
 
+  // Because of the preload script, the renderer has access to the versions global, so let's display that information in the window.
+  // This variable can be accessed via window.versions.
   if (!client)
-    return (<div>Loading...</div>);
+    return (<div>This app is using Chrome (v${window.versions.chrome()}), Node.js (v${window.versions.node()}), and Electron (v${window.versions.electron()}). Loading...</div>);
 
   return (
     <div className="App">

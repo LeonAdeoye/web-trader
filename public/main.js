@@ -11,7 +11,11 @@ function createWindow()
         height: 860,
         minHeight: 860,
         maxHeight: 1860,
-        webPreferences: { enableRemoteModule: true }
+        webPreferences:
+        {
+            enableRemoteModule: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
     });
 
     win.webContents.openDevTools();
