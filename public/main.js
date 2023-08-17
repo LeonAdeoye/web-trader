@@ -4,7 +4,10 @@ const path = require('path');
 
 require('@electron/remote/main').initialize();
 
-function createWindow()
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
+// The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
+const createWindow = () =>
 {
     const win = new BrowserWindow({
         width: 1000,
@@ -14,10 +17,16 @@ function createWindow()
         webPreferences:
         {
             enableRemoteModule: true,
+            // Attach a preload script to the main process in the BrowserWindow. This script will be executed before other scripts in the renderer process.
             preload: path.join(__dirname, 'preload.js')
         }
     });
 
+    //Remove menu bar
+    win.removeMenu();
+
+    // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
+    // You can interact with this web content from the main process using the window's webContents object.
     win.webContents.openDevTools();
 
     win.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
@@ -40,4 +49,6 @@ app.on('activate', () =>
     if (BrowserWindow.getAllWindows().length === 0)
         createWindow();
 });
+
+
 

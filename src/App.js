@@ -9,7 +9,7 @@ const App = () =>
 {
   const [client, setClient] = useState(null);
 
-    const func = async () =>
+    const logVersion = async () =>
     {
         const response = await window.versions.logVersions();
         console.log(response);
@@ -17,11 +17,10 @@ const App = () =>
 
     useEffect(() =>
     {
-        func().then(() => console.log("pinged")).catch((e) => console.log(e));
+        logVersion().then(() => console.log("pinged")).catch((e) => console.log(e));
         // create the server chooser
         const chooser = new DefaultServerChooser();
         chooser.add(`ws://localhost:9008/amps/json`);
-        //ping().then(() => console.log("pinged")); //TODO
 
         // create the AMPS HA client object
         const client = new Client('web-trader-market-data-subscriber');
