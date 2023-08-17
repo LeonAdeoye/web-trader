@@ -6,15 +6,19 @@
 // From Electron 20 onwards, preload scripts are sand-boxed by default and no longer have access to a full Node.js environment.
 // Practically, this means that you have a poly-filled require function that only has access to a limited set of APIs.
 
-
 // Created a preload script that exposes my app's versions of Chrome, Node, and Electron into the renderer.
 // The script that exposes selected properties of Electron's process.versions object to the renderer process in a versions global variable.
-const { contextBridge } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
-    electron: () => process.versions.electron
+    electron: () => process.versions.electron,
+    // It is not possible to access the Node.js APIs directly from the renderer process, nor the HTML Document Object Model (DOM) from the main process.
+    // The solution for this problem is to use Electron's ipcMain and ipcRenderer modules for inter-process communication (IPC).
+    // To send a message from your web page to the main process, you can set up a main process handler with ipcMain.handle
+    // and then expose a function like logVersions below in your preload script that calls ipcRenderer.invoke to trigger the handler in your main.js script.
+    logVersions: () => ipcRenderer.invoke('logVersions')
     // we can also expose variables, not just functions
 })
 

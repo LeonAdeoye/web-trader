@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 
@@ -23,7 +23,11 @@ function createWindow()
     win.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() =>
+{
+    ipcMain.handle('logVersions', (event, args) => `Logging node version: ${process.versions.node}, chrome version: ${process.versions.chrome}, and electron version: ${process.versions.electron}`);
+    createWindow();
+});
 
 app.on('window-all-closed', () =>
 {
