@@ -14,6 +14,15 @@ const createWindow = () =>
         height: 860,
         minHeight: 860,
         maxHeight: 1860,
+        // frame: false, removes the frame
+        // titleBarStyle: 'hidden', removes the title bar
+        // transparent: true, makes the app completely transparent except for the top-right buttons
+        titleBarStyle: 'hidden',
+        titleBarOverlay: {
+            color: 'white',
+            symbolColor: '#404040',
+            height: 30
+        },
         webPreferences:
         {
             enableRemoteModule: true,

@@ -4,6 +4,7 @@ import {PriceChartApp} from "./components/PriceChartApp";
 import {StockTickerApp} from "./components/StockTickerApp";
 import {useEffect, useState} from "react";
 import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
+import LaunchPadApp from "./components/LaunchPadApp";
 
 const App = () =>
 {
@@ -44,13 +45,16 @@ const App = () =>
   // Because of the preload script, the renderer has access to the versions global, so let's display that information in the window.
   // This variable can be accessed via window.versions.
   if (!client)
-    return (<div>This app is using Chrome (v${window.versions.chrome()}), Node.js (v${window.versions.node()}), and Electron (v${window.versions.electron()}). Loading...</div>);
+    return (<div>Loading...</div>);
+
+    //return (<div>This app is using Chrome (v${window.versions.chrome()}), Node.js (v${window.versions.node()}), and Electron (v${window.versions.electron()}). Loading...</div>);
+    //      <CryptoTickerApp/>
+    //       <PriceChartApp/>
+    //       <StockTickerApp client={client}/>
 
   return (
     <div className="App">
-      <CryptoTickerApp/>
-      <PriceChartApp/>
-      <StockTickerApp client={client}/>
+        <LaunchPadApp/>
     </div>
   );
 }
