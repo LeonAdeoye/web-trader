@@ -27,7 +27,12 @@ contextBridge.exposeInMainWorld('versions', {
     // The solution for this problem is to use Electron's ipcMain and ipcRenderer modules for inter-process communication (IPC).
     // To send a message from your web page to the main process, you can set up a main process handler with ipcMain.handle
     // and then expose a function like logVersions below in your preload script that calls ipcRenderer.invoke to trigger the handler in your main.js script.
-    logVersions: () => ipcRenderer.invoke('logVersions')  // The correct way to expose IPC-based APIs would be to provide one method per IPC message.
+    // The correct way to expose IPC-based APIs would be to provide one method per IPC message.
+    logVersions: () => ipcRenderer.invoke('logVersions')
+})
+
+contextBridge.exposeInMainWorld('launchPad', {
+    openApp: (appName) => ipcRenderer.send('openApp', appName),
 })
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.

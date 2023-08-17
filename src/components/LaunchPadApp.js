@@ -7,17 +7,17 @@ const LaunchPadApp = () =>
     [
         { name: 'Dashboard', icon: 'dashboard', url: 'PriceChartApp.js' },
         { name: 'Users', icon: 'user.png', url: 'CryptoTickerApp.js' },
-        { name: 'History', icon: 'user.png', url: 'CryptoTickerApp.js' },
-        { name: 'Trades', icon: 'user.png', url: 'CryptoTickerApp.js' },
+        { name: 'Trade History', icon: 'user.png', url: 'CryptoTickerApp.js' },
         { name: 'Alerts', icon: 'user.png', url: 'CryptoTickerApp.js' },
         { name: 'Tasks', icon: 'user.png', url: 'CryptoTickerApp.js' },
-        { name: 'Blast', icon: './user.png', url: 'CryptoTickerApp.js' },
-        { name: 'Config', icon: './user.png', url: 'CryptoTickerApp.js' }
+        { name: 'Blasts', icon: './user.png', url: 'CryptoTickerApp.js' },
+        { name: 'Configs', icon: './user.png', url: 'CryptoTickerApp.js' },
+        { name: 'Crossings', icon: './user.png', url: 'CryptoTickerApp.js' }
     ];
 
-    const launchApp = (url) =>
+    const launchApp = (name) =>
     {
-        window.open(url);
+        window.launchPad.openApp(name);
     };
 
     return (

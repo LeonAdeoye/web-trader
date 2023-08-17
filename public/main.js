@@ -44,6 +44,7 @@ const createWindow = () =>
 app.whenReady().then(() =>
 {
     ipcMain.handle('logVersions', (event, args) => `Logging node version: ${process.versions.node}, chrome version: ${process.versions.chrome}, and electron version: ${process.versions.electron}`);
+    ipcMain.handle('openApp', (event, args) => console.log(args));
     createWindow();
 });
 
