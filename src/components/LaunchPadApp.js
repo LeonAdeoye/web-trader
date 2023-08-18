@@ -15,9 +15,9 @@ const LaunchPadApp = () =>
         { name: 'Crossings', icon: './user.png', url: 'CryptoTickerApp.js' }
     ];
 
-    const launchApp = (name) =>
+    const launchApp = (url) =>
     {
-        window.launchPad.openApp(name);
+        window.launchPad.openApp(url);
     };
 
     return (

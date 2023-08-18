@@ -6,10 +6,12 @@ require('@electron/remote/main').initialize();
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
+let mainWindow;
+
 // The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
 const createWindow = () =>
 {
-    const win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1000,
         height: 860,
         minHeight: 860,
@@ -32,19 +34,24 @@ const createWindow = () =>
     });
 
     //Remove menu bar
-    win.removeMenu();
+    mainWindow.removeMenu();
 
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
-    win.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
-    win.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+    mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+}
+
+const openApp = (event, args) =>
+{
+    const child = new BrowserWindow({ parent: mainWindow, modal: false, show: true, width: 800, height: 600, webPreferences: { nodeIntegration: true } });
 }
 
 app.whenReady().then(() =>
 {
     ipcMain.handle('logVersions', (event, args) => `Logging node version: ${process.versions.node}, chrome version: ${process.versions.chrome}, and electron version: ${process.versions.electron}`);
-    ipcMain.handle('openApp', (event, args) => console.log(args));
+    ipcMain.on('openApp', openApp);
     createWindow();
 });
 

@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('versions', {
 })
 
 contextBridge.exposeInMainWorld('launchPad', {
-    openApp: (appName) => ipcRenderer.send('openApp', appName),
+    openApp: (url) => ipcRenderer.send('openApp', url),
 })
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
