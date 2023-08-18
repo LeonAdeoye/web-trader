@@ -6,7 +6,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {useRecoilState} from "recoil";
 import {selectedCurrencyState} from "./currency-state";
 
-
 export const CryptoTickerApp = () =>
 {
     const [prices, setPrices]  = useState([]);
@@ -68,6 +67,7 @@ export const CryptoTickerApp = () =>
 
     const onSelectionChanged = useCallback(() =>
     {
+        console.log("onSelectionChanged");
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         setSelectedCurrency(selectedRows.length === 0 ? null : selectedRows[0].symbol);
     }, []);
@@ -113,7 +113,7 @@ export const CryptoTickerApp = () =>
     }, []);
 
     return (
-        <div className="ag-theme-alpine-dark" style={gridDimensions}>
+        <div className="ag-theme-alpine" style={gridDimensions}>
             <AgGridReact
                 ref={gridApiRef}
                 columnDefs={columnDefs}

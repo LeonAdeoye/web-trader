@@ -17,20 +17,6 @@
 // Instead, use the contextBridge module to accomplish this securely:
 const { contextBridge, ipcRenderer } = require('electron')
 
-// Created a preload script that exposes my app's versions of Chrome, Node, and Electron into the renderer.
-// The script that exposes selected properties of Electron's process.versions object to the renderer process in a versions global variable.
-contextBridge.exposeInMainWorld('versions', {
-    node: () => process.versions.node,
-    chrome: () => process.versions.chrome,
-    electron: () => process.versions.electron,
-    // It is not possible to access the Node.js APIs directly from the renderer process, nor the HTML Document Object Model (DOM) from the main process.
-    // The solution for this problem is to use Electron's ipcMain and ipcRenderer modules for inter-process communication (IPC).
-    // To send a message from your web page to the main process, you can set up a main process handler with ipcMain.handle
-    // and then expose a function like logVersions below in your preload script that calls ipcRenderer.invoke to trigger the handler in your main.js script.
-    // The correct way to expose IPC-based APIs would be to provide one method per IPC message.
-    logVersions: () => ipcRenderer.invoke('logVersions')
-})
-
 contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url) => ipcRenderer.send('openApp', url),
 })

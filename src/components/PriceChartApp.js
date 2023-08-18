@@ -60,7 +60,7 @@ export const PriceChartApp = () =>
                 }
             }],
         theme: {
-            baseTheme:  'ag-default-dark',
+            baseTheme:  'ag-default',
             overrides:
             {
                 cartesian:
