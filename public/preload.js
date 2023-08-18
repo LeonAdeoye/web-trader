@@ -1,6 +1,6 @@
 // Because the require function is a polyfill with limited functionality,
 // you will not be able to use CommonJS modules to separate your preload script into multiple files.
-// If you need to split your preload code, use a bundler such as webpack or Parcel.
+// If you need to split your preload code, use a bundler such as webpack.
 
 // Electron's main process is a Node.js environment that has full operating system access.
 // On top of Electron modules, you can also access Node.js built-ins, as well as any packages installed via npm.

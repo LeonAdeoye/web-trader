@@ -16,20 +16,20 @@ const createWindow = () =>
         height: 860,
         minHeight: 860,
         maxHeight: 1860,
-        // frame: false, removes the frame
-        // titleBarStyle: 'hidden', removes the title bar
-        // transparent: true, makes the app completely transparent except for the top-right buttons
-        titleBarStyle: 'hidden',
+        title: 'Web Trader - Launch Pad',
+        frame: true,
         titleBarOverlay: {
-            color: 'white',
             symbolColor: '#404040',
             height: 30
         },
         webPreferences:
         {
+            nodeIntegration: true,
+            webSecurity: false,
             enableRemoteModule: true,
             // Attach a preload script to the main process in the BrowserWindow. This script will be executed before other scripts in the renderer process.
             preload: path.join(__dirname, 'preload.js')
+            //preload: path.join(__dirname, '../dist/preload.bundle.js'), // Path to bundled preload script if webpack is used to bundle preload.js
         }
     });
 
@@ -43,12 +43,14 @@ const createWindow = () =>
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 }
 
-const openApp = (event, url) =>
+const openApp = (event, {url, title}) =>
 {
     const childWindow = new BrowserWindow({
         parent: mainWindow,
+        title: `Web Trader - ${title}`,
         modal: false,
         show: true,
+        frame: true,
         width: 800,
         height: 600,
         webPreferences: { nodeIntegration: true }

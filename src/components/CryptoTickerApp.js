@@ -11,7 +11,7 @@ export const CryptoTickerApp = () =>
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
-    const gridDimensions = useMemo(() => ({ height: '60%', width: '100%' }), []);
+    const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedCurrencyState);
 
     const isValidParameter = (parameter) =>
@@ -40,19 +40,19 @@ export const CryptoTickerApp = () =>
     }
 
     const [columnDefs] = useState([
-        {headerName: "Symbol", field: "symbol", maxWidth: 200, width: 200, pinned: "left", cellDataType: "text"},
-        {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
-        {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 160, width: 160},
-        {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "VWAP Last 24h", field: "vwap_24h", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "Low", field: "low", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "High", field: "high", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "Open", field: "open", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "Close", field: "close", cellDataType: "number", valueFormatter: currencyFormatter},
-        {headerName: "Volume", field: "vol_today", cellDataType: "number", valueFormatter: numberFormatter},
-        {headerName: "Volume Last 24h", field: "vol_24h", cellDataType: "number", valueFormatter: numberFormatter},
-        {headerName: "Trades", field: "num_trades", cellDataType: "number", valueFormatter: numberFormatter},
-        {headerName: "Trades Last 24h" , field: "num_trades_24h", cellDataType: "number", valueFormatter: numberFormatter}]);
+        {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
+        {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 150, width: 150},
+        {headerName: "VWAP Last 24h", field: "vwap_24h", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 150, width: 150},
+        {headerName: "Low", field: "low", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "High", field: "high", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "Open", field: "open", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "Close", field: "close", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "Volume", field: "vol_today", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 150, width: 150},
+        {headerName: "Volume Last 24h", field: "vol_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 160, width: 160},
+        {headerName: "Trades", field: "num_trades", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 130, width: 130},
+        {headerName: "Trades Last 24h" , field: "num_trades_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 150, width: 150}]);
 
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
 
