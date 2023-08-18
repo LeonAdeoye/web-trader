@@ -2,9 +2,10 @@ import './App.css';
 import {CryptoTickerApp} from "./components/CryptoTickerApp";
 import {PriceChartApp} from "./components/PriceChartApp";
 import {StockTickerApp} from "./components/StockTickerApp";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
 import LaunchPadApp from "./components/LaunchPadApp";
+import { Route, Routes} from "react-router-dom";
 
 const App = () =>
 {
@@ -15,6 +16,14 @@ const App = () =>
         const response = await window.versions.logVersions();
         console.log(response);
     }
+
+    const apps =
+        [
+            { name: 'Launch Pad', path: '/', component: LaunchPadApp },
+            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp},
+            { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
+            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}}
+        ];
 
     useEffect(() =>
     {
@@ -42,19 +51,21 @@ const App = () =>
         };
     }, []);
 
-  // Because of the preload script, the renderer has access to the versions global, so let's display that information in the window.
-  // This variable can be accessed via window.versions.
   if (!client)
     return (<div>Loading...</div>);
 
-    //return (<div>This app is using Chrome (v${window.versions.chrome()}), Node.js (v${window.versions.node()}), and Electron (v${window.versions.electron()}). Loading...</div>);
-    //      <CryptoTickerApp/>
-    //       <PriceChartApp/>
-    //       <StockTickerApp client={client}/>
-
+  // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (
     <div className="App">
-        <LaunchPadApp/>
+        <Routes>
+            {apps.map((app, index) => (
+                <Route
+                    key={index}
+                    path={app.path}
+                    element={React.createElement(app.component, app.props ?? {})}
+                />
+            ))}
+        </Routes>
     </div>
   );
 }

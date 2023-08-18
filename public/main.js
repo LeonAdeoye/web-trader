@@ -43,9 +43,19 @@ const createWindow = () =>
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 }
 
-const openApp = (event, args) =>
+const openApp = (event, url) =>
 {
-    const child = new BrowserWindow({ parent: mainWindow, modal: false, show: true, width: 800, height: 600, webPreferences: { nodeIntegration: true } });
+    const childWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: false,
+        show: true,
+        width: 800,
+        height: 600,
+        webPreferences: { nodeIntegration: true }
+    });
+
+    childWindow.removeMenu();
+    childWindow.loadURL(url);
 }
 
 app.whenReady().then(() =>
