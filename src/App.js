@@ -9,13 +9,7 @@ import { Route, Routes} from "react-router-dom";
 
 const App = () =>
 {
-  const [client, setClient] = useState(null);
-
-    const logVersion = async () =>
-    {
-        const response = await window.versions.logVersions();
-        console.log(response);
-    }
+    const [client, setClient] = useState(null);
 
     const apps =
         [
@@ -27,7 +21,6 @@ const App = () =>
 
     useEffect(() =>
     {
-        logVersion().then(() => console.log("pinged")).catch((e) => console.log(e));
         // create the server chooser
         const chooser = new DefaultServerChooser();
         chooser.add(`ws://localhost:9008/amps/json`);
