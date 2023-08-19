@@ -6,10 +6,10 @@ const LaunchPadApp = () =>
 {
     const apps =
     [
-        { name: 'Crypto Ticker', icon: 'file:///assets/crypt-ticker.png', url: 'http://localhost:3000/crypto-ticker' },
-        { name: 'Crypto Chart', icon: 'file:///assets/crypto-chart.png', url: 'http://localhost:3000/crypto-chart' },
-        { name: 'Stock Ticker', icon: 'file:///assets/stock-ticker.png', url: 'http://localhost:3000/stock-ticker' },
-        { name: 'Stock Chart', icon: 'file:///assets/stock-chart.png', url: 'http://localhost:3000/stock-chart' },
+        { name: 'Crypto Ticker', icon: 'file:///assets/ticker.png', url: 'http://localhost:3000/crypto-ticker' },
+        { name: 'Crypto Chart', icon: 'file:///assets/chart.png', url: 'http://localhost:3000/crypto-chart' },
+        { name: 'Stock Ticker', icon: 'file:///assets/ticker.png', url: 'http://localhost:3000/stock-ticker' },
+        { name: 'Stock Chart', icon: 'file:///assets/chart.png', url: 'http://localhost:3000/stock-chart' },
         { name: 'Dashboard', icon: 'file:///assets/dashboard.png', url: 'http://localhost:3000/dashboard' },
         { name: 'Users', icon: 'file:///assets/user.png', url: 'http://localhost:3000/users' },
         { name: 'Trade History', icon: 'file:///assets/trade-history.png', url: 'http://localhost:3000/trade-history' },
