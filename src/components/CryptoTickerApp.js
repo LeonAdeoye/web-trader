@@ -72,7 +72,7 @@ export const CryptoTickerApp = () =>
         setSelectedCurrency(selectedRows.length === 0 ? null : selectedRows[0].symbol);
     }, []);
 
-    const handleWorkerMessage = (event) =>
+    const handleWorkerMessage = useCallback((event) =>
     {
         const { messageType, price: eventPrice } = event.data;
         setPrices(prevPrices =>
@@ -84,7 +84,7 @@ export const CryptoTickerApp = () =>
             }
             return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
         });
-    };
+    }, []);
 
     useEffect(() =>
     {
