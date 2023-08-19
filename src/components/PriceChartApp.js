@@ -8,7 +8,8 @@ import {selectedCurrencyState} from "./currency-state";
 export const PriceChartApp = () =>
 {
     const [worker, setWorker] = useState(null);
-    const [selectedCurrency] = useRecoilState(selectedCurrencyState);
+    const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedCurrencyState);
+    setSelectedCurrency('XBT/USD');
     const [options, setOptions] = useState({
         data: [],
         series: [
