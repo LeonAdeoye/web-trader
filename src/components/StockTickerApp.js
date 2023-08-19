@@ -72,18 +72,15 @@ export const StockTickerApp = ({client}) =>
     }, []);
 
     return (
-        <div className="ag-theme-alpine-dark" style={{height: 600, width: 600}}>
+        <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
             <AgGridReact columnDefs={columnDefs}
-
+                 rowHeight={25}
                 // we now use state to track row data changes
                 rowData={rowData}
-
                 // unique identification of the row based on the SowKey
                 getRowId={({data: { key }}) => key}
-
                 // resize columns on grid resize
                 onGridSizeChanged={({ api }) => api.sizeColumnsToFit()}
-
                 // provide callback to invoke once grid is initialised.
                 onGridReady={ async (api) =>
                 {
