@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
-import {useCallback, useMemo, useRef, useState} from "react";
+import {useCallback, useMemo, useRef, useState, useEffect} from "react";
 
 export const UsersApp = () =>
 {
@@ -26,6 +26,14 @@ export const UsersApp = () =>
     {
         console.log("onSelectionChanged");
         const selectedRows = gridApiRef.current.api.getSelectedRows();
+    }, []);
+
+    useEffect(() =>
+    {
+        fetch("localhost:20003/users").then((data) =>
+        {
+
+        });
     }, []);
 
     const updateRows = useCallback((user) =>
