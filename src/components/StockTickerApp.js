@@ -53,6 +53,7 @@ export const StockTickerApp = ({client}) =>
     const [worker, setWorker] = useState(null);
     // Keep a reference to the subscription ID.
     const subIdTef = useRef();
+    const gridApiRef = useRef();
 
     useEffect(() =>
     {

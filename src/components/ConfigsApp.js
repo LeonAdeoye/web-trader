@@ -2,21 +2,25 @@ import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
 import {useCallback, useMemo, useRef, useState, useEffect} from "react";
 
-export const UsersApp = () =>
+export const ConfigsApp = () =>
 {
-    const [users, setUsers]  = useState([]);
+    const [configs, setConfigs]  = useState([]);
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
 
-    const [columnDefs] = useState( [
-            { field: "userId", sortable: true, minWidth: 100, width: 130 },
-            { field: "fullName", sortable: true, minWidth: 250, width: 250 },
-            { field: "region", sortable: true, minWidth: 100, width: 100 },
-            { field: "countryCode", sortable: true, minWidth: 150, width: 150 },
-            { field: "location", sortable: true, minWidth: 150, maxWidth: 150, width: 150},
-            { field: "deskName", sortable: true, minWidth: 250, width: 150},
-            { field: "isActive", minWidth: 120, maxWidth: 120, width: 120 }
-        ]);
+    const [columnDefs] = useState([
+        { field: 'owner', sortable: true, minWidth: 100, width: 130 },
+        { field: 'key', sortable: true, minWidth: 150, width: 200 },
+        { field: 'value', sortable: true, minWidth: 200, width: 470 },
+        { field: 'lastUpdatedBy', sortable: true, minWidth: 100, maxWidth: 170, width: 170 },
+        { headerName: "Last Updated On", field: 'lastUpdatedOn', sortable: true, minWidth: 200, maxWidth: 200, width: 200, valueGetter: (params) =>
+        {
+            let timestamp = Number((params.data.lastUpdatedOn));
+            return transformLocalDataTime(timestamp.valueOf());
+        }}]
+    );
+
+    const  transformLocalDataTime = (epochTimeInUTC) => new Date(epochTimeInUTC).toLocaleString();
 
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
 
@@ -30,21 +34,10 @@ export const UsersApp = () =>
 
     useEffect(() =>
     {
-        fetch("http://localhost:20003/users")
+        fetch("http://localhost:20001/configurations")
             .then((response) => response.json())
-            .then((data) => setUsers(data))
+            .then((data) => setConfigs(data))
             .catch((error) => console.log(error));
-    }, []);
-
-    const updateRows = useCallback((user) =>
-    {
-        gridApiRef.current.api.forEachNode((rowNode) =>
-        {
-            if (rowNode.data.userId !== user.userId)
-                return;
-
-            rowNode.updateData({...rowNode.data, ...user});
-        });
     }, []);
 
     return (
@@ -52,7 +45,7 @@ export const UsersApp = () =>
             <AgGridReact
                 ref={gridApiRef}
                 columnDefs={columnDefs}
-                rowData={users}
+                rowData={configs}
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}

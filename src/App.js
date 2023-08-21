@@ -7,6 +7,7 @@ import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
 import LaunchPadApp from "./components/LaunchPadApp";
 import { Route, Routes} from "react-router-dom";
 import {UsersApp} from "./components/UsersApp";
+import {ConfigsApp} from "./components/ConfigsApp";
 
 const App = () =>
 {
@@ -18,7 +19,8 @@ const App = () =>
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp},
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp}
+            { name: 'Users', path: '/users', component: UsersApp},
+            { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];
 
     useEffect(() =>
