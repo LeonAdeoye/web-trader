@@ -8,6 +8,9 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let mainWindow;
 
+// create amp of child windows objects keyed by destination IDs
+const childWindowsMap = new Map();
+
 // The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
 const createWindow = () =>
 {
@@ -53,16 +56,23 @@ const openApp = (event, {url, title}) =>
         frame: true,
         width: 800,
         height: 600,
+        preload: path.join(__dirname, 'preload.js'),
         webPreferences: { nodeIntegration: true }
     });
 
     childWindow.removeMenu();
-    childWindow.loadURL(url);
+    childWindow.loadURL(url).then(() =>
+    {
+        childWindowsMap.set(title, childWindow);
+    });
 }
+
+const selectedGridItem = (event, {itemId, destination}) => childWindowsMap[destination].webContents.send('selectedGridItem', itemId);
 
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', openApp);
+    ipcMain.on('selectedGridItem', selectedGridItem);
     createWindow();
 });
 

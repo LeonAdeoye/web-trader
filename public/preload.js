@@ -18,7 +18,9 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('launchPad', {
-    openApp: (url) => ipcRenderer.send('openApp', url),
+    openApp: (url, title) => ipcRenderer.send('openApp', url, title),
+    sendSelectedGridItem: (itemId, destination) => ipcRenderer.send('selectedGridItem', itemId, destination),
+    receiveSelectedGridItem: (callback) => ipcRenderer.on('selectedGridItem', callback)
 })
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.

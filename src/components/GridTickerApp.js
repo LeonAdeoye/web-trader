@@ -30,7 +30,13 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
     const onSelectionChanged = useCallback(() =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-        setSelectedSymbol(selectedRows.length === 0 ? null : selectedRows[0].symbol);
+        let selectedItemId = selectedRows.length === 0 ? null : selectedRows[0].symbol;
+
+        if(window.launchPad)
+            window.launchPad.sendSelectedGridItem(selectedItemId);
+        else
+            alert("GridTickerApp::Error: window.launchPad not found!");
+
     }, []);
 
     const handleWorkerMessage = useCallback((event) =>

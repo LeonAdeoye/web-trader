@@ -18,7 +18,7 @@ export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, colum
     const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-        console.log("Selected: " + selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]);
+        console.log("Selected: " + (selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]));
     };
 
     useEffect(() =>
