@@ -3,12 +3,12 @@ import {useState, useEffect} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
 import {useRecoilState} from "recoil";
-import {selectedCurrencyState} from "./currency-state";
+import {selectedSymbolState} from "./symbol-state";
 
 export const PriceChartApp = () =>
 {
     const [worker, setWorker] = useState(null);
-    const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedCurrencyState);
+    const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedSymbolState);
     const [options, setOptions] = useState({
         data: [],
         series: [
