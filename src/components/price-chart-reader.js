@@ -35,8 +35,8 @@ const main = async () =>
 
     onmessage = (message) =>
     {
-        const {selectedCurrency='XBT/USD', currentConnectionId} = message.data;
-        initialize(selectedCurrency, currentConnectionId).then(() => console.log("Initialization completed."));
+        const {selectedCurrency, currentConnectionId} = message.data;
+        initialize('XBT/USD', currentConnectionId).then(() => console.log("Initialization completed."));
     }
 }
 

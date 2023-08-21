@@ -29,7 +29,6 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
 
     const onSelectionChanged = useCallback(() =>
     {
-        console.log("onSelectionChanged");
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         setSelectedSymbol(selectedRows.length === 0 ? null : selectedRows[0].symbol);
     }, []);

@@ -9,8 +9,7 @@ export const UsersApp = () =>
             { headerName: "Region", field: "region", sortable: true, minWidth: 100, width: 100 },
             { headerName: "Country", field: "countryCode", sortable: true, minWidth: 150, width: 150 },
             { headerName: "Location", field: "location", sortable: true, minWidth: 150, maxWidth: 150, width: 150},
-            { headerName: "Is Active", field: "active", minWidth: 120, maxWidth: 120, width: 120 }
-        ];
+            { headerName: "Is Active", field: "active", minWidth: 120, maxWidth: 120, width: 120 }];
 
     return(<GenericGridApp initUrl={"http://localhost:20003/users"}
                            rowHeight={25}

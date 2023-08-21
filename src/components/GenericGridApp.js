@@ -10,21 +10,16 @@ export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, colum
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
 
-    console.log("initUrl " + initUrl);
-    console.log("rowHeight " + rowHeight);
-    console.log("gridTheme " + gridTheme);
-    console.log("rowIdArray " + rowIdArray);
-    console.log("columnDefs " + columnDefs);
-
     const getRowId = useMemo(() => (row) =>
     {
         return getRowIdValue(rowIdArray, row.data);
     }, []);
 
-    const onSelectionChanged = useCallback(() =>
+    const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-    }, []);
+        console.log("Selected: " + selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]);
+    };
 
     useEffect(() =>
     {
@@ -54,7 +49,7 @@ export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, colum
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}
-                onSelectionChanged={onSelectionChanged}
+                onSelectionChanged={() => onSelectionChanged()}
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}
