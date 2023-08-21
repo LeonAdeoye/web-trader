@@ -29,14 +29,16 @@ const App = () =>
         {headerName: "Trades", field: "num_trades", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 130, width: 130},
         {headerName: "Trades Last 24h" , field: "num_trades_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 150, width: 150}];
 
+    const standardProps = {rowHeight: 25, gridTheme: "ag-theme-alpine"};
+
     const apps =
         [
             { name: 'Launch Pad', path: '/', component: LaunchPadApp },
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp},
-            { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, rowHeight: 25, gridTheme: "ag-theme-alpine"}},
+            { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp},
-            { name: 'Configs', path: '/configs', component: ConfigsApp}
+            { name: 'Users', path: '/users', component: UsersApp },
+            { name: 'Configs', path: '/configs', component: ConfigsApp }
         ];
 
     useEffect(() =>

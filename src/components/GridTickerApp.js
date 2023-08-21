@@ -51,10 +51,7 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
     useEffect(() =>
     {
         if (worker)
-        {
-            gridApiRef.current.api.setHeaderHeight(rowHeight);
             worker.onmessage = handleWorkerMessage;
-        }
 
         return () =>
         {
@@ -87,6 +84,7 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}
+                headerHeight={rowHeight}
             />
         </div>
     );
