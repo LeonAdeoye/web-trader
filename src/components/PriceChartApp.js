@@ -8,8 +8,9 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
 {
     const [worker, setWorker] = useState(null);
     const [symbol, setSymbol] = useState(null);
+    const [newlySelectedSymbol, setNewlySelectedSymbol] = useState(null);
     const [connectionId, setConnectionId] = useState(null);
-    const [chartCache] = useState(new CacheService());
+    const [cacheService] = useState(new CacheService());
     const [options, setOptions] = useState({
         data: [],
         series: [
@@ -90,8 +91,6 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
         },
     });
 
-
-
     useEffect(() =>
     {
         const web_worker = new Worker(new URL("./price-chart-reader.js", import.meta.url));
@@ -103,16 +102,19 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
     {
         window.messenger.handleMessageFromMain((destination, fdc3Context, source) =>
         {
-            let selectedSymbol = fdc3Context.instruments[0].id.ticker;
-            console.log("Selected symbol: " + selectedSymbol + ", current symbol: " + symbol);
-            setSymbol(previousSymbol =>
-            {
-                if(previousSymbol !== null && previousSymbol !== selectedSymbol)
-                    chartCache.put(previousSymbol, options.data);
-                return selectedSymbol;
-            });
+            let newSymbol = fdc3Context.instruments[0].id.ticker;
+            setNewlySelectedSymbol(newSymbol);
         });
     }, []);
+
+    useEffect(() =>
+    {
+        if(symbol !== null && symbol !== newlySelectedSymbol)
+            cacheService.put(symbol, options.data);
+
+        setSymbol(newlySelectedSymbol);
+
+    }, [newlySelectedSymbol]);
 
     useEffect(() =>
     {
@@ -121,7 +123,7 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
             setOptions(prevOptions =>
             {
                 const optionsClone = { ...prevOptions };
-                optionsClone.data = chartCache.hasSymbol(symbol) ? chartCache.get(symbol) : [];
+                optionsClone.data = cacheService.hasSymbol(symbol) ? cacheService.get(symbol) : [];
                 optionsClone.title = {text: `Intra-day price chart for ${symbol}`};
                 return optionsClone;
             });

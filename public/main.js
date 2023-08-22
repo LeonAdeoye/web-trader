@@ -69,7 +69,7 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
     // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
     // The webContents.send method takes a channel name and a data payload as arguments.
-    // Iterate through each item in childWindowsMap and send message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
+    // Iterate through each item in childWindowsMap and send a message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
     const regex = new RegExp(destination + "( \\(\\d+\\))?");
     childWindowsMap.forEach((childWindow) =>
     {
