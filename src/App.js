@@ -34,7 +34,7 @@ const App = () =>
     const apps =
         [
             { name: 'Launch Pad', path: '/', component: LaunchPadApp },
-            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp},
+            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'}},
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
             { name: 'Users', path: '/users', component: UsersApp },

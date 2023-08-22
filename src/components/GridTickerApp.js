@@ -3,7 +3,7 @@ import {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {createChartContext} from "../fdc3-manager";
+import {FDC3Service} from "../services/FDC3Service";
 
 export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) =>
 {
@@ -29,7 +29,7 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         let symbol = selectedRows.length === 0 ? null : selectedRows[0].symbol;
-        window.messenger.sendMessageToMain(createChartContext(symbol, 5), "Crypto Chart", "Crypto Ticker");
+        window.messenger.sendMessageToMain(FDC3Service.createChartContext(symbol, 5), "Crypto Chart", "Crypto Ticker");
     };
 
     const handleWorkerMessage = useCallback((event) =>

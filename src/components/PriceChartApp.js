@@ -2,11 +2,14 @@ import * as React from 'react';
 import {useState, useEffect} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
+import {CacheService} from "../services/CacheService";
 
-export const PriceChartApp = () =>
+export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
 {
     const [worker, setWorker] = useState(null);
     const [symbol, setSymbol] = useState(null);
+    const [connectionId, setConnectionId] = useState(null);
+    const [chartCache] = useState(new CacheService());
     const [options, setOptions] = useState({
         data: [],
         series: [
@@ -41,7 +44,7 @@ export const PriceChartApp = () =>
                 nice: true,
                 tick:
                 {
-                    interval: time.minute.every(10)
+                    interval: time.minute.every(interval)
                 },
                 label:
                 {
@@ -58,7 +61,7 @@ export const PriceChartApp = () =>
                 }
             }],
         theme: {
-            baseTheme:  'ag-default',
+            baseTheme:  chartTheme,
             overrides:
             {
                 cartesian:
@@ -87,7 +90,7 @@ export const PriceChartApp = () =>
         },
     });
 
-    const [connectionId, setConnectionId] = useState(null);
+
 
     useEffect(() =>
     {
@@ -100,8 +103,14 @@ export const PriceChartApp = () =>
     {
         window.messenger.handleMessageFromMain((destination, fdc3Context, source) =>
         {
-            console.log(`The renderer ${destination} received message from ${source} with the context: ${JSON.stringify(fdc3Context)}`);
-            setSymbol(fdc3Context.instruments[0].id.ticker);
+            let selectedSymbol = fdc3Context.instruments[0].id.ticker;
+            console.log("Selected symbol: " + selectedSymbol + ", current symbol: " + symbol);
+            setSymbol(previousSymbol =>
+            {
+                if(previousSymbol !== null && previousSymbol !== selectedSymbol)
+                    chartCache.put(previousSymbol, options.data);
+                return selectedSymbol;
+            });
         });
     }, []);
 
@@ -112,13 +121,12 @@ export const PriceChartApp = () =>
             setOptions(prevOptions =>
             {
                 const optionsClone = { ...prevOptions };
-                optionsClone.data = [];
+                optionsClone.data = chartCache.hasSymbol(symbol) ? chartCache.get(symbol) : [];
                 optionsClone.title = {text: `Intra-day price chart for ${symbol}`};
                 return optionsClone;
             });
             worker.postMessage({symbol: symbol, currentConnectionId: connectionId});
         }
-
     }, [symbol]);
 
     useEffect(() =>

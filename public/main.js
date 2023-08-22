@@ -49,8 +49,7 @@ const openApp = (event, {url, title}) =>
 {
     const childWindow = new BrowserWindow({
         parent: mainWindow,
-        title: `${title}`,
-        id: title,
+        title: childWindowsMap.has(title) ? `${title} (${childWindowsMap.size})` : title,
         modal: false,
         show: true,
         frame: true,
@@ -63,13 +62,23 @@ const openApp = (event, {url, title}) =>
     childWindow.webContents.openDevTools();
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowsMap.set(childWindow.getTitle(), childWindow);
+    childWindow.on('close', () => childWindowsMap.delete(childWindow.getTitle()));
 }
 
 const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
     // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
-    childWindowsMap.get(destination).webContents.send("message-to-renderer", destination, fdc3Context, source);
-    console.log("Message sent to child window: " + destination + " with context: " + JSON.stringify(fdc3Context));
+    // The webContents.send method takes a channel name and a data payload as arguments.
+    // Iterate through each item in childWindowsMap and send message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
+    const regex = new RegExp(destination + "( \\(\\d+\\))?");
+    childWindowsMap.forEach((childWindow) =>
+    {
+        if(regex.test(childWindow.getTitle()))
+        {
+            childWindow.webContents.send("message-to-renderer", destination, fdc3Context, source);
+            console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
+        }
+    });
 }
 
 app.whenReady().then(() =>
