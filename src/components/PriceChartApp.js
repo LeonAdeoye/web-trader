@@ -100,18 +100,16 @@ export const PriceChartApp = () =>
 
     useEffect(() =>
     {
+        window.messenger.receiveSelectedGridItem((destination, itemId, source) =>
+        {
+            alert(`The renderer ${destination} received message from ${source} with item ID: ${itemId}`);
+        });
+    }, []);
+
+    useEffect(() =>
+    {
         if (worker)
         {
-            if(window.launchPad)
-            {
-                window.launchPad.receiveSelectedGridItem((selectedGridItem) =>
-                {
-                    alert("priceChartApp selectedGridItem " + selectedGridItem);
-                });
-            }
-            else
-                alert("Error: window.launchPad not found!");
-
             setOptions(prevOptions =>
             {
                 const optionsClone = { ...prevOptions };

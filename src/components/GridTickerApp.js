@@ -3,8 +3,6 @@ import {useEffect, useMemo, useState, useRef, useCallback} from "react";
 import {AgGridReact} from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {useRecoilState} from "recoil";
-import {selectedSymbolState} from "./symbol-state";
 
 export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) =>
 {
@@ -12,7 +10,6 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
-    const [selectedSymbol, setSelectedSymbol] = useRecoilState(selectedSymbolState);
 
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
@@ -27,17 +24,12 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
         return () => webWorker.terminate();
     }, []);
 
-    const onSelectionChanged = useCallback(() =>
+    const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         let selectedItemId = selectedRows.length === 0 ? null : selectedRows[0].symbol;
-
-        if(window.launchPad)
-            window.launchPad.sendSelectedGridItem(selectedItemId);
-        else
-            alert("GridTickerApp::Error: window.launchPad not found!");
-
-    }, []);
+        window.messenger.sendSelectedGridItem(selectedItemId, "Crypto Chart", "Crypto Ticker");
+    };
 
     const handleWorkerMessage = useCallback((event) =>
     {

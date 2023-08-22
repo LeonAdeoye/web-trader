@@ -19,7 +19,7 @@ const createWindow = () =>
         height: 860,
         minHeight: 860,
         maxHeight: 1860,
-        title: 'Web Trader - Launch Pad',
+        title: 'Launch Pad',
         frame: true,
         titleBarOverlay: {
             symbolColor: '#404040',
@@ -42,7 +42,6 @@ const createWindow = () =>
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
     mainWindow.webContents.openDevTools();
-
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 }
 
@@ -50,29 +49,33 @@ const openApp = (event, {url, title}) =>
 {
     const childWindow = new BrowserWindow({
         parent: mainWindow,
-        title: `Web Trader - ${title}`,
+        title: `${title}`,
+        id: title,
         modal: false,
         show: true,
         frame: true,
         width: 800,
         height: 600,
-        preload: path.join(__dirname, 'preload.js'),
-        webPreferences: { nodeIntegration: true }
+        webPreferences: { nodeIntegration: true, preload: path.join(__dirname, 'preload.js') }
     });
 
     childWindow.removeMenu();
-    childWindow.loadURL(url).then(() =>
-    {
-        childWindowsMap.set(title, childWindow);
-    });
+    childWindow.webContents.openDevTools();
+    childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
+    childWindowsMap.set(childWindow.getTitle(), childWindow);
 }
 
-const selectedGridItem = (event, {itemId, destination}) => childWindowsMap[destination].webContents.send('selectedGridItem', itemId);
+const selectedGridItem = (event, itemId, destination, source) =>
+{
+    // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
+    childWindowsMap.get(destination).webContents.send("message-to-renderer", destination, itemId, source);
+    console.log("Message sent to child window: " + destination + " with item ID: " + itemId);
+}
 
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', openApp);
-    ipcMain.on('selectedGridItem', selectedGridItem);
+    ipcMain.on('message-to-main', selectedGridItem);
     createWindow();
 });
 

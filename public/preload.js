@@ -18,10 +18,16 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('launchPad', {
-    openApp: (url, title) => ipcRenderer.send('openApp', url, title),
-    sendSelectedGridItem: (itemId, destination) => ipcRenderer.send('selectedGridItem', itemId, destination),
-    receiveSelectedGridItem: (callback) => ipcRenderer.on('selectedGridItem', callback)
+    openApp: (url, title) => ipcRenderer.send('openApp', url, title)
 })
+
+contextBridge.exposeInMainWorld('messenger', {
+    sendSelectedGridItem: (itemId, destination, source) => ipcRenderer.send('message-to-main', itemId, destination, source),
+    receiveSelectedGridItem: (callback) => ipcRenderer.on('message-to-renderer', (_, destination, itemId, source) =>
+    {
+        callback(destination, itemId, source);
+    })
+});
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
 window.addEventListener('DOMContentLoaded', () =>
