@@ -29,7 +29,7 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         let symbol = selectedRows.length === 0 ? null : selectedRows[0].symbol;
-        window.messenger.sendSelectedGridItem(createChartContext(symbol, 5), "Crypto Chart", "Crypto Ticker");
+        window.messenger.sendMessageToMain(createChartContext(symbol, 5), "Crypto Chart", "Crypto Ticker");
     };
 
     const handleWorkerMessage = useCallback((event) =>

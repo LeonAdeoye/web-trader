@@ -87,7 +87,7 @@ export const PriceChartApp = () =>
         {
             enabled: true,
         },
-    });
+    });``
 
     const [connectionId, setConnectionId] = useState(null);
 
@@ -100,7 +100,7 @@ export const PriceChartApp = () =>
 
     useEffect(() =>
     {
-        window.messenger.receiveSelectedGridItem((destination, fdc3Context, source) =>
+        window.messenger.handleMessageFromMain((destination, fdc3Context, source) =>
         {
             console.log(`The renderer ${destination} received message from ${source} with the context: ${JSON.stringify(fdc3Context)}`);
             // TODO: Add logic to handle the context

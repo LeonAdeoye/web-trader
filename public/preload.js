@@ -22,8 +22,8 @@ contextBridge.exposeInMainWorld('launchPad', {
 })
 
 contextBridge.exposeInMainWorld('messenger', {
-    sendSelectedGridItem: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main', fdc3Context, destination, source),
-    receiveSelectedGridItem: (callback) => ipcRenderer.on('message-to-renderer', (_, destination, fdc3Context, source) =>
+    sendMessageToMain: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main', fdc3Context, destination, source),
+    handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer', (_, destination, fdc3Context, source) =>
     {
         callback(destination, fdc3Context, source);
     })
