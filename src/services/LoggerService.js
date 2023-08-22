@@ -1,42 +1,25 @@
 export class LoggerService
 {
-    #logLevel;
+    #logger;
 
-    constructor()
+    async logInfo(message)
     {
-        this.#logLevel = "INFO";
+        await this.#logMessage(message, "INFO");
     }
 
-    logInfo(message)
+    async logError(message)
     {
-
+        await this.#logMessage(message, "ERROR");
     }
 
-    logError(message)
+    async #logMessage(message, logLevel)
     {
-
+        console.log(`Logger: ${this.#logger}, Level: ${logLevel}, message: ${message}`);
+        await fetch(`http://localhost:20002/log?logger=${this.#logger}&level=${logLevel}&message=${message}`, {method: "POST"});
     }
 
-    setLogLevel(logLevel)
+    setLogger(logger)
     {
-        this.#logLevel = logLevel;
-    }
-
-    log(message, logLevel)
-    {
-        if(!logLevel)
-            logLevel = this.#logLevel;
-
-        switch(logLevel)
-        {
-            case "INFO":
-                this.logInfo(message);
-                break;
-            case "ERROR":
-                this.logError(message);
-                break;
-            default:
-                console.log(message);
-        }
+        this.#logger = logger;
     }
 }
