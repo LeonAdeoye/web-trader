@@ -100,9 +100,10 @@ export const PriceChartApp = () =>
 
     useEffect(() =>
     {
-        window.messenger.receiveSelectedGridItem((destination, itemId, source) =>
+        window.messenger.receiveSelectedGridItem((destination, fdc3Context, source) =>
         {
-            alert(`The renderer ${destination} received message from ${source} with item ID: ${itemId}`);
+            console.log(`The renderer ${destination} received message from ${source} with the context: ${JSON.stringify(fdc3Context)}`);
+            // TODO: Add logic to handle the context
         });
     }, []);
 

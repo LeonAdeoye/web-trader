@@ -65,11 +65,11 @@ const openApp = (event, {url, title}) =>
     childWindowsMap.set(childWindow.getTitle(), childWindow);
 }
 
-const selectedGridItem = (event, itemId, destination, source) =>
+const selectedGridItem = (_, fdc3Context, destination, source) =>
 {
     // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
-    childWindowsMap.get(destination).webContents.send("message-to-renderer", destination, itemId, source);
-    console.log("Message sent to child window: " + destination + " with item ID: " + itemId);
+    childWindowsMap.get(destination).webContents.send("message-to-renderer", destination, fdc3Context, source);
+    console.log("Message sent to child window: " + destination + " with item ID: " + JSON.stringify(fdc3Context));
 }
 
 app.whenReady().then(() =>
