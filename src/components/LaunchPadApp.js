@@ -22,7 +22,10 @@ const LaunchPadApp = () =>
         { title: 'TCA', icon: 'file:///assets/tca.png', url: 'http://localhost:3000/tca' },
         { title: 'Workflow', icon: 'file:///assets/workflow.png', url: 'http://localhost:3000/workflow' },
         { title: 'Insights', icon: 'file:///assets/insights.png', url: 'http://localhost:3000/insights' },
-        { title: 'Reports', icon: 'file:///assets/reports.png', url: 'http://localhost:3000/reports' }
+        { title: 'Reports', icon: 'file:///assets/reports.png', url: 'http://localhost:3000/reports' },
+        { title: 'RFQ', icon: 'file:///assets/rfq.png', url: 'http://localhost:3000/rfq' },
+        { title: 'Index Pricing', icon: 'file:///assets/index-pricing.png', url: 'http://localhost:3000/index-pricing' },
+        { title: 'Positions', icon: 'file:///assets/positions.png', url: 'http://localhost:3000/positions' }
     ];
 
     const launchApp = (url, title) =>

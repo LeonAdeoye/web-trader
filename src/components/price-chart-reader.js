@@ -1,6 +1,5 @@
 const {Client, Command} = require('amps');
 const {onAmpsMessage} = require("./message_handler");
-
 const clientName = "web-trader-price-chart-reader";
 const topicName = "prices";
 const url = "ws://localhost:9008/amps/json";
@@ -35,8 +34,8 @@ const main = async () =>
 
     onmessage = (message) =>
     {
-        const {selectedCurrency, currentConnectionId} = message.data;
-        initialize('XBT/USD', currentConnectionId).then(() => console.log("Initialization completed."));
+        const {symbol, currentConnectionId} = message.data;
+        initialize(symbol, currentConnectionId).then(() => console.log("Initialization completed."));
     }
 }
 

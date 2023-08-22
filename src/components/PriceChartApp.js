@@ -2,13 +2,11 @@ import * as React from 'react';
 import {useState, useEffect} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
-import {useRecoilState} from "recoil";
-import {selectedSymbolState} from "./symbol-state";
 
 export const PriceChartApp = () =>
 {
     const [worker, setWorker] = useState(null);
-    const [selectedCurrency, setSelectedCurrency] = useRecoilState(selectedSymbolState);
+    const [symbol, setSymbol] = useState(null);
     const [options, setOptions] = useState({
         data: [],
         series: [
@@ -87,7 +85,7 @@ export const PriceChartApp = () =>
         {
             enabled: true,
         },
-    });``
+    });
 
     const [connectionId, setConnectionId] = useState(null);
 
@@ -103,7 +101,7 @@ export const PriceChartApp = () =>
         window.messenger.handleMessageFromMain((destination, fdc3Context, source) =>
         {
             console.log(`The renderer ${destination} received message from ${source} with the context: ${JSON.stringify(fdc3Context)}`);
-            // TODO: Add logic to handle the context
+            setSymbol(fdc3Context.instruments[0].id.ticker);
         });
     }, []);
 
@@ -115,13 +113,13 @@ export const PriceChartApp = () =>
             {
                 const optionsClone = { ...prevOptions };
                 optionsClone.data = [];
-                optionsClone.title = {text: `Intra-day price chart for ${selectedCurrency}`};
+                optionsClone.title = {text: `Intra-day price chart for ${symbol}`};
                 return optionsClone;
             });
-            worker.postMessage({selectedCurrency: selectedCurrency, currentConnectionId: connectionId});
+            worker.postMessage({symbol: symbol, currentConnectionId: connectionId});
         }
 
-    }, [selectedCurrency]);
+    }, [symbol]);
 
     useEffect(() =>
     {
