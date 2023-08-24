@@ -2,13 +2,14 @@ import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
 import {useCallback, useMemo, useRef, useState, useEffect} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
+import {LoggerService} from "../services/LoggerService";
 
-export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, columnDefs}) =>
+export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData}) =>
 {
-    const [rowData, setRowData]  = useState([]);
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
+    const [loggerService] = useState(new LoggerService(GenericGridApp));
 
     const getRowId = useMemo(() => (row) =>
     {
@@ -18,16 +19,8 @@ export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, colum
     const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-        console.log("Selected: " + (selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]));
+        loggerService.logInfo("Selected: " + (selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]));
     };
-
-    useEffect(() =>
-    {
-        fetch(initUrl)
-            .then((response) => response.json())
-            .then((data) => setRowData(data))
-            .catch((error) => console.log(error));
-    }, []);
 
     const updateRows = useCallback((row) =>
     {
@@ -45,7 +38,7 @@ export const GenericGridApp = ({initUrl, rowHeight, gridTheme, rowIdArray, colum
             <AgGridReact
                 ref={gridApiRef}
                 columnDefs={columnDefs}
-                rowData={rowData}
+                rowData={gridData}
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}

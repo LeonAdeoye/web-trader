@@ -9,10 +9,14 @@ import { Route, Routes} from "react-router-dom";
 import {UsersApp} from "./components/UsersApp";
 import {ConfigsApp} from "./components/ConfigsApp";
 import {currencyFormatter, numberFormatter} from "./utilities";
+import {ConfigurationService} from "./services/ConfigurationService";
+import {DataService} from "./services/DataService";
 
 const App = () =>
 {
     const [client, setClient] = useState(null);
+    const [configurationService] = useState(new ConfigurationService());
+    const [dataService] = useState(new DataService());
 
     const cryptoTickerColumnDefinitions = [
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -33,13 +37,19 @@ const App = () =>
 
     const apps =
         [
-            { name: 'Launch Pad', path: '/', component: LaunchPadApp },
+            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: { configurationService: configurationService }},
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'}},
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp },
-            { name: 'Configs', path: '/configs', component: ConfigsApp }
+            { name: 'Users', path: '/users', component: UsersApp , props: { configurationService: configurationService , dataService: dataService}},
+            { name: 'Configs', path: '/configs', component: ConfigsApp , props: { configurationService: configurationService }}
         ];
+
+    useEffect(() =>
+    {
+        configurationService.loadConfigurations("leon"); // TODO: remove hard coded user
+        configurationService.loadConfigurations("system");
+    }, []);
 
     useEffect(() =>
     {

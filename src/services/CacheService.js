@@ -2,18 +2,19 @@ import {LoggerService} from "./LoggerService";
 
 export class CacheService
 {
-    #cacheMap = new Map();
-    #logService = new LoggerService();
+    #cacheMap;
+    #loggerService;
 
     constructor()
     {
-        this.#logService.setLogger("CacheService");
+        this.#cacheMap = new Map();
+        this.#loggerService = new LoggerService(this.constructor.name);
     }
 
     put(symbol, previousData)
     {
         if(this.#cacheMap.has(symbol))
-            this.#logService.logInfo("Data with symbol " + symbol + " already exists so updating existing data.");
+            this.#loggerService.logInfo("Data with symbol " + symbol + " already exists so updating existing data.");
 
         this.#cacheMap.set(symbol, previousData);
     }
@@ -23,14 +24,14 @@ export class CacheService
         if(this.#cacheMap.has(symbol))
             this.#cacheMap.delete(symbol);
         else
-            this.#logService.logError("Cannot remove data because symbol " + symbol + " does not exist.");
+            this.#loggerService.logError("Cannot remove data because symbol " + symbol + " does not exist.");
     }
 
     get(symbol)
     {
         if(!this.#cacheMap.has(symbol))
         {
-            this.#logService.logError("Data with symbol " + symbol + " does not exist so returning empty object.");
+            this.#loggerService.logError("Data with symbol " + symbol + " does not exist so returning empty object.");
             return {};
         }
         else

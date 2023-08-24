@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './launch-pad-app.css';
 
-const LaunchPadApp = () =>
+const LaunchPadApp = ({configurationService}) =>
 {
     const apps =
     [
