@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
+const settings = require("electron-settings");
 
 require('@electron/remote/main').initialize();
 
@@ -10,6 +11,15 @@ let mainWindow;
 
 // create amp of child windows objects keyed by destination IDs
 const childWindowsMap = new Map();
+
+settings.configure({
+    atomicSave: true,
+    fileName: 'settings.json',
+    numSpaces: 2,
+    prettify: false
+});
+
+console.log("settings file path: " + settings.file());
 
 // The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
 const createWindow = () =>
@@ -43,6 +53,26 @@ const createWindow = () =>
     // You can interact with this web content from the main process using the window's webContents object.
     //mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+
+    // Load the saved window position or use default position
+    settings.get(mainWindow.getTitle())
+        .then((windowPosition) =>
+        {
+            if(windowPosition !== undefined)
+                mainWindow.setPosition(windowPosition.x, windowPosition.y);
+        })
+        .catch((err) => console.log("Error loading main window position: " + err));
+
+
+    mainWindow.on('close', () =>
+    {
+        console.log('close ' + mainWindow.getTitle() + " " + mainWindow.getPosition());
+        const currentPosition = mainWindow.getPosition();
+        // TODO this does not work. It does not save the window position. It dies before it gets here.
+        settings.set(mainWindow.getTitle(), {x: currentPosition[0], y: currentPosition[1]})
+            .then(() => console.log("Closing main window: " + mainWindow.getTitle() + " and saving its last window position."))
+            .catch((err) => console.log("Error saving main window position: " + err));
+    });
 }
 
 const openApp = (event, {url, title}) =>
@@ -64,7 +94,26 @@ const openApp = (event, {url, title}) =>
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowsMap.set(childWindow.getTitle(), childWindow);
     childWindow.on('close', () => childWindowsMap.delete(childWindow.getTitle()));
+
+    // Load the saved window position or use default position
+    settings.get(childWindow.getTitle())
+       .then((windowPosition) =>
+        {
+            if(windowPosition !== undefined)
+                childWindow.setPosition(windowPosition.x, windowPosition.y);
+        })
+        .catch((err) => console.log("Error loading child window position: " + err));
+
+    // Save window position when it's moved
+    childWindow.on('close', () =>
+    {
+        const currentPosition = childWindow.getPosition();
+        settings.set(childWindow.getTitle(), {x: currentPosition[0], y: currentPosition[1]})
+            .then(() => console.log("Closing child window and saving its last window position."))
+            .catch((err) => console.log("Error saving child window position: " + err));
+    });
 }
+
 
 const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
@@ -103,6 +152,9 @@ app.on('activate', () =>
 
 app.on('before-quit', () =>
 {
+    ipcMain.removeListener('openApp', openApp);
+    ipcMain.removeListener('message-to-main', handleMessageFromRenderer);
+
     childWindowsMap.forEach((childWindow) => childWindow.destroy());
     childWindowsMap.clear();
 });

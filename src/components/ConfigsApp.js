@@ -33,9 +33,16 @@ export const ConfigsApp = () =>
 
     }, [])
 
-    return(<GenericGridApp rowHeight={25}
+
+    return(
+        <>
+            <GenericGridApp rowHeight={25}
                            gridTheme={"ag-theme-alpine"}
                            rowIdArray={["id"]}
                            columnDefs={columnDefs}
-                           gridData={gridData}/>);
+                           gridData={gridData}/>
+            <button>Edit</button>
+            <button>Save</button>
+            <button>Cancel</button>
+        </>);
 };
