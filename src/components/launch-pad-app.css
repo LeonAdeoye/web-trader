@@ -7,23 +7,30 @@
 .launch-pad__app
 {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 16px;
-    cursor: pointer;
-    border-radius: 10px; /* Add rounded border */
+    flex-direction: column; /* indicates that the flex items should be stacked vertically rather than by row */
+    align-items: center; /* Vertically center items: This property determines how flex items are aligned on the vertical cross axis of the flex container. */
+
+    margin: 16px; /* Add padding for spacing */
     padding: 10px; /* Add padding for spacing */
+    border: 2px solid white; /* Add border to app icon so that hovering does not cause a shift in icon position */
+}
+
+.launch-pad__app:hover
+{
+    border: 2px solid #404040;
+    cursor: pointer;
+    border-radius: 10px; /* Add rounded border when hovering over app icon*/
 }
 
 .launch-pad__icon
 {
     margin-bottom: 8px;
-    height: 30px;
+    height: 60px;
 }
 
 .launch-pad__name
 {
     text-align: center;
     font-family: Calibri;
-    font-size: 20px;
+    font-size: 18px;
 }
