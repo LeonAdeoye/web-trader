@@ -7,24 +7,24 @@ export class LoggerService
         this.#logger = logger;
     }
 
-    async logInfo(message)
+    logInfo(message)
     {
-        await this.#logMessage(message, "INFO");
+        this.#logMessage(message, "INFO");
     }
 
-    async logError(message)
+    logError(message)
     {
-        await this.#logMessage(message, "ERROR");
+        this.#logMessage(message, "ERROR");
     }
 
-    async #logMessage(message, logLevel)
+    #logMessage(message, logLevel)
     {
-        console.log(`Logger: ${this.#logger}, Level: ${logLevel}, message: ${message}`);
-        await fetch(`http://localhost:20002/log`,
+        fetch(`http://localhost:20002/log`,
             {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({logger: this.#logger, level: logLevel, message: message})
-                });
+                })
+            .then(() => console.log(`Logger: ${this.#logger}, Level: ${logLevel}, message: ${message}`));
     }
 }

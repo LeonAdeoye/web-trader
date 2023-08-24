@@ -59,7 +59,7 @@ export class ConfigurationService
             const configurations = this.#configurations.get(owner);
             const configuration = configurations.find(configuration => configuration.key === key)
             if(configuration)
-                return configuration;
+                return configuration.value;
         }
 
         return null;

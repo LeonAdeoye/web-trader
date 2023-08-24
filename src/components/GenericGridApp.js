@@ -9,7 +9,7 @@ export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gr
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
-    const [loggerService] = useState(new LoggerService(GenericGridApp));
+    const [loggerService] = useState(new LoggerService(GenericGridApp.name));
 
     const getRowId = useMemo(() => (row) =>
     {

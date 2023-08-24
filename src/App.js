@@ -11,12 +11,15 @@ import {ConfigsApp} from "./components/ConfigsApp";
 import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {DataService} from "./services/DataService";
+import {LoggerService} from "./services/LoggerService";
+
 
 const App = () =>
 {
     const [client, setClient] = useState(null);
     const [configurationService] = useState(new ConfigurationService());
     const [dataService] = useState(new DataService());
+    const [loggerService] = useState(new LoggerService(App.name));
 
     const cryptoTickerColumnDefinitions = [
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -66,13 +69,13 @@ const App = () =>
         client.connect().then(() =>
         {
             setClient(client);
-            console.log("connected to ws://localhost:9008/amps/json");
+            loggerService.logInfo("connected to ws://localhost:9008/amps/json");
         });
 
         // disconnect the client from AMPS when the component is destructed
         return () =>
         {
-            client.disconnect().then(() => console.log('disconnected'));
+            client.disconnect().then(() => loggerService.logInfo('disconnected from AMPS'));
         };
     }, []);
 
