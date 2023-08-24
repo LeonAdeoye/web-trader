@@ -13,12 +13,10 @@ import {ConfigurationService} from "./services/ConfigurationService";
 import {DataService} from "./services/DataService";
 import {LoggerService} from "./services/LoggerService";
 
-
 const App = () =>
 {
     const [client, setClient] = useState(null);
     const [configurationService] = useState(new ConfigurationService());
-    const [dataService] = useState(new DataService());
     const [loggerService] = useState(new LoggerService(App.name));
 
     const cryptoTickerColumnDefinitions = [
@@ -40,18 +38,23 @@ const App = () =>
 
     const apps =
         [
-            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: { configurationService: configurationService }},
+            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: {  }},
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'}},
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp , props: { configurationService: configurationService , dataService: dataService}},
-            { name: 'Configs', path: '/configs', component: ConfigsApp , props: { configurationService: configurationService }}
+            { name: 'Users', path: '/users', component: UsersApp , props: { }},
+            { name: 'Configs', path: '/configs', component: ConfigsApp , props: {  }}
         ];
 
-    useEffect(() =>
+    useEffect( () =>
     {
-        configurationService.loadConfigurations("leon"); // TODO: remove hard coded user
-        configurationService.loadConfigurations("system");
+        async function loadAllConfigurations(user)
+        {
+            await configurationService.loadConfigurations(user);
+            await configurationService.loadConfigurations("system");
+        }
+
+        loadAllConfigurations("leon").then(() => loggerService.logInfo("Successfully Loaded all configurations."));
     }, []);
 
     useEffect(() =>

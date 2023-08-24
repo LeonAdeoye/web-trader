@@ -11,17 +11,14 @@ export class ConfigurationService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    loadConfigurations(owner)
+    async loadConfigurations(owner)
     {
-        fetch(`http://localhost:20001/configurationByOwner?owner=${owner}`)
+        await fetch(`http://localhost:20001/configurationByOwner?owner=${owner}`)
             .then(response => response.json())
             .then(data =>
             {
                 if(data.length > 0)
-                {
-                    this.#loggerService.logInfo(`Loaded ${JSON.stringify(data)} configurations for owner: ${owner}`);
                     this.#configurations.set(owner, data);
-                }
                 else
                     this.#loggerService.logInfo(`Loaded zero configurations for owner: ${owner}`);
             })
@@ -61,7 +58,6 @@ export class ConfigurationService
             if(configuration)
                 return configuration.value;
         }
-
         return null;
     }
 

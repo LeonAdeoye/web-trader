@@ -1,16 +1,23 @@
 import * as React from 'react';
 import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
+import {ConfigurationService} from "../services/ConfigurationService";
+import {DataService} from "../services/DataService";
 
-export const UsersApp = ({configurationService, dataService}) =>
+export const UsersApp = () =>
 {
-    const url = configurationService.getConfigValue("system", "user-service-get-users-url") ?? "http://localhost:20003/users"
+    const [configurationService] = useState(new ConfigurationService());
+    const [dataService] = useState(new DataService());
     const [gridData, setGridData] = useState([]);
 
     useEffect(() =>
     {
-        dataService.get(url).then(data => setGridData(data));
-    }, [url, dataService]);
+        configurationService.loadConfigurations("system").then(() =>
+        {
+            const url = configurationService.getConfigValue("system", "user-service-get-users-url") ?? "http://localhost:20003/users";
+            dataService.get(url).then(data => setGridData(data));
+        });
+    }, [dataService, configurationService]);
 
     const columnDefs = [
         {headerName: "User Id", field: "userId", sortable: true, minWidth: 100, width: 130},

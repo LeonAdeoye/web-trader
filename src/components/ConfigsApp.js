@@ -2,10 +2,13 @@ import * as React from 'react';
 import {transformLocalDataTime} from "../utilities";
 import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
+import {ConfigurationService} from "../services/ConfigurationService";
 
-export const ConfigsApp = ({configurationService}) =>
+export const ConfigsApp = () =>
 {
     const [gridData, setGridData] = useState([]);
+    const [configurationService] = useState(new ConfigurationService());
+
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
         { headerName: "Owner", field: 'owner', sortable: true, minWidth: 100, width: 130 },
@@ -20,8 +23,15 @@ export const ConfigsApp = ({configurationService}) =>
 
     useEffect(() =>
     {
-        setGridData(configurationService.getCachedConfigs());
-    }, [configurationService]);
+        async function loadAllConfigurations(user)
+        {
+            await configurationService.loadConfigurations(user);
+            await configurationService.loadConfigurations("system");
+        }
+
+        loadAllConfigurations("leon").then(() => setGridData(configurationService.getCachedConfigs()));
+
+    }, [])
 
     return(<GenericGridApp rowHeight={25}
                            gridTheme={"ag-theme-alpine"}
