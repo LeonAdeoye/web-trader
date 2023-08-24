@@ -10,7 +10,7 @@ export const UsersApp = ({configurationService, dataService}) =>
     useEffect(() =>
     {
         dataService.get(url).then(data => setGridData(data));
-    }, [url]);
+    }, [url, dataService]);
 
     const columnDefs = [
         {headerName: "User Id", field: "userId", sortable: true, minWidth: 100, width: 130},

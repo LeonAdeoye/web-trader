@@ -9,13 +9,13 @@ const LaunchPadApp = ({configurationService}) =>
         { title: 'Crypto Chart', icon: 'file:///assets/chart.png', url: 'http://localhost:3000/crypto-chart' },
         { title: 'Stock Ticker', icon: 'file:///assets/ticker.png', url: 'http://localhost:3000/stock-ticker' },
         { title: 'Stock Chart', icon: 'file:///assets/chart.png', url: 'http://localhost:3000/stock-chart' },
-        { title: 'Configs', icon: 'file:///assets/configs.png', url: 'http://localhost:3000/configs' },
+        { title: 'Configurations', icon: 'file:///assets/configs.png', url: 'http://localhost:3000/configs' },
         { title: 'Users', icon: 'file:///assets/user.png', url: 'http://localhost:3000/users' },
         { title: 'Dashboard', icon: 'file:///assets/dashboard.png', url: 'http://localhost:3000/dashboard' },
         { title: 'Trade History', icon: 'file:///assets/trade-history.png', url: 'http://localhost:3000/trade-history' },
         { title: 'Alerts', icon: 'file:///assets/alerts.png', url: 'http://localhost:3000/alerts' },
         { title: 'Tasks', icon: 'file:///assets/tasks.png', url: 'http://localhost:3000/tasks' },
-        { title: 'Blasts', icon: 'file:///assets/blasts.png', url: 'http://localhost:3000/blasts' },
+        { title: 'Client Blasts', icon: 'file:///assets/blasts.png', url: 'http://localhost:3000/blasts' },
         { title: 'Crosses', icon: 'file:///assets/crosses.png', url: 'http://localhost:3000/crosses' },
         { title: 'News', icon: 'file:///assets/news.png', url: 'http://localhost:3000/news' },
         { title: 'IOIs', icon: 'file:///assets/iois.png', url: 'http://localhost:3000/ioi' },
@@ -23,9 +23,9 @@ const LaunchPadApp = ({configurationService}) =>
         { title: 'Workflow', icon: 'file:///assets/workflow.png', url: 'http://localhost:3000/workflow' },
         { title: 'Insights', icon: 'file:///assets/insights.png', url: 'http://localhost:3000/insights' },
         { title: 'Reports', icon: 'file:///assets/reports.png', url: 'http://localhost:3000/reports' },
-        { title: 'RFQ', icon: 'file:///assets/rfq.png', url: 'http://localhost:3000/rfq' },
+        { title: 'Request For Quote', icon: 'file:///assets/rfq.png', url: 'http://localhost:3000/rfq' },
         { title: 'Index Pricing', icon: 'file:///assets/index-pricing.png', url: 'http://localhost:3000/index-pricing' },
-        { title: 'Positions', icon: 'file:///assets/positions.png', url: 'http://localhost:3000/positions' }
+        { title: 'Position Keeping', icon: 'file:///assets/positions.png', url: 'http://localhost:3000/positions' }
     ];
 
     const launchApp = (url, title) =>
