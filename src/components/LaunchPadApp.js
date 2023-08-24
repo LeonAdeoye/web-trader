@@ -24,8 +24,8 @@ const LaunchPadApp = () =>
             {
                 const appList = JSON.parse(configurationService.getConfigValue("system", "app-list-with-display-properties")) ??
                 [
-                    { title: 'Users', icon: 'file:///assets/user.png', url: 'http://localhost:3000/users' },
-                    { title: 'Configs', icon: 'file:///assets/configs.png', url: 'http://localhost:3000/configs' }
+                    { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
+                    { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' }
                 ];
 
                 setApps(appList);

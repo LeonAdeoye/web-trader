@@ -1,5 +1,5 @@
 const path = require('path');
-
+// TODO remove this config file if not using WebPack. So far it is not used for bundling.
 module.exports =
 {
   entry: './public/preload.js',

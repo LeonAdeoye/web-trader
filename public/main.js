@@ -55,6 +55,7 @@ const openApp = (event, {url, title}) =>
         frame: true,
         width: 800,
         height: 600,
+        icon: path.join(__dirname, `../assets/${title}.png`),
         webPreferences: { nodeIntegration: true, preload: path.join(__dirname, 'preload.js') }
     });
 
@@ -98,6 +99,12 @@ app.on('activate', () =>
 {
     if (BrowserWindow.getAllWindows().length === 0)
         createWindow();
+});
+
+app.on('before-quit', () =>
+{
+    childWindowsMap.forEach((childWindow) => childWindow.destroy());
+    childWindowsMap.clear();
 });
 
 
