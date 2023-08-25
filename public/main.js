@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 const settings = require("electron-settings");
@@ -26,9 +26,10 @@ const createWindow = () =>
 {
     mainWindow = new BrowserWindow({
         width: 1000,
-        height: 860,
-        minHeight: 860,
+        height: 660,
+        minHeight: 660,
         maxHeight: 1860,
+        minWidth:400,
         title: 'Launch Pad',
         frame: true,
         titleBarOverlay: {
@@ -51,28 +52,10 @@ const createWindow = () =>
 
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-
-    // Load the saved window position or use default position
-    settings.get(mainWindow.getTitle())
-        .then((windowPosition) =>
-        {
-            if(windowPosition !== undefined)
-                mainWindow.setPosition(windowPosition.x, windowPosition.y);
-        })
-        .catch((err) => console.log("Error loading main window position: " + err));
-
-
-    mainWindow.on('close', () =>
-    {
-        console.log('close ' + mainWindow.getTitle() + " " + mainWindow.getPosition());
-        const currentPosition = mainWindow.getPosition();
-        // TODO this does not work. It does not save the window position. It dies before it gets here.
-        settings.set(mainWindow.getTitle(), {x: currentPosition[0], y: currentPosition[1]})
-            .then(() => console.log("Closing main window: " + mainWindow.getTitle() + " and saving its last window position."))
-            .catch((err) => console.log("Error saving main window position: " + err));
-    });
+    loadWindowDimensions(mainWindow).then(() => console.log("Main window dimensions loaded from settings file."))
+    mainWindow.on('close', () => saveWindowDimensions(mainWindow));
 }
 
 const openApp = (event, {url, title}) =>
@@ -94,26 +77,78 @@ const openApp = (event, {url, title}) =>
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowsMap.set(childWindow.getTitle(), childWindow);
     childWindow.on('close', () => childWindowsMap.delete(childWindow.getTitle()));
-
-    // Load the saved window position or use default position
-    settings.get(childWindow.getTitle())
-       .then((windowPosition) =>
-        {
-            if(windowPosition !== undefined)
-                childWindow.setPosition(windowPosition.x, windowPosition.y);
-        })
-        .catch((err) => console.log("Error loading child window position: " + err));
-
-    // Save window position when it's moved
-    childWindow.on('close', () =>
-    {
-        const currentPosition = childWindow.getPosition();
-        settings.set(childWindow.getTitle(), {x: currentPosition[0], y: currentPosition[1]})
-            .then(() => console.log("Closing child window and saving its last window position."))
-            .catch((err) => console.log("Error saving child window position: " + err));
-    });
+    loadWindowDimensions(childWindow).then(() => console.log("Child window dimensions loaded from settings file"));
+    childWindow.on('close', () =>  saveWindowDimensions(childWindow));
+    addContextMenu(childWindow)
 }
 
+const saveWindowDimensions = async (window) =>
+{
+    const [x, y] = window.getPosition();
+    const [w, h] = window.getSize();
+    await settings.set(window.getTitle(), {x: x, y: y, h: h, w: w})
+        .then(() => console.log(`Saving last window position and size of: ${window.getTitle()}: (${x},${y}) (${w},${h})`))
+        .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
+}
+
+const loadWindowDimensions = async (window) =>
+{
+    await settings.get(window.getTitle())
+        .then((dimensions) =>
+        {
+            if(dimensions === undefined)
+                return;
+
+            const {x ,y , h, w} = dimensions;
+
+            if(x !== undefined && y !== undefined)
+                window.setPosition(x, y);
+
+            if(w !== undefined && h !== undefined)
+                window.setSize(w, h);
+        })
+        .catch((err) => console.log("Error loading window position: " + err));
+}
+
+const addContextMenu = (window) =>
+{
+    const contextMenuTemplate =
+        [
+            { label: 'Impersonate', click: () => console.log('Impersonate clicked') },
+            { type: 'separator' },
+            { label: 'Workspaces', submenu: [
+                    { label: 'Low-touch Trading', click: () => console.log('Low-touch Trading clicked') },
+                    { type: 'separator' },
+                    { label: 'High-touch Trading', click: () => console.log('High-touch Trading clicked') },
+                    { type: 'separator' },
+                    { label: 'Program Trading', click: () => console.log('Program Trading clicked') },
+                    { type: 'separator' },
+                    { label: 'Create Workspace', click: () => console.log('New Workspace clicked') }
+            ]},
+            { type: 'separator' },
+            { label: 'Close current window', click: () =>
+                {
+                    saveWindowDimensions(window).then(() => console.log("Child window dimensions saved to settings file"));
+                    window.close();
+                }
+            },
+            { type: 'separator' },
+            { label: 'Quit application', click: () =>
+                {
+                    saveWindowDimensions(mainWindow).then(() => console.log("Main window dimensions saved to settings file"));
+                    childWindowsMap.forEach((childWindow) => saveWindowDimensions(childWindow));
+                    app.quit();
+                }
+            }
+        ];
+
+    const contextMenu = Menu.buildFromTemplate(contextMenuTemplate);
+
+    window.webContents.on('context-menu', (event, params) =>
+    {
+        contextMenu.popup({ window: window, x: params.x, y: params.y });
+    });
+}
 
 const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
@@ -131,11 +166,14 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
     });
 }
 
+
+
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', openApp);
     ipcMain.on('message-to-main', handleMessageFromRenderer);
     createWindow();
+    addContextMenu(mainWindow);
 });
 
 app.on('window-all-closed', () =>
@@ -154,8 +192,7 @@ app.on('before-quit', () =>
 {
     ipcMain.removeListener('openApp', openApp);
     ipcMain.removeListener('message-to-main', handleMessageFromRenderer);
-
-    childWindowsMap.forEach((childWindow) => childWindow.destroy());
+    childWindowsMap.forEach((childWindow) => saveWindowDimensions(childWindow));
     childWindowsMap.clear();
 });
 

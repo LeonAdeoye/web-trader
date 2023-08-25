@@ -41,8 +41,5 @@ export const ConfigsApp = () =>
                            rowIdArray={["id"]}
                            columnDefs={columnDefs}
                            gridData={gridData}/>
-            <button>Edit</button>
-            <button>Save</button>
-            <button>Cancel</button>
         </>);
 };
