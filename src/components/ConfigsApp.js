@@ -7,12 +7,14 @@ import {LoggerService} from "../services/LoggerService";
 import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "./appTheme";
 import '../style_sheets/component-base.css';
+import AddConfigurationDialogComponent from "./AddConfigurationDialogComponent";
 
 export const ConfigsApp = ({user}) =>
 {
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
+    const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag] = useState(false);
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -40,18 +42,21 @@ export const ConfigsApp = ({user}) =>
 
     }, [])
 
-    const addConfiguration = async (config) =>
+    const addConfiguration = async () => setAddConfigDialogOpenFlag(true);
+
+    const saveConfiguration = async (owner, key, value) =>
     {
         try
         {
+            const config = {owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()};
             await configurationService.addConfiguration(config);
             setGridData([...gridData, config]);
         }
         catch (error)
         {
-            console.error("Error adding configuration:", error);
+            loggerService.logError(error);
         }
-    };
+    }
 
     const deleteConfiguration = async (id) =>
     {
@@ -80,14 +85,14 @@ export const ConfigsApp = ({user}) =>
         }
     };
 
-    const openAddConfigDialogHandler = () =>
+    const addConfigDialogHandler = () =>
     {
-        alert("Hello from openAddConfigDialogHandler()");
+        alert("Hello from addConfigDialogHandler()");
     }
 
-    const openDeleteConfigDialogHandler = () =>
+    const deleteConfigDialogHandler = () =>
     {
-        alert("Hello from openDeleteConfigDialogHandler()");
+        alert("Hello from deleteConfigDialogHandler()");
     }
 
     return(
@@ -105,13 +110,14 @@ export const ConfigsApp = ({user}) =>
                 <ThemeProvider theme={appTheme}>
                     <Tooltip title={<Typography fontSize={12}>Add new configuration.</Typography>}>
                         <Button className="action-button" variant="contained" color="primary"
-                                onClick={openAddConfigDialogHandler}>Add Configuration</Button>
+                                onClick={addConfigDialogHandler}>Add Configuration</Button>
                     </Tooltip>
                     <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
                         <Button className="action-button right-most" variant="contained" color="primary"
-                                onClick={openDeleteConfigDialogHandler}>Delete Configuration</Button>
+                                onClick={deleteConfigDialogHandler}>Delete Configuration</Button>
                     </Tooltip>
                 </ThemeProvider>
             </div>
+            <AddConfigurationDialogComponent addConfigDialogOpenFlag={true} onCloseHandler={saveConfiguration}/>
         </div>);
 };
