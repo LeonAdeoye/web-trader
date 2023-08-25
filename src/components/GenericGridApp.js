@@ -33,6 +33,7 @@ export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gr
         });
     }, []);
 
+    // TODO move dimensions to style sheet
     return (
         <div className={gridTheme} style={gridDimensions}>
             <AgGridReact

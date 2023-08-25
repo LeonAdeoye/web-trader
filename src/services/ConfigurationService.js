@@ -111,4 +111,24 @@ export class ConfigurationService
     {
         this.#configurations.clear();
     }
+
+    async addConfiguration(config)
+    {
+
+    }
+
+    async deleteConfiguration(id)
+    {
+
+    }
+
+    async uploadConfigurations(newConfigs)
+    {
+
+    }
+
+    parseCSVData(csvData)
+    {
+
+    }
 }

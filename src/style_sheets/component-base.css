@@ -1,0 +1,23 @@
+Button.action-button
+{
+    text-transform: none;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+Button.action-button.right-most
+{
+    margin-right: 0px;
+}
+
+Button.action-button:hover
+{
+    background-color: #656161;
+}
+
+div.app-parent-with-action-button
+{
+    height: calc(100% - 51px);
+    margin-top: 10px;
+}

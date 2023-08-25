@@ -4,6 +4,9 @@ import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {LoggerService} from "../services/LoggerService";
+import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
+import appTheme from "./appTheme";
+import '../style_sheets/component-base.css';
 
 export const ConfigsApp = ({user}) =>
 {
@@ -37,13 +40,78 @@ export const ConfigsApp = ({user}) =>
 
     }, [])
 
+    const addConfiguration = async (config) =>
+    {
+        try
+        {
+            await configurationService.addConfiguration(config);
+            setGridData([...gridData, config]);
+        }
+        catch (error)
+        {
+            console.error("Error adding configuration:", error);
+        }
+    };
+
+    const deleteConfiguration = async (id) =>
+    {
+        try
+        {
+            await configurationService.deleteConfiguration(id);
+            setGridData(gridData.filter(config => config.id !== id));
+        }
+        catch (error)
+        {
+            console.error("Error deleting configuration:", error);
+        }
+    };
+
+    const uploadConfigurationsFromCSV = async (csvData) =>
+    {
+        try
+        {
+            const newConfigs = configurationService.parseCSVData(csvData);
+            await configurationService.uploadConfigurations(newConfigs);
+            setGridData([...gridData, ...newConfigs]);
+        }
+        catch (error)
+        {
+            console.error("Error uploading configurations:", error);
+        }
+    };
+
+    const openAddConfigDialogHandler = () =>
+    {
+        alert("Hello from openAddConfigDialogHandler()");
+    }
+
+    const openDeleteConfigDialogHandler = () =>
+    {
+        alert("Hello from openDeleteConfigDialogHandler()");
+    }
 
     return(
-        <>
-            <GenericGridApp rowHeight={25}
-                           gridTheme={"ag-theme-alpine"}
-                           rowIdArray={["id"]}
-                           columnDefs={columnDefs}
-                           gridData={gridData}/>
-        </>);
+        <div className="app-parent-with-action-button">
+            <div>
+                <GenericGridApp
+                    rowHeight={25}
+                    gridTheme="ag-theme-alpine"
+                    rowIdArray={['id']}
+                    columnDefs={columnDefs}
+                    gridData={gridData}
+                />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+                <ThemeProvider theme={appTheme}>
+                    <Tooltip title={<Typography fontSize={12}>Add new configuration.</Typography>}>
+                        <Button className="action-button" variant="contained" color="primary"
+                                onClick={openAddConfigDialogHandler}>Add Configuration</Button>
+                    </Tooltip>
+                    <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
+                        <Button className="action-button right-most" variant="contained" color="primary"
+                                onClick={openDeleteConfigDialogHandler}>Delete Configuration</Button>
+                    </Tooltip>
+                </ThemeProvider>
+            </div>
+        </div>);
 };
