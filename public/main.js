@@ -54,7 +54,8 @@ const createWindow = () =>
     // You can interact with this web content from the main process using the window's webContents object.
     mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-    loadWindowDimensions(mainWindow).then(() => console.log("Main window dimensions loaded from settings file."))
+    loadWindowDimensions(mainWindow)
+        .then(() => console.log("Main window dimensions loaded from settings file."))
     mainWindow.on('close', () => saveWindowDimensions(mainWindow));
 }
 
@@ -76,10 +77,14 @@ const openApp = (event, {url, title}) =>
     childWindow.webContents.openDevTools();
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowsMap.set(childWindow.getTitle(), childWindow);
-    childWindow.on('close', () => childWindowsMap.delete(childWindow.getTitle()));
-    loadWindowDimensions(childWindow).then(() => console.log("Child window dimensions loaded from settings file"));
-    childWindow.on('close', () =>  saveWindowDimensions(childWindow));
-    addContextMenu(childWindow)
+
+    childWindow.on('close', () =>
+    {
+        saveWindowDimensions(childWindow). then(() => childWindowsMap.delete(childWindow.getTitle()));
+    });
+
+    addContextMenu(childWindow);
+    loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
 }
 
 const saveWindowDimensions = async (window) =>
@@ -126,19 +131,13 @@ const addContextMenu = (window) =>
                     { label: 'Create Workspace', click: () => console.log('New Workspace clicked') }
             ]},
             { type: 'separator' },
-            { label: 'Close current window', click: () =>
-                {
-                    saveWindowDimensions(window).then(() => console.log("Child window dimensions saved to settings file"));
-                    window.close();
-                }
-            },
+            { label: 'Close current window', click: () => saveWindowDimensions(window).then(() => window.close()) },
             { type: 'separator' },
-            { label: 'Quit application', click: () =>
+            { label: 'Quit application', click: () => saveWindowDimensions(mainWindow).then(() =>
                 {
-                    saveWindowDimensions(mainWindow).then(() => console.log("Main window dimensions saved to settings file"));
                     childWindowsMap.forEach((childWindow) => saveWindowDimensions(childWindow));
                     app.quit();
-                }
+                })
             }
         ];
 
@@ -166,8 +165,6 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
     });
 }
 
-
-
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', openApp);
@@ -192,7 +189,12 @@ app.on('before-quit', () =>
 {
     ipcMain.removeListener('openApp', openApp);
     ipcMain.removeListener('message-to-main', handleMessageFromRenderer);
-    childWindowsMap.forEach((childWindow) => saveWindowDimensions(childWindow));
+    childWindowsMap.forEach((childWindow) =>
+    {
+        if(childWindow !== undefined)
+            saveWindowDimensions(childWindow)
+                .catch((err) => console.log("Error saving child window dimensions: " + err));
+    });
     childWindowsMap.clear();
 });
 

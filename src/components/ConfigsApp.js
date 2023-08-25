@@ -3,11 +3,13 @@ import {transformLocalDataTime} from "../utilities";
 import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
+import {LoggerService} from "../services/LoggerService";
 
-export const ConfigsApp = () =>
+export const ConfigsApp = ({user}) =>
 {
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService());
+    const [loggerService] = useState(new LoggerService(ConfigsApp.name));
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -29,7 +31,9 @@ export const ConfigsApp = () =>
             await configurationService.loadConfigurations("system");
         }
 
-        loadAllConfigurations("leon").then(() => setGridData(configurationService.getCachedConfigs()));
+        loadAllConfigurations(user)
+            .then(() => setGridData(configurationService.getCachedConfigs()))
+            .catch((error) => loggerService.logError(error));
 
     }, [])
 

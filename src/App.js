@@ -10,7 +10,6 @@ import {UsersApp} from "./components/UsersApp";
 import {ConfigsApp} from "./components/ConfigsApp";
 import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
-import {DataService} from "./services/DataService";
 import {LoggerService} from "./services/LoggerService";
 
 const App = () =>
@@ -43,7 +42,7 @@ const App = () =>
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
             { name: 'Users', path: '/users', component: UsersApp , props: { }},
-            { name: 'Configs', path: '/configs', component: ConfigsApp , props: {  }}
+            { name: 'Configs', path: '/configs', component: ConfigsApp , props: { user: "leon"}}
         ];
 
     useEffect( () =>
