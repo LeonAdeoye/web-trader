@@ -90,12 +90,17 @@ export class ConfigurationService
             });
     }
 
-    removeConfiguration(owner, key)
+    clear()
     {
-        fetch(`http://localhost:20001/configuration?owner=${owner}&key=${key}`, {method: "DELETE"})
+        this.#configurations.clear();
+    }
+
+    async deleteConfiguration(id)
+    {
+        fetch(`http://localhost:20001/configuration?id=${id}`, {method: "DELETE"})
             .then(() =>
             {
-                if(this.#configurations.has(owner))
+                if(this.#configurations.values()) // TODO get config with id match method argument and remove it
                 {
                     const configurations = this.#configurations.get(owner);
                     const configuration = configurations.find(configuration => configuration.key === key)
@@ -111,16 +116,6 @@ export class ConfigurationService
                     throw new Error(`Cannot remove configuration for owner ${owner} because owner does not exist.`);
             })
             .catch(error => this.#loggerService.logError(error));
-    }
-
-    clear()
-    {
-        this.#configurations.clear();
-    }
-
-    async deleteConfiguration(id)
-    {
-
     }
 
     async uploadConfigurations(newConfigs)

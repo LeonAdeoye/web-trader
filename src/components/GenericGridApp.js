@@ -2,14 +2,15 @@ import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
 import {useCallback, useMemo, useRef, useState, useEffect} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
-import {LoggerService} from "../services/LoggerService";
+import {selectedGenericGridRowState} from "../atoms/DialogState";
+import {useRecoilState} from "recoil";
 
 export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData}) =>
 {
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
-    const [loggerService] = useState(new LoggerService(GenericGridApp.name));
+    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const getRowId = useMemo(() => (row) =>
     {
@@ -19,7 +20,9 @@ export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gr
     const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-        loggerService.logInfo("Selected: " + (selectedRows.length === 0 ? '' : selectedRows[0][createRowId(rowIdArray)]));
+        if(selectedRows.length === 0)
+            return;
+        setSelectedGenericGridRow(selectedRows[0][createRowId(rowIdArray)]);
     };
 
     const updateRows = useCallback((row) =>
