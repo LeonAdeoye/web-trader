@@ -15,7 +15,7 @@ import {LoggerService} from "./services/LoggerService";
 const App = () =>
 {
     const [client, setClient] = useState(null);
-    const [configurationService] = useState(new ConfigurationService());
+    const [configurationService] = useState(new ConfigurationService("leon"));
     const [loggerService] = useState(new LoggerService(App.name));
 
     const cryptoTickerColumnDefinitions = [
@@ -37,12 +37,12 @@ const App = () =>
 
     const apps =
         [
-            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: {  }},
+            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: {user:'leon'}},
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'}},
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp , props: { }},
-            { name: 'Configs', path: '/configs', component: ConfigsApp , props: { user: "leon"}}
+            { name: 'Users', path: '/users', component: UsersApp , props: {user: "leon"}},
+            { name: 'Configs', path: '/configs', component: ConfigsApp , props: {user: "leon"}}
         ];
 
     useEffect( () =>

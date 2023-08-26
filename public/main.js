@@ -91,8 +91,10 @@ const saveWindowDimensions = async (window) =>
 {
     const [x, y] = window.getPosition();
     const [w, h] = window.getSize();
-    await settings.set(window.getTitle(), {x: x, y: y, h: h, w: w})
-        .then(() => console.log(`Saving last window position and size of: ${window.getTitle()}: (${x},${y}) (${w},${h})`))
+    const title = window.getTitle();
+
+    await settings.set(title, {x: x, y: y, h: h, w: w})
+        .then(() => console.log(`Saving last window position and size of ${title} app: (${x},${y}) (${w},${h})`))
         .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
 }
 

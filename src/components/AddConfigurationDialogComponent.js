@@ -30,16 +30,17 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
     {
         onCloseHandler(owner, key, value);
         setAddConfigDialogOpenFlag(false);
+        cleanUp();
     };
 
     const handleCancel = () =>
     {
-        handleClear();
+        cleanUp();
         onCloseHandler(owner, key, value);
         setAddConfigDialogOpenFlag(false);
     };
 
-    const handleClear = () =>
+    const cleanUp = () =>
     {
         setOwner('');
         setKey('');
@@ -61,7 +62,7 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
                 <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
-                    <Button className="dialog-action-button" disabled={!(owner || key || value)} variant='contained' onClick={handleClear}>Clear</Button>
+                    <Button className="dialog-action-button" disabled={!(owner || key || value)} variant='contained' onClick={cleanUp}>Clear</Button>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Cancel adding new configuration and close dialog window.</Typography>}>
                     <Button className="dialog-action-button" color="primary"variant='contained' onClick={handleCancel}>Cancel</Button>

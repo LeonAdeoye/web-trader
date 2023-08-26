@@ -4,9 +4,11 @@ export class ConfigurationService
 {
     #configurations;
     #loggerService;
+    #user
 
-    constructor()
+    constructor(user)
     {
+        this.#user = user;
         this.#configurations = new Map();
         this.#loggerService = new LoggerService(this.constructor.name);
     }
@@ -28,7 +30,8 @@ export class ConfigurationService
     reloadConfigurations()
     {
         this.clear();
-        this.loadConfigurations();
+        this.loadConfigurations()
+            .then(() => this.#loggerService.logInfo(`Reloaded configurations for user ${this.#user}`));
     }
 
     getConfigsBelongingToOwner(owner)
@@ -63,24 +66,27 @@ export class ConfigurationService
 
     set(owner, key, value)
     {
-        fetch(`http://localhost:20001/configuration`, {
+        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: new Date()};
+        fetch("http://localhost:20001/configuration", {
             method: "POST",
-            body: JSON.stringify({owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: new Date()})})
+            contentType: "application/json",
+            body: JSON.stringify(newConfig)})
             .then(() =>
             {
                 if(this.#configurations.has(owner))
                 {
                     const configurations = this.#configurations.get(owner);
                     const configuration = configurations.find(configuration => configuration.key === key)
+
                     if(configuration)
                         configuration.value = value;
                     else
-                        configurations.push({owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: new Date()});
+                        configurations.push(newConfig);
                 }
                 else
-                    this.#configurations.set(owner, [{owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: new Date()}]);
+                    this.#configurations.set(owner, [newConfig]);
 
-                this.#loggerService.logInfo(`Saved configuration for owner ${owner} and key ${key} with value ${value} by ${owner}`);
+                this.#loggerService.logInfo(`Saved configuration for owner ${owner} and key ${key} with value ${value} by ${this.#user}`);
             });
     }
 

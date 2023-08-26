@@ -4,11 +4,11 @@ import {useCallback, useEffect, useState} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 
-const LaunchPadApp = () =>
+const LaunchPadApp = ({user}) =>
 {
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
-    const [configurationService] = useState(new ConfigurationService());
+    const [configurationService] = useState(new ConfigurationService(user));
 
     useEffect(() =>
     {
@@ -18,7 +18,7 @@ const LaunchPadApp = () =>
             await configurationService.loadConfigurations("system");
         }
 
-        loadAllConfigurations("leon").then(() =>
+        loadAllConfigurations(user).then(() =>
         {
             try
             {

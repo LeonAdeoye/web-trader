@@ -4,9 +4,9 @@ import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {DataService} from "../services/DataService";
 
-export const UsersApp = () =>
+export const UsersApp = ({user}) =>
 {
-    const [configurationService] = useState(new ConfigurationService());
+    const [configurationService] = useState(new ConfigurationService(user));
     const [dataService] = useState(new DataService());
     const [gridData, setGridData] = useState([]);
 

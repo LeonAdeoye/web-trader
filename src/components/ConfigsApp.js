@@ -15,7 +15,7 @@ import {FDC3Service} from "../services/FDC3Service";
 export const ConfigsApp = ({user}) =>
 {
     const [gridData, setGridData] = useState([]);
-    const [configurationService] = useState(new ConfigurationService());
+    const [configurationService] = useState(new ConfigurationService(user));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
 
