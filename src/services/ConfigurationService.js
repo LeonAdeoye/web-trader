@@ -112,9 +112,23 @@ export class ConfigurationService
         this.#configurations.clear();
     }
 
-    async addConfiguration(config)
+    async addConfiguration(owner, key, value)
     {
-
+        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: new Date()};
+        fetch(`http://localhost:20001/configuration`, {
+            method: "POST",
+            body: JSON.stringify(newConfig)})
+            .then(() =>
+            {
+                if(this.#configurations.has(owner))
+                {
+                    const configurations = this.#configurations.get(owner);
+                    configurations.push(newConfig);
+                }
+                else
+                    this.#configurations.set(owner, [newConfig]);
+            })
+            .catch(error => this.#loggerService.logError(error));
     }
 
     async deleteConfiguration(id)

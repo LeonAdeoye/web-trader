@@ -8,13 +8,16 @@ import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "./appTheme";
 import '../style_sheets/component-base.css';
 import AddConfigurationDialogComponent from "./AddConfigurationDialogComponent";
+import {addConfigDialogDisplayState} from "../atoms/DialogState";
+import {useRecoilState} from "recoil";
+import {FDC3Service} from "../services/FDC3Service";
 
 export const ConfigsApp = ({user}) =>
 {
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
-    const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag] = useState(false);
+    const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -48,9 +51,14 @@ export const ConfigsApp = ({user}) =>
     {
         try
         {
+            if(owner.trim() === '' || key.trim() === '' || value.trim() === '')
+                return;
+
             const config = {owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()};
-            await configurationService.addConfiguration(config);
-            setGridData([...gridData, config]);
+            configurationService.addConfiguration(config).then(() =>
+            {
+                setGridData([...gridData, config]);
+            });
         }
         catch (error)
         {
@@ -62,8 +70,10 @@ export const ConfigsApp = ({user}) =>
     {
         try
         {
-            await configurationService.deleteConfiguration(id);
-            setGridData(gridData.filter(config => config.id !== id));
+            await configurationService.deleteConfiguration(id).then(() =>
+            {
+                setGridData(gridData.filter(config => config.id !== id));
+            });
         }
         catch (error)
         {
@@ -85,10 +95,7 @@ export const ConfigsApp = ({user}) =>
         }
     };
 
-    const addConfigDialogHandler = () =>
-    {
-        alert("Hello from addConfigDialogHandler()");
-    }
+    const addConfigDialogHandler = () => setAddConfigDialogOpenFlag(true);
 
     const deleteConfigDialogHandler = () =>
     {
@@ -118,6 +125,6 @@ export const ConfigsApp = ({user}) =>
                     </Tooltip>
                 </ThemeProvider>
             </div>
-            <AddConfigurationDialogComponent addConfigDialogOpenFlag={true} onCloseHandler={saveConfiguration}/>
+            <AddConfigurationDialogComponent onCloseHandler={saveConfiguration}/>
         </div>);
 };
