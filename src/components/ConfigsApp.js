@@ -10,14 +10,13 @@ import '../style_sheets/component-base.css';
 import AddConfigurationDialogComponent from "./AddConfigurationDialogComponent";
 import {addConfigDialogDisplayState} from "../atoms/DialogState";
 import {useRecoilState} from "recoil";
-import {FDC3Service} from "../services/FDC3Service";
 
 export const ConfigsApp = ({user}) =>
 {
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService(user));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
-    const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
+    const [, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -54,11 +53,9 @@ export const ConfigsApp = ({user}) =>
             if(owner.trim() === '' || key.trim() === '' || value.trim() === '')
                 return;
 
-            const config = {owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()};
-            configurationService.addConfiguration(config).then(() =>
-            {
-                setGridData([...gridData, config]);
-            });
+            loggerService.logInfo(`User ${user} adding new configuration: owner=${owner}, key=${key}, value=${value}`);
+            configurationService.addNewConfiguration(owner, key, value)
+                .then(() => setGridData([...gridData, {owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()}]));
         }
         catch (error)
         {

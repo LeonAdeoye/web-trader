@@ -80,7 +80,10 @@ const openApp = (event, {url, title}) =>
 
     childWindow.on('close', () =>
     {
-        saveWindowDimensions(childWindow). then(() => childWindowsMap.delete(childWindow.getTitle()));
+        let title = childWindow.getTitle();
+        saveWindowDimensions(childWindow)
+            .then(() => childWindowsMap.delete(title))
+            .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
     });
 
     addContextMenu(childWindow);
@@ -191,12 +194,14 @@ app.on('before-quit', () =>
 {
     ipcMain.removeListener('openApp', openApp);
     ipcMain.removeListener('message-to-main', handleMessageFromRenderer);
+
     childWindowsMap.forEach((childWindow) =>
     {
         if(childWindow !== undefined)
             saveWindowDimensions(childWindow)
-                .catch((err) => console.log("Error saving child window dimensions: " + err));
+                .catch((err) => console.log("Error saving child window's dimensions: " + err));
     });
+
     childWindowsMap.clear();
 });
 

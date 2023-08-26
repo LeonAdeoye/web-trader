@@ -30,12 +30,10 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
     {
         onCloseHandler(owner, key, value);
         setAddConfigDialogOpenFlag(false);
-        cleanUp();
     };
 
     const handleCancel = () =>
     {
-        cleanUp();
         onCloseHandler(owner, key, value);
         setAddConfigDialogOpenFlag(false);
     };
@@ -49,7 +47,7 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
 
     useEffect(() =>
     {
-
+        cleanUp();
     }, [addConfigDialogOpenFlag])
 
     return (

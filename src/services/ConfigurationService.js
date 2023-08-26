@@ -64,12 +64,12 @@ export class ConfigurationService
         return null;
     }
 
-    set(owner, key, value)
+    async addNewConfiguration(owner, key, value)
     {
-        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: new Date()};
-        fetch("http://localhost:20001/configuration", {
+        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: Date.now()};
+        await fetch("http://localhost:20001/configuration", {
             method: "POST",
-            contentType: "application/json",
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(newConfig)})
             .then(() =>
             {
@@ -86,11 +86,11 @@ export class ConfigurationService
                 else
                     this.#configurations.set(owner, [newConfig]);
 
-                this.#loggerService.logInfo(`Saved configuration for owner ${owner} and key ${key} with value ${value} by ${this.#user}`);
+                this.#loggerService.logInfo(`Saved configuration for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
             });
     }
 
-    remove(owner, key)
+    removeConfiguration(owner, key)
     {
         fetch(`http://localhost:20001/configuration?owner=${owner}&key=${key}`, {method: "DELETE"})
             .then(() =>
@@ -116,25 +116,6 @@ export class ConfigurationService
     clear()
     {
         this.#configurations.clear();
-    }
-
-    async addConfiguration(owner, key, value)
-    {
-        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: new Date()};
-        fetch(`http://localhost:20001/configuration`, {
-            method: "POST",
-            body: JSON.stringify(newConfig)})
-            .then(() =>
-            {
-                if(this.#configurations.has(owner))
-                {
-                    const configurations = this.#configurations.get(owner);
-                    configurations.push(newConfig);
-                }
-                else
-                    this.#configurations.set(owner, [newConfig]);
-            })
-            .catch(error => this.#loggerService.logError(error));
     }
 
     async deleteConfiguration(id)
