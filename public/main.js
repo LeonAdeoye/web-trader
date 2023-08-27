@@ -52,7 +52,7 @@ const createWindow = () =>
 
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
     loadWindowDimensions(mainWindow)
         .then(() => console.log("Main window dimensions loaded from settings file."))

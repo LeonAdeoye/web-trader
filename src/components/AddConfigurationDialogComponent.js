@@ -60,13 +60,19 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
                 <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
-                    <Button className="dialog-action-button" disabled={!(owner || key || value)} variant='contained' onClick={cleanUp}>Clear</Button>
+                    <span>
+                        <Button className="dialog-action-button" disabled={!(owner || key || value)} variant='contained' onClick={cleanUp}>Clear</Button>
+                    </span>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Cancel adding new configuration and close dialog window.</Typography>}>
-                    <Button className="dialog-action-button" color="primary"variant='contained' onClick={handleCancel}>Cancel</Button>
+                    <span>
+                        <Button className="dialog-action-button" color="primary"variant='contained' onClick={handleCancel}>Cancel</Button>
+                    </span>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Save the new configuration.</Typography>}>
-                    <Button className="dialog-action-button submit" color="primary" disabled={!(owner && key && value)} variant='contained' onClick={handleSubmit}>Submit</Button>
+                    <span>
+                        <Button className="dialog-action-button submit" color="primary" disabled={!(owner && key && value)} variant='contained' onClick={handleSubmit}>Submit</Button>
+                    </span>
                 </Tooltip>
             </DialogActions>
         </Dialog>

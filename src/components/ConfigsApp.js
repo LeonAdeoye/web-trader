@@ -111,8 +111,10 @@ export const ConfigsApp = ({user}) =>
             <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
                 <ThemeProvider theme={appTheme}>
                     <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
-                        <Button className="action-button" variant="contained" color="primary"
+                        <span>  {/* span is used to disable tooltip when button is disabled */}
+                            <Button className="action-button" variant="contained" color="primary"
                                 onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
+                        </span>
                     </Tooltip>
                     <Tooltip title={<Typography fontSize={12}>Add new configuration.</Typography>}>
                         <Button className="action-button right-most" variant="contained" color="primary"
