@@ -17,7 +17,7 @@ export const ConfigsApp = ({user}) =>
     const [configurationService] = useState(new ConfigurationService(user));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
-    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -56,7 +56,7 @@ export const ConfigsApp = ({user}) =>
 
             loggerService.logInfo(`User ${user} adding new configuration: owner=${owner}, key=${key}, value=${value}`);
             configurationService.addNewConfiguration(owner, key, value)
-                .then(() => setGridData([...gridData, {owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()}]));
+                .then((id) => setGridData([...gridData, {id: id, owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()}]));
         }
         catch (error)
         {
@@ -71,6 +71,7 @@ export const ConfigsApp = ({user}) =>
             configurationService.deleteConfiguration(id).then(() =>
             {
                 setGridData(gridData.filter(config => config.id !== id));
+                setSelectedGenericGridRow(undefined);
             });
         }
         catch (error)

@@ -68,7 +68,7 @@ export class ConfigurationService
     {
         const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: Date.now()};
         this.#loggerService.logInfo(`Saving configuration for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
-        await fetch("http://localhost:20001/configuration", {
+        return await fetch("http://localhost:20001/configuration", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(newConfig)})
@@ -79,7 +79,12 @@ export class ConfigurationService
                     this.#configurations.get(owner).push(configResponse);
                 else
                     this.#configurations.set(owner, [configResponse]);
-            });
+
+                this.#loggerService.logInfo(`Saved configuration for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+
+                return configResponse.id;
+            })
+            .catch(error => this.#loggerService.logError(error));
     }
 
     clear()
