@@ -8,7 +8,7 @@ import LaunchPadApp from "./components/LaunchPadApp";
 import { Route, Routes} from "react-router-dom";
 import {UsersApp} from "./components/UsersApp";
 import {ConfigsApp} from "./components/ConfigsApp";
-import {currencyFormatter, isEmptyString, numberFormatter} from "./utilities";
+import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
 import LoginDialogComponent from "./components/LoginDialogComponent";
@@ -93,13 +93,12 @@ const App = ({}) =>
     <div className="App">
         <LoginDialogComponent/>
         <Routes>
-            {apps.map((app, index) => (
-                <Route
+            {apps.map((app, index) =>
+                (<Route
                     key={index}
                     path={app.path}
                     element={React.createElement(app.component, app.props ?? {})}
-                />
-            ))}
+                />))}
         </Routes>
     </div>
   );
