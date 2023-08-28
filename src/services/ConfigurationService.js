@@ -122,4 +122,31 @@ export class ConfigurationService
     {
 
     }
+
+    async updateConfiguration(id, owner, key, value)
+    {
+        const updatedConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: Date.now()};
+        this.#loggerService.logInfo(`Updating configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+        return await fetch("http://localhost:20001/configuration", {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(updatedConfig)})
+            .then(response => response.json())
+            .then((configResponse) =>
+            {
+                const listOfConfigs = this.#configurations.get(owner);
+                for(const current of listOfConfigs)
+                {
+                    if(current.id === id)
+                    {
+                        listOfConfigs[listOfConfigs.indexOf(current)] = configResponse;
+                        this.#configurations.set(owner, listOfConfigs);
+                        break;
+                    }
+                }
+
+                this.#loggerService.logInfo(`Updated configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+            })
+            .catch(error => this.#loggerService.logError(error));
+    }
 }

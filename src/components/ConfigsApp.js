@@ -16,7 +16,7 @@ export const ConfigsApp = ({user}) =>
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService(user));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
-    const [, setAddConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
+    const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = [
@@ -45,7 +45,7 @@ export const ConfigsApp = ({user}) =>
 
     }, [])
 
-    const addConfiguration = async () => setAddConfigDialogOpenFlag(true);
+    const addConfiguration = async () => setConfigDialogOpenFlag(true);
 
     const saveConfiguration = async (owner, key, value) =>
     {
@@ -80,6 +80,30 @@ export const ConfigsApp = ({user}) =>
         }
     };
 
+    const updateConfiguration = (owner, key, value, id) =>
+    {
+        try
+        {
+            if(owner === undefined || key === undefined || value === undefined || id === undefined ||
+                owner.trim() === '' || key.trim() === '' || value.trim() === '' || id === '')
+                return;
+
+            loggerService.logInfo(`User ${user} updating existing configuration: owner=${owner}, key=${key}, value=${value}, id=${id}`);
+            configurationService.updateConfiguration(id, owner, key, value)
+                .then(() => setGridData(previousGridData =>
+                {
+                    const index = previousGridData.findIndex(config => config.id === id);
+                    previousGridData[index] = {id: id, owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()};
+                    setSelectedGenericGridRow(previousGridData[index]);
+                    return [...previousGridData];
+                }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
     const uploadConfigurationsFromCSV = async (csvData) =>
     {
         try
@@ -94,11 +118,14 @@ export const ConfigsApp = ({user}) =>
         }
     };
 
-    const addConfigDialogHandler = () => setAddConfigDialogOpenFlag(true);
+    const addConfigDialogHandler = () => {
+        setSelectedGenericGridRow(undefined);
+        setConfigDialogOpenFlag(true);
+    }
 
     const deleteConfigDialogHandler = () => deleteConfiguration(selectedGenericGridRow.id);
 
-    const updateConfigDialogHandler = () => setAddConfigDialogOpenFlag(true);
+    const updateConfigDialogHandler = () => setConfigDialogOpenFlag(true);
 
     return(
         <div className="app-parent-with-action-button">
@@ -131,6 +158,6 @@ export const ConfigsApp = ({user}) =>
                     </Tooltip>
                 </ThemeProvider>
             </div>
-            <ConfigurationDialogComponent onCloseHandler={saveConfiguration}/>
+            <ConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
         </div>);
 };
