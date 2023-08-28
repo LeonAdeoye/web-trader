@@ -20,9 +20,8 @@ export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gr
     const onSelectionChanged = () =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
-        if(selectedRows.length === 0)
-            return;
-        setSelectedGenericGridRow(selectedRows[0][createRowId(rowIdArray)]);
+        if(selectedRows.length === 1)
+            setSelectedGenericGridRow(selectedRows[0]);
     };
 
     const updateRows = useCallback((row) =>

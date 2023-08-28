@@ -1,15 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, ThemeProvider, Tooltip, Typography } from '@mui/material';
 import '../style_sheets/dialog-base.css';
-import {addConfigDialogDisplayState} from "../atoms/DialogState";
+import {configDialogDisplayState} from "../atoms/DialogState";
 import {useRecoilState} from "recoil";
 
-const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
+const ConfigurationDialogComponent = ({ onCloseHandler }) =>
 {
     const [owner, setOwner] = useState('');
     const [key, setKey] = useState('');
     const [value, setValue] = useState('');
-    const [addConfigDialogOpenFlag, setAddConfigDialogOpenFlag ] = useRecoilState(addConfigDialogDisplayState);
+    const [configDialogOpenFlag, setConfigDialogOpenFlag ] = useRecoilState(configDialogDisplayState);
 
     const handleOwnerChange = (event) =>
     {
@@ -29,13 +29,13 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
     const handleSubmit = () =>
     {
         onCloseHandler(owner, key, value);
-        setAddConfigDialogOpenFlag(false);
+        setConfigDialogOpenFlag(false);
     };
 
     const handleCancel = () =>
     {
         onCloseHandler(owner, key, value);
-        setAddConfigDialogOpenFlag(false);
+        setConfigDialogOpenFlag(false);
     };
 
     const cleanUp = () =>
@@ -48,10 +48,10 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
     useEffect(() =>
     {
         cleanUp();
-    }, [addConfigDialogOpenFlag])
+    }, [configDialogOpenFlag])
 
     return (
-        <Dialog aria-labelledby='dialog-title' open={Boolean(addConfigDialogOpenFlag)} onClose={handleCancel}>
+        <Dialog aria-labelledby='dialog-title' open={Boolean(configDialogOpenFlag)} onClose={handleCancel}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Add New Configuration</DialogTitle>
             <DialogContent>
                 <TextField size='small' label='Enter the configuration owner' value={owner} onChange={handleOwnerChange} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '0px'}} required/>
@@ -79,4 +79,4 @@ const AddConfigurationDialogComponent = ({ onCloseHandler }) =>
     );
 };
 
-export default AddConfigurationDialogComponent;
+export default ConfigurationDialogComponent;

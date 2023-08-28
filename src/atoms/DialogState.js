@@ -1,7 +1,7 @@
 import {atom} from "recoil";
 
-export const addConfigDialogDisplayState = atom({
-    key: 'addConfigDialogDisplayState',
+export const configDialogDisplayState = atom({
+    key: 'configDialogDisplayState',
     default: false,
 });
 

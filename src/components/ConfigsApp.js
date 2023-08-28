@@ -7,8 +7,8 @@ import {LoggerService} from "../services/LoggerService";
 import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "./appTheme";
 import '../style_sheets/component-base.css';
-import AddConfigurationDialogComponent from "./AddConfigurationDialogComponent";
-import {addConfigDialogDisplayState, selectedGenericGridRowState} from "../atoms/DialogState";
+import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
+import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/DialogState";
 import {useRecoilState} from "recoil";
 
 export const ConfigsApp = ({user}) =>
@@ -16,7 +16,7 @@ export const ConfigsApp = ({user}) =>
     const [gridData, setGridData] = useState([]);
     const [configurationService] = useState(new ConfigurationService(user));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
-    const [, setAddConfigDialogOpenFlag] = useRecoilState(addConfigDialogDisplayState);
+    const [, setAddConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = [
@@ -96,7 +96,9 @@ export const ConfigsApp = ({user}) =>
 
     const addConfigDialogHandler = () => setAddConfigDialogOpenFlag(true);
 
-    const deleteConfigDialogHandler = () => deleteConfiguration(selectedGenericGridRow);
+    const deleteConfigDialogHandler = () => deleteConfiguration(selectedGenericGridRow.id);
+
+    const updateConfigDialogHandler = () => setAddConfigDialogOpenFlag(true);
 
     return(
         <div className="app-parent-with-action-button">
@@ -111,6 +113,12 @@ export const ConfigsApp = ({user}) =>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
                 <ThemeProvider theme={appTheme}>
+                    <Tooltip title={<Typography fontSize={12}>Update selected configuration.</Typography>}>
+                        <span>  {/* span is used to disable tooltip when button is disabled */}
+                            <Button className="action-button" variant="contained" color="primary"
+                                    onClick={updateConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Update Configuration</Button>
+                        </span>
+                    </Tooltip>
                     <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
                         <span>  {/* span is used to disable tooltip when button is disabled */}
                             <Button className="action-button" variant="contained" color="primary"
@@ -123,6 +131,6 @@ export const ConfigsApp = ({user}) =>
                     </Tooltip>
                 </ThemeProvider>
             </div>
-            <AddConfigurationDialogComponent onCloseHandler={saveConfiguration}/>
+            <ConfigurationDialogComponent onCloseHandler={saveConfiguration}/>
         </div>);
 };
