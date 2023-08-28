@@ -16,16 +16,10 @@ export const ConfigsApp = () =>
 {
     const [loggedInUser] = useRecoilState(loggedInUserState);
     const [gridData, setGridData] = useState([]);
-    const [configurationService, setConfigurationService] = useState(new ConfigurationService(loggedInUser));
+    const [configurationService, setConfigurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-
-    useEffect(() =>
-    {
-        configurationService.setLoggedInUser(loggedInUser);
-    }, [loggedInUser]);
-
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },

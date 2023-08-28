@@ -5,23 +5,16 @@ export class ConfigurationService
 {
     #configurations;
     #loggerService;
-    #user = "";
 
-    constructor(user)
+    constructor()
     {
-        this.#user = user;
         this.#configurations = new Map();
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    setLoggedInUser(user)
-    {
-        this.#user = user;
-    }
-
     async loadConfigurations(owner)
     {
-        if(isEmptyString(owner) || isEmptyString(this.#user))
+        if(isEmptyString(owner))
             return;
 
         await fetch(`http://localhost:20001/configurationByOwner?owner=${owner}`)
@@ -40,7 +33,7 @@ export class ConfigurationService
     {
         this.clear();
         this.loadConfigurations()
-            .then(() => this.#loggerService.logInfo(`Reloaded configurations for user ${this.#user}`));
+            .then(() => this.#loggerService.logInfo(`Reloaded configurations`));
     }
 
     getConfigsBelongingToOwner(owner)
@@ -75,8 +68,8 @@ export class ConfigurationService
 
     async addNewConfiguration(owner, key, value)
     {
-        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: Date.now()};
-        this.#loggerService.logInfo(`Saving configuration for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+        const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
+        this.#loggerService.logInfo(`Saving configuration for owner: ${owner} and key: ${key} with value: ${value}`);
         return await fetch("http://localhost:20001/configuration", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -89,7 +82,7 @@ export class ConfigurationService
                 else
                     this.#configurations.set(owner, [configResponse]);
 
-                this.#loggerService.logInfo(`Saved configuration for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+                this.#loggerService.logInfo(`Saved configuration for owner: ${owner} and key: ${key} with value: ${value}`);
 
                 return configResponse.id;
             })
@@ -113,7 +106,7 @@ export class ConfigurationService
                         if(current.id === id)
                         {
                             listOfConfigs.splice(listOfConfigs.indexOf(current), 1);
-                            this.#loggerService.logInfo(`Successfully deleted configuration for id ${id}`);
+                            this.#loggerService.logInfo(`Successfully deleted configuration for id: ${id}`);
                             return;
                         }
                     }
@@ -134,8 +127,8 @@ export class ConfigurationService
 
     async updateConfiguration(id, owner, key, value)
     {
-        const updatedConfig = {owner: owner, key: key, value: value, lastUpdatedBy: this.#user, lastUpdatedOn: Date.now()};
-        this.#loggerService.logInfo(`Updating configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+        const updatedConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
+        this.#loggerService.logInfo(`Updating configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value}`);
         return await fetch("http://localhost:20001/configuration", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -154,7 +147,7 @@ export class ConfigurationService
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value} by user: ${this.#user}`);
+                this.#loggerService.logInfo(`Updated configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value}`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

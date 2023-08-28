@@ -8,8 +8,7 @@ import {loggedInUserState} from "../atoms/app-state";
 
 export const UsersApp = () =>
 {
-    const [loggedInUser] = useRecoilState(loggedInUserState);
-    const [configurationService] = useState(new ConfigurationService(loggedInUser));
+    const [configurationService] = useState(new ConfigurationService());
     const [dataService] = useState(new DataService());
     const [gridData, setGridData] = useState([]);
 

@@ -5,7 +5,6 @@ import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {useRecoilState} from "recoil";
 import {loggedInUserState} from "../atoms/app-state";
-import LoginDialogComponent from "./LoginDialogComponent";
 import {isEmptyString} from "../utilities";
 
 const LaunchPadApp = () =>
@@ -13,16 +12,16 @@ const LaunchPadApp = () =>
     const [loggedInUser] = useRecoilState(loggedInUserState);
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
-    const [configurationService] = useState(new ConfigurationService(loggedInUser));
+    const [configurationService] = useState(new ConfigurationService());
 
     useEffect(() =>
     {
-        console.log("launchPad::loggedInUser: " + loggedInUser); // TODO Remove this line
         async function loadAllConfigurations(user)
         {
-            await configurationService.loadConfigurations("system");
             if(!isEmptyString(user))
                 await configurationService.loadConfigurations(user);
+
+            return await configurationService.loadConfigurations("system");
         }
 
         loadAllConfigurations(loggedInUser).then(() =>
@@ -43,7 +42,7 @@ const LaunchPadApp = () =>
             }
         });
 
-    }, [loggedInUser])
+    }, [])
 
     const launchApp = useCallback((url, title) =>
     {
