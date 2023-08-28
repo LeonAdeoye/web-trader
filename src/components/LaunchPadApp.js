@@ -3,30 +3,37 @@ import './launch-pad-app.css';
 import {useCallback, useEffect, useState} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
+import {useRecoilState} from "recoil";
+import {loggedInUserState} from "../atoms/app-state";
+import LoginDialogComponent from "./LoginDialogComponent";
+import {isEmptyString} from "../utilities";
 
-const LaunchPadApp = ({user}) =>
+const LaunchPadApp = () =>
 {
+    const [loggedInUser] = useRecoilState(loggedInUserState);
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
-    const [configurationService] = useState(new ConfigurationService(user));
+    const [configurationService] = useState(new ConfigurationService(loggedInUser));
 
     useEffect(() =>
     {
+        console.log("launchPad::loggedInUser: " + loggedInUser); // TODO Remove this line
         async function loadAllConfigurations(user)
         {
-            await configurationService.loadConfigurations(user);
             await configurationService.loadConfigurations("system");
+            if(!isEmptyString(user))
+                await configurationService.loadConfigurations(user);
         }
 
-        loadAllConfigurations(user).then(() =>
+        loadAllConfigurations(loggedInUser).then(() =>
         {
             try
             {
                 const appList = JSON.parse(configurationService.getConfigValue("system", "app-list-with-display-properties")) ??
-                [
-                    { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
-                    { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' }
-                ];
+                    [
+                        { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
+                        { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' }
+                    ];
 
                 setApps(appList);
             }
@@ -36,7 +43,7 @@ const LaunchPadApp = ({user}) =>
             }
         });
 
-    }, [])
+    }, [loggedInUser])
 
     const launchApp = useCallback((url, title) =>
     {

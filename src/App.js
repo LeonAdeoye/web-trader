@@ -8,15 +8,19 @@ import LaunchPadApp from "./components/LaunchPadApp";
 import { Route, Routes} from "react-router-dom";
 import {UsersApp} from "./components/UsersApp";
 import {ConfigsApp} from "./components/ConfigsApp";
-import {currencyFormatter, numberFormatter} from "./utilities";
+import {currencyFormatter, isEmptyString, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
+import LoginDialogComponent from "./components/LoginDialogComponent";
+import {useRecoilState} from "recoil";
+import {loggedInUserState} from "./atoms/app-state";
 
-const App = () =>
+const App = ({}) =>
 {
     const [client, setClient] = useState(null);
     const [configurationService] = useState(new ConfigurationService("leon"));
     const [loggerService] = useState(new LoggerService(App.name));
+    const [loggedInUser, setLoggedInUser] = useRecoilState(loggedInUserState);
 
     const cryptoTickerColumnDefinitions = [
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -37,12 +41,12 @@ const App = () =>
 
     const apps =
         [
-            { name: 'Launch Pad', path: '/', component: LaunchPadApp, props: {user:'leon'}},
-            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'}},
-            { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps}},
-            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client}},
-            { name: 'Users', path: '/users', component: UsersApp , props: {user: "leon"}},
-            { name: 'Configs', path: '/configs', component: ConfigsApp , props: {user: "leon"}}
+            { name: 'Launch Pad', path: '/', component: LaunchPadApp },
+            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'} },
+            { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps} },
+            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
+            { name: 'Users', path: '/users', component: UsersApp },
+            { name: 'Configs', path: '/configs', component: ConfigsApp }
         ];
 
     useEffect( () =>
@@ -53,8 +57,8 @@ const App = () =>
             await configurationService.loadConfigurations("system");
         }
 
-        loadAllConfigurations("leon").then(() => loggerService.logInfo("Successfully Loaded all configurations."));
-    }, []);
+        loadAllConfigurations(loggedInUser).then(() => loggerService.logInfo("Successfully Loaded all configurations."));
+    }, [loggedInUser]);
 
     useEffect(() =>
     {
@@ -81,12 +85,13 @@ const App = () =>
         };
     }, []);
 
-  if (!client)
-    return (<div>Loading...</div>);
+    if (!client)
+        return (<div>Loading...</div>);
 
   // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (
     <div className="App">
+        <LoginDialogComponent/>
         <Routes>
             {apps.map((app, index) => (
                 <Route

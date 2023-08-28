@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {transformLocalDataTime} from "../utilities";
+import {isEmptyString, transformLocalDataTime} from "../utilities";
 import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
@@ -8,16 +8,24 @@ import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "./appTheme";
 import '../style_sheets/component-base.css';
 import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
-import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/DialogState";
+import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
+import {loggedInUserState} from "../atoms/app-state";
 
-export const ConfigsApp = ({user}) =>
+export const ConfigsApp = () =>
 {
+    const [loggedInUser] = useRecoilState(loggedInUserState);
     const [gridData, setGridData] = useState([]);
-    const [configurationService] = useState(new ConfigurationService(user));
+    const [configurationService, setConfigurationService] = useState(new ConfigurationService(loggedInUser));
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+
+    useEffect(() =>
+    {
+        configurationService.setLoggedInUser(loggedInUser);
+    }, [loggedInUser]);
+
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },
@@ -33,17 +41,19 @@ export const ConfigsApp = ({user}) =>
 
     useEffect(() =>
     {
+        console.log("configApp::loggedInUser: " + loggedInUser); // TODO: Remove this line
         async function loadAllConfigurations(user)
         {
-            await configurationService.loadConfigurations(user);
             await configurationService.loadConfigurations("system");
+            if(!isEmptyString(user))
+                await configurationService.loadConfigurations(user);
         }
 
-        loadAllConfigurations(user)
+        loadAllConfigurations(loggedInUser)
             .then(() => setGridData(configurationService.getCachedConfigs()))
             .catch((error) => loggerService.logError(error));
 
-    }, [])
+    }, [loggedInUser, configurationService])
 
     const addConfiguration = async () => setConfigDialogOpenFlag(true);
 
@@ -51,12 +61,12 @@ export const ConfigsApp = ({user}) =>
     {
         try
         {
-            if(owner.trim() === '' || key.trim() === '' || value.trim() === '')
+            if(isEmptyString(owner) || isEmptyString(key) || isEmptyString(value))
                 return;
 
-            loggerService.logInfo(`User ${user} adding new configuration: owner=${owner}, key=${key}, value=${value}`);
+            loggerService.logInfo(`User ${loggedInUser} adding new configuration: owner=${owner}, key=${key}, value=${value}`);
             configurationService.addNewConfiguration(owner, key, value)
-                .then((id) => setGridData([...gridData, {id: id, owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()}]));
+                .then((id) => setGridData([...gridData, {id: id, owner: owner, key: key, value: value, lastUpdatedBy : loggedInUser, lastUpdatedOn: Date.now()}]));
         }
         catch (error)
         {
@@ -84,16 +94,15 @@ export const ConfigsApp = ({user}) =>
     {
         try
         {
-            if(owner === undefined || key === undefined || value === undefined || id === undefined ||
-                owner.trim() === '' || key.trim() === '' || value.trim() === '' || id === '')
+            if(isEmptyString(owner) || isEmptyString(key) || isEmptyString(value) || isEmptyString(id))
                 return;
 
-            loggerService.logInfo(`User ${user} updating existing configuration: owner=${owner}, key=${key}, value=${value}, id=${id}`);
+            loggerService.logInfo(`User ${loggedInUser} updating existing configuration: owner=${owner}, key=${key}, value=${value}, id=${id}`);
             configurationService.updateConfiguration(id, owner, key, value)
                 .then(() => setGridData(previousGridData =>
                 {
                     const index = previousGridData.findIndex(config => config.id === id);
-                    previousGridData[index] = {id: id, owner: owner, key: key, value: value, lastUpdatedBy : user, lastUpdatedOn: Date.now()};
+                    previousGridData[index] = {id: id, owner: owner, key: key, value: value, lastUpdatedBy : loggedInUser, lastUpdatedOn: Date.now()};
                     setSelectedGenericGridRow(previousGridData[index]);
                     return [...previousGridData];
                 }));
@@ -118,13 +127,13 @@ export const ConfigsApp = ({user}) =>
         }
     };
 
-    const addConfigDialogHandler = () => {
+    const addConfigDialogHandler = () =>
+    {
         setSelectedGenericGridRow(undefined);
         setConfigDialogOpenFlag(true);
     }
 
     const deleteConfigDialogHandler = () => deleteConfiguration(selectedGenericGridRow.id);
-
     const updateConfigDialogHandler = () => setConfigDialogOpenFlag(true);
 
     return(

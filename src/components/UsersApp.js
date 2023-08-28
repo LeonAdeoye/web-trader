@@ -3,10 +3,13 @@ import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {DataService} from "../services/DataService";
+import {useRecoilState} from "recoil";
+import {loggedInUserState} from "../atoms/app-state";
 
-export const UsersApp = ({user}) =>
+export const UsersApp = () =>
 {
-    const [configurationService] = useState(new ConfigurationService(user));
+    const [loggedInUser] = useRecoilState(loggedInUserState);
+    const [configurationService] = useState(new ConfigurationService(loggedInUser));
     const [dataService] = useState(new DataService());
     const [gridData, setGridData] = useState([]);
 

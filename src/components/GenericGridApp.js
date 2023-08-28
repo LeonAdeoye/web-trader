@@ -2,7 +2,7 @@ import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
 import {useCallback, useMemo, useRef, useState, useEffect} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
-import {selectedGenericGridRowState} from "../atoms/DialogState";
+import {selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
 
 export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData}) =>

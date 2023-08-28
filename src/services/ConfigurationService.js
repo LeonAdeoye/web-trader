@@ -1,10 +1,11 @@
 import {LoggerService} from "./LoggerService";
+import {isEmptyString} from "../utilities";
 
 export class ConfigurationService
 {
     #configurations;
     #loggerService;
-    #user
+    #user = "";
 
     constructor(user)
     {
@@ -13,8 +14,16 @@ export class ConfigurationService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
+    setLoggedInUser(user)
+    {
+        this.#user = user;
+    }
+
     async loadConfigurations(owner)
     {
+        if(isEmptyString(owner) || isEmptyString(this.#user))
+            return;
+
         await fetch(`http://localhost:20001/configurationByOwner?owner=${owner}`)
             .then(response => response.json())
             .then(data =>

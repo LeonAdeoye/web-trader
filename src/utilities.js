@@ -29,4 +29,6 @@ export const createRowId = (rowIdArray) => rowIdArray.join("\\");
 
 export const getRowIdValue = (rowIdArray, rowData) => rowIdArray.map(idKey => rowData[idKey]).filter(val => val !== undefined).join("\\");
 
+export const isEmptyString = (str) => str === undefined || str === null || str.trim() === '';
+
 
