@@ -9,10 +9,10 @@ const ConfigurationDialogComponent = ({ onCloseHandler }) =>
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const [configDialogOpenFlag, setConfigDialogOpenFlag ] = useRecoilState(configDialogDisplayState);
 
-    const [owner, setOwner] = useState(selectedGenericGridRow !== undefined ? selectedGenericGridRow.owner : '');
-    const [key, setKey] = useState(selectedGenericGridRow !== undefined ? selectedGenericGridRow.key : '');
-    const [value, setValue] = useState( selectedGenericGridRow !== undefined ? selectedGenericGridRow.value : '' );
-    const [id, setId] = useState( selectedGenericGridRow !== undefined ? selectedGenericGridRow.id : '' );
+    const [owner, setOwner] = useState( '');
+    const [key, setKey] = useState( '');
+    const [value, setValue] = useState(  '' );
+    const [id, setId] = useState(  '' );
 
     const handleOwnerChange = (event) =>
     {

@@ -147,8 +147,8 @@ export const ConfigsApp = ({user}) =>
                         </span>
                     </Tooltip>
                     <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
-                        <span>  {/* span is used to disable tooltip when button is disabled */}
-                            <Button className="action-button" variant="contained" color="primary" {/* If a row is NOT selected then disable the button */}
+                        <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
+                            <Button className="action-button" variant="contained" color="primary"
                                 onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
                         </span>
                     </Tooltip>
