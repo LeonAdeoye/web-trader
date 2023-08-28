@@ -141,14 +141,14 @@ export const ConfigsApp = ({user}) =>
             <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
                 <ThemeProvider theme={appTheme}>
                     <Tooltip title={<Typography fontSize={12}>Update selected configuration.</Typography>}>
-                        <span>  {/* span is used to disable tooltip when button is disabled */}
+                        <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
                             <Button className="action-button" variant="contained" color="primary"
                                     onClick={updateConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Update Configuration</Button>
                         </span>
                     </Tooltip>
                     <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
                         <span>  {/* span is used to disable tooltip when button is disabled */}
-                            <Button className="action-button" variant="contained" color="primary"
+                            <Button className="action-button" variant="contained" color="primary" {/* If a row is NOT selected then disable the button */}
                                 onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
                         </span>
                     </Tooltip>
@@ -157,7 +157,7 @@ export const ConfigsApp = ({user}) =>
                                 onClick={addConfigDialogHandler}>Add Configuration</Button>
                     </Tooltip>
                 </ThemeProvider>
-            </div>
+            </div> {/* If a row is already selected then an UPDATE handler will be used after submission otherwise a SAVE handler will be used. */}
             <ConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
         </div>);
 };
