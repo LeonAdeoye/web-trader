@@ -1,12 +1,10 @@
 import React, {useState} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
 import '../style_sheets/dialog-base.css';
-import {useRecoilState} from "recoil";
-import {loginDialogDisplayState} from "../atoms/dialog-state";
 
 const LoginDialogComponent = () =>
 {
-    const [loginDialogDisplay, setLoginDialogDisplay] = useRecoilState(loginDialogDisplayState);
+    const [loginDialogDisplay, setLoginDialogDisplay] = useState(true);
     const [userId, setUserId] = useState('');
     const handleUserIdChange = (event) => setUserId(event.target.value);
     const handleSubmit = () =>

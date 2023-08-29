@@ -5,11 +5,6 @@ export const configDialogDisplayState = atom({
     default: false,
 });
 
-export const loginDialogDisplayState = atom({
-    key: 'loginDialogDisplayState',
-    default: true,
-});
-
 export const selectedGenericGridRowState = atom({
     key: 'selectedGenericGridRowState',
     default: undefined,
