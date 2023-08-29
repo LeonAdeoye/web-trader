@@ -11,16 +11,12 @@ import {ConfigsApp} from "./components/ConfigsApp";
 import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
-import LoginDialogComponent from "./components/LoginDialogComponent";
-import {useRecoilState} from "recoil";
-import {loggedInUserState} from "./atoms/app-state";
 
 const App = ({}) =>
 {
     const [client, setClient] = useState(null);
-    const [configurationService] = useState(new ConfigurationService("leon"));
+    const [configurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(App.name));
-    const [loggedInUser, setLoggedInUser] = useRecoilState(loggedInUserState);
 
     const cryptoTickerColumnDefinitions = [
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -46,19 +42,14 @@ const App = ({}) =>
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps} },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
             { name: 'Users', path: '/users', component: UsersApp },
-            { name: 'Configs', path: '/configs', component: ConfigsApp }
+            { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];
 
     useEffect( () =>
     {
-        async function loadAllConfigurations(user)
-        {
-            await configurationService.loadConfigurations(user);
-            await configurationService.loadConfigurations("system");
-        }
-
-        loadAllConfigurations(loggedInUser).then(() => loggerService.logInfo("Successfully Loaded all configurations."));
-    }, [loggedInUser]);
+        configurationService.loadConfigurations('system')
+            .then(() => loggerService.logInfo("Successfully Loaded all configurations."));
+    }, []);
 
     useEffect(() =>
     {
@@ -91,7 +82,6 @@ const App = ({}) =>
   // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (
     <div className="App">
-        <LoginDialogComponent/>
         <Routes>
             {apps.map((app, index) =>
                 (<Route

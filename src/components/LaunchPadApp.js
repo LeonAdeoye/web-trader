@@ -3,44 +3,34 @@ import './launch-pad-app.css';
 import {useCallback, useEffect, useState} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
-import {useRecoilState} from "recoil";
-import {loggedInUserState} from "../atoms/app-state";
-import {isEmptyString} from "../utilities";
+import LoginDialogComponent from "./LoginDialogComponent";
 
 const LaunchPadApp = () =>
 {
-    const [loggedInUser] = useRecoilState(loggedInUserState);
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
     const [configurationService] = useState(new ConfigurationService());
 
     useEffect(() =>
     {
-        async function loadAllConfigurations(user)
-        {
-            if(!isEmptyString(user))
-                await configurationService.loadConfigurations(user);
-
-            return await configurationService.loadConfigurations("system");
-        }
-
-        loadAllConfigurations(loggedInUser).then(() =>
-        {
-            try
+        configurationService.loadConfigurations('system')
+            .then(() =>
             {
-                const appList = JSON.parse(configurationService.getConfigValue("system", "app-list-with-display-properties")) ??
-                    [
-                        { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
-                        { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' }
-                    ];
+                try
+                {
+                    const appList = JSON.parse(configurationService.getConfigValue("system", "app-list-with-display-properties")) ??
+                        [
+                            { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
+                            { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' }
+                        ];
 
-                setApps(appList);
-            }
-            catch(err)
-            {
-                loggerService.logError("While loading and parsing configurations in the launch pad, the following errors occurred: " + err);
-            }
-        });
+                    setApps(appList);
+                }
+                catch(err)
+                {
+                    loggerService.logError("While loading and parsing configurations in the launch pad, the following errors occurred: " + err);
+                }
+            });
 
     }, [])
 
@@ -51,6 +41,7 @@ const LaunchPadApp = () =>
 
     return (
         <div className="launch-pad">
+            <LoginDialogComponent/>
             {apps.map((app) => (
                 <div key={app.title} className="launch-pad__app" onClick={() => launchApp(app.url, app.title)}>
                     <img className="launch-pad__icon" src={app.icon} alt={app.title}/>

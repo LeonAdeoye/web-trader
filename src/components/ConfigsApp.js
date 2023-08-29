@@ -10,13 +10,12 @@ import '../style_sheets/component-base.css';
 import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
 import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
-import {loggedInUserState} from "../atoms/app-state";
 
 export const ConfigsApp = () =>
 {
-    const [loggedInUser] = useRecoilState(loggedInUserState);
+    const [loggedInUser, setLoggedInUser] = useState('');
     const [gridData, setGridData] = useState([]);
-    const [configurationService, setConfigurationService] = useState(new ConfigurationService());
+    const [configurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -35,19 +34,27 @@ export const ConfigsApp = () =>
 
     useEffect(() =>
     {
-        console.log("configApp::loggedInUser: " + loggedInUser); // TODO: Remove this line
-        async function loadAllConfigurations(user)
+        window.configurations.getLoggedInUserId()
+            .then(loggedInUser => setLoggedInUser(loggedInUser))
+            .catch((error) => loggerService.logError(error));
+
+    }, [])
+
+    useEffect(() =>
+    {
+        async function loadAllConfigurations()
         {
             await configurationService.loadConfigurations("system");
-            if(!isEmptyString(user))
-                await configurationService.loadConfigurations(user);
+
+            if(!isEmptyString(loggedInUser))
+                await configurationService.loadConfigurations(loggedInUser);
         }
 
-        loadAllConfigurations(loggedInUser)
+        loadAllConfigurations()
             .then(() => setGridData(configurationService.getCachedConfigs()))
             .catch((error) => loggerService.logError(error));
 
-    }, [loggedInUser, configurationService])
+    }, [loggedInUser])
 
     const addConfiguration = async () => setConfigDialogOpenFlag(true);
 

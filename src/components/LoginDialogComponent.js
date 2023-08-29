@@ -2,18 +2,21 @@ import React, {useState} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
 import '../style_sheets/dialog-base.css';
 import {useRecoilState} from "recoil";
-import {loggedInUserState} from "../atoms/app-state";
-import {isEmptyString} from "../utilities";
+import {loginDialogDisplayState} from "../atoms/dialog-state";
 
 const LoginDialogComponent = () =>
 {
-    const [loggedInUser, setLoggedInUser] = useRecoilState(loggedInUserState);
+    const [loginDialogDisplay, setLoginDialogDisplay] = useRecoilState(loginDialogDisplayState);
     const [userId, setUserId] = useState('');
     const handleUserIdChange = (event) => setUserId(event.target.value);
-    const handleSubmit = () => setLoggedInUser(userId);
+    const handleSubmit = () =>
+    {
+        window.configurations.setLoggedInUserId(userId);
+        setLoginDialogDisplay(false);
+    }
 
     return (
-        <Dialog aria-labelledby='dialog-title' open={Boolean(isEmptyString(loggedInUser))}>
+        <Dialog aria-labelledby='dialog-title' open={Boolean(loginDialogDisplay)}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Log on to web-trader</DialogTitle>
             <DialogContent>
                 <TextField size='small' label='Enter the user Id' value={userId} onChange={handleUserIdChange} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '0px'}} required/>

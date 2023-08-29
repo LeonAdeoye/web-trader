@@ -8,6 +8,7 @@ require('@electron/remote/main').initialize();
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let mainWindow;
+let loggedInUser; // Used to capture the logged-in user from the login dialog and make it available to the rest of the app
 
 // create amp of child windows objects keyed by destination IDs
 const childWindowsMap = new Map();
@@ -20,6 +21,8 @@ settings.configure({
 });
 
 console.log("settings file path: " + settings.file());
+
+
 
 // The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
 const createWindow = () =>
@@ -170,10 +173,16 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
     });
 }
 
+const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
+const handleGetLoggedInUserMessage = () => loggedInUser;
+
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', openApp);
     ipcMain.on('message-to-main', handleMessageFromRenderer);
+    ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
+    ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
+
     createWindow();
     addContextMenu(mainWindow);
 });
@@ -194,6 +203,8 @@ app.on('before-quit', () =>
 {
     ipcMain.removeListener('openApp', openApp);
     ipcMain.removeListener('message-to-main', handleMessageFromRenderer);
+    ipcMain.removeListener('set-user-logged-in', handleSetLoggedInUserMessage);
+    ipcMain.removeListener('get-user-logged-in', handleGetLoggedInUserMessage);
 
     childWindowsMap.forEach((childWindow) =>
     {
