@@ -17,7 +17,7 @@ const LoginDialogComponent = () =>
         <Dialog aria-labelledby='dialog-title' open={Boolean(loginDialogDisplay)}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Log on to web-trader</DialogTitle>
             <DialogContent>
-                <TextField size='small' label='Enter the user Id' value={userId} onChange={handleUserIdChange} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '0px'}} required/>
+                <TextField size='small' label='Enter your user Id' value={userId} onChange={handleUserIdChange} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '0px'}} required/>
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
                 <Button className="dialog-action-button submit" color="primary" disabled={userId === ''} variant='contained' onClick={handleSubmit}>Login</Button>
