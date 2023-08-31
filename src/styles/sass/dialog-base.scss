@@ -1,0 +1,16 @@
+Button.dialog-action-button
+{
+  text-transform: none;
+  background-color: #404040;
+  color: white;
+
+  &.submit
+  {
+    margin-right: 15px;
+  }
+
+  &:hover
+  {
+    background-color: #656161;
+  }
+}

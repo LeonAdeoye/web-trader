@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
-import '../style_sheets/dialog-base.css';
+//import '../styles/dialog-base.css';
+import '../styles/css/main.css';
 
 const LoginDialogComponent = () =>
 {

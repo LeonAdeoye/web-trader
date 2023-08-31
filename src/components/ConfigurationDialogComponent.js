@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, Typography } from '@mui/material';
-import '../style_sheets/dialog-base.css';
+//import '../styles/dialog-base.css';
+import '../styles/css/main.css';
 import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
 

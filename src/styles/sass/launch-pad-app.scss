@@ -1,0 +1,41 @@
+.launch-pad
+{
+  display: flex;
+  flex-wrap: wrap;
+
+/*  In Sass, the & symbol is used as a placeholder that represents the parent selector.
+  This can be particularly useful when you're nesting selectors within each other.
+  When you combine & with another selector, Sass will replace & with the parent selector. */
+
+  &__app
+  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin: 16px;
+    padding: 10px;
+    border: 2px solid white;
+
+    &:hover
+    {
+      border: 2px solid #9a1c1c;
+      cursor: pointer;
+      border-radius: 10px;
+      color: maroon;
+    }
+  }
+
+  &__icon
+  {
+    margin-bottom: 8px;
+    height: 50px;
+  }
+
+  &__name
+  {
+    text-align: center;
+    font-family: Calibri;
+    font-size: 18px;
+  }
+}
