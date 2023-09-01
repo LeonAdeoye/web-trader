@@ -26,6 +26,5 @@ export class LoggerService
             })
             .then(() => console.log(`Logger: ${this.#logger}, Level: ${logLevel}, message: ${message}`))
             .catch(err => console.log("Error: " + err + ", while " + this.#logger + " trying to log: " +  message));
-
     }
 }

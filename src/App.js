@@ -11,6 +11,7 @@ import {ConfigsApp} from "./components/ConfigsApp";
 import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
+import CrossesApp from "./components/CrossesApp";
 
 const App = ({}) =>
 {
@@ -42,6 +43,7 @@ const App = ({}) =>
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps} },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
             { name: 'Users', path: '/users', component: UsersApp },
+            { name: 'Crosses', path: '/crosses', component: CrossesApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];
 
@@ -82,14 +84,14 @@ const App = ({}) =>
   // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (
     <div className="App">
-        <Routes>
+        {<Routes>
             {apps.map((app, index) =>
                 (<Route
                     key={index}
                     path={app.path}
                     element={React.createElement(app.component, app.props ?? {})}
                 />))}
-        </Routes>
+        </Routes>}
     </div>
   );
 }

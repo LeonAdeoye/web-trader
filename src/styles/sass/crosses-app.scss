@@ -1,0 +1,114 @@
+.crosses-app
+{
+  .opportunity-row
+  {
+    .stock-info
+    {
+      display: flex;
+      flex-direction: column;
+
+      .top-part
+      {
+        font-weight: bold;
+        font-size: 16px;
+        background-color: #404040;
+        display: flex;
+        align-items: center; // Align items vertically
+        padding: 5px;
+
+        .stock-label
+        {
+          font-size: 12px;
+          font-weight: bold;
+          font-family: Arial, sans-serif;
+        }
+
+        .buy-label
+        {
+          color: #346bb4; // Blue color for BUY label
+          margin-right: 200px; // Add space between label and text
+        }
+
+        .sell-label
+        {
+          color: #83AF9B; // Green color for SELL label
+          margin-left: 80px; // Add space between label and text
+        }
+
+        .stock-code
+        {
+          font-size: 18px;
+          font-weight: bold;
+          font-family: Arial, sans-serif;
+          color: white;
+          margin-right: 380px; // Add space between stock code and description
+        }
+
+        .stock-description
+        {
+          font-size: 14px;
+          font-family: Arial, sans-serif;
+          color: white;
+        }
+
+        .summary-info
+        {
+          font-size: 12px;
+          font-family: Arial, sans-serif;
+          color: white;
+          display: flex;
+          gap: 40px; // Add space between summary elements
+          align-items: center; // Align items vertically
+          margin-left: auto; // Push summary to the right
+        }
+      }
+
+      .bottom-part
+      {
+        display: flex;
+
+        .buy-orders
+        {
+          background-color: white;
+          flex-grow: 1;
+          padding: 0;
+
+          .ag-header
+          {
+            background-color: #4F81BD; // Blue color
+            font-size: 10px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            height: 16px; // Reduced header height
+          }
+
+          .ag-cell
+          {
+            font-size: 10px; // Reduced font size
+          }
+        }
+
+        .sell-orders
+        {
+          background-color: white;
+          flex-grow: 1;
+          padding: 0;
+
+          .ag-header
+          {
+            background-color: #528c74; // Green color
+            font-size: 10px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            height: 16px; // Reduced header height
+          }
+
+          .ag-cell
+          {
+            font-size: 10px; // Reduced font size
+          }
+        }
+      }
+    }
+  }
+}
