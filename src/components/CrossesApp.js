@@ -78,8 +78,7 @@ const CrossesApp = () =>
         },
     ];
 
-    fxService.loadExchangeRates();
-
+    fxService.loadExchangeRates(); // TODO use them to convert notional values
 
     const stockRows = dummyDataService.get("crossing_data").map((stock) =>
     {
@@ -91,9 +90,9 @@ const CrossesApp = () =>
                         <div className="stock-code">{stock.stockCode}</div>
                         <div className="stock-description">{stock.stockDescription}</div>
                         <div className="summary-info">
-                            <span>Total Notional: {stock.totalNotional}$</span>
+                            <span>Total Notional: {stock.totalNotional.toLocaleString()} USD</span>
                             <span className="summary-gap">|</span>
-                            <span>Total Quantity: {stock.totalQuantity}</span>
+                            <span>Total Quantity: {stock.totalQuantity.toLocaleString()}</span>
                         </div>
                         <div className="stock-label sell-label">SELL</div>
                     </div>

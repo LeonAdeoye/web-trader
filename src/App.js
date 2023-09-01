@@ -12,6 +12,7 @@ import {currencyFormatter, numberFormatter} from "./utilities";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
 import CrossesApp from "./components/CrossesApp";
+import {FxRatesApp} from "./components/FxRatesApp";
 
 const App = ({}) =>
 {
@@ -44,6 +45,7 @@ const App = ({}) =>
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
             { name: 'Users', path: '/users', component: UsersApp },
             { name: 'Crosses', path: '/crosses', component: CrossesApp },
+            { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];
 
