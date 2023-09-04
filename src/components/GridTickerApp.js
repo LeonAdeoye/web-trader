@@ -20,7 +20,7 @@ export const GridTickerApp = ({webWorkerUrl, columnDefs, rowHeight, gridTheme}) 
         // TODO: More refactoring required here.
         //  Use webWorkerUrl props instead of hard-coded URL. If I use props I'm getting an Uncaught DOMException:
         //  Failed to construct 'Worker': Script at 'file:///C:/Users/Leon%20Adeoye/development/web-trader/src/components/price-ticker-reader.js' cannot be accessed from origin 'http://localhost:3000'.
-        const webWorker = new Worker(new URL("./price-ticker-reader.js", import.meta.url));
+        const webWorker = new Worker(new URL("../workers/price-ticker-reader.js", import.meta.url));
         setWorker(webWorker);
         return () => webWorker.terminate();
     }, []);

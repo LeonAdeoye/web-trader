@@ -1,5 +1,5 @@
 const {Client, Command} = require('amps');
-const {onAmpsMessage} = require("./message_handler");
+const {onAmpsPriceMessage} = require("./message_handler");
 
 const main = async () =>
 {
@@ -11,7 +11,7 @@ const main = async () =>
         const client = new Client(clientName);
         await client.connect(url);
         const cmd = new Command("sow_and_delta_subscribe").topic(topicName);
-        await client.execute(cmd, onAmpsMessage);
+        await client.execute(cmd, onAmpsPriceMessage);
         console.log("Price ticker reader web worker Connected to AMPS using URL: ", url);
     }
     catch (e)

@@ -67,7 +67,7 @@ export const StockTickerApp = ({client}) =>
 
     useEffect(() =>
     {
-        const web_worker = new Worker(new URL("./market-data.js", import.meta.url));
+        const web_worker = new Worker(new URL("../workers/market-data.js", import.meta.url));
         setWorker(web_worker);
         return () => web_worker.terminate();
     }, []);

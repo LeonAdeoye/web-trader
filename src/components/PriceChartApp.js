@@ -93,7 +93,7 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
 
     useEffect(() =>
     {
-        const web_worker = new Worker(new URL("./price-chart-reader.js", import.meta.url));
+        const web_worker = new Worker(new URL("../workers/price-chart-reader.js", import.meta.url));
         setWorker(web_worker);
         return () => web_worker.terminate();
     }, []);
