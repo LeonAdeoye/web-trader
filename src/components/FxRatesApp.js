@@ -1,35 +1,56 @@
 import * as React from 'react';
 import {GenericGridApp} from "./GenericGridApp";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {FxService} from "../services/FxService";
 
 export const FxRatesApp = () =>
 {
     const [fxService] = useState(new FxService());
     const [gridData, setGridData] = useState([]);
+    const [worker, setWorker] = useState(null);
 
     useEffect(() =>
     {
-        fxService.loadExchangeRates();
+        const webWorker = new Worker(new URL("../workers/fx-rate-reader.js", import.meta.url));
+        setWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
 
-        setGridData([{
-            currency: "USD",
-            bid: 0.95,
-            ask: 1.05,
-            mid: 1.0
-        },
+    const handleWorkerMessage = useCallback((event) =>
+    {
+        const { rates: eventFxRates } = event.data;
+        const calculatedRates = Object.entries(eventFxRates.rates).map(([currency, rate]) => ({
+            currency,
+            bid: parseFloat((0.95 * rate).toFixed(4)),
+            ask: parseFloat((1.05 * rate).toFixed(4)),
+            mid: parseFloat((rate).toFixed(4))
+        }));
+        console.log(JSON.stringify(calculatedRates));
+        setGridData(calculatedRates);
+    }, []);
+
+    useEffect(() =>
+    {
+        if (worker)
+            worker.onmessage = handleWorkerMessage;
+
+        return () =>
         {
-            currency: "JPY",
-            bid: 108,
-            ask: 112,
-            mid: 110
-        },
+            if (worker)
+                worker.onmessage = null;
+        };
+    }, [worker]);
+
+    const updateRows = useCallback((fxRate) =>
+    {
+        /*gridApiRef.current.api.forEachNode((rowNode) =>
         {
-            currency: "GBP",
-            bid: 0.785,
-            ask: 0.795,
-            mid: 0.790
-        }]);
+            if (rowNode.data.symbol !== price.symbol)
+                return;
+
+            rowNode.updateData({...rowNode.data, ...fxRate});
+        });*/
+
     }, []);
 
     const columnDefs = [
