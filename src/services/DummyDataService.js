@@ -9,7 +9,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk A",
                 trader: "John Doe",
-                quantity: 300,
+                quantity: 30000,
                 notionalValue: 15000,
                 instruction: "Limit",
                 price: 50,
@@ -19,7 +19,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk B",
                 trader: "Jane Smith",
-                quantity: 200,
+                quantity: 20000,
                 notionalValue: 10000,
                 instruction: "Market",
                 price: 48,
@@ -29,7 +29,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk C",
                 trader: "Michael Johnson",
-                quantity: 150,
+                quantity: 10050,
                 notionalValue: 7500,
                 instruction: "Market",
                 price: 55,
@@ -39,7 +39,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk D",
                 trader: "Emily Brown",
-                quantity: 120,
+                quantity: 1200,
                 notionalValue: 6000,
                 instruction: "Limit",
                 price: 53,
@@ -51,7 +51,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk E",
                 trader: "David Chen",
-                quantity: 80,
+                quantity: 80000,
                 notionalValue: 4000,
                 instruction: "Market",
                 price: 56,
@@ -61,7 +61,7 @@ const crossing_data = [
             {
                 desk: "Equity Desk F",
                 trader: "Sophia Liu",
-                quantity: 70,
+                quantity: 7000,
                 notionalValue: 3500,
                 instruction: "Limit",
                 price: 58,
