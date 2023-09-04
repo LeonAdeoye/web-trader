@@ -80,7 +80,7 @@ const CrossesApp = () =>
 
     fxService.loadExchangeRates();
 
-    const calculateMinimumCrossableAmount = (buyOrders, sellOrders) =>
+    const calculateMaximumCrossableAmount = (buyOrders, sellOrders) =>
     {
         const totalQuantityBuy = buyOrders.reduce((total, order) => total + order.quantity, 0);
         const totalQuantitySell = sellOrders.reduce((total, order) => total + order.quantity, 0);
@@ -93,7 +93,7 @@ const CrossesApp = () =>
 
     const stockRows = dummyDataService.get("crossing_data").map((stock) =>
     {
-        const { minimumQuantity, minimumNotionalValue } = calculateMinimumCrossableAmount(stock.buyOrders, stock.sellOrders);
+        const { maxCrossableQty, maxCrossableNotional } = calculateMaximumCrossableAmount(stock.buyOrders, stock.sellOrders);
 
         return (
             <div key={stock.stockCode} className="opportunity-row">
@@ -103,9 +103,9 @@ const CrossesApp = () =>
                         <div className="stock-code">{stock.stockCode}</div>
                         <div className="stock-description">{stock.stockDescription}</div>
                         <div className="summary-info">
-                            <span>Max. Crossable Qty: {minimumQuantity.toLocaleString()}</span>
+                            <span>Max. Crossable Qty: {maxCrossableQty.toLocaleString()}</span>
                             <span className="summary-gap">|</span>
-                            <span>Max. Crossable Notional: {minimumNotionalValue.toLocaleString()} USD</span>
+                            <span>Max. Crossable Notional: {maxCrossableNotional.toLocaleString()} USD</span>
                         </div>
                         <div className="stock-label sell-label">SELL</div>
                     </div>
