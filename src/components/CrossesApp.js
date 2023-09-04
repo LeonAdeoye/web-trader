@@ -78,10 +78,23 @@ const CrossesApp = () =>
         },
     ];
 
-    fxService.loadExchangeRates(); // TODO use them to convert notional values
+    fxService.loadExchangeRates();
+
+    const calculateMinimumCrossableAmount = (buyOrders, sellOrders) =>
+    {
+        const totalQuantityBuy = buyOrders.reduce((total, order) => total + order.quantity, 0);
+        const totalQuantitySell = sellOrders.reduce((total, order) => total + order.quantity, 0);
+        const totalNotionalBuy = buyOrders.reduce((total, order) => total + order.notionalValue, 0);
+        const totalNotionalSell = sellOrders.reduce((total, order) => total + order.notionalValue, 0);
+        const minimumQuantity = Math.min(totalQuantityBuy, totalQuantitySell);
+        const minimumNotionalValue = Math.min(totalNotionalBuy, totalNotionalSell);
+        return { minimumQuantity, minimumNotionalValue };
+    };
 
     const stockRows = dummyDataService.get("crossing_data").map((stock) =>
     {
+        const { minimumQuantity, minimumNotionalValue } = calculateMinimumCrossableAmount(stock.buyOrders, stock.sellOrders);
+
         return (
             <div key={stock.stockCode} className="opportunity-row">
                 <div className="stock-info">
@@ -90,9 +103,9 @@ const CrossesApp = () =>
                         <div className="stock-code">{stock.stockCode}</div>
                         <div className="stock-description">{stock.stockDescription}</div>
                         <div className="summary-info">
-                            <span>Total Notional: {stock.totalNotional.toLocaleString()} USD</span>
+                            <span>Max. Crossable Qty: {minimumQuantity.toLocaleString()}</span>
                             <span className="summary-gap">|</span>
-                            <span>Total Quantity: {stock.totalQuantity.toLocaleString()}</span>
+                            <span>Max. Crossable Notional: {minimumNotionalValue.toLocaleString()} USD</span>
                         </div>
                         <div className="stock-label sell-label">SELL</div>
                     </div>
