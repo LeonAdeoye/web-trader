@@ -5,8 +5,8 @@ const main = async () =>
 {
     try
     {
-        const clientName = "fx-rate-reader";
-        const topicName = "fx-rates";
+        const clientName = "web-trader-fx_rate_reader";
+        const topicName = "fx_rates";
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);

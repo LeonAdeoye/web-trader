@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {GenericGridApp} from "./GenericGridApp";
 import {useEffect, useState, useCallback} from "react";
-import {FxService} from "../services/FxService";
 
 export const FxRatesApp = () =>
 {
-    const [fxService] = useState(new FxService());
-    const [gridData, setGridData] = useState([]);
+    const [fxData, setFxData] = useState([]);
     const [worker, setWorker] = useState(null);
 
     useEffect(() =>
@@ -18,15 +16,41 @@ export const FxRatesApp = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const { rates: eventFxRates } = event.data;
-        const calculatedRates = Object.entries(eventFxRates.rates).map(([currency, rate]) => ({
-            currency,
-            bid: parseFloat((0.95 * rate).toFixed(4)),
-            ask: parseFloat((1.05 * rate).toFixed(4)),
-            mid: parseFloat((rate).toFixed(4))
-        }));
-        console.log(JSON.stringify(calculatedRates));
-        setGridData(calculatedRates);
+        const fx = event.data.rate;
+        if(fx.rate === undefined)
+        {
+            console.log("Invalid FX rate received: ", fx);
+            return;
+        }
+        else
+            console.log("FX rate received: ", fx);
+
+        window.fxRates.setRate(fx);
+
+        fx.rate += new Date().getTime()/100000000000
+
+        const calculatedRate =
+        {
+            currency: fx.currency,
+
+            bid: parseFloat((0.95 * fx.rate).toFixed(4)) + 0.1,
+            ask: parseFloat((1.05 * fx.rate).toFixed(4)) + 0.2,
+            mid: parseFloat((fx.rate).toFixed(4) + 0.3)
+        };
+
+        setFxData((prevData) =>
+        {
+            const index = prevData.findIndex((element) => element.currency === calculatedRate.currency);
+            if (index !== -1)
+            {
+                const updatedData = [...prevData];
+                updatedData[index] = calculatedRate;
+                return updatedData;
+            }
+            else
+                return [...prevData, calculatedRate];
+        });
+
     }, []);
 
     useEffect(() =>
@@ -63,5 +87,5 @@ export const FxRatesApp = () =>
                             gridTheme={"ag-theme-alpine"}
                             rowIdArray={["currency"]}
                             columnDefs={columnDefs}
-                            gridData={gridData}/>);
+                            gridData={fxData}/>);
 };

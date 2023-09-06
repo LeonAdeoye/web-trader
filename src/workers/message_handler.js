@@ -16,14 +16,13 @@ export const onAmpsPriceMessage = (message) =>
 
 export const onAmpsFxRateMessage = (message) =>
 {
-    const dateTime = new Date(message.data.time_stamp);
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", rates: {...message.data, time_stamp: dateTime}});
+            postMessage({messageType: "snapshot", rate: message.data});
             break;
         case 'p':
-            postMessage({messageType: "update", rates: {...message.data, time_stamp: dateTime}});
+            postMessage({messageType: "update", rate: message.data});
             break;
         default:
             break;

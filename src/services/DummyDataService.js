@@ -3,8 +3,7 @@ const crossing_data = [
     {
         stockCode: "0001.HK",
         stockDescription: "CK Hutchison Holdings",
-        totalNotional: 500000,
-        totalQuantity: 8000,
+        currency: "HKD",
         buyOrders: [
             {
                 desk: "Equity Desk A",
@@ -73,8 +72,7 @@ const crossing_data = [
     {
         stockCode: "0388.HK",
         stockDescription: "Hong Kong Exchanges and Clearing",
-        totalNotional: 300000,
-        totalQuantity: 5000,
+        currency: "HKD",
         buyOrders: [
             {
                 desk: "Equity Desk F",
@@ -113,8 +111,7 @@ const crossing_data = [
     {
         stockCode: "0700.HK",
         stockDescription: "Tencent Holdings",
-        totalNotional: 800000,
-        totalQuantity: 6000,
+        currency: "HKD",
         buyOrders: [
             {
                 desk: "Equity Desk I",
@@ -163,8 +160,7 @@ const crossing_data = [
     {
         stockCode: "2318.HK",
         stockDescription: "Ping An Insurance Group",
-        totalNotional: 450000,
-        totalQuantity: 7000,
+        currency: "HKD",
         buyOrders: [
             {
                 desk: "Equity Desk M",

@@ -22,8 +22,8 @@ contextBridge.exposeInMainWorld('launchPad', {
 })
 
 contextBridge.exposeInMainWorld('messenger', {
-    sendMessageToMain: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main', fdc3Context, destination, source),
-    handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer', (_, destination, fdc3Context, source) =>
+    sendMessageToMain: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main-from-renderer', fdc3Context, destination, source),
+    handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer-from-main', (_, destination, fdc3Context, source) =>
     {
         callback(destination, fdc3Context, source);
     })
@@ -32,6 +32,12 @@ contextBridge.exposeInMainWorld('messenger', {
 contextBridge.exposeInMainWorld('configurations', {
     setLoggedInUserId: (loggedInUserId) => ipcRenderer.send('set-user-logged-in', loggedInUserId),
     getLoggedInUserId: () => ipcRenderer.invoke('get-user-logged-in') // This get data from main and returns it back to the render in the same call.
+});
+
+contextBridge.exposeInMainWorld('fxRates', {
+    convertRate: (amount, fromCurrency, toCurrency) => ipcRenderer.invoke('convert-fx-rate', amount, fromCurrency, toCurrency),
+    getRate: (currencyCode) => ipcRenderer.invoke('get-fx-rate', currencyCode),
+    setRate: (rate) => ipcRenderer.send('set-fx-rate', rate)
 });
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
