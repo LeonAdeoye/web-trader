@@ -17,38 +17,20 @@ export const FxRatesApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const fx = event.data.rate;
-        if(fx.rate === undefined)
-        {
-            console.log("Invalid FX rate received: ", fx);
-            return;
-        }
-        else
-            console.log("FX rate received: ", fx);
-
-        window.fxRates.setRate(fx);
-
-        fx.rate += new Date().getTime()/100000000000
-
-        const calculatedRate =
-        {
-            currency: fx.currency,
-
-            bid: parseFloat((0.95 * fx.rate).toFixed(4)) + 0.1,
-            ask: parseFloat((1.05 * fx.rate).toFixed(4)) + 0.2,
-            mid: parseFloat((fx.rate).toFixed(4) + 0.3)
-        };
+        const fx4dp = {currency: fx.currency, bid: fx.bid.toFixed(4), ask: fx.ask.toFixed(4), mid: fx.mid.toFixed(4)}
+        window.fxRates.setRate(fx4dp);
 
         setFxData((prevData) =>
         {
-            const index = prevData.findIndex((element) => element.currency === calculatedRate.currency);
+            const index = prevData.findIndex((element) => element.currency === fx4dp.currency);
             if (index !== -1)
             {
                 const updatedData = [...prevData];
-                updatedData[index] = calculatedRate;
+                updatedData[index] = fx4dp;
                 return updatedData;
             }
             else
-                return [...prevData, calculatedRate];
+                return [...prevData, fx4dp];
         });
 
     }, []);

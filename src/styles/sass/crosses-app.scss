@@ -26,12 +26,16 @@
         .buy-label
         {
           color: #346bb4; // Blue color for BUY label
+          font-size: 18px;
+          padding: 0px;
           margin-right: 200px; // Add space between label and text
         }
 
         .sell-label
         {
           color: #83AF9B; // Green color for SELL label
+          font-size: 18px;
+          padding: 0px;
           margin-left: 80px; // Add space between label and text
         }
 
@@ -41,7 +45,16 @@
           font-weight: bold;
           font-family: Arial, sans-serif;
           color: white;
-          margin-right: 380px; // Add space between stock code and description
+          margin-right: 20px; // Add space between stock code and currency
+        }
+
+        .stock-currency
+        {
+          font-size: 13px;
+          font-weight: bold;
+          font-family: Arial, sans-serif;
+          color: white;
+          margin-right: 280px; // Add space between stock currency and description
         }
 
         .stock-description

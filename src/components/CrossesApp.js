@@ -5,6 +5,7 @@ import '../styles/css/main.css';
 import { AgGridReact } from 'ag-grid-react';
 import {DummyDataService} from "../services/DummyDataService";
 
+
 const CrossesApp = () =>
 {
     const [dummyDataService] = useState(new DummyDataService());
@@ -76,30 +77,23 @@ const CrossesApp = () =>
         },
     ];
 
-    const calculateMaximumCrossableAmount = async (currency, buyOrders, sellOrders) =>
+    const calculateMaximumCrossableAmount = (currency, buyOrders, sellOrders) =>
     {
-        let totalNotionalBuyUSD = 0;
-        let totalNotionalSellUSD = 0;
         const totalNotionalBuy = buyOrders.reduce((total, order) => total + order.notionalValue, 0);
         const totalNotionalSell = sellOrders.reduce((total, order) => total + order.notionalValue, 0);
 
-        await window.fxRates.convertRate(totalNotionalBuy, currency, "USD").then(result => totalNotionalBuyUSD = result);
-        console.log("totalNotionalBuyUSD: " + totalNotionalBuyUSD);
-        await window.fxRates.convertRate(totalNotionalSell, currency, "USD").then(result => totalNotionalSellUSD = result);
-        console.log("totalNotionalSellUSD: " + totalNotionalSellUSD);
-
         const totalQuantityBuy = buyOrders.reduce((total, order) => total + order.quantity, 0);
         const totalQuantitySell = sellOrders.reduce((total, order) => total + order.quantity, 0);
-        //const totalNotionalBuy = await window.fxRates.convertRate(buyOrders.reduce((total, order) => total + order.notionalValue, 0), currency, "USD");
-        //const totalNotionalSell = await window.fxRates.convertRate(sellOrders.reduce((total, order) => total + order.notionalValue, 0), currency, "USD");
+
         const minimumQuantity = Math.min(totalQuantityBuy, totalQuantitySell);
         const minimumNotionalValue = Math.min(totalNotionalBuy, totalNotionalSell);
+
         return { minimumQuantity, minimumNotionalValue };
     };
 
-    const stockRows = dummyDataService.get("crossing_data").map(async (stock) =>
+    const stockRows = dummyDataService.get("crossing_data").map((stock) =>
     {
-        const { minimumQuantity, minimumNotionalValue  } = calculateMaximumCrossableAmount(stock.currency, stock.buyOrders, stock.sellOrders);
+        const { minimumQuantity, minimumNotionalValue } = calculateMaximumCrossableAmount(stock.currency, stock.buyOrders, stock.sellOrders);
 
         return (
             <div key={stock.stockCode} className="opportunity-row">
@@ -107,9 +101,10 @@ const CrossesApp = () =>
                     <div className="top-part">
                         <div className="stock-label buy-label">BUY</div>
                         <div className="stock-code">{stock.stockCode}</div>
+                        <div className="stock-currency">({stock.currency})</div>
                         <div className="stock-description">{stock.stockDescription}</div>
                         <div className="summary-info">
-                            <span>Max. Crossable Qty: {minimumQuantity.toLocaleString()}</span>
+                            <span>Max. Crossable Qty: {minimumQuantity}</span>
                             <span className="summary-gap"></span>
                             <span>Max. Crossable Notional: {minimumNotionalValue.toLocaleString()} USD</span>
                         </div>

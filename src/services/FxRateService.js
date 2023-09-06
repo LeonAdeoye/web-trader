@@ -7,9 +7,9 @@ class FxRateService
         this.#exchangeRates = {}
     }
 
-    setExchangeRate({currency, rate})
+    setExchangeRate({currency, mid})
     {
-        this.#exchangeRates[currency.toUpperCase()] = rate;
+        this.#exchangeRates[currency.toUpperCase()] = mid;
     }
 
     getExchangeRate(currencyCode)

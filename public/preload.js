@@ -37,7 +37,7 @@ contextBridge.exposeInMainWorld('configurations', {
 contextBridge.exposeInMainWorld('fxRates', {
     convertRate: (amount, fromCurrency, toCurrency) => ipcRenderer.invoke('convert-fx-rate', amount, fromCurrency, toCurrency),
     getRate: (currencyCode) => ipcRenderer.invoke('get-fx-rate', currencyCode),
-    setRate: (rate) => ipcRenderer.send('set-fx-rate', rate)
+    setRate: (rate) => ipcRenderer.send('set-fx-rate', rate),
 });
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
