@@ -6,65 +6,65 @@ const crossing_data = [
         currency: "HKD",
         buyOrders: [
             {
-                desk: "Equity Desk A",
+                desk: "Block HK",
                 trader: "John Doe",
                 quantity: 30000,
                 notionalValue: 1500000,
                 instruction: "Limit",
                 price: 50,
-                client: "Client A",
+                client: "CITICS",
                 time: "09:30:00"
             },
             {
-                desk: "Equity Desk B",
+                desk: "LowTouch TK",
                 trader: "Jane Smith",
                 quantity: 20000,
                 notionalValue: 960000,
                 instruction: "Market",
                 price: 48,
-                client: "Client B",
+                client: "Client Masked",
                 time: "09:35:00"
             },
             {
-                desk: "Equity Desk C",
+                desk: "HighTouch SG",
                 trader: "Michael Johnson",
                 quantity: 10050,
                 notionalValue: 552750,
                 instruction: "Market",
                 price: 55,
-                client: "Client C",
+                client: "Millennium Capital",
                 time: "09:40:00"
             },
             {
-                desk: "Equity Desk D",
+                desk: "Block HK",
                 trader: "Emily Brown",
                 quantity: 1200,
                 notionalValue: 63600,
                 instruction: "Limit",
                 price: 53,
-                client: "Client D",
+                client: "GoldMan Sachs",
                 time: "09:45:00"
             }
         ],
         sellOrders: [
             {
-                desk: "Equity Desk E",
+                desk: "Equity Derivatives HK",
                 trader: "David Chen",
                 quantity: 80000,
                 notionalValue: 4480000,
                 instruction: "Market",
                 price: 56,
-                client: "Client E",
+                client: "JP Morgan",
                 time: "09:50:00"
             },
             {
-                desk: "Equity Desk F",
+                desk: "HighTouch HK",
                 trader: "Sophia Liu",
                 quantity: 7000,
                 notionalValue: 406000,
                 instruction: "Limit",
                 price: 58,
-                client: "Client F",
+                client: "Deutsche Bank",
                 time: "09:55:00"
             }
         ]
@@ -75,35 +75,35 @@ const crossing_data = [
         currency: "HKD",
         buyOrders: [
             {
-                desk: "Equity Desk F",
+                desk: "LowTouch",
                 trader: "Jessica Wong",
                 quantity: 150,
                 notionalValue: 45000,
                 instruction: "Limit",
                 price: 295,
-                client: "Client F",
+                client: "Client Masked",
                 time: "10:05:00"
             }
         ],
         sellOrders: [
             {
-                desk: "Equity Desk G",
+                desk: "Facilitation HK",
                 trader: "David Chen",
                 quantity: 80,
                 notionalValue: 24800,
                 instruction: "Market",
                 price: 310,
-                client: "Client G",
+                client: "Client Masked",
                 time: "10:10:00"
             },
             {
-                desk: "Equity Desk H",
+                desk: "HighTouch India",
                 trader: "Sophia Liu",
                 quantity: 70,
                 notionalValue: 21350,
                 instruction: "Limit",
                 price: 305,
-                client: "Client H",
+                client: "Deutsche Bank",
                 time: "10:15:00"
             }
         ]
@@ -114,45 +114,45 @@ const crossing_data = [
         currency: "HKD",
         buyOrders: [
             {
-                desk: "Equity Desk I",
+                desk: "Block",
                 trader: "James Wang",
                 quantity: 250,
                 notionalValue: 60000,
                 instruction: "Limit",
                 price: 240,
-                client: "Client I",
+                client: "Schroders",
                 time: "10:30:00"
             },
             {
-                desk: "Equity Desk J",
+                desk: "LowTouch",
                 trader: "Michelle Chen",
                 quantity: 180,
                 notionalValue: 42840,
                 instruction: "Market",
                 price: 238,
-                client: "Client J",
+                client: "Client Masked",
                 time: "10:35:00"
             }
         ],
         sellOrders: [
             {
-                desk: "Equity Desk K",
+                desk: "HighTouch TK",
                 trader: "Daniel Liu",
                 quantity: 140,
                 notionalValue: 34300,
                 instruction: "Market",
                 price: 245,
-                client: "Client K",
+                client: "Nomura",
                 time: "10:40:00"
             },
             {
-                desk: "Equity Desk L",
+                desk: "HighTouch HK",
                 trader: "Sophie Wang",
                 quantity: 120,
                 notionalValue: 29040,
                 instruction: "Limit",
                 price: 242,
-                client: "Client L",
+                client: "JP Morgan",
                 time: "10:45:00"
             }
         ]
@@ -163,35 +163,35 @@ const crossing_data = [
         currency: "HKD",
         buyOrders: [
             {
-                desk: "Equity Desk M",
+                desk: "Facilitation HK",
                 trader: "Andy Zhang",
                 quantity: 180,
                 notionalValue: 8694,
                 instruction: "Limit",
                 price: 48.3,
-                client: "Client M",
+                client: "Client Masked",
                 time: "11:00:00"
             },
             {
-                desk: "Equity Desk N",
+                desk: "Block",
                 trader: "Grace Liu",
                 quantity: 150,
                 notionalValue: 7050,
                 instruction: "Market",
                 price: 47,
-                client: "Client N",
+                client: "UBS",
                 time: "11:05:00"
             }
         ],
         sellOrders: [
             {
-                desk: "Equity Desk O",
+                desk: "HighTouch HK",
                 trader: "Brian Chen",
                 quantity: 200,
                 notionalValue: 9700,
                 instruction: "Market",
                 price: 48.5,
-                client: "Client O",
+                client: "Client Masked",
                 time: "11:10:00"
             }
         ]
