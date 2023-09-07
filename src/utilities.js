@@ -9,7 +9,7 @@ export const numberFormatter = (param) =>
 
 export const currencyFormatter = (param) =>
 {
-    return isValidParameter(param) ? "$" + formatNumber(param.value) : param.value;
+    return isValidParameter(param) ? formatNumber(param.value) : param.value;
 }
 
 export const isValidParameter = (parameter) =>

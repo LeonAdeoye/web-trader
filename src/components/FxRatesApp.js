@@ -18,7 +18,6 @@ export const FxRatesApp = () =>
     {
         const fx = event.data.rate;
         const fx4dp = {currency: fx.currency, bid: fx.bid.toFixed(4), ask: fx.ask.toFixed(4), mid: fx.mid.toFixed(4)}
-        window.fxRates.setRate(fx4dp);
 
         setFxData((prevData) =>
         {

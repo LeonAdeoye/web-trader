@@ -2,7 +2,6 @@ const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 const settings = require("electron-settings");
-const FxRateService = require('../src/services/FxRateService');
 
 require('@electron/remote/main').initialize();
 
@@ -22,8 +21,6 @@ settings.configure({
 });
 
 console.log("settings file path: " + settings.file());
-
-const fxRateService = new FxRateService();
 
 // The main process' primary purpose is to create and manage application windows with the BrowserWindow module.
 const createWindow = () =>
@@ -63,7 +60,7 @@ const createWindow = () =>
     mainWindow.on('close', () => saveWindowDimensions(mainWindow));
 }
 
-const openApp = (event, {url, title}) =>
+const handleOpenAppMessage = (event, {url, title}) =>
 {
     const childWindow = new BrowserWindow({
         parent: mainWindow,
@@ -177,21 +174,13 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
 
-const handleFxRateConversionMessage = (_, amount, fromCurrency, toCurrency) => fxRateService.convert(amount, fromCurrency, toCurrency);
-const handleGetFxRateMessage = (_, currencyCode) => fxRateService.getExchangeRate(currencyCode);
-const handleSetFxRateMessage = (_, rate) => fxRateService.setExchangeRate(rate);
-
 app.whenReady().then(() =>
 {
-    ipcMain.on('openApp', openApp);
+    ipcMain.on('openApp', handleOpenAppMessage);
     ipcMain.on('message-to-main-from-renderer', handleMessageFromRenderer);
 
     ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
-
-    ipcMain.handle('convert-fx-rate', handleFxRateConversionMessage);
-    ipcMain.handle('get-fx-rate', handleGetFxRateMessage);
-    ipcMain.on('set-fx-rate', handleSetFxRateMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -211,15 +200,11 @@ app.on('activate', () =>
 
 app.on('before-quit', () =>
 {
-    ipcMain.removeListener('openApp', openApp);
+    ipcMain.removeListener('openApp', handleOpenAppMessage);
     ipcMain.removeListener('message-to-main-from-renderer', handleMessageFromRenderer);
 
     ipcMain.removeListener('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.removeListener('get-user-logged-in', handleGetLoggedInUserMessage);
-
-    ipcMain.removeListener('convert-fx-rate', handleFxRateConversionMessage);
-    ipcMain.removeListener('get-fx-rate', handleGetFxRateMessage);
-    ipcMain.removeListener('set-fx-rate', handleSetFxRateMessage);
 
     childWindowsMap.forEach((childWindow) =>
     {

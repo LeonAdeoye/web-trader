@@ -7,21 +7,26 @@ class FxRateService
         this.#exchangeRates = {}
     }
 
-    setExchangeRate({currency, mid})
+    setExchangeRate(rate)
     {
-        this.#exchangeRates[currency.toUpperCase()] = mid;
+        this.#exchangeRates[rate.currency.toUpperCase()] = rate;
     }
 
-    getExchangeRate(currencyCode)
+    getExchangeRate(currencyCode, priceType='mid')
     {
-        const rate = this.#exchangeRates[currencyCode.toUpperCase()];
+        const rate = this.#exchangeRates[currencyCode.toUpperCase()][priceType];
         return rate !== undefined ? rate : 1.0;
     }
 
-    convert(amount, fromCurrency, toCurrency)
+    getAllExchangeRates()
     {
-        const fromRate = this.getExchangeRate(fromCurrency);
-        const toRate = this.getExchangeRate(toCurrency);
+        return this.#exchangeRates;
+    }
+
+    convert(amount, fromCurrency, toCurrency, priceType = 'mid')
+    {
+        const fromRate = this.getExchangeRate(fromCurrency, priceType);
+        const toRate = this.getExchangeRate(toCurrency, priceType);
 
         if (isNaN(amount) || typeof amount !== 'number') {
             throw new Error('Invalid amount for conversion.');
