@@ -46,18 +46,6 @@ export const FxRatesApp = () =>
         };
     }, [worker]);
 
-    const updateRows = useCallback((fxRate) =>
-    {
-        /*gridApiRef.current.api.forEachNode((rowNode) =>
-        {
-            if (rowNode.data.symbol !== price.symbol)
-                return;
-
-            rowNode.updateData({...rowNode.data, ...fxRate});
-        });*/
-
-    }, []);
-
     const columnDefs = [
         {headerName: "Currency", field: "currency", sortable: true, minWidth: 130, width: 130},
         {headerName: "Bid", field: "bid", sortable: false, minWidth: 100, width: 100},
