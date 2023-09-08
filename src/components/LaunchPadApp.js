@@ -1,5 +1,4 @@
 import * as React from 'react';
-//import '../styles/launch-pad-app.css';
 import '../styles/css/main.css';
 import {useCallback, useEffect, useState} from "react";
 import {LoggerService} from "../services/LoggerService";

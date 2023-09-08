@@ -1,0 +1,124 @@
+.trade-history-app
+{
+  .trade-history-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+
+  }
+
+  // Styles for the client tab
+  .client-trade-history-tab {
+    // Custom styles for each tab
+    min-height: 25px;
+    height: 25px;
+    text-transform: none;
+    color: white;
+
+    // Additional styles as needed
+  }
+
+  // Styles for the stock tab
+  .stock-trade-history-tab {
+    // Custom styles for each tab
+    min-height: 25px;
+    height: 25px;
+    text-transform: none;
+    color: white;
+
+    // Additional styles as needed
+  }
+
+  .client-trade-history, .stock-trade-history {
+    margin: 0;
+    padding: 0;
+    .trade-history-row {
+      .stock-info {
+        display: flex;
+        flex-direction: column;
+
+        .top-part {
+          font-weight: bold;
+          font-size: 16px;
+          font-family: Arial, sans-serif;
+          background-color: #404040;
+          display: flex;
+          align-items: center; // Align items vertically
+          padding: 15px;
+          color: white;
+        }
+
+        .bottom-part {
+          display: flex;
+          flex-grow: 1; // Allow both grids to grow to fill the available height
+          margin: 0; // Remove margin
+          padding: 0;
+
+          .buy-orders {
+            background-color: white;
+            flex-grow: 1;
+            padding: 0;
+            margin: 0; // Remove margin
+            height:100%;
+
+            .summary-info {
+              font-size: 12px;
+              font-family: Arial, sans-serif;
+              font-weight: bold;
+              color: #4F81BD;
+              background-color: #404040;
+              display: flex;
+              gap: 20px; // Add space between summary elements
+              align-items: center; // Align items vertically
+              margin-left: auto; // Push summary to the right
+            }
+
+            .ag-header {
+              background-color: #4F81BD; // Blue color
+              font-size: 10px;
+              font-weight: bold;
+              font-family: Arial, sans-serif;
+              height: 16px; // Reduced header height
+            }
+
+            .ag-cell {
+              font-size: 10px; // Reduced font size
+            }
+          }
+
+          .sell-orders {
+            background-color: white;
+            flex-grow: 1;
+            padding: 0;
+            margin: 0; // Remove margin
+            height:100%;
+
+            .summary-info {
+              font-weight: bold;
+              font-size: 12px;
+              font-family: Arial, sans-serif;
+              color: #528c74;
+              background-color: #404040;
+              display: flex;
+              gap: 20px; // Add space between summary elements
+              align-items: center; // Align items vertically
+              margin-left: auto; // Push summary to the right
+            }
+
+            .ag-header {
+              background-color: #528c74; // Blue color
+              font-size: 10px;
+              font-weight: bold;
+              font-family: Arial, sans-serif;
+              height: 16px; // Reduced header height
+            }
+
+            .ag-cell {
+              font-size: 10px; // Reduced font size
+            }
+          }
+        }
+      }
+    }
+  }
+}

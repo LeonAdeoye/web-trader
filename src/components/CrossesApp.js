@@ -3,7 +3,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import {AgGridReact} from 'ag-grid-react';
-import {DummyDataService} from "../services/DummyDataService";
+import {MockDataService} from "../services/MockDataService";
 import {useEffect} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {currencyFormatter, numberFormatter} from "../utilities";
@@ -11,7 +11,7 @@ import {currencyFormatter, numberFormatter} from "../utilities";
 
 const CrossesApp = () =>
 {
-    const [dummyDataService] = useState(new DummyDataService());
+    const [dummyDataService] = useState(new MockDataService());
     const columnDefs = [
         {
             headerName: 'Desk',

@@ -13,6 +13,7 @@ import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
 import CrossesApp from "./components/CrossesApp";
 import {FxRatesApp} from "./components/FxRatesApp";
+import TradeHistoryApp from "./components/TradeHistoryApp";
 
 const App = ({}) =>
 {
@@ -46,6 +47,7 @@ const App = ({}) =>
             { name: 'Users', path: '/users', component: UsersApp },
             { name: 'Crosses', path: '/crosses', component: CrossesApp },
             { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
+            { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];
 
