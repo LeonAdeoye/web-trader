@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useMemo} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
@@ -16,7 +16,7 @@ const TradeHistoryApp = () =>
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
 
-    const stockColumnDefs = [
+    const stockColumnDefs = useMemo(() => ( [
         {
             headerName: 'Trd. Date',
             field: 'date', // Replace with your data field for date
@@ -88,8 +88,8 @@ const TradeHistoryApp = () =>
             filter: true,
             cellDataType: 'number',
         },
-    ];
-    const clientColumnDefs = [
+    ]), []);
+    const clientColumnDefs = useMemo(() => ( [
         {
             headerName: 'Trd. Date',
             field: 'date', // Replace with your data field for date
@@ -169,7 +169,7 @@ const TradeHistoryApp = () =>
             filter: true,
             cellDataType: 'number',
         },
-    ];
+    ]), []);
 
     return (
         <div className="trade-history-app">

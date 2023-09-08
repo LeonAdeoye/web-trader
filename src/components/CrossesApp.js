@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
@@ -12,7 +12,7 @@ import {currencyFormatter, numberFormatter} from "../utilities";
 const CrossesApp = () =>
 {
     const [dummyDataService] = useState(new MockDataService());
-    const columnDefs = [
+    const columnDefs = useMemo(() => ([
         {
             headerName: 'Desk',
             field: 'desk',
@@ -81,7 +81,8 @@ const CrossesApp = () =>
             sortable: true,
             filter: true,
         },
-    ];
+    ]), []);
+
     const [stockRows, setStockRows] = useState([]);
     const [exchangeRateService] = useState(new ExchangeRateService());
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
