@@ -35,8 +35,7 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
         if(totalBuyNotional > totalSellNotional)
             setBuySkew(totalBuyNotional/totalSellNotional);
 
-    }, [totalSellNotional]);
-
+    }, [totalSellNotional, totalBuyNotional]);
 
     return (
         <div className="trade-history-app">
@@ -58,7 +57,7 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
                                         columnDefs={columnDefs}
                                         rowData={rows.buyTrades}
                                         domLayout="autoHeight"
-                                        headerHeight={20}
+                                        headerHeight={25}
                                         rowHeight={20}
                                         height
                                     />
@@ -75,7 +74,7 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
                                         columnDefs={columnDefs}
                                         rowData={rows.sellTrades}
                                         domLayout="autoHeight"
-                                        headerHeight={20}
+                                        headerHeight={25}
                                         rowHeight={20}
                                     />
                                 </div>

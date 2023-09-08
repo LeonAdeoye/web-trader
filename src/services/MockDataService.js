@@ -198,13 +198,37 @@ const crossing_data = [
     }
 ]
 
+const filterTradesByDays = (trades, days) =>
+{
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() - days);
+
+    const filteredBuyTrades = trades.buyTrades.filter((trade) =>
+    {
+        const tradeDate = new Date(trade.date);
+        return tradeDate >= currentDate;
+    });
+
+    const filteredSellTrades = trades.sellTrades.filter((trade) =>
+    {
+        const tradeDate = new Date(trade.date);
+        return tradeDate >= currentDate;
+    });
+
+    return {
+        ...trades,
+        buyTrades: filteredBuyTrades,
+        sellTrades: filteredSellTrades,
+    };
+}
+
 const client_trade_history = {
     buyTrades: [
         {
             stockCode: '0001.HK',
             stockDescription: 'CK Hutchison Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 50.25,
             desk: 'LowTouch HK',
             trader: 'John Doe',
@@ -217,7 +241,7 @@ const client_trade_history = {
             stockCode: '0001.HK',
             stockDescription: 'CK Hutchison Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 48.75,
             desk: 'HighTouch SG',
             trader: 'Jane Smith',
@@ -230,7 +254,7 @@ const client_trade_history = {
             stockCode: '0700.HK',
             stockDescription: 'Tencent Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 535.50,
             desk: 'LowTouch HK',
             trader: 'Emily Brown',
@@ -245,7 +269,7 @@ const client_trade_history = {
             stockCode: '0001.HK',
             stockDescription: 'CK Hutchison Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 56.50,
             desk: 'Equity Derivatives HK',
             trader: 'David Chen',
@@ -258,7 +282,7 @@ const client_trade_history = {
             stockCode: '0001.HK',
             stockDescription: 'CK Hutchison Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '09/06/23',
             averagePrice: 58.20,
             desk: 'HighTouch HK',
             trader: 'Sophia Liu',
@@ -271,7 +295,7 @@ const client_trade_history = {
             stockCode: '0001.HK',
             stockDescription: 'CK Hutchison Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '05/06/23',
             averagePrice: 53.80,
             desk: 'LowTouch AU',
             trader: 'John Smith',
@@ -284,7 +308,7 @@ const client_trade_history = {
             stockCode: '0700.HK',
             stockDescription: 'Tencent Holdings',
             currency: 'HKD',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 556.80,
             desk: 'Equity Derivatives SG',
             trader: 'Michael Johnson',
@@ -303,7 +327,7 @@ const stock_trade_history = {
     buyTrades: [
         {
             client: 'Deutsche Bank',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 50.25,
             desk: 'LowTouch HK',
             trader: 'John Doe',
@@ -314,7 +338,7 @@ const stock_trade_history = {
         },
         {
             client: 'Morgan Stanley',
-            date: '01/09/23',
+            date: '09/06/23',
             averagePrice: 48.75,
             desk: 'HighTouch SG',
             trader: 'Jane Smith',
@@ -325,7 +349,7 @@ const stock_trade_history = {
         },
         {
             client: 'JP Morgan',
-            date: '01/09/23',
+            date: '09/03/23',
             averagePrice: 535.50,
             desk: 'LowTouch HK',
             trader: 'Emily Brown',
@@ -336,7 +360,7 @@ const stock_trade_history = {
         },
         {
             client: 'Morgan Stanley',
-            date: '01/08/23',
+            date: '08/18/23',
             averagePrice: 48.75,
             desk: 'HighTouch SG',
             trader: 'Jane Smith',
@@ -347,7 +371,7 @@ const stock_trade_history = {
         },
         {
             client: 'Morgan Stanley',
-            date: '01/07/23',
+            date: '08/18/23',
             averagePrice: 48.75,
             desk: 'HighTouch SG',
             trader: 'Jane Smith',
@@ -358,7 +382,7 @@ const stock_trade_history = {
         },
         {
             client: 'JP Morgan',
-            date: '23/07/23',
+            date: '09/08/23',
             averagePrice: 535.50,
             desk: 'LowTouch HK',
             trader: 'Emily Brown',
@@ -369,7 +393,7 @@ const stock_trade_history = {
         },
         {
             client: 'Deutsche Bank',
-            date: '01/05/23',
+            date: '04/15/23',
             averagePrice: 535.50,
             desk: 'LowTouch HK',
             trader: 'Emily Brown',
@@ -382,7 +406,7 @@ const stock_trade_history = {
     sellTrades: [
         {
             client: 'Millennium Capital',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 56.50,
             desk: 'Equity Derivatives HK',
             trader: 'David Chen',
@@ -393,7 +417,7 @@ const stock_trade_history = {
         },
         {
             client: 'Goldman Sachs',
-            date: '01/09/23',
+            date: '08/06/23',
             averagePrice: 58.20,
             desk: 'HighTouch HK',
             trader: 'Sophia Liu',
@@ -404,7 +428,7 @@ const stock_trade_history = {
         },
         {
             client: 'Deutsche Bank',
-            date: '01/09/23',
+            date: '08/26/23',
             averagePrice: 53.80,
             desk: 'LowTouch AU',
             trader: 'John Smith',
@@ -415,7 +439,7 @@ const stock_trade_history = {
         },
         {
             client: 'Morgan Stanley',
-            date: '01/09/23',
+            date: '08/26/23',
             averagePrice: 556.80,
             desk: 'Equity Derivatives SG',
             trader: 'Michael Johnson',
@@ -429,16 +453,16 @@ const stock_trade_history = {
 
 export class MockDataService
 {
-    get(dataId)
+    get(dataId, days)
     {
         switch (dataId)
         {
             case "crossing_data":
                 return crossing_data;
             case "client_trade_history":
-                return client_trade_history;
+                return filterTradesByDays(client_trade_history, days);
             case "stock_trade_history":
-                return stock_trade_history;
+                return filterTradesByDays(stock_trade_history, days);
             default:
                 return [];
         }

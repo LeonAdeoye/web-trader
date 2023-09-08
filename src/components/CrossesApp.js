@@ -135,7 +135,7 @@ const CrossesApp = () =>
                                         columnDefs={columnDefs}
                                         rowData={stock.buyOrders}
                                         domLayout='autoHeight'
-                                        headerHeight={20}
+                                        headerHeight={25}
                                         rowHeight={20}
                                     />
                                 </div>
@@ -146,7 +146,7 @@ const CrossesApp = () =>
                                         columnDefs={columnDefs}
                                         rowData={stock.sellOrders}
                                         domLayout='autoHeight'
-                                        headerHeight={20}
+                                        headerHeight={25}
                                         rowHeight={20}
                                     />
                                 </div>
