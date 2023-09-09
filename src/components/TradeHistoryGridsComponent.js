@@ -4,6 +4,9 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
+import {useRecoilState} from "recoil";
+import {filterDaysState} from "../atoms/filter-state";
+
 
 const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
 {
@@ -14,25 +17,41 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
     const [totalSellNotional, setTotalSellNotional] = useState(0);
     const [sellSkew, setSellSkew] = useState(0);
     const [buySkew, setBuySkew] = useState(0);
+    const [filterDays] = useRecoilState(filterDaysState);
 
     useEffect(() =>
     {
-        if(rows.buyTrades.length === 0 || rows.sellTrades.length === 0)
-            return;
+        if(rows.buyTrades.length === 0)
+        {
+            setTotalBuyNotional(0);
+            setSellSkew(0);
+            setBuySkew(0);
+        }
+        else
+        {
+            setTotalBuyQty(rows.buyTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
+            setTotalBuyNotional(rows.buyTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
+        }
 
-        setTotalBuyQty(rows.buyTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
-        setTotalSellQty(rows.sellTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
-        setTotalBuyNotional(rows.buyTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
-        setTotalSellNotional(rows.sellTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
-
+        if(rows.sellTrades.length === 0)
+        {
+            setTotalSellNotional(0);
+            setSellSkew(0);
+            setBuySkew(0);
+        }
+        else
+        {
+            setTotalSellQty(rows.sellTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
+            setTotalSellNotional(rows.sellTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
+        }
     }, [rows]);
 
     useEffect(() =>
     {
-        if(totalSellNotional > totalBuyNotional)
+        if(totalSellNotional > totalBuyNotional && totalBuyNotional > 0 && totalSellNotional > 0)
             setSellSkew(totalSellNotional/totalBuyNotional);
 
-        if(totalBuyNotional > totalSellNotional)
+        if(totalBuyNotional > totalSellNotional && totalSellNotional > 0 && totalBuyNotional > 0)
             setBuySkew(totalBuyNotional/totalSellNotional);
 
     }, [totalSellNotional, totalBuyNotional]);

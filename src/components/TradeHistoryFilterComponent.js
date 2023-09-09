@@ -12,7 +12,8 @@ const TradeHistoryFilterComponent = ({buySkew, sellSkew}) =>
         <div>
             <FormControl>
                 <RadioGroup row name="position" value={filterDays} onChange={handleDayFilterChange}>
-                    {sellSkew === 0 ? <Typography sx={{ fontSize: '12px' }}>Buy Skew {buySkew.toFixed(2)}:1</Typography>:<Typography sx={{ fontSize: '12px' }}>Sell Skew {sellSkew.toFixed(2)}:1</Typography>}
+                    {sellSkew > 0 ? <Typography sx={{ fontSize: '12px' }}>Sell Skew {sellSkew.toFixed(2)}:1</Typography> : ""}
+                    {buySkew > 0 ? <Typography sx={{ fontSize: '12px' }}>Buy Skew {buySkew.toFixed(2)}:1</Typography> : ""}
                     <FormControlLabel value="1" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>Days: 1</Typography>}labelPlacement="start"/>
                     <FormControlLabel value="5" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>5</Typography>}labelPlacement="start"/>
                     <FormControlLabel value="10" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>10</Typography>}labelPlacement="start"/>
