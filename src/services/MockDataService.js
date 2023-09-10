@@ -223,6 +223,7 @@ const filterTradesByDays = (trades, days) =>
 }
 
 const client_trade_history = {
+    client: 'Goldman Sachs',
     buyTrades: [
         {
             stockCode: '0001.HK',

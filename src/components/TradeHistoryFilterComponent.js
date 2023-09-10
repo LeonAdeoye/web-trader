@@ -3,7 +3,7 @@ import { grey,red } from '@mui/material/colors';
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 
-const TradeHistoryFilterComponent = ({buySkew, sellSkew}) =>
+const TradeHistoryFilterComponent = ({historyPropertyValue, buySkew, sellSkew}) =>
 {
     const [filterDays, setFilterDays] = useRecoilState(filterDaysState);
     const handleDayFilterChange = (event) => setFilterDays(event.target.value);
@@ -21,10 +21,11 @@ const TradeHistoryFilterComponent = ({buySkew, sellSkew}) =>
                         <FormControlLabel value="90" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>90</Typography>}labelPlacement="start"/>
                         <FormControlLabel value="180" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>180</Typography>}labelPlacement="start"/>
                     </div>
-                    <div className="skews" style={{marginLeft: "80px"}}>
+                    <div className="skews" style={{marginLeft: "80px", marginRight: "270px"}}>
                         {sellSkew > 0 ? <Typography sx={{ fontSize: '12px'}}>Sell Skew {sellSkew.toFixed(2)}:1</Typography> : ""}
                         {buySkew > 0 ? <Typography sx={{ fontSize: '12px' }}>Buy Skew {buySkew.toFixed(2)}:1</Typography> : ""}
                     </div>
+                    <span>{historyPropertyValue}</span>
                 </RadioGroup>
             </FormControl>
         </div>);

@@ -5,7 +5,7 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
 
-const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
+const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs}) =>
 {
     const gridDimensions = useMemo(() => ({ height: '100%'}), []);
     const [totalBuyQty, setTotalBuyQty] = useState(0);
@@ -58,7 +58,7 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
                 <div className="trade-history-row">
                     <div className="stock-info">
                         <div className="top-part">
-                            <TradeHistoryFilterComponent buySkew={buySkew} sellSkew={sellSkew}/>
+                            <TradeHistoryFilterComponent historyPropertyValue={`Trade history of ${rows[historyProperty]}`} buySkew={buySkew} sellSkew={sellSkew}/>
                         </div>
                         <div className="bottom-part">
                             <div className="buy-orders">
