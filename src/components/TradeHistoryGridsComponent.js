@@ -4,9 +4,6 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
-import {useRecoilState} from "recoil";
-import {filterDaysState} from "../atoms/filter-state";
-
 
 const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
 {
@@ -17,7 +14,6 @@ const TradeHistoryGridsComponent = ({rows, dataId, columnDefs}) =>
     const [totalSellNotional, setTotalSellNotional] = useState(0);
     const [sellSkew, setSellSkew] = useState(0);
     const [buySkew, setBuySkew] = useState(0);
-    const [filterDays] = useRecoilState(filterDaysState);
 
     useEffect(() =>
     {
