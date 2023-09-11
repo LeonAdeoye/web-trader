@@ -222,6 +222,38 @@ const filterTradesByDays = (trades, days) =>
     };
 }
 
+const client_holdings = {
+    client: "JP Morgan",
+    holdings: [
+        {
+            stockCode: "0001.HK",
+            stockDescription: "CK Hutchison Holdings",
+            currency: "HKD",
+            quantity: 25000,
+            notionalValue: 1250000,
+            quantityChange: 5000,
+            sharesPercent: 2,
+            lastDate: "08/06/23"
+        }
+    ]
+}
+
+const stock_holdings = {
+    stockCode: "0001.HK",
+    stockDescription: "CK Hutchison Holdings",
+    currency: "HKD",
+    holdings: [
+        {
+            client: "JP Morgan",
+            quantity: 25000,
+            notionalValue: 1250000,
+            quantityChange: 5000,
+            sharesPercent: 2,
+            lastDate: "08/06/23"
+        }
+    ]
+}
+
 const client_trade_history = {
     client: 'Goldman Sachs',
     buyTrades: [
@@ -464,6 +496,10 @@ export class MockDataService
                 return filterTradesByDays(client_trade_history, days);
             case "stock_trade_history":
                 return filterTradesByDays(stock_trade_history, days);
+            case "stock_holdings":
+                return stock_holdings;
+            case "client_holdings":
+                return client_holdings;
             default:
                 return [];
         }

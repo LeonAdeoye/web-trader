@@ -46,7 +46,7 @@ const HoldingsApp = () =>
         },
         {
             headerName: 'Qty',
-            field: 'Quantity',
+            field: 'quantity',
             width: 85,
             valueFormatter: numberFormatter,
             sortable: true,
@@ -64,7 +64,7 @@ const HoldingsApp = () =>
         },
         {
             headerName: '% of Shares',
-            field: 'SharesPercent',
+            field: 'sharesPercent',
             width: 120,
             headerTooltip: 'Percentage of Sahres',
             valueFormatter: numberFormatter,
@@ -88,8 +88,8 @@ const HoldingsApp = () =>
         },
         {
             headerName: 'Client',
-            field: 'Client',
-            width: 85,
+            field: 'client',
+            width: 180,
             headerTooltip: 'Client',
             sortable: true,
             filter: true,
@@ -121,7 +121,7 @@ const HoldingsApp = () =>
         },
         {
             headerName: '% of Shares',
-            field: 'SharesPercent',
+            field: 'sharesPercent',
             width: 120,
             headerTooltip: 'Percentage of Sahres',
             valueFormatter: numberFormatter,
@@ -146,12 +146,12 @@ const HoldingsApp = () =>
                 </TabList>
 
                 {selectedTab === "1" && (
-                    <TabPanel value="1" className="client-holdings">
+                    <TabPanel value="1" className="holdings">
                         <HoldingsGridsComponent rows={dataService.get("client_holdings")} historyProperty="client" dataId="client_holdings" columnDefs={clientColumnDefs}/>
                     </TabPanel>)}
 
                 {selectedTab === "2" && (
-                    <TabPanel value="2" className="client-holdings">
+                    <TabPanel value="2" className="holdings">
                         <HoldingsGridsComponent rows={dataService.get("stock_holdings")} historyProperty="stockCode" dataId="stock_holdings" columnDefs={stockColumnDefs}/>
                     </TabPanel>)}
             </TabContext>

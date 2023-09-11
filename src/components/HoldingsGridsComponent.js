@@ -16,12 +16,12 @@ const HoldingsGridsComponent = ({rows, holdingsProperty, dataId, columnDefs}) =>
     return (
         <div className="holdings">
             <div className="summary-info">
-                <span>`Holdings of ${rows[holdingsProperty]}`</span>
+                <span>Holdings of {rows[holdingsProperty]}</span>
             </div>
             <div className="ag-theme-balham" style={gridDimensions}>
                 <AgGridReact
                     columnDefs={columnDefs}
-                    rowData={rows}
+                    rowData={rows.holdings}
                     domLayout="autoHeight"
                     headerHeight={25}
                     rowHeight={20}
