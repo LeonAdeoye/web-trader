@@ -81,84 +81,60 @@ const HoldingsApp = () =>
     ]), []);
     const stockColumnDefs = useMemo(() => ( [
         {
-            headerName: 'Trd. Date',
-            field: 'date', // Replace with your data field for date
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Trade Date',
+            headerName: 'Score',
+            field: 'score',
+            width: 85,
+            headerTooltip: 'score'
+        },
+        {
+            headerName: 'Client',
+            field: 'Client',
+            width: 85,
+            headerTooltip: 'Client',
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'RIC',
-            field: 'stockCode', // Replace with your data field for stock symbol
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Stock Symbol (RIC)',
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Description',
-            field: 'stockDescription', // Replace with your data field for stock description
-            width: 140, // Adjust width as needed
-            headerTooltip: 'Stock Description',
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Avg. Px',
-            field: 'averagePrice', // Replace with your data field for average price
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Average Price',
+            headerName: 'Notional Val.',
+            field: 'notionalValue',
+            width: 140,
+            headerTooltip: 'Notional value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Desk',
-            field: 'desk', // Replace with your data field for trading desk
-            width: 100, // Adjust width as needed
-            headerTooltip: 'Trading Desk',
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Org. Qty',
-            field: 'originalQuantity', // Replace with your data field for original quantity
-            width: 90, // Adjust width as needed
-            headerTooltip: 'Org. Qty',
+            headerName: 'Qty',
+            field: 'quantity',
+            width: 90,
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Org. Notional',
-            field: 'originalNotionalValue', // Replace with your data field for original notional value
-            width: 110, // Adjust width as needed
-            headerTooltip: 'Org. Notional Value',
-            valueFormatter: numberFormatter,
+            headerName: 'Qty Chg.',
+            field: 'quantityChange',
+            width: 100,
+            headerTooltip: 'Quantity change',
             sortable: true,
             filter: true,
-            cellDataType: 'number',
         },
         {
-            headerName: 'Curr. Qty',
-            field: 'currentQuantity', // Replace with your data field for current quantity
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Curr. Qty',
+            headerName: '% of Shares',
+            field: 'SharesPercent',
+            width: 120,
+            headerTooltip: 'Percentage of Sahres',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Curr. Notional',
-            field: 'currentNotionalValue', // Replace with your data field for current notional value
-            width: 110, // Adjust width as needed
-            headerTooltip: 'Curr. Notional Value',
-            valueFormatter: numberFormatter,
+            headerName: 'Last Date',
+            field: 'lastDate',
+            width: 120,
             sortable: true,
             filter: true,
-            cellDataType: 'number',
-        },
+        }
     ]), []);
 
     return (
