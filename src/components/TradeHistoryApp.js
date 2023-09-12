@@ -175,8 +175,8 @@ const TradeHistoryApp = () =>
         <div className="trade-history-app">
             <TabContext value={selectedTab}>
                 <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
-                    <Tab className="client-trade-history-tab" label="Client History" value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "#1976D2"}}}/>
-                    <Tab className="client-trade-history-tab" label="Stock History" value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "#1976D2"}}}/>
+                    <Tab className="client-trade-history-tab" label="Client History" value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
+                    <Tab className="client-trade-history-tab" label="Stock History" value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
                 </TabList>
 
                 {selectedTab === "1" && (

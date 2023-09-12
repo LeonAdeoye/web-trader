@@ -141,8 +141,8 @@ const HoldingsApp = () =>
         <div className="holdings-app" style={{height: '100%', width: '100%'}}>
             <TabContext value={selectedTab}>
                 <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                    <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ marginRight: "5px", backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "#1976D2"}}}/>
-                    <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "#1976D2"}}}/>
+                    <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ marginRight: "5px", backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
+                    <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
                 </TabList>
 
                 {selectedTab === "1" && (
