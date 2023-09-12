@@ -226,6 +226,7 @@ const client_holdings = {
     client: "JP Morgan",
     holdings: [
         {
+            score:[1, 2, 3, 4, 5],
             stockCode: "0001.HK",
             stockDescription: "CK Hutchison Holdings",
             currency: "HKD",
@@ -236,6 +237,7 @@ const client_holdings = {
             lastDate: "08/06/23"
         },
         {
+            score:[1, 2],
             stockCode: "0005.HK",
             stockDescription: "HSBC Holdings",
             currency: "HKD",
@@ -254,6 +256,7 @@ const stock_holdings = {
     currency: "HKD",
     holdings: [
         {
+            score:[1, 2, 3, 4, 5],
             client: "JP Morgan",
             quantity: 25000,
             notionalValue: 1025000,
@@ -262,6 +265,7 @@ const stock_holdings = {
             lastDate: "08/06/23"
         },
         {
+            score:[1, 2],
             client: "Deutsche Bank",
             quantity: 2000,
             notionalValue: 82000,
@@ -270,6 +274,7 @@ const stock_holdings = {
             lastDate: "08/06/23"
         },
         {
+            score:[1, 2, 3],
             client: "SchroderS",
             quantity: 3500,
             notionalValue: 143500,
@@ -278,6 +283,7 @@ const stock_holdings = {
             lastDate: "09/06/23"
         },
         {
+            score:[1, 2, 3, 4],
             client: "Morgan Stanley",
             quantity: 1450,
             notionalValue: 594500,

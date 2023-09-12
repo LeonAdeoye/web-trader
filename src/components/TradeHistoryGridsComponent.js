@@ -7,7 +7,7 @@ import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
 
 const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs}) =>
 {
-    const gridDimensions = useMemo(() => ({ height: '100%'}), []);
+    const gridDimensions = useMemo(() => ({ height: 'calc(100vh - 190px)'}), []);
     const [totalBuyQty, setTotalBuyQty] = useState(0);
     const [totalSellQty, setTotalSellQty] = useState(0);
     const [totalBuyNotional, setTotalBuyNotional] = useState(0);

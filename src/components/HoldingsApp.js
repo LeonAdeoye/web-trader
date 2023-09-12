@@ -7,6 +7,7 @@ import {Tab} from "@mui/material";
 import {MockDataService} from "../services/MockDataService";
 import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
+import SparklineRenderer from './SparklineRenderer';
 
 const HoldingsApp = () =>
 {
@@ -17,8 +18,11 @@ const HoldingsApp = () =>
         {
             headerName: 'Score',
             field: 'score',
-            width: 100,
-            headerTooltip: 'Score'
+            width: 120,
+            headerTooltip: 'Score',
+            cellDataType: 'object',
+            valueFormatter: numberFormatter, // Needed otherwise ag-grid warning.
+            cellRenderer: SparklineRenderer
         },
         {
             headerName: 'Symbol',
@@ -84,12 +88,14 @@ const HoldingsApp = () =>
             headerName: 'Score',
             field: 'score',
             width: 100,
-            headerTooltip: 'score'
+            headerTooltip: 'score',
+            valueFormatter: numberFormatter, // Needed otherwise ag-grid warning.
+            cellRenderer:SparklineRenderer
         },
         {
             headerName: 'Client',
             field: 'client',
-            width: 180,
+            width: 230,
             headerTooltip: 'Client',
             sortable: true,
             filter: true,

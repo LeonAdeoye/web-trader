@@ -4,29 +4,20 @@
     min-height: 27px;
     height: 27px;
     background-color: white;
-
   }
 
-  // Styles for the client tab
   .client-trade-history-tab {
-    // Custom styles for each tab
     min-height: 25px;
     height: 25px;
     text-transform: none;
     color: white;
-
-    // Additional styles as needed
   }
 
-  // Styles for the stock tab
   .stock-trade-history-tab {
-    // Custom styles for each tab
     min-height: 25px;
     height: 25px;
     text-transform: none;
     color: white;
-
-    // Additional styles as needed
   }
 
   .client-trade-history, .stock-trade-history {
@@ -42,7 +33,7 @@
           font-family: Arial, sans-serif;
           background-color: #404040;
           display: flex;
-          align-items: center; // Align items vertically
+          align-items: center;
           color: white;
           margin-bottom: -5;
           padding: 0;
@@ -50,16 +41,15 @@
 
         .bottom-part {
           display: flex;
-          flex-grow: 1; // Allow both grids to grow to fill the available height
-          margin: 0; // Remove margin
+          flex-grow: 1;
+          margin: 0;
           padding: 0;
 
           .buy-orders {
             background-color: white;
             flex-grow: 1;
             padding: 0;
-            margin: 0; // Remove margin
-            height:100%;
+            margin: 0;
 
             .summary-info {
               font-size: 12px;
@@ -68,21 +58,21 @@
               color: #4F81BD;
               background-color: #404040;
               display: flex;
-              gap: 50px; // Add space between summary elements
-              align-items: center; // Align items vertically
-              margin-left: auto; // Push summary to the right
+              gap: 50px;
+              align-items: center;
+              margin-left: auto;
             }
 
             .ag-header {
-              background-color: #4F81BD; // Blue color
+              background-color: #4F81BD;
               font-size: 10px;
               font-weight: bold;
               font-family: Arial, sans-serif;
-              height: 16px; // Reduced header height
+              height: 16px;
             }
 
             .ag-cell {
-              font-size: 10px; // Reduced font size
+              font-size: 10px;
             }
           }
 
@@ -90,8 +80,7 @@
             background-color: white;
             flex-grow: 1;
             padding: 0;
-            margin: 0; // Remove margin
-            height:100%;
+            margin: 0;
 
             .summary-info {
               font-weight: bold;
@@ -100,21 +89,21 @@
               color: #528c74;
               background-color: #404040;
               display: flex;
-              gap: 50px; // Add space between summary elements
-              align-items: center; // Align items vertically
-              margin-left: auto; // Push summary to the right
+              gap: 50px;
+              align-items: center;
+              margin-left: auto;
             }
 
             .ag-header {
-              background-color: #528c74; // Blue color
+              background-color: #528c74;
               font-size: 10px;
               font-weight: bold;
               font-family: Arial, sans-serif;
-              height: 16px; // Reduced header height
+              height: 16px;
             }
 
             .ag-cell {
-              font-size: 10px; // Reduced font size
+              font-size: 10px;
             }
           }
         }

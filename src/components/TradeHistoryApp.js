@@ -99,7 +99,7 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: 'RIC',
+            headerName: 'Symbol',
             field: 'stockCode', // Replace with your data field for stock symbol
             width: 85, // Adjust width as needed
             headerTooltip: 'Stock Symbol (RIC)',

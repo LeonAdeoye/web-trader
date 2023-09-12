@@ -30,6 +30,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
+    "react-sparklines": "^1.7.0",
     "recoil": "^0.7.7",
     "util": "^0.12.5",
     "wait-on": "^7.0.1"
