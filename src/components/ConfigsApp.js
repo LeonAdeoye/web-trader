@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {isEmptyString, transformLocalDataTime} from "../utilities";
-import {GenericGridApp} from "./GenericGridApp";
+import {GenericGridComponent} from "./GenericGridComponent";
 import {useEffect, useState} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {LoggerService} from "../services/LoggerService";
@@ -140,7 +140,7 @@ export const ConfigsApp = () =>
     return(
         <div className="app-parent-with-action-button">
             <div>
-                <GenericGridApp
+                <GenericGridComponent
                     rowHeight={25}
                     gridTheme="ag-theme-alpine"
                     rowIdArray={['id']}

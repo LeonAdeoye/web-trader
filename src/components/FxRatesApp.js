@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {GenericGridApp} from "./GenericGridApp";
+import {GenericGridComponent} from "./GenericGridComponent";
 import {useEffect, useState, useCallback} from "react";
 
 export const FxRatesApp = () =>
@@ -52,9 +52,9 @@ export const FxRatesApp = () =>
         {headerName: "Ask", field: "ask", sortable: false, minWidth: 100, width: 100},
         {headerName: "Mid", field: "mid", sortable: false, minWidth: 100, width: 100}];
 
-    return (<GenericGridApp rowHeight={25}
-                            gridTheme={"ag-theme-alpine"}
-                            rowIdArray={["currency"]}
-                            columnDefs={columnDefs}
-                            gridData={fxData}/>);
+    return (<GenericGridComponent rowHeight={25}
+                                  gridTheme={"ag-theme-alpine"}
+                                  rowIdArray={["currency"]}
+                                  columnDefs={columnDefs}
+                                  gridData={fxData}/>);
 };

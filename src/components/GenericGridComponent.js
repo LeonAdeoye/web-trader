@@ -5,7 +5,7 @@ import {createRowId, getRowIdValue} from "../utilities";
 import {selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
 
-export const GenericGridApp = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData}) =>
+export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData}) =>
 {
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);

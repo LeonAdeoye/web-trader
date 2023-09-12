@@ -6,7 +6,7 @@ import '../styles/css/main.css';
 import {Tab} from "@mui/material";
 import {MockDataService} from "../services/MockDataService";
 import {numberFormatter} from "../utilities";
-import HoldingsGridsComponent from "./HoldingsGridsComponent";
+import {GenericGridComponent} from "./GenericGridComponent";
 
 const HoldingsApp = () =>
 {
@@ -17,7 +17,7 @@ const HoldingsApp = () =>
         {
             headerName: 'Score',
             field: 'score',
-            width: 70,
+            width: 100,
             headerTooltip: 'Score'
         },
         {
@@ -36,26 +36,26 @@ const HoldingsApp = () =>
             filter: true,
         },
         {
-            headerName: 'Notional Val.',
+            headerName: 'Notional Value',
             field: 'notionalValue',
-            width: 130,
+            width: 170,
             headerTooltip: 'Notional value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Qty',
+            headerName: 'Quantity',
             field: 'quantity',
-            width: 85,
+            width: 140,
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Qty Chg.',
+            headerName: 'Qty Change',
             field: 'quantityChange',
-            width: 100,
+            width: 140,
             headerTooltip: 'Change in quantity',
             valueFormatter: numberFormatter,
             sortable: true,
@@ -65,7 +65,7 @@ const HoldingsApp = () =>
         {
             headerName: '% of Shares',
             field: 'sharesPercent',
-            width: 120,
+            width: 135,
             headerTooltip: 'Percentage of Sahres',
             valueFormatter: numberFormatter,
             sortable: true,
@@ -83,7 +83,7 @@ const HoldingsApp = () =>
         {
             headerName: 'Score',
             field: 'score',
-            width: 85,
+            width: 100,
             headerTooltip: 'score'
         },
         {
@@ -95,26 +95,26 @@ const HoldingsApp = () =>
             filter: true,
         },
         {
-            headerName: 'Notional Val.',
+            headerName: 'Notional Value',
             field: 'notionalValue',
-            width: 140,
+            width: 170,
             headerTooltip: 'Notional value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Qty',
+            headerName: 'Quantity',
             field: 'quantity',
-            width: 90,
+            width: 140,
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Qty Chg.',
+            headerName: 'Qty Change',
             field: 'quantityChange',
-            width: 100,
+            width: 140,
             headerTooltip: 'Quantity change',
             sortable: true,
             filter: true,
@@ -122,7 +122,7 @@ const HoldingsApp = () =>
         {
             headerName: '% of Shares',
             field: 'sharesPercent',
-            width: 120,
+            width: 135,
             headerTooltip: 'Percentage of Sahres',
             valueFormatter: numberFormatter,
             sortable: true,
@@ -138,21 +138,29 @@ const HoldingsApp = () =>
     ]), []);
 
     return (
-        <div className="holdings-app">
+        <div className="holdings-app" style={{height: '100%', width: '100%'}}>
             <TabContext value={selectedTab}>
                 <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                    <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "#1976D2"}}}/>
-                    <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "#1976D2"}}}/>
+                    <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ marginRight: "5px", backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "#1976D2"}}}/>
+                    <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "#1976D2"}}}/>
                 </TabList>
 
                 {selectedTab === "1" && (
-                    <TabPanel value="1" className="holdings">
-                        <HoldingsGridsComponent rows={dataService.get("client_holdings")} historyProperty="client" dataId="client_holdings" columnDefs={clientColumnDefs}/>
+                    <TabPanel value="1" className="holdings-panel">
+                        <GenericGridComponent rowHeight={25}
+                                              gridTheme={"ag-theme-alpine"}
+                                              rowIdArray={["stockCode"]}
+                                              columnDefs={clientColumnDefs}
+                                              gridData={dataService.get("client_holdings").holdings}/>
                     </TabPanel>)}
 
                 {selectedTab === "2" && (
-                    <TabPanel value="2" className="holdings">
-                        <HoldingsGridsComponent rows={dataService.get("stock_holdings")} historyProperty="stockCode" dataId="stock_holdings" columnDefs={stockColumnDefs}/>
+                    <TabPanel value="2" className="holdings-panel">
+                        <GenericGridComponent rowHeight={25}
+                                              gridTheme={"ag-theme-alpine"}
+                                              rowIdArray={["client"]}
+                                              columnDefs={stockColumnDefs}
+                                              gridData={dataService.get("stock_holdings").holdings}/>
                     </TabPanel>)}
             </TabContext>
         </div>

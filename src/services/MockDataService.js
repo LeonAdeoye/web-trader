@@ -234,6 +234,16 @@ const client_holdings = {
             quantityChange: 5000,
             sharesPercent: 2,
             lastDate: "08/06/23"
+        },
+        {
+            stockCode: "0005.HK",
+            stockDescription: "HSBC Holdings",
+            currency: "HKD",
+            quantity: 2000,
+            notionalValue: 116000,
+            quantityChange: 500,
+            sharesPercent: 0.2,
+            lastDate: "09/06/23"
         }
     ]
 }
@@ -246,10 +256,34 @@ const stock_holdings = {
         {
             client: "JP Morgan",
             quantity: 25000,
-            notionalValue: 1250000,
+            notionalValue: 1025000,
             quantityChange: 5000,
             sharesPercent: 2,
             lastDate: "08/06/23"
+        },
+        {
+            client: "Deutsche Bank",
+            quantity: 2000,
+            notionalValue: 82000,
+            quantityChange: 1000,
+            sharesPercent: 0.3,
+            lastDate: "08/06/23"
+        },
+        {
+            client: "SchroderS",
+            quantity: 3500,
+            notionalValue: 143500,
+            quantityChange: 500,
+            sharesPercent: 1.4,
+            lastDate: "09/06/23"
+        },
+        {
+            client: "Morgan Stanley",
+            quantity: 1450,
+            notionalValue: 594500,
+            quantityChange: 1200,
+            sharesPercent: 1.01,
+            lastDate: "09/06/23"
         }
     ]
 }

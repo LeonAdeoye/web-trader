@@ -7,49 +7,43 @@
     background-color: white;
 
   }
-
-  // Styles for the client tab
   .holdings-tab
   {
-    // Custom styles for each tab
     min-height: 25px;
     height: 25px;
     text-transform: none;
     color: white;
-
-    // Additional styles as needed
   }
-  .holdings
+  .holdings-panel
   {
     margin: 0;
     padding: 0;
-    .holdings-row
+    .holdings-grid
     {
        .summary-info
        {
-          font-size: 12px;
+          font-size: 16px;
           font-family: Arial, sans-serif;
           font-weight: bold;
-          color: #4F81BD;
+          height: 25px;
+          color: white;
           background-color: #404040;
           display: flex;
-          gap: 20px; // Add space between summary elements
-          align-items: center; // Align items vertically
-          margin-left: auto; // Push summary to the right
+          align-items: center;
+          margin-left: auto;
        }
 
       .ag-header
       {
-        background-color: #4F81BD; // Blue color
         font-size: 10px;
         font-weight: bold;
         font-family: Arial, sans-serif;
-        height: 16px; // Reduced header height
+        height: 16px;
       }
 
       .ag-cell
       {
-        font-size: 10px; // Reduced font size
+        font-size: 10px;
       }
     }
   }
