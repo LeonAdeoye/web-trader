@@ -7,7 +7,7 @@ const SparklineRenderer = (props) =>
 
     return (
         <Sparklines data={value} limit={5} margin={5}>
-            <SparklinesBars color="blue" />
+            <SparklinesBars/>
         </Sparklines>
     );
 };

@@ -70,7 +70,7 @@ const HoldingsApp = () =>
             headerName: '% of Shares',
             field: 'sharesPercent',
             width: 135,
-            headerTooltip: 'Percentage of Sahres',
+            headerTooltip: 'Percentage of Shares',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
