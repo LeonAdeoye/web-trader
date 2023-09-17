@@ -15,6 +15,8 @@ import CrossesApp from "./components/CrossesApp";
 import {FxRatesApp} from "./components/FxRatesApp";
 import TradeHistoryApp from "./components/TradeHistoryApp";
 import HoldingsApp from "./components/HoldingsApp";
+import TaskListApp from "./components/TaskListApp";
+
 
 const App = ({}) =>
 {
@@ -49,6 +51,7 @@ const App = ({}) =>
             { name: 'Crosses', path: '/crosses', component: CrossesApp },
             { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
             { name: 'Holdings', path: '/holdings', component: HoldingsApp },
+            { name: 'Tasks', path: '/tasks', component: TaskListApp },
             { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp}
         ];

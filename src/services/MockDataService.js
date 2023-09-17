@@ -524,6 +524,33 @@ const stock_trade_history = {
     ]
 };
 
+const task_list = [
+    {
+        id: 1,
+        type: "Potential Cross",
+        stockCode: "0001.HK",
+        stockDescription: "CK Hutchison Holdings",
+        isCompleted: false,
+        timestamp: "2021-06-23T10:00:00.000Z"
+    },
+    {
+        id: 2,
+        type: "Cross",
+        stockCode: "0005.HK",
+        stockDescription: "HSBC Holdings",
+        isCompleted: false,
+        timestamp: "2021-06-23T10:00:00.000Z"
+    },
+    {
+        id: 3,
+        type: "Blasts",
+        stockCode: "0003.HK",
+        stockDescription: "Hong Kong and China Gas",
+        isCompleted: false,
+        timestamp: "2021-06-23T10:00:00.000Z"
+    }
+];
+
 export class MockDataService
 {
     get(dataId, days)
@@ -540,6 +567,8 @@ export class MockDataService
                 return stock_holdings;
             case "client_holdings":
                 return client_holdings;
+            case "task_list":
+                return task_list;
             default:
                 return [];
         }
