@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText, ListItemIcon, Typography } from '@mui/material';
-import { Search, Work, Info, Alarm, CheckCircle } from '@mui/icons-material';
+import { Work, Info, Alarm, CheckCircle } from '@mui/icons-material';
 import {MockDataService} from "../services/MockDataService";
+import '../styles/css/main.css';
 
 const TaskListApp = () =>
 {
@@ -15,8 +16,17 @@ const TaskListApp = () =>
         setTasks(dataService.get("task_list"));
     }, [searchRIC, searchType]);
 
+    const formatTimestamp = timestamp =>
+    {
+        const date = new Date(timestamp);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    };
+
     return (
-        <div>
+        <div className="task-list-app">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <TextField label="Search by RIC or Stock Description"
                     variant="outlined" fullWidth value={searchRIC}
@@ -35,9 +45,9 @@ const TaskListApp = () =>
             </div>
             <List>
                 {tasks.map((task, index) => (
-                    <ListItem key={index} alignItems="flex-start" sx={{ border: '2px solid #404040', borderRadius: '4px', marginBottom: '8px' }}>
+                    <ListItem className="task-list-item" key={index} alignItems="flex-start">
                         <ListItemIcon>
-                            {task.type === 'crosses' && <Work color="primary" />}
+                            {task.type === 'crosses' && <Work color="primary"/>}
                             {task.type === 'potential-crosses' && <Info color="secondary" />}
                             {task.type === 'alerts' && <Alarm color="error" />}
                         </ListItemIcon>
@@ -46,9 +56,7 @@ const TaskListApp = () =>
                             secondary={
                                 <>
                                     {task.stockDescription}
-                                    <Typography component="span" variant="body2" color="textPrimary">
-                                        {task.timestamp}
-                                    </Typography>
+                                    <Typography component="span" variant="body2" color="textPrimary">{formatTimestamp(task.timestamp)}</Typography>
                                     {task.isCompleted && <CheckCircle style={{ color: 'green' }} />}
                                 </>
                             }
