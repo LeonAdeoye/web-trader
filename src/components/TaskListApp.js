@@ -28,10 +28,10 @@ const TaskListApp = () =>
     return (
         <div className="task-list-app">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <TextField label="Search by RIC or Stock Description"
+                <TextField size='small' label="Search by RIC or Stock Description"
                     variant="outlined" fullWidth value={searchRIC}
                     onChange={(e) => setSearchRIC(e.target.value)}/>
-                <FormControl variant="outlined" style={{ minWidth: '200px' }}>
+                <FormControl size='small' variant="outlined" style={{ minWidth: '200px' }}>
                     <InputLabel>Type of Task</InputLabel>
                     <Select label="Type of Task" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                         <MenuItem value="">All</MenuItem>
