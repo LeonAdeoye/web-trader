@@ -534,7 +534,8 @@ const task_list = [
         timestamp: "2021-06-23T10:00:00.000Z",
         isLive: true,
         market: "HK",
-        metadata: "Contact HK low-touch"
+        metadata: "Contact HK low-touch",
+        ranking: 8
     },
     {
         id: 2,
@@ -545,7 +546,8 @@ const task_list = [
         timestamp: "2021-06-23T11:00:00.000Z",
         isLive: true,
         market: "HK",
-        metadata: "Contact Lee McQueen"
+        metadata: "Contact Lee McQueen",
+        ranking: 9
     },
     {
         id: 3,
@@ -556,7 +558,8 @@ const task_list = [
         timestamp: "2021-06-23T11:30:00.000Z",
         isLive: true,
         market: "HK",
-        metadata: "JP Morgan Block desk"
+        metadata: "JP Morgan Block desk",
+        ranking: 7
     },
     {
         id: 4,
@@ -567,7 +570,8 @@ const task_list = [
         timestamp: "2021-06-23T11:35:00.000Z",
         isLive: false,
         market: "HK",
-        metadata: "Goldman Facil desk"
+        metadata: "Goldman Facil desk",
+        ranking: 6
     },
     {
         id: 5,
@@ -578,7 +582,8 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Deutsche Bank"
+        metadata: "Deutsche Bank",
+        ranking: 6
     },
     {
         id: 6,
@@ -589,7 +594,8 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Morgan Stanley"
+        metadata: "Morgan Stanley",
+        ranking: 5
     },
     {
         id: 6,
@@ -599,7 +605,9 @@ const task_list = [
         isCompleted: false,
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
-        market: "VWAP Algo paused"
+        market: "TK",
+        metadata: "VWAP algo paused",
+        ranking: 10
     }
 ];
 
