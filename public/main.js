@@ -173,14 +173,15 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
+const handleContextShareMessage = (_, context) => console.log("Context shared with main: " + JSON.stringify(context));
 
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', handleOpenAppMessage);
     ipcMain.on('message-to-main-from-renderer', handleMessageFromRenderer);
-
     ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
+    ipcMain.on('share-context-with-main', handleContextShareMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -205,6 +206,7 @@ app.on('before-quit', () =>
 
     ipcMain.removeListener('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.removeListener('get-user-logged-in', handleGetLoggedInUserMessage);
+    ipcMain.removeListener('share-context-with-main', handleContextShareMessage);
 
     childWindowsMap.forEach((childWindow) =>
     {

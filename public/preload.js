@@ -34,6 +34,10 @@ contextBridge.exposeInMainWorld('configurations', {
     getLoggedInUserId: () => ipcRenderer.invoke('get-user-logged-in') // This get data from main and returns it back to the render in the same call.
 });
 
+contextBridge.exposeInMainWorld('contextSharer', {
+    sendContextToMain: (context) => ipcRenderer.send('share-context-with-main', context)
+});
+
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
 window.addEventListener('DOMContentLoaded', () =>
 {

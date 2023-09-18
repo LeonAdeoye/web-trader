@@ -1,5 +1,11 @@
 .task-list-app
 {
+  .task-icon
+  {
+    color: #404040;
+    margin-left: -12px;
+    margin-right: -20px;
+  }
   .task-search
   {
     margin-right: 8px;
@@ -7,16 +13,18 @@
 
   .task-list-item
   {
+    margin-top: -2px;
     border: 2px solid #404040;
     border-radius : 4px;
     margin-bottom: 8px;
-    height: 65px;
+    height: 60px;
   }
   .task-type-label
   {
-    color: darkred;
+    color: #ea3535;
     font-weight: bold;
-    margin-right: 10px;
+    margin-right: 8px;
+    font-size: 13px;
   }
 
   .task-metadata
@@ -24,17 +32,27 @@
     margin-right: 10px;
   }
 
-  .stock-code
+  .task-stock-code
   {
     height: 40px;
     font-weight: bold;
-    margin-right: 12px;
+    margin-right: 8px;
+  }
+
+  .task-stock-description
+  {
+    font-size: 11px;
+  }
+
+  .task-metadata
+  {
+    font-size: 12px;
   }
 
   .task-live-label
   {
     font-family: Calibri;
-    background-color: darkolivegreen;
+    background-color: #528c74;
     color: white;
     border-color: darkgreen;
     padding: 2px 5px;

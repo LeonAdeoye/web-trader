@@ -13,7 +13,7 @@
         font-size: 16px;
         background-color: #404040;
         display: flex;
-        align-items: center; // Align items vertically
+        align-items: center;
         padding: 5px;
 
         .stock-label
@@ -25,18 +25,18 @@
 
         .buy-label
         {
-          color: #346bb4; // Blue color for BUY label
+          color: #346bb4;
           font-size: 18px;
           padding: 0px;
-          margin-right: 200px; // Add space between label and text
+          margin-right: 200px;
         }
 
         .sell-label
         {
-          color: #83AF9B; // Green color for SELL label
+          color: #528c74;
           font-size: 18px;
           padding: 0px;
-          margin-left: 80px; // Add space between label and text
+          margin-left: 80px;
         }
 
         .stock-code
@@ -45,7 +45,7 @@
           font-weight: bold;
           font-family: Arial, sans-serif;
           color: white;
-          margin-right: 20px; // Add space between stock code and currency
+          margin-right: 20px;
         }
 
         .stock-currency
@@ -54,7 +54,7 @@
           font-weight: bold;
           font-family: Arial, sans-serif;
           color: white;
-          margin-right: 280px; // Add space between stock currency and description
+          margin-right: 280px;
         }
 
         .stock-description
@@ -70,9 +70,9 @@
           font-family: Arial, sans-serif;
           color: #ea3535;
           display: flex;
-          gap: 20px; // Add space between summary elements
-          align-items: center; // Align items vertically
-          margin-left: auto; // Push summary to the right
+          gap: 20px;
+          align-items: center;
+          margin-left: auto;
         }
       }
 
@@ -88,16 +88,16 @@
 
           .ag-header
           {
-            background-color: #4F81BD; // Blue color
+            background-color: #4F81BD;
             font-size: 10px;
             font-weight: bold;
             font-family: Arial, sans-serif;
-            height: 16px; // Reduced header height
+            height: 16px;
           }
 
           .ag-cell
           {
-            font-size: 10px; // Reduced font size
+            font-size: 10px;
           }
         }
 
@@ -109,16 +109,16 @@
 
           .ag-header
           {
-            background-color: #528c74; // Green color
+            background-color: #528c74;
             font-size: 10px;
             font-weight: bold;
             font-family: Arial, sans-serif;
-            height: 16px; // Reduced header height
+            height: 16px;
           }
 
           .ag-cell
           {
-            font-size: 10px; // Reduced font size
+            font-size: 10px;
           }
         }
       }

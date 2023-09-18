@@ -582,7 +582,7 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Deutsche Bank",
+        metadata: "Deutsche  seller",
         ranking: 6
     },
     {
@@ -594,7 +594,7 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Morgan Stanley",
+        metadata: "Morgan Stanley buyer",
         ranking: 5
     },
     {

@@ -3,6 +3,7 @@ import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, L
 import { Send, VisibilityOff, SwapHorizontalCircle, NewReleases, CircleNotifications } from '@mui/icons-material';
 import {MockDataService} from "../services/MockDataService";
 import '../styles/css/main.css';
+import {LoggerService} from "../services/LoggerService";
 
 const TaskListApp = () =>
 {
@@ -10,22 +11,17 @@ const TaskListApp = () =>
     const [searchType, setSearchType] = useState('All');
     const [tasks, setTasks] = useState([]);
     const [dataService] = useState(new MockDataService());
+    const [loggerService] = useState(new LoggerService(TaskListApp.name));
 
     useEffect(() =>
     {
         setTasks(dataService.get("task_list").filter(filterTaskDetail).filter(filterTaskTypes));
     }, [searchValue, searchType]);
 
-    const selectTaskHandler = (e) =>
+    const selectTaskHandler = (task) =>
     {
-        const task = tasks.find(task => task.id === e.currentTarget.id);
-        console.log(task);
-    }
-
-    const taskDetailHandler = (e) =>
-    {
-        const task = tasks.find(task => task.id === e.currentTarget.id);
-        console.log(task);
+        loggerService.logInfo(`Selected task in TaskListApp for context sharing with main: ${JSON.stringify(task)}`);
+        window.contextSharer.sendContextToMain(task);
     }
 
     const filterTaskTypes = (task) =>
@@ -52,7 +48,7 @@ const TaskListApp = () =>
 
     return (
         <div className="task-list-app">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1px' }}>
                 <TextField className="task-search" size='small' label="Search task details"
                     variant="outlined" fullWidth value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}/>
@@ -71,8 +67,8 @@ const TaskListApp = () =>
             </div>
             <List>
                 {tasks.sort((first, second) => second.ranking - first.ranking) .map((task, index) => (
-                    <ListItem className="task-list-item" key={index} alignItems="flex-start" onDoubleClick={taskDetailHandler} onClick={selectTaskHandler}>
-                        <ListItemIcon>
+                    <ListItem className="task-list-item" key={index} alignItems="flex-start" onClick={() => selectTaskHandler(task)}>
+                        <ListItemIcon className="task-icon">
                             {task.type === 'Desk Cross' && <SwapHorizontalCircle style={{ color: '#404040' }} />}
                             {task.type === 'Potential Cross' && <VisibilityOff style={{ color: '#404040' }} />}
                             {task.type === 'Alert' && <CircleNotifications style={{ color: '#404040' }} />}
@@ -82,8 +78,8 @@ const TaskListApp = () =>
                         <ListItemText
                             primary={
                             <>
-                                <span className="stock-code">{task.stockCode}</span>
-                                <Typography className="stock-description" component="span" variant="body2" color="textPrimary">{task.stockDescription}</Typography>
+                                <span className="task-stock-code">{task.stockCode}</span>
+                                <Typography className="task-stock-description" component="span" variant="body2" color="textPrimary">{task.stockDescription}</Typography>
                             </>}
                             secondary={
                             <>
