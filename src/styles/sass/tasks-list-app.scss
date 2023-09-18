@@ -1,8 +1,45 @@
 .task-list-app
 {
-  .task-list-item {
+  .task-search
+  {
+    margin-right: 8px;
+  }
+
+  .task-list-item
+  {
     border: 2px solid #404040;
     border-radius : 4px;
     margin-bottom: 8px;
+    height: 65px;
+  }
+  .task-type-label
+  {
+    color: darkred;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .task-metadata
+  {
+    margin-right: 10px;
+  }
+
+  .stock-code
+  {
+    height: 40px;
+    font-weight: bold;
+    margin-right: 12px;
+  }
+
+  .task-live-label
+  {
+    font-family: Calibri;
+    background-color: darkolivegreen;
+    color: white;
+    border-color: darkgreen;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-right: -13px;
+    margin-top: -5px
   }
 }

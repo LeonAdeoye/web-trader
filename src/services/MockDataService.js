@@ -531,23 +531,75 @@ const task_list = [
         stockCode: "0001.HK",
         stockDescription: "CK Hutchison Holdings",
         isCompleted: false,
-        timestamp: "2021-06-23T10:00:00.000Z"
+        timestamp: "2021-06-23T10:00:00.000Z",
+        isLive: true,
+        market: "HK",
+        metadata: "Contact HK low-touch"
     },
     {
         id: 2,
-        type: "Cross",
+        type: "Desk Cross",
         stockCode: "0005.HK",
         stockDescription: "HSBC Holdings",
         isCompleted: false,
-        timestamp: "2021-06-23T10:00:00.000Z"
+        timestamp: "2021-06-23T11:00:00.000Z",
+        isLive: true,
+        market: "HK",
+        metadata: "Contact Lee McQueen"
     },
     {
         id: 3,
-        type: "Blasts",
+        type: "Blast",
         stockCode: "0003.HK",
         stockDescription: "Hong Kong and China Gas",
         isCompleted: false,
-        timestamp: "2021-06-23T10:00:00.000Z"
+        timestamp: "2021-06-23T11:30:00.000Z",
+        isLive: true,
+        market: "HK",
+        metadata: "JP Morgan Block desk"
+    },
+    {
+        id: 4,
+        type: "Blast",
+        stockCode: "0005.HK",
+        stockDescription: "Hong Kong and China Gas",
+        isCompleted: false,
+        timestamp: "2021-06-23T11:35:00.000Z",
+        isLive: false,
+        market: "HK",
+        metadata: "Goldman Facil desk"
+    },
+    {
+        id: 5,
+        type: "Order",
+        stockCode: "8602.T",
+        stockDescription: "Daiwa Securities",
+        isCompleted: true,
+        timestamp: "2021-06-23T11:36:00.000Z",
+        isLive: true,
+        market: "TK",
+        metadata: "Deutsche Bank"
+    },
+    {
+        id: 6,
+        type: "Order",
+        stockCode: "8604.T",
+        stockDescription: "Nomura Holdings",
+        isCompleted: false,
+        timestamp: "2021-06-23T11:36:00.000Z",
+        isLive: true,
+        market: "TK",
+        metadata: "Morgan Stanley"
+    },
+    {
+        id: 6,
+        type: "Alert",
+        stockCode: "8604.T",
+        stockDescription: "Nomura Holdings",
+        isCompleted: false,
+        timestamp: "2021-06-23T11:36:00.000Z",
+        isLive: true,
+        market: "VWAP Algo paused"
     }
 ];
 
