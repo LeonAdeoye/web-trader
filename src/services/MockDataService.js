@@ -535,7 +535,12 @@ const task_list = [
         isLive: true,
         market: "HK",
         metadata: "Contact HK low-touch",
-        ranking: 8
+        ranking: 8,
+        Desk: "Low-touch HK",
+        Client: "Masked",
+        Quantity: 10000,
+        Trader: "Horatio",
+        Side: "Buy"
     },
     {
         id: 2,
@@ -547,7 +552,13 @@ const task_list = [
         isLive: true,
         market: "HK",
         metadata: "Contact Lee McQueen",
-        ranking: 9
+        ranking: 9,
+        Desk: "Block desk HK",
+        Client: "JP Morgan Chase",
+        Quantity: 45000,
+        Trader: "Harper",
+        Side: "Sell",
+        OrderId: 1125111
     },
     {
         id: 3,
@@ -558,8 +569,8 @@ const task_list = [
         timestamp: "2021-06-23T11:30:00.000Z",
         isLive: true,
         market: "HK",
-        metadata: "JP Morgan Block desk",
-        ranking: 7
+        metadata: "Contact JP Morgan Block desk",
+        ranking: 5
     },
     {
         id: 4,
@@ -571,7 +582,7 @@ const task_list = [
         isLive: false,
         market: "HK",
         metadata: "Goldman Facil desk",
-        ranking: 6
+        ranking: 3
     },
     {
         id: 5,
@@ -582,8 +593,14 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Deutsche  seller",
-        ranking: 6
+        metadata: "Deutsche aggressive seller",
+        ranking: 6,
+        Desk: "Facil desk Tokyo",
+        Client: "Deutsche Bank",
+        Quantity: 900000,
+        Trader: "Harry",
+        Side: "Sell",
+        OrderId: 1225117
     },
     {
         id: 6,
@@ -594,8 +611,14 @@ const task_list = [
         timestamp: "2021-06-23T11:36:00.000Z",
         isLive: true,
         market: "TK",
-        metadata: "Morgan Stanley buyer",
-        ranking: 5
+        metadata: "Morgan Stanley passive buyer",
+        ranking: 2,
+        Desk: "Block desk Tokyo",
+        Client: "Morgan Stanley",
+        Quantity: 22400,
+        Trader: "Mike",
+        Side: "Buy",
+        OrderId: 1235668
     },
     {
         id: 6,
@@ -607,7 +630,12 @@ const task_list = [
         isLive: true,
         market: "TK",
         metadata: "VWAP algo paused",
-        ranking: 10
+        ranking: 1,
+        Client: "JP Morgan Chase",
+        Quantity: 45000,
+        Side: "Sell",
+        OrderId: 1234567
+
     }
 ];
 

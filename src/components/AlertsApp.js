@@ -48,21 +48,20 @@ export const AlertsApp = () =>
 
     const columnDefs = [
         {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 130, width: 130},
-        {headerName: "Type", field: "type", sortable: true, minWidth: 120, width: 120, filter: true},
+        {headerName: "Type", field: "type", sortable: true, minWidth: 170, width: 170, filter: true},
+        {headerName: "Alert Details", field: "alertDetails", sortable: true, minWidth: 400, width: 400, filter: true},
         {headerName: "Time", field: "time", sortable: true, minWidth: 90, width: 90},
-        {headerName: "Description", field: "description", sortable: false, minWidth: 200, width: 200, filter: true},
         {headerName: "Priority", field: "priority", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 250, filter: true},
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 100, width: 150, filter: true},
-        {headerName: "Order State", field: "orderState", sortable: true, minWidth: 100, width: 120, filter: true},
+        {headerName: "Order State", field: "orderState", sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 100, width: 100, filter: true, headerTooltip: 'Original order price'},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 100, width: 120, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 100, width: 120, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 100, width: 100, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
-        {headerName: "Notional USD", field: "notionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Alert Details", field: "alertDetails", sortable: true, minWidth: 500, width: 500, filter: true}
+        {headerName: "Notional USD", field: "notionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Notional value in USD', valueFormatter: numberFormatter}
     ];
 
     return (<GenericGridComponent rowHeight={25}

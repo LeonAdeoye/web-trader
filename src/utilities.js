@@ -31,4 +31,12 @@ export const getRowIdValue = (rowIdArray, rowData) => rowIdArray.map(idKey => ro
 
 export const isEmptyString = (str) => str === undefined || str === null || str.trim() === '';
 
+export const createArrayFromScore = (score) =>
+{
+    if (Number.isInteger(score) && score > 0)
+        return Array.from({ length: score + 1 }, (_, index) => index + 1);
+    else
+        throw new Error("Input must be a positive integer");
+}
+
 

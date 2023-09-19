@@ -41,12 +41,34 @@
 
   .task-stock-description
   {
-    font-size: 11px;
+    font-size: 15px;
   }
 
   .task-metadata
   {
-    font-size: 12px;
+    font-size: 13px;
+  }
+
+  .task-metadata-detail
+  {
+    font-size: 14px;
+    font-weight: bold;
+    color: darkolivegreen;
+  }
+
+  .task-ranking-sparklines
+  {
+    height: 40px;
+    width: 50px;
+    margin-top: 12px;
+    margin-left: 20px;
+    margin-right: -10px
+  }
+
+  .task-ranking-number
+  {
+    margin-right: 20px;
+    font-weight: bolder;
   }
 
   .task-live-label
@@ -54,10 +76,11 @@
     font-family: Calibri;
     background-color: #528c74;
     color: white;
+    height: 20px;
     border-color: darkgreen;
     padding: 2px 5px;
     border-radius: 4px;
-    margin-right: -13px;
-    margin-top: -5px
+    margin-right: -11px;
+    margin-top: 7px;
   }
 }
