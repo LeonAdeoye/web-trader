@@ -1,86 +1,148 @@
 .task-list-app
 {
-  .task-icon
-  {
-    color: #404040;
-    margin-left: -12px;
-    margin-right: -20px;
-  }
   .task-search
   {
     margin-right: 8px;
   }
 
-  .task-list-item
+  .task-list-summary
   {
     margin-top: -2px;
     border: 2px solid #404040;
     border-radius : 4px;
     margin-bottom: 8px;
     height: 60px;
-  }
-  .task-type-label
-  {
-    color: #ea3535;
-    font-weight: bold;
-    margin-right: 8px;
-    font-size: 13px;
+
+    .task-icon
+    {
+      color: #404040;
+      margin-left: -12px;
+      margin-right: -20px;
+    }
+
+    .task-type-label
+    {
+      color: #ea3535;
+      font-weight: bold;
+      margin-right: 8px;
+      font-size: 13px;
+    }
+
+    .task-stock-code
+    {
+      height: 40px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .task-ranking-sparklines
+    {
+      height: 40px;
+      width: 50px;
+      margin-top: 12px;
+      margin-left: 20px;
+      margin-right: -22px
+    }
+
+    .task-live-label
+    {
+      font-family: Calibri;
+      background-color: #528c74;
+      color: white;
+      height: 20px;
+      border-color: darkgreen;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-right: -11px;
+      margin-top: 7px;
+    }
   }
 
-  .task-metadata
+  .task-list-detail
   {
-    margin-right: 10px;
-  }
+    .task-detail
+    {
+      margin-right: 40px;
+      font-size: 15px;
+      fond-weight: bold;
+      display: block;
+    }
 
-  .task-stock-code
-  {
-    height: 40px;
-    font-weight: bold;
-    margin-right: 8px;
-  }
+    span.task-status
+    {
+      font-weight: bolder;
+      height: 20px;
+      font-size: 17px;
+      border-radius: 4px;
+      margin-left: 10px;
+      padding-left:5px;
+      padding-right:5px;
+      font-family: Calibri;
+      color: white;
+    }
 
-  .task-stock-description
-  {
-    font-size: 15px;
-  }
+    span.task-status.pending
+    {
+      background-color: darkred;
+    }
 
-  .task-metadata
-  {
-    font-size: 13px;
-  }
+    span.task-status.completed
+    {
+      background-color: darkolivegreen;
+    }
 
-  .task-metadata-detail
-  {
-    font-size: 14px;
-    font-weight: bold;
-    color: darkolivegreen;
-  }
+    span.task-status.dismissed
+    {
+      background-color: grey;
+    }
 
-  .task-ranking-sparklines
-  {
-    height: 40px;
-    width: 50px;
-    margin-top: 12px;
-    margin-left: 20px;
-    margin-right: -10px
-  }
+    .task-metadata
+    {
+      margin-right: 10px;
+    }
 
-  .task-ranking-number
-  {
-    margin-right: 20px;
-    font-weight: bolder;
-  }
+    .task-stock-code
+    {
+      height: 40px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
 
-  .task-live-label
-  {
-    font-family: Calibri;
-    background-color: #528c74;
-    color: white;
-    height: 20px;
-    border-color: darkgreen;
-    padding: 2px 5px;
-    border-radius: 4px;
-    margin-right: -11px;
-    margin-top: 7px;
+    .task-stock-description
+    {
+      font-size: 15px;
+    }
+
+    .task-metadata
+    {
+      font-size: 13px;
+    }
+
+    .task-metadata-detail
+    {
+      font-size: 14px;
+      font-weight: bold;
+      color: darkolivegreen;
+    }
+
+    .task-ranking-number
+    {
+      margin-right: 20px;
+      font-weight: bolder;
+    }
+
+    Button.task-action-button
+    {
+      text-transform: none;
+      background-color: #404040;
+      color: white;
+      margin-right: 10px;
+      margin-top: 10px;
+
+      &:hover
+      {
+        background-color: #656161;
+      }
+    }
   }
 }
