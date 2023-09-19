@@ -16,6 +16,7 @@ const TaskListApp = () =>
     const [loggerService] = useState(new LoggerService(TaskListApp.name));
     const [worker, setWorker] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
+    const [expandedAccordion, setExpandedAccordion] = useState(null);
 
     useEffect(() =>
     {
@@ -45,11 +46,12 @@ const TaskListApp = () =>
     useEffect(() =>
     {
         setTasks(dataService.get("task_list").filter(filterTaskDetail).filter(filterTaskTypes));
+        setExpandedAccordion(null);
     }, [searchValue, searchType]);
 
     useEffect(() =>
     {
-        setSelectedTask(tasks[0]);
+        //setSelectedTask(tasks[0]);
     }, [searchValue, searchType, tasks]);
 
     const selectTaskHandler = (task) =>
@@ -105,6 +107,14 @@ const TaskListApp = () =>
         setSearchType(prevValue => prevValue);
     }
 
+    const handleAccordionChange = (panel) => (_, isExpanded) =>
+    {
+        if (isExpanded)
+           setExpandedAccordion(panel);
+        else
+            setExpandedAccordion(null);
+    };
+
     return (
         <div className="task-list-app">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1px' }}>
@@ -128,7 +138,9 @@ const TaskListApp = () =>
             </div>
             <List>
                 {tasks.sort((first, second) => second.ranking - first.ranking).map((task, index) => (
-                        <Accordion key={index}>
+                        <Accordion disableGutters key={index}
+                                   expanded={expandedAccordion === `panel${index}`}
+                                   onChange={handleAccordionChange(`panel${index}`)}>
                             <AccordionSummary className="task-list-summary" onClick={() => selectTaskHandler(task)}>
                                 <ListItemIcon className="task-icon">
                                     {task.type === 'Desk Cross' && <SwapHorizontalCircle style={{ color: '#404040' }} />}
@@ -193,7 +205,7 @@ const TaskListApp = () =>
                                                 {task.type === "Alert"  && <span className="task-detail">Side: {task.side}</span>}
                                                 {task.type === "Alert"  && <span className="task-detail">Order ID: {task.orderId}</span>}
                                             </div>
-                                            {(selectedTask && selectedTask.status === "pending") &&
+                                            {(task.status === "pending") &&
                                             <div>
                                                 <Tooltip title={<Typography fontSize={12}>Mark the task as completed.</Typography>}>
                                                     <span>
