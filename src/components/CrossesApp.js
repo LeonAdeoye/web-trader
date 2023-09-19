@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
@@ -86,6 +86,33 @@ const CrossesApp = () =>
     const [stockRows, setStockRows] = useState([]);
     const [exchangeRateService] = useState(new ExchangeRateService());
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
+
+    const [worker, setWorker] = useState(null);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/cross-reader.js", import.meta.url));
+        setWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    const handleWorkerMessage = useCallback((event) =>
+    {
+        const newCross = event.data.cross;
+        setStockRows((prevData) => [...prevData, newCross]);
+    }, []);
+
+    useEffect(() =>
+    {
+        if (worker)
+            worker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (worker)
+                worker.onmessage = null;
+        };
+    }, [worker]);
 
     useEffect(() =>
     {

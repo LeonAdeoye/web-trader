@@ -16,6 +16,8 @@ import {FxRatesApp} from "./components/FxRatesApp";
 import TradeHistoryApp from "./components/TradeHistoryApp";
 import HoldingsApp from "./components/HoldingsApp";
 import TaskListApp from "./components/TaskListApp";
+import {AlertsApp} from "./components/AlertsApp";
+import {OrdersApp} from "./components/OrdersApp";
 
 
 const App = ({}) =>
@@ -24,6 +26,7 @@ const App = ({}) =>
     const [configurationService] = useState(new ConfigurationService());
     const [loggerService] = useState(new LoggerService(App.name));
 
+    // TODO: move this inside the component.
     const cryptoTickerColumnDefinitions = [
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
         {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
@@ -48,6 +51,8 @@ const App = ({}) =>
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js", columnDefs: cryptoTickerColumnDefinitions, ...standardProps} },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
             { name: 'Users', path: '/users', component: UsersApp },
+            { name: 'Orders', path: '/orders', component: OrdersApp },
+            { name: 'Alerts', path: '/alerts', component: AlertsApp },
             { name: 'Crosses', path: '/crosses', component: CrossesApp },
             { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
             { name: 'Holdings', path: '/holdings', component: HoldingsApp },
@@ -62,6 +67,7 @@ const App = ({}) =>
             .then(() => loggerService.logInfo("Successfully Loaded all configurations."));
     }, []);
 
+    // TODO move this inside the component.
     useEffect(() =>
     {
         // create the server chooser

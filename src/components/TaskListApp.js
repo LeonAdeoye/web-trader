@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText, ListItemIcon, Typography } from '@mui/material';
 import { Send, VisibilityOff, SwapHorizontalCircle, NewReleases, CircleNotifications } from '@mui/icons-material';
 import {MockDataService} from "../services/MockDataService";
@@ -12,6 +12,32 @@ const TaskListApp = () =>
     const [tasks, setTasks] = useState([]);
     const [dataService] = useState(new MockDataService());
     const [loggerService] = useState(new LoggerService(TaskListApp.name));
+    const [worker, setWorker] = useState(null);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/task-reader.js", import.meta.url));
+        setWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    const handleWorkerMessage = useCallback((event) =>
+    {
+        const newTask = event.data.task;
+        setTasks((prevData) => [...prevData, newTask]);
+    }, []);
+
+    useEffect(() =>
+    {
+        if (worker)
+            worker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (worker)
+                worker.onmessage = null;
+        };
+    }, [worker]);
 
     useEffect(() =>
     {
@@ -52,9 +78,9 @@ const TaskListApp = () =>
                 <TextField className="task-search" size='small' label="Search task details"
                     variant="outlined" fullWidth value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}/>
-                <FormControl size='small' variant="outlined" style={{ minWidth: '200px' }}>
+                <FormControl size='small' variant="outlined" style={{ minWidth: '174px'}}>
                     <InputLabel>Type of Task</InputLabel>
-                    <Select label="Type of Task" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                    <Select label="Type of Task" value={searchType} onChange={(e) => setSearchType(e.target.value)} style={{ minWidth: '174px', width: '174px'}}>
                         <MenuItem value="All">All</MenuItem>
                         <MenuItem value="Blast">Blasts</MenuItem>
                         <MenuItem value="Order">Orders</MenuItem>
