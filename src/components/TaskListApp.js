@@ -15,7 +15,6 @@ const TaskListApp = () =>
     const [dataService] = useState(new MockDataService());
     const [loggerService] = useState(new LoggerService(TaskListApp.name));
     const [worker, setWorker] = useState(null);
-    const [selectedTask, setSelectedTask] = useState(null);
     const [expandedAccordion, setExpandedAccordion] = useState(null);
 
     useEffect(() =>
@@ -49,26 +48,17 @@ const TaskListApp = () =>
         setExpandedAccordion(null);
     }, [searchValue, searchType]);
 
-    useEffect(() =>
-    {
-        //setSelectedTask(tasks[0]);
-    }, [searchValue, searchType, tasks]);
-
     const selectTaskHandler = (task) =>
     {
         loggerService.logInfo(`Selected task in TaskListApp for context sharing with main: ${JSON.stringify(task)}`);
-        setSelectedTask(task);
         window.contextSharer.sendContextToMain(task);
     };
 
     const filterTaskTypes = (task) =>
     {
         if (searchType === 'Completed' && task.status === "completed") return true;
-
         if (searchType === 'Dismissed' && task.status === "dismissed") return true;
-
         if (searchType === 'All' && task.status === "pending") return true;
-
         return task.type === searchType;
     };
 
