@@ -28,3 +28,63 @@ export const onAmpsFxRateMessage = (message) =>
             break;
     }
 }
+
+export const onAmpsTaskMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", rate: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", rate: message.data});
+            break;
+        default:
+            break;
+    }
+}
+
+export const onAmpsAlertMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", rate: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", rate: message.data});
+            break;
+        default:
+            break;
+    }
+}
+
+export const onAmpsCrossMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", rate: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", rate: message.data});
+            break;
+        default:
+            break;
+    }
+}
+
+export const onAmpsOrderMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", rate: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", rate: message.data});
+            break;
+        default:
+            break;
+    }
+}

@@ -12,7 +12,7 @@ const main = async () =>
         await client.connect(url);
         const cmd = new Command("sow_and_subscribe").topic(topicName);
         await client.execute(cmd, onAmpsFxRateMessage);
-        console.log("FX rate reader web worker Connected to AMPS using URL: ", url);
+        console.log("FX rate reader web worker connected to AMPS using URL: ", url);
     }
     catch (e)
     {
@@ -20,4 +20,4 @@ const main = async () =>
     }
 }
 
-main().then(() => console.log("AMPS subscription completed."));
+main().then(() => console.log("FX rate reader AMPS subscription completed."));

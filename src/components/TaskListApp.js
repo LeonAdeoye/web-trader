@@ -52,7 +52,7 @@ const TaskListApp = () =>
                 <TextField className="task-search" size='small' label="Search task details"
                     variant="outlined" fullWidth value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}/>
-                <FormControl size='small' variant="outlined" style={{ minWidth: '180px' }}>
+                <FormControl size='small' variant="outlined" style={{ minWidth: '200px' }}>
                     <InputLabel>Type of Task</InputLabel>
                     <Select label="Type of Task" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                         <MenuItem value="All">All</MenuItem>
