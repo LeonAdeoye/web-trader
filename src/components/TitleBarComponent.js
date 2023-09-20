@@ -1,34 +1,36 @@
 import React from 'react';
-import {Button, IconButton} from '@mui/material';
+import {IconButton} from '@mui/material';
 import { Close,  Minimize, Build, Lan} from '@mui/icons-material';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
 
-const TitleBarComponent = ({title}) =>
+const TitleBarComponent = ({title, addHandler}) =>
 {
     const handleChannel = () =>
     {
-        console.log("channel button clicked!");
+        window.titleBarActions.openChannels();
     };
 
     const handleTools = () =>
     {
-        console.log("tools button clicked!");
+        window.titleBarActions.openTools();
     };
 
     const handleMinimize = () =>
     {
-        console.log("minimize button clicked!");
+        window.titleBarActions.minimize(title);
     };
 
     const handleMaximize = () =>
     {
-        console.log("maximize button clicked!");
+        window.titleBarActions.maximize(title);
     };
 
     const handleClose = () =>
     {
-        console.log("close button clicked!");
+        window.titleBarActions.close();
+        window.close();
     };
 
     return(
@@ -42,6 +44,9 @@ const TitleBarComponent = ({title}) =>
                 <IconButton className="title-bar-tools" onClick={handleTools}>
                     <Build/>
                 </IconButton>
+                {addHandler !== undefined && <IconButton className="title-bar-add" onClick={addHandler}>
+                    <LocalHospitalIcon/>
+                </IconButton>}
                 <IconButton className="title-bar-minimize" onClick={handleMinimize}>
                     <Minimize/>
                 </IconButton>

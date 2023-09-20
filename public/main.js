@@ -176,6 +176,28 @@ const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
 const handleContextShareMessage = (_, context) => console.log("Context shared with main: " + JSON.stringify(context));
 
+const handleCloseMessage = (windowName) =>
+{
+    if(childWindowsMap.has(windowName))
+        saveWindowDimensions(childWindowsMap.get(windowName)).then(() => childWindowsMap.delete(windowName));
+};
+
+const handleMinimizeMessage = (_, windowName) =>
+{
+    if(childWindowsMap.has(windowName))
+        childWindowsMap.get(windowName).minimize();
+}
+const handleMaximizeMessage = (_, windowName) =>
+{
+    if(childWindowsMap.has(windowName))
+        childWindowsMap.get(windowName).maximize();
+}
+
+const handleOpenToolsMessage = (windowName) => {};
+const handleOpenChannelsMessage = (windowName) => {};
+
+
+
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', handleOpenAppMessage);
@@ -183,6 +205,11 @@ app.whenReady().then(() =>
     ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
     ipcMain.on('share-context-with-main', handleContextShareMessage);
+    ipcMain.on('close', handleCloseMessage);
+    ipcMain.on('maximize', handleMaximizeMessage);
+    ipcMain.on('minimize', handleMinimizeMessage);
+    ipcMain.on('openTools', handleOpenToolsMessage);
+    ipcMain.on('openChannel', handleOpenChannelsMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -208,6 +235,12 @@ app.on('before-quit', () =>
     ipcMain.removeListener('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.removeListener('get-user-logged-in', handleGetLoggedInUserMessage);
     ipcMain.removeListener('share-context-with-main', handleContextShareMessage);
+
+    ipcMain.removeListener('close', handleCloseMessage);
+    ipcMain.removeListener('maximize', handleMaximizeMessage);
+    ipcMain.removeListener('minimize', handleMinimizeMessage);
+    ipcMain.removeListener('openTools', handleOpenToolsMessage);
+    ipcMain.removeListener('openChannel', handleOpenChannelsMessage);
 
     childWindowsMap.forEach((childWindow) =>
     {

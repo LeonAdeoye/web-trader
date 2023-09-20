@@ -17,16 +17,19 @@
 // Instead, use the contextBridge module to accomplish this securely:
 const { contextBridge, ipcRenderer } = require('electron')
 
+window.electronRequire = require;
+
 contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title) => ipcRenderer.send('openApp', url, title)
 })
 
 contextBridge.exposeInMainWorld('titleBarActions', {
-    close: () => ipcRenderer.send('close'),
-    maximize: () => ipcRenderer.send('maximize'),
-    minimize: () => ipcRenderer.send('minimize'),
-    channels: () => ipcRenderer.send('channels'),
-    tools: () => ipcRenderer.send('tools'),
+    close: (window) => ipcRenderer.send('close', window),
+    maximize: (windowName) => ipcRenderer.send('maximize', windowName),
+    minimize: (windowName) => ipcRenderer.send('minimize', windowName),
+    openChannels: () => ipcRenderer.send('openChannels'),
+    setChannel: (window, channel) => ipcRenderer.send('openChannels', window, channel),
+    openTools: () => ipcRenderer.send('openTools'),
 })
 
 contextBridge.exposeInMainWorld('messenger', {
