@@ -21,6 +21,14 @@ contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title) => ipcRenderer.send('openApp', url, title)
 })
 
+contextBridge.exposeInMainWorld('titleBarActions', {
+    close: () => ipcRenderer.send('close'),
+    maximize: () => ipcRenderer.send('maximize'),
+    minimize: () => ipcRenderer.send('minimize'),
+    channels: () => ipcRenderer.send('channels'),
+    tools: () => ipcRenderer.send('tools'),
+})
+
 contextBridge.exposeInMainWorld('messenger', {
     sendMessageToMain: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main-from-renderer', fdc3Context, destination, source),
     handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer-from-main', (_, destination, fdc3Context, source) =>

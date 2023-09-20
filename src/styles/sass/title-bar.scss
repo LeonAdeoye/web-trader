@@ -1,0 +1,47 @@
+.title-bar
+{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #404040;
+  height: 30px;
+  padding: 0px 0px 15px 0px;
+  margin-bottom: 2px;
+}
+
+.title-bar-icon
+{
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+}
+
+.title-bar-text
+{
+  color: white;
+  flex-grow: 1;
+  margin-left: 0px;
+  font-family: Calibri;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.title-bar-controls
+{
+  display: flex;
+}
+
+.title-bar-controls .title-bar-channel,
+.title-bar-controls .title-bar-tools,
+.title-bar-controls .title-bar-minimize,
+.title-bar-controls .title-bar-maximize,
+.title-bar-controls .title-bar-close
+{
+  color: white;
+  margin-right: 0px;
+}
+
+.title-bar-controls .title-bar-maximize
+{
+  margin-right: 0;
+}

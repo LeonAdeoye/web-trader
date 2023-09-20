@@ -32,7 +32,7 @@ const createWindow = () =>
         maxHeight: 1860,
         minWidth:400,
         title: 'Launch Pad',
-        frame: true,
+        frame: false,
         titleBarOverlay: {
             symbolColor: '#404040',
             height: 30
@@ -50,6 +50,7 @@ const createWindow = () =>
 
     //Remove menu bar
     mainWindow.removeMenu();
+    mainWindow.webContents.openDevTools();
 
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
@@ -67,7 +68,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
         title: childWindowsMap.has(title) ? `${title} (${childWindowsMap.size})` : title,
         modal: false,
         show: true,
-        frame: true,
+        frame: false,
         width: 800,
         height: 600,
         icon: path.join(__dirname, `../assets/${title}.png`),

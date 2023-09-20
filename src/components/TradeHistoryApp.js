@@ -9,6 +9,7 @@ import {MockDataService} from "../services/MockDataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 import {numberFormatter} from "../utilities";
+import TitleBarComponent from "./TitleBarComponent";
 
 const TradeHistoryApp = () =>
 {
@@ -173,6 +174,7 @@ const TradeHistoryApp = () =>
 
     return (
         <div className="trade-history-app">
+            <TitleBarComponent title={"Trade History"}/>
             <TabContext value={selectedTab}>
                 <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
                     <Tab className="client-trade-history-tab" label="Client History" value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
