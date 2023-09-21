@@ -14,6 +14,8 @@ export const GridTickerApp = ({webWorkerUrl}) =>
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("grid-ticker"), []);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},

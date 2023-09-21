@@ -228,7 +228,7 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
-const handleContextShareMessage = (_, windowId, context) =>
+const handleContextShareMessage = (_, windowId, {stockCode, market, client}) =>
 {
     channelsWindowMap.forEach((value, key) =>
     {
@@ -237,7 +237,7 @@ const handleContextShareMessage = (_, windowId, context) =>
 
         if(senderIndex > -1 && value.length > 1)
             console.log("Window with Id [" + windowId + "] and title [" + child.getTitle()
-                + "] is sending context: " + JSON.stringify(context) + " on channel: " + key
+                + "] is sending context: " + JSON.stringify({stockCode, market, client}) + " on channel: " + key
                 + " to all windows on the same channel [" + value.filter((_, index) => index !== senderIndex) + "]");
     });
 }
