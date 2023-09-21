@@ -1,12 +1,14 @@
 import * as React from 'react';
 import {GenericGridComponent} from "./GenericGridComponent";
-import {useEffect, useState, useCallback} from "react";
+import {useEffect, useState, useCallback, useMemo} from "react";
 import {numberFormatter} from "../utilities";
 
 export const AlertsApp = () =>
 {
     const [alerts, setAlerts] = useState([]);
     const [worker, setWorker] = useState(null);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("alerts"), []);
 
     useEffect(() =>
     {

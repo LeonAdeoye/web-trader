@@ -13,6 +13,8 @@ const HoldingsApp = () =>
 {
     const [dataService] = useState(new MockDataService());
     const [selectedTab, setSelectedTab] = useState("1");
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
 
     const clientColumnDefs = useMemo(() => ( [
         {

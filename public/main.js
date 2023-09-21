@@ -8,13 +8,16 @@ require('@electron/remote/main').initialize();
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let mainWindow;
-let loggedInUser; // Used to capture the logged-in user from the login dialog and make it available to the rest of the app
+// Used to capture the logged-in user from the login dialog and make it available to the rest of the app.
+let loggedInUser;
 
-// create amp of child windows objects keyed by destination IDs
-const childWindowsMap = new Map();
-
-// Create map of channels windows keyed by channel name
+// Create map of child window objects keyed by their window titles. This is used for managing duplicate titles of newly created child windows of the same type.
+const childWindowTitleMap = new Map();
+// Create map of child window objects keyed by their window IDs. This is used for context sharing.
+const childWindowIdMap = new Map();
+// Create map of window titles keyed by channel name.
 const channelsWindowMap = new Map();
+
 channelsWindowMap.set('red', []);
 channelsWindowMap.set('blue', []);
 channelsWindowMap.set('green', []);
@@ -53,11 +56,10 @@ const createWindow = () =>
 
     //Remove menu bar
     mainWindow.removeMenu();
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
 
     // Each instance of the BrowserWindow class creates an application window that loads a web page in a separate renderer process.
     // You can interact with this web content from the main process using the window's webContents object.
-    //mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
     loadWindowDimensions(mainWindow)
         .then(() => console.log("Main window dimensions loaded from settings file."));
@@ -69,7 +71,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
 {
     const childWindow = new BrowserWindow({
         parent: mainWindow,
-        title: childWindowsMap.has(title) ? `${title} (${childWindowsMap.size})` : title,
+        title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
         modal: false,
         show: true,
         frame: true,
@@ -83,21 +85,26 @@ const handleOpenAppMessage = (event, {url, title}) =>
     // TODO: eventually remove this.
     //childWindow.webContents.openDevTools();
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
-    childWindowsMap.set(childWindow.getTitle(), childWindow);
+    childWindowTitleMap.set(childWindow.getTitle(), childWindow);
 
     childWindow.on('close', () =>
     {
         let title = childWindow.getTitle();
+        ipcMain.removeListener('get-window-title', handleGetWindowTitleMessage);
         removeWindowFromChannel(title);
         saveWindowDimensions(childWindow)
-            .then(() => childWindowsMap.delete(title))
+            .then(() => childWindowTitleMap.delete(title))
             .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
     });
 
-    ipcMain.on('get-window-title', (event) =>
+    const handleGetWindowTitleMessage = (event, windowTitle) =>
     {
-        event.returnValue = childWindow.getTitle();
-    });
+        const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
+        childWindowIdMap.set(windowId, childWindow);
+        event.returnValue = windowId;
+    }
+
+    ipcMain.on('get-window-id', handleGetWindowTitleMessage);
 
     addContextMenu(childWindow);
     loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
@@ -149,23 +156,23 @@ const addContextMenu = (window) =>
                     { label: 'Create Workspace', click: () => console.log('New Workspace clicked') }
             ]},
             { type: 'separator' },
-            { label: 'set Channel', submenu: [
-                    { label: 'Set context sharing channel to red', icon: path.join(__dirname, '../assets', 'red.png'), click: () => addWindowToChannel('red', window.getTitle()) },
+            { label: 'Context Sharing Channel', submenu: [
+                    { label: 'Set channel to red', icon: path.join(__dirname, '../assets', 'red.png'), click: () => addWindowToChannel('red', window.getTitle()) },
                     { type: 'separator' },
-                    { label: 'Set context sharing channel to blue', icon: path.join(__dirname, '../assets', 'blue.png'), click: () => addWindowToChannel('blue', window.getTitle()) },
+                    { label: 'Set channel to blue', icon: path.join(__dirname, '../assets', 'blue.png'), click: () => addWindowToChannel('blue', window.getTitle()) },
                     { type: 'separator' },
-                    { label: 'Set context sharing channel to green', icon: path.join(__dirname, '../assets', 'green.png'), click: () => addWindowToChannel('green', window.getTitle()) },
+                    { label: 'Set channel to green', icon: path.join(__dirname, '../assets', 'green.png'), click: () => addWindowToChannel('green', window.getTitle()) },
                     { type: 'separator' },
-                    { label: 'Set context sharing channel to yellow', icon: path.join(__dirname, '../assets', 'yellow.png'), click: () => addWindowToChannel('yellow', window.getTitle()) },
+                    { label: 'Set channel to yellow', icon: path.join(__dirname, '../assets', 'yellow.png'), click: () => addWindowToChannel('yellow', window.getTitle()) },
                     { type: 'separator' },
-                    { label: 'No channel selected for context sharing', click: () => removeWindowFromChannel(window.getTitle()) }
+                    { label: 'No channel selected', click: () => removeWindowFromChannel(window.getTitle()) }
                 ]},
             { type: 'separator' },
             { label: 'Close current window', click: () => saveWindowDimensions(window).then(() => window.close()) },
             { type: 'separator' },
             { label: 'Quit application', click: () => saveWindowDimensions(mainWindow).then(() =>
                 {
-                    childWindowsMap.forEach((childWindow) =>
+                    childWindowTitleMap.forEach((childWindow) =>
                     {
                         removeWindowFromChannel(childWindow.getTitle());
                         saveWindowDimensions(childWindow);
@@ -185,19 +192,20 @@ const addContextMenu = (window) =>
 
 const addWindowToChannel = (channel, windowTitle) =>
 {
-    console.log("Adding window: " + windowTitle + " to " + channel + " channel");
     channelsWindowMap.get(channel).push(windowTitle);
-    console.log("Current windows in " + channel + " channel: " + channelsWindowMap.get(channel));
+    console.log("Added window: " + windowTitle + " to " + channel + " channel. Current window(s) in " + channel + " channel: [" + channelsWindowMap.get(channel) + "]");
 }
 
 const removeWindowFromChannel = (windowTitle) =>
 {
-    console.log("Removing window: " + windowTitle + " from all channels");
     channelsWindowMap.forEach((value) =>
     {
         const index = value.indexOf(windowTitle);
         if(index > -1)
+        {
+            console.log("Removing window: " + windowTitle + " from all channels");
             value.splice(index, 1);
+        }
     });
     channelsWindowMap.forEach((value, key) => value.length > 0 && console.log("Window(s) remaining in " + key + " channel: " + value));
 }
@@ -206,9 +214,9 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
     // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
     // The webContents.send method takes a channel name and a data payload as arguments.
-    // Iterate through each item in childWindowsMap and send a message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
+    // Iterate through each item in childWindowTitleMap and send a message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
     const regex = new RegExp(destination + "( \\(\\d+\\))?");
-    childWindowsMap.forEach((childWindow) =>
+    childWindowTitleMap.forEach((childWindow) =>
     {
         if(regex.test(childWindow.getTitle()))
         {
@@ -220,13 +228,38 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
-const handleContextShareMessage = (_, context) => console.log("Context shared with main: " + JSON.stringify(context));
+const handleContextShareMessage = (_, windowId, context) =>
+{
+    channelsWindowMap.forEach((value, key) =>
+    {
+        const child = childWindowIdMap.get(windowId);
+        const senderIndex = value.indexOf(child.getTitle());
+
+        if(senderIndex > -1 && value.length > 1)
+            console.log("Window with Id [" + windowId + "] and title [" + child.getTitle()
+                + "] is sending context: " + JSON.stringify(context) + " on channel: " + key
+                + " to all windows on the same channel [" + value.filter((_, index) => index !== senderIndex) + "]");
+    });
+}
 
 const handleCloseMessage = (_, windowTitle) => {};
 const handleMinimizeMessage = (_, windowTitle) => {};
 const handleMaximizeMessage = (_, windowTitle) => {};
 const handleOpenToolsMessage = (_, windowTitle) => {};
 const handleOpenChannelsMessage = (_, windowTitle) => {};
+
+const handleGetContextShareChannelMessage = (event, windowTitle) =>
+{
+    let channel = undefined;
+    channelsWindowMap.forEach((value, key) =>
+    {
+        if(value.includes(windowTitle))
+            channel = key;
+    });
+
+    console.log("Channel for window: " + windowTitle + " is: " + channel)
+    event.returnValue = channel;
+};
 
 app.whenReady().then(() =>
 {
@@ -241,6 +274,7 @@ app.whenReady().then(() =>
     ipcMain.on('minimize', handleMinimizeMessage);
     ipcMain.on('open-tools', handleOpenToolsMessage);
     ipcMain.on('open-channel', handleOpenChannelsMessage);
+    ipcMain.on('get-context-share-channel', handleGetContextShareChannelMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -273,7 +307,9 @@ app.on('before-quit', () =>
     ipcMain.removeListener('open-tools', handleOpenToolsMessage);
     ipcMain.removeListener('open-channel', handleOpenChannelsMessage);
 
-    childWindowsMap.forEach((childWindow) =>
+    ipcMain.removeListener('get-context-share-channel', handleGetContextShareChannelMessage);
+
+    childWindowTitleMap.forEach((childWindow) =>
     {
         if(childWindow !== undefined)
         {
@@ -283,7 +319,8 @@ app.on('before-quit', () =>
         }
     });
 
-    childWindowsMap.clear();
+    childWindowTitleMap.clear();
+    childWindowIdMap.clear();
 });
 
 

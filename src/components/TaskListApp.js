@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText, ListItemIcon, Typography, Accordion, AccordionSummary, AccordionDetails, Tooltip, Button } from '@mui/material';
 import { Send, VisibilityOff, SwapHorizontalCircle, NewReleases, CircleNotifications, Podcasts } from '@mui/icons-material';
 import { MockDataService } from '../services/MockDataService';
@@ -16,6 +16,9 @@ const TaskListApp = () =>
     const [loggerService] = useState(new LoggerService(TaskListApp.name));
     const [worker, setWorker] = useState(null);
     const [expandedAccordion, setExpandedAccordion] = useState(null);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("task"), []);
+
 
     useEffect(() =>
     {
@@ -50,8 +53,8 @@ const TaskListApp = () =>
 
     const selectTaskHandler = (task) =>
     {
-        loggerService.logInfo(`Selected task in TaskListApp for context sharing with main: ${JSON.stringify(task)}`);
-        window.contextSharer.sendContextToMain(task);
+        loggerService.logInfo(`Selected task in task app with Id: ${windowId} for context sharing with main: ${JSON.stringify(task)}`);
+        window.contextSharer.sendContextToMain(windowId, task);
     };
 
     const filterTaskTypes = (task) =>
@@ -142,14 +145,14 @@ const TaskListApp = () =>
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={
-                                        <div>
+                                        <>
                                             <span className="task-stock-code">{task.stockCode}</span>
                                             <span className="task-type-label">{task.type.toUpperCase()}</span>
-                                        </div>}
+                                        </>}
                                     secondary={
-                                        <div>
+                                        <>
                                             <span className="task-metadata">{task.metadata}</span>
-                                        </div>}
+                                        </>}
                                 />
                                 {task.isLive && (
                                     <span className="task-live-label">LIVE</span>
@@ -163,18 +166,16 @@ const TaskListApp = () =>
                             <AccordionDetails className="task-list-detail">
                                 <ListItemText
                                     primary={
-                                        <div>
-                                            <div>
-                                                <span className="task-stock-code">{task.stockCode}</span>
-                                                <Typography className="task-stock-description" component="span" variant="body2" color="textPrimary">{task.stockDescription}</Typography>
-                                            </div>
-                                        </div>}
+                                        <>
+                                            <span className="task-stock-code">{task.stockCode}</span>
+                                            <Typography className="task-stock-description" component="span" variant="body2" color="textPrimary">{task.stockDescription}</Typography>
+                                        </>}
                                     secondary={
-                                        <div>
+                                        <>
                                             <span className="task-ranking-number">Task Ranking: {task.ranking}</span>
                                             <span className="task-metadata-detail">{task.metadata}</span>
                                             <span className={`task-status ${task.status}`}>{task.status}</span>
-                                            <div>
+                                            <>
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Trader: {task.trader}</span>}
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Quantity: {task.quantity.toLocaleString()}</span>}
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Side: {task.side}</span>}
@@ -194,21 +195,16 @@ const TaskListApp = () =>
                                                 {task.type === "Alert"  && <span className="task-detail">Quantity: {task.quantity.toLocaleString()}</span>}
                                                 {task.type === "Alert"  && <span className="task-detail">Side: {task.side}</span>}
                                                 {task.type === "Alert"  && <span className="task-detail">Order ID: {task.orderId}</span>}
-                                            </div>
-                                            {(task.status === "pending") &&
-                                            <div>
-                                                <Tooltip title={<Typography fontSize={12}>Mark the task as completed.</Typography>}>
-                                                    <span>
-                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleComplete(task)}>Complete</Button>
-                                                    </span>
-                                                </Tooltip>
-                                                <Tooltip title={<Typography fontSize={12}>Dismiss the task as it not applicable or relevant.</Typography>}>
-                                                    <span>
-                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleDismiss(task)}>Dismiss</Button>
-                                                    </span>
-                                                </Tooltip>
-                                            </div>}
-                                        </div>}
+                                            </>
+                                            {(task.status === "pending") && <span>
+                                                                                <Tooltip title={<Typography fontSize={12}>Mark the task as completed.</Typography>}>
+                                                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleComplete(task)}>Complete</Button>
+                                                                                </Tooltip>
+                                                                                <Tooltip title={<Typography fontSize={12}>Dismiss the task as it not applicable or relevant.</Typography>}>
+                                                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleDismiss(task)}>Dismiss</Button>
+                                                                                </Tooltip>
+                                                                            </span>}
+                                        </>}
                                 />
                             </AccordionDetails>
                         </Accordion>

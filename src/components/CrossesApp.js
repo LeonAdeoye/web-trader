@@ -12,6 +12,12 @@ import {currencyFormatter, numberFormatter} from "../utilities";
 const CrossesApp = () =>
 {
     const [dummyDataService] = useState(new MockDataService());
+    const [stockRows, setStockRows] = useState([]);
+    const [exchangeRateService] = useState(new ExchangeRateService());
+    const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
+    const [worker, setWorker] = useState(null);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("cross"), []);
     const columnDefs = useMemo(() => ([
         {
             headerName: 'Desk',
@@ -82,12 +88,6 @@ const CrossesApp = () =>
             filter: true,
         },
     ]), []);
-
-    const [stockRows, setStockRows] = useState([]);
-    const [exchangeRateService] = useState(new ExchangeRateService());
-    const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
-
-    const [worker, setWorker] = useState(null);
 
     useEffect(() =>
     {

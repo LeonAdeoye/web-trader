@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '../styles/css/main.css';
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useState, useMemo} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 import LoginDialogComponent from "./LoginDialogComponent";
@@ -10,6 +10,8 @@ const LaunchPadApp = () =>
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
     const [configurationService] = useState(new ConfigurationService());
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("launch-pad"), []);
 
     useEffect(() =>
     {

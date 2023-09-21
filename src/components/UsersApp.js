@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {GenericGridComponent} from "./GenericGridComponent";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useMemo} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {DataService} from "../services/DataService";
 export const UsersApp = () =>
@@ -8,6 +8,8 @@ export const UsersApp = () =>
     const [configurationService] = useState(new ConfigurationService());
     const [dataService] = useState(new DataService());
     const [gridData, setGridData] = useState([]);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("users"), []);
 
     useEffect(() =>
     {

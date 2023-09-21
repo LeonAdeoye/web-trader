@@ -9,27 +9,27 @@ const TitleBarComponent = ({title, addHandler}) =>
 {
     const handleChannel = () =>
     {
-        window.titleBarActions.openChannels();
+        window.command.openChannels();
     };
 
     const handleTools = () =>
     {
-        window.titleBarActions.openTools();
+        window.command.openTools();
     };
 
     const handleMinimize = () =>
     {
-        window.titleBarActions.minimize(title);
+        window.command.minimize(title);
     };
 
     const handleMaximize = () =>
     {
-        window.titleBarActions.maximize(title);
+        window.command.maximize(title);
     };
 
     const handleClose = () =>
     {
-        window.titleBarActions.close(title);
+        window.command.close(title);
     };
 
     return(

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {isEmptyString, transformLocalDataTime} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useMemo} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {LoggerService} from "../services/LoggerService";
 import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
@@ -11,6 +11,7 @@ import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
 import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
 
+
 export const ConfigsApp = () =>
 {
     const [loggedInUser, setLoggedInUser] = useState('');
@@ -19,6 +20,8 @@ export const ConfigsApp = () =>
     const [loggerService] = useState(new LoggerService(ConfigsApp.name));
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("configs"), []);
 
     const columnDefs = [
         { headerName: "Id", field: 'id', hide: true },

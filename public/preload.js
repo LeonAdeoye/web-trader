@@ -21,14 +21,14 @@ contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title) => ipcRenderer.send('openApp', url, title)
 });
 
-contextBridge.exposeInMainWorld('titleBarActions', {
+contextBridge.exposeInMainWorld('command', {
     close: (windowTitle) => ipcRenderer.send('close', windowTitle),
     maximize: (windowTitle) => ipcRenderer.send('maximize', windowTitle),
     minimize: (windowTitle) => ipcRenderer.send('minimize', windowTitle),
     openChannels: () => ipcRenderer.send('open-channels'),
     setChannel: (windowTitle, channel) => ipcRenderer.send('open-channels', windowTitle, channel),
     openTools: () => ipcRenderer.send('open-tools'),
-    getWindowTitle: () => ipcRenderer.sendSync('get-window-title')
+    getWindowId: (windowTitle) => ipcRenderer.sendSync('get-window-id', windowTitle)
 });
 
 contextBridge.exposeInMainWorld('messenger', {
@@ -45,7 +45,8 @@ contextBridge.exposeInMainWorld('configurations', {
 });
 
 contextBridge.exposeInMainWorld('contextSharer', {
-    sendContextToMain: (context) => ipcRenderer.send('share-context-with-main', context)
+    sendContextToMain: (windowTitle, context) => ipcRenderer.send('share-context-with-main', windowTitle, context),
+    getChannel: (windowTitle) => ipcRenderer.sendSync('get-share-context-channel', windowTitle)
 });
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
