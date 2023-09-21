@@ -74,9 +74,6 @@ export const OrdersApp = () =>
         {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPlBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 150, filter: false},
     ];
 
-    return (<GenericGridComponent rowHeight={25}
-                                  gridTheme={"ag-theme-alpine"}
-                                  rowIdArray={["orderId"]}
-                                  columnDefs={columnDefs}
-                                  gridData={orders}/>);
-};
+    return (<GenericGridComponent rowHeight={25} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={orders}/>);
+
+}

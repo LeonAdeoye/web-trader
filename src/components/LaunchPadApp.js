@@ -4,7 +4,6 @@ import {useCallback, useEffect, useState} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 import LoginDialogComponent from "./LoginDialogComponent";
-import TitleBarComponent from "./TitleBarComponent";
 
 const LaunchPadApp = () =>
 {
@@ -41,18 +40,15 @@ const LaunchPadApp = () =>
     }, []);
 
     return (
-        <>
-            <TitleBarComponent title={"Launch Pad"}/>
-            <div className="launch-pad">
-                <LoginDialogComponent/>
-                {apps.map((app) => (
-                    <div key={app.title} className="launch-pad__app" onClick={() => launchApp(app.url, app.title)}>
-                        <img className="launch-pad__icon" src={app.icon} alt={app.title}/>
-                        <span className="launch-pad__name">{app.title}</span>
-                    </div>
-                ))}
-            </div>
-        </>
+        <div className="launch-pad">
+            <LoginDialogComponent/>
+            {apps.map((app) => (
+                <div key={app.title} className="launch-pad__app" onClick={() => launchApp(app.url, app.title)}>
+                    <img className="launch-pad__icon" src={app.icon} alt={app.title}/>
+                    <span className="launch-pad__name">{app.title}</span>
+                </div>
+            ))}
+        </div>
     );
 };
 

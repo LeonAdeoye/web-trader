@@ -29,13 +29,11 @@ const TitleBarComponent = ({title, addHandler}) =>
 
     const handleClose = () =>
     {
-        window.titleBarActions.close();
-        window.close();
+        window.titleBarActions.close(title);
     };
 
     return(
         <div className="title-bar">
-            {/*  TODO <img className="title-bar-icon" src={iconSource}/>*/}
             <span className="title-bar-text">{title}</span>
             <div className="title-bar-controls">
                 <IconButton className="title-bar-channel" onClick={handleChannel}>

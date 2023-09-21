@@ -7,6 +7,7 @@
   height: 30px;
   padding: 0px 0px 15px 0px;
   margin-bottom: 2px;
+  -webkit-app-region: drag;
 }
 
 .title-bar-icon
@@ -29,6 +30,7 @@
 .title-bar-controls
 {
   display: flex;
+  -webkit-app-region: no-drag;
 }
 
 .title-bar-controls .title-bar-channel,

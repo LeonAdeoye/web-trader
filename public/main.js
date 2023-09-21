@@ -13,6 +13,13 @@ let loggedInUser; // Used to capture the logged-in user from the login dialog an
 // create amp of child windows objects keyed by destination IDs
 const childWindowsMap = new Map();
 
+// Create map of channels windows keyed by channel name
+const channelsWindowMap = new Map();
+channelsWindowMap.set('red', []);
+channelsWindowMap.set('blue', []);
+channelsWindowMap.set('green', []);
+channelsWindowMap.set('yellow', []);
+
 settings.configure({
     atomicSave: true,
     fileName: 'settings.json',
@@ -32,11 +39,7 @@ const createWindow = () =>
         maxHeight: 1860,
         minWidth:400,
         title: 'Launch Pad',
-        frame: false,
-        titleBarOverlay: {
-            symbolColor: '#404040',
-            height: 30
-        },
+        frame: true,
         webPreferences:
         {
             nodeIntegration: true,
@@ -57,7 +60,8 @@ const createWindow = () =>
     //mainWindow.webContents.openDevTools();
     mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
     loadWindowDimensions(mainWindow)
-        .then(() => console.log("Main window dimensions loaded from settings file."))
+        .then(() => console.log("Main window dimensions loaded from settings file."));
+
     mainWindow.on('close', () => saveWindowDimensions(mainWindow));
 }
 
@@ -68,7 +72,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
         title: childWindowsMap.has(title) ? `${title} (${childWindowsMap.size})` : title,
         modal: false,
         show: true,
-        frame: false,
+        frame: true,
         width: 800,
         height: 600,
         icon: path.join(__dirname, `../assets/${title}.png`),
@@ -76,16 +80,23 @@ const handleOpenAppMessage = (event, {url, title}) =>
     });
 
     childWindow.removeMenu();
-    childWindow.webContents.openDevTools();
+    // TODO: eventually remove this.
+    //childWindow.webContents.openDevTools();
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowsMap.set(childWindow.getTitle(), childWindow);
 
     childWindow.on('close', () =>
     {
         let title = childWindow.getTitle();
+        removeWindowFromChannel(title);
         saveWindowDimensions(childWindow)
             .then(() => childWindowsMap.delete(title))
             .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
+    });
+
+    ipcMain.on('get-window-title', (event) =>
+    {
+        event.returnValue = childWindow.getTitle();
     });
 
     addContextMenu(childWindow);
@@ -138,11 +149,27 @@ const addContextMenu = (window) =>
                     { label: 'Create Workspace', click: () => console.log('New Workspace clicked') }
             ]},
             { type: 'separator' },
+            { label: 'set Channel', submenu: [
+                    { label: 'Set context sharing channel to red', icon: path.join(__dirname, '../assets', 'red.png'), click: () => addWindowToChannel('red', window.getTitle()) },
+                    { type: 'separator' },
+                    { label: 'Set context sharing channel to blue', icon: path.join(__dirname, '../assets', 'blue.png'), click: () => addWindowToChannel('blue', window.getTitle()) },
+                    { type: 'separator' },
+                    { label: 'Set context sharing channel to green', icon: path.join(__dirname, '../assets', 'green.png'), click: () => addWindowToChannel('green', window.getTitle()) },
+                    { type: 'separator' },
+                    { label: 'Set context sharing channel to yellow', icon: path.join(__dirname, '../assets', 'yellow.png'), click: () => addWindowToChannel('yellow', window.getTitle()) },
+                    { type: 'separator' },
+                    { label: 'No channel selected for context sharing', click: () => removeWindowFromChannel(window.getTitle()) }
+                ]},
+            { type: 'separator' },
             { label: 'Close current window', click: () => saveWindowDimensions(window).then(() => window.close()) },
             { type: 'separator' },
             { label: 'Quit application', click: () => saveWindowDimensions(mainWindow).then(() =>
                 {
-                    childWindowsMap.forEach((childWindow) => saveWindowDimensions(childWindow));
+                    childWindowsMap.forEach((childWindow) =>
+                    {
+                        removeWindowFromChannel(childWindow.getTitle());
+                        saveWindowDimensions(childWindow);
+                    });
                     app.quit();
                 })
             }
@@ -154,6 +181,25 @@ const addContextMenu = (window) =>
     {
         contextMenu.popup({ window: window, x: params.x, y: params.y });
     });
+}
+
+const addWindowToChannel = (channel, windowTitle) =>
+{
+    console.log("Adding window: " + windowTitle + " to " + channel + " channel");
+    channelsWindowMap.get(channel).push(windowTitle);
+    console.log("Current windows in " + channel + " channel: " + channelsWindowMap.get(channel));
+}
+
+const removeWindowFromChannel = (windowTitle) =>
+{
+    console.log("Removing window: " + windowTitle + " from all channels");
+    channelsWindowMap.forEach((value) =>
+    {
+        const index = value.indexOf(windowTitle);
+        if(index > -1)
+            value.splice(index, 1);
+    });
+    channelsWindowMap.forEach((value, key) => value.length > 0 && console.log("Window(s) remaining in " + key + " channel: " + value));
 }
 
 const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
@@ -176,27 +222,11 @@ const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
 const handleContextShareMessage = (_, context) => console.log("Context shared with main: " + JSON.stringify(context));
 
-const handleCloseMessage = (windowName) =>
-{
-    if(childWindowsMap.has(windowName))
-        saveWindowDimensions(childWindowsMap.get(windowName)).then(() => childWindowsMap.delete(windowName));
-};
-
-const handleMinimizeMessage = (_, windowName) =>
-{
-    if(childWindowsMap.has(windowName))
-        childWindowsMap.get(windowName).minimize();
-}
-const handleMaximizeMessage = (_, windowName) =>
-{
-    if(childWindowsMap.has(windowName))
-        childWindowsMap.get(windowName).maximize();
-}
-
-const handleOpenToolsMessage = (windowName) => {};
-const handleOpenChannelsMessage = (windowName) => {};
-
-
+const handleCloseMessage = (_, windowTitle) => {};
+const handleMinimizeMessage = (_, windowTitle) => {};
+const handleMaximizeMessage = (_, windowTitle) => {};
+const handleOpenToolsMessage = (_, windowTitle) => {};
+const handleOpenChannelsMessage = (_, windowTitle) => {};
 
 app.whenReady().then(() =>
 {
@@ -205,11 +235,12 @@ app.whenReady().then(() =>
     ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
     ipcMain.on('share-context-with-main', handleContextShareMessage);
+
     ipcMain.on('close', handleCloseMessage);
     ipcMain.on('maximize', handleMaximizeMessage);
     ipcMain.on('minimize', handleMinimizeMessage);
-    ipcMain.on('openTools', handleOpenToolsMessage);
-    ipcMain.on('openChannel', handleOpenChannelsMessage);
+    ipcMain.on('open-tools', handleOpenToolsMessage);
+    ipcMain.on('open-channel', handleOpenChannelsMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -239,14 +270,17 @@ app.on('before-quit', () =>
     ipcMain.removeListener('close', handleCloseMessage);
     ipcMain.removeListener('maximize', handleMaximizeMessage);
     ipcMain.removeListener('minimize', handleMinimizeMessage);
-    ipcMain.removeListener('openTools', handleOpenToolsMessage);
-    ipcMain.removeListener('openChannel', handleOpenChannelsMessage);
+    ipcMain.removeListener('open-tools', handleOpenToolsMessage);
+    ipcMain.removeListener('open-channel', handleOpenChannelsMessage);
 
     childWindowsMap.forEach((childWindow) =>
     {
         if(childWindow !== undefined)
+        {
+            removeWindowFromChannel(childWindow.getTitle());
             saveWindowDimensions(childWindow)
                 .catch((err) => console.log("Error saving child window's dimensions: " + err));
+        }
     });
 
     childWindowsMap.clear();

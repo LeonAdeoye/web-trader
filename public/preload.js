@@ -17,20 +17,19 @@
 // Instead, use the contextBridge module to accomplish this securely:
 const { contextBridge, ipcRenderer } = require('electron')
 
-window.electronRequire = require;
-
 contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title) => ipcRenderer.send('openApp', url, title)
-})
+});
 
 contextBridge.exposeInMainWorld('titleBarActions', {
-    close: (window) => ipcRenderer.send('close', window),
-    maximize: (windowName) => ipcRenderer.send('maximize', windowName),
-    minimize: (windowName) => ipcRenderer.send('minimize', windowName),
-    openChannels: () => ipcRenderer.send('openChannels'),
-    setChannel: (window, channel) => ipcRenderer.send('openChannels', window, channel),
-    openTools: () => ipcRenderer.send('openTools'),
-})
+    close: (windowTitle) => ipcRenderer.send('close', windowTitle),
+    maximize: (windowTitle) => ipcRenderer.send('maximize', windowTitle),
+    minimize: (windowTitle) => ipcRenderer.send('minimize', windowTitle),
+    openChannels: () => ipcRenderer.send('open-channels'),
+    setChannel: (windowTitle, channel) => ipcRenderer.send('open-channels', windowTitle, channel),
+    openTools: () => ipcRenderer.send('open-tools'),
+    getWindowTitle: () => ipcRenderer.sendSync('get-window-title')
+});
 
 contextBridge.exposeInMainWorld('messenger', {
     sendMessageToMain: (fdc3Context, destination, source) => ipcRenderer.send('message-to-main-from-renderer', fdc3Context, destination, source),
@@ -62,4 +61,4 @@ window.addEventListener('DOMContentLoaded', () =>
     {
         replaceText(`${dependency}-version`, process.versions[dependency])
     }
-})
+});
