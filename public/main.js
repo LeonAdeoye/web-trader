@@ -83,28 +83,28 @@ const handleOpenAppMessage = (event, {url, title}) =>
 
     childWindow.removeMenu();
     // TODO: eventually remove this.
-    //childWindow.webContents.openDevTools();
+    childWindow.webContents.openDevTools();
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowTitleMap.set(childWindow.getTitle(), childWindow);
 
     childWindow.on('close', () =>
     {
         let title = childWindow.getTitle();
-        ipcMain.removeListener('get-window-title', handleGetWindowTitleMessage);
+        ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
         removeWindowFromChannel(title);
         saveWindowDimensions(childWindow)
             .then(() => childWindowTitleMap.delete(title))
             .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
     });
 
-    const handleGetWindowTitleMessage = (event, windowTitle) =>
+    const handleGetWindowIdMessage = (event, windowTitle) =>
     {
         const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
         childWindowIdMap.set(windowId, childWindow);
         event.returnValue = windowId;
     }
 
-    ipcMain.on('get-window-id', handleGetWindowTitleMessage);
+    ipcMain.on('get-window-id', handleGetWindowIdMessage);
 
     addContextMenu(childWindow);
     loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
@@ -237,7 +237,7 @@ const handleContextShareMessage = (_, windowId, {stockCode, market, client}) =>
 
         if(senderIndex > -1 && value.length > 1)
             console.log("Window with Id [" + windowId + "] and title [" + child.getTitle()
-                + "] is sending context: " + JSON.stringify({stockCode, market, client}) + " on channel: " + key
+                + "] is sending context: " + JSON.stringify({stockCode, client}) + " on channel: " + key
                 + " to all windows on the same channel [" + value.filter((_, index) => index !== senderIndex) + "]");
     });
 }

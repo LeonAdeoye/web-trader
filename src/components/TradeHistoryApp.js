@@ -5,16 +5,19 @@ import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
 import TradeHistoryGridsComponent from "./TradeHistoryGridsComponent";
-import {MockDataService} from "../services/MockDataService";
+import {DataService} from "../services/DataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 import {numberFormatter} from "../utilities";
 
 const TradeHistoryApp = () =>
 {
-    const [dataService] = useState(new MockDataService());
+    const [dataService] = useState(new DataService());
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
+    const [stockCode, setStockCode] = useState("0001.HK");
+    const [client, setClient] = useState("Goldman Sachs");
+
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
 
@@ -183,12 +186,12 @@ const TradeHistoryApp = () =>
 
                 {selectedTab === "1" && (
                 <TabPanel value="1" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={dataService.get("client_trade_history", filterDays)} historyProperty="client" dataId="client_trade_history" columnDefs={clientColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays)} historyProperty="client" dataId="client_trade_history" columnDefs={clientColumnDefs}/>
                 </TabPanel>)}
 
                 {selectedTab === "2" && (
                 <TabPanel value="2" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={dataService.get("stock_trade_history", filterDays)} historyProperty="stockCode" dataId="stock_trade_history" columnDefs={stockColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays)} historyProperty="stockCode" dataId="stock_trade_history" columnDefs={stockColumnDefs}/>
                 </TabPanel>)}
             </TabContext>
         </div>

@@ -1,20 +1,29 @@
-import React, { useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
-import {MockDataService} from "../services/MockDataService";
+import {DataService} from "../services/DataService";
 import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import SparklineRenderer from './SparklineRenderer';
 
 const HoldingsApp = () =>
 {
-    const [dataService] = useState(new MockDataService());
+    const [dataService] = useState(new DataService());
     const [selectedTab, setSelectedTab] = useState("1");
+    const [stockCode, setStockCode] = useState("0001.HK");
+    const [client, setClient] = useState("Schroders");
+
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
+
+    useEffect(() =>
+    {
+        //TODO: improve and then remove
+        console.log("windowId: " + windowId);
+    }, [windowId])
 
     const clientColumnDefs = useMemo(() => ( [
         {
@@ -148,6 +157,7 @@ const HoldingsApp = () =>
     return (
         <div className="holdings-app" style={{height: '100%', width: '100%'}}>
             <TabContext value={selectedTab}>
+
                 <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
                     <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
                     <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
@@ -159,7 +169,7 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["stockCode"]}
                                               columnDefs={clientColumnDefs}
-                                              gridData={dataService.get("client_holdings").holdings}/>
+                                              gridData={dataService.getData(DataService.HOLDINGS, null, client).holdings}/>
                     </TabPanel>)}
 
                 {selectedTab === "2" && (
@@ -168,7 +178,7 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["client"]}
                                               columnDefs={stockColumnDefs}
-                                              gridData={dataService.get("stock_holdings").holdings}/>
+                                              gridData={dataService.getData(DataService.HOLDINGS, stockCode, null).holdings}/>
                     </TabPanel>)}
             </TabContext>
         </div>
