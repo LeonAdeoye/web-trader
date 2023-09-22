@@ -18,10 +18,7 @@ const TaskListApp = () =>
     const [expandedAccordion, setExpandedAccordion] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null)
-
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("task"), []);
-
 
     useEffect(() =>
     {

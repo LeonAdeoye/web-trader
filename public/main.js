@@ -69,45 +69,50 @@ const createWindow = () =>
 
 const handleOpenAppMessage = (event, {url, title}) =>
 {
-    const childWindow = new BrowserWindow({
-        parent: mainWindow,
-        title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
-        modal: false,
-        show: true,
-        frame: true,
-        width: 800,
-        height: 600,
-        icon: path.join(__dirname, `../assets/${title}.png`),
-        webPreferences: { nodeIntegration: true, preload: path.join(__dirname, 'preload.js') }
-    });
-
-    childWindow.removeMenu();
-    // TODO: eventually remove this.
-    childWindow.webContents.openDevTools();
-    childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
-    childWindowTitleMap.set(childWindow.getTitle(), childWindow);
-
-    childWindow.on('close', () =>
+    const createChildWindow = () =>
     {
-        let title = childWindow.getTitle();
-        ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
-        removeWindowFromChannel(title);
-        saveWindowDimensions(childWindow)
-            .then(() => childWindowTitleMap.delete(title))
-            .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
-    });
+        let childWindow = new BrowserWindow({
+            parent: mainWindow,
+            title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
+            modal: false,
+            show: true,
+            frame: true,
+            width: 800,
+            height: 600,
+            icon: path.join(__dirname, `../assets/${title}.png`),
+            webPreferences: {nodeIntegration: true, preload: path.join(__dirname, 'preload.js')}
+        });
 
-    const handleGetWindowIdMessage = (event, windowTitle) =>
-    {
-        const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
-        childWindowIdMap.set(windowId, childWindow);
-        event.returnValue = windowId;
+        childWindow.removeMenu();
+        childWindow.webContents.openDevTools(); // TODO: Remove this line in production
+        childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
+        childWindowTitleMap.set(childWindow.getTitle(), childWindow);
+
+        childWindow.on('close', () =>
+        {
+            let title = childWindow.getTitle();
+            ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
+            removeWindowFromChannel(title);
+            saveWindowDimensions(childWindow)
+                .then(() => childWindowTitleMap.delete(title))
+                .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
+        });
+
+        // This is the legacy approach before the ipcRenderer invoke method was introduced.
+        // It is still used here because of the childWindow closure will not be available to the ipcMain event handler.
+        const handleGetWindowIdMessage = (event, windowTitle) =>
+        {
+            const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
+            childWindowIdMap.set(windowId, childWindow);
+            event.returnValue = windowId;
+        }
+
+        ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
+
+        addContextMenu(childWindow);
+        loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
     }
-
-    ipcMain.on('get-window-id', handleGetWindowIdMessage);
-
-    addContextMenu(childWindow);
-    loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
+    createChildWindow();
 }
 
 const saveWindowDimensions = async (window) =>
@@ -228,7 +233,7 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
-const handleContextShareMessage = (_, windowId, {stockCode, market, client}) =>
+const handleContextShareMessage = (_, windowId, {stockCode, client}) =>
 {
     channelsWindowMap.forEach((value, key) =>
     {
