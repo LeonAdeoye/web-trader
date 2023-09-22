@@ -16,7 +16,7 @@ const CrossesApp = () =>
     const [exchangeRateService] = useState(new ExchangeRateService());
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
     const [worker, setWorker] = useState(null);
-    const [stockCode, setStockCode] = useState("0388.HK");
+    const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
 
     // Used for context sharing between child windows.

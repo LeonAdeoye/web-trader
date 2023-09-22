@@ -13,8 +13,8 @@ const HoldingsApp = () =>
 {
     const [dataService] = useState(new DataService());
     const [selectedTab, setSelectedTab] = useState("1");
-    const [stockCode, setStockCode] = useState("0001.HK");
-    const [client, setClient] = useState("Schroders");
+    const [stockCode, setStockCode] = useState(null);
+    const [client, setClient] = useState(null);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);

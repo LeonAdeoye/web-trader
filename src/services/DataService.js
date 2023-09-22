@@ -86,6 +86,22 @@ export class DataService
             return crosses;
     }
 
+    #filterTasks(tasks, stockCode, client)
+    {
+        if(stockCode)
+        {
+            this.#loggerService.logInfo(`Filtering tasks for stock code: ${stockCode}.`);
+            return tasks.filter((item) => item.stockCode === stockCode);
+        }
+        else if(client)
+        {
+            this.#loggerService.logInfo(`Filtering tasks for client: ${client}.`);
+            return tasks.filter((item) => item.client === client);
+        }
+        else
+            return tasks;
+    }
+
     getData(dataType, stock, client, days)
     {
         switch (dataType)
@@ -97,7 +113,7 @@ export class DataService
             case DataService.HOLDINGS:
                 return this.#filterHoldings(holdings, stock, client);
             case DataService.TASKS:
-                return tasks;
+                return this.#filterTasks(tasks, stock, client);
             default:
                 return [];
         }
@@ -105,13 +121,18 @@ export class DataService
 
     async get(url)
     {
-        let data = [];
+        try
+        {
+            const response = await fetch(url);
 
-        await fetch(url)
-            .then(response => response.json())
-            .then(jsonResponse => data = jsonResponse)
-            .catch(error => this.#loggerService.logError(error));
+            if (!response.ok)
+                throw new Error(`Request using url: ${url} failed with status ${response.status}`);
 
-        return data;
+            return await response.json();
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(error);
+        }
     }
 }

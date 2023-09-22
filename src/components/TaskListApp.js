@@ -16,6 +16,9 @@ const TaskListApp = () =>
     const [loggerService] = useState(new LoggerService(TaskListApp.name));
     const [worker, setWorker] = useState(null);
     const [expandedAccordion, setExpandedAccordion] = useState(null);
+    const [stockCode, setStockCode] = useState(null);
+    const [client, setClient] = useState(null)
+
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("task"), []);
 
@@ -47,7 +50,7 @@ const TaskListApp = () =>
 
     useEffect(() =>
     {
-        setTasks(dataService.getData(DataService.TASKS).filter(filterTaskDetail).filter(filterTaskTypes));
+        setTasks(dataService.getData(DataService.TASKS, stockCode, client).filter(filterTaskDetail).filter(filterTaskTypes));
         setExpandedAccordion(null);
     }, [searchValue, searchType]);
 
@@ -196,14 +199,15 @@ const TaskListApp = () =>
                                                 {task.type === "Alert"  && <span className="task-detail">Side: {task.side}</span>}
                                                 {task.type === "Alert"  && <span className="task-detail">Order ID: {task.orderId}</span>}
                                             </>
-                                            {(task.status === "pending") && <span>
-                                                                                <Tooltip title={<Typography fontSize={12}>Mark the task as completed.</Typography>}>
-                                                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleComplete(task)}>Complete</Button>
-                                                                                </Tooltip>
-                                                                                <Tooltip title={<Typography fontSize={12}>Dismiss the task as it not applicable or relevant.</Typography>}>
-                                                                                        <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleDismiss(task)}>Dismiss</Button>
-                                                                                </Tooltip>
-                                                                            </span>}
+                                            {(task.status === "pending") &&
+                                                <span>
+                                                    <Tooltip title={<Typography fontSize={12}>Mark the task as completed.</Typography>}>
+                                                            <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleComplete(task)}>Complete</Button>
+                                                    </Tooltip>
+                                                    <Tooltip title={<Typography fontSize={12}>Dismiss the task as it not applicable or relevant.</Typography>}>
+                                                            <Button className="task-action-button" color="primary" variant='contained' onClick={() => handleDismiss(task)}>Dismiss</Button>
+                                                    </Tooltip>
+                                                </span>}
                                         </>}
                                 />
                             </AccordionDetails>
