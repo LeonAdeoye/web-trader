@@ -57,6 +57,8 @@ export class DataService
                 holdings: holdings.filter((item) => item.client === client)
             };
         }
+        else
+            return holdings;
     }
 
     #filterCrosses(crosses, stockCode, client)

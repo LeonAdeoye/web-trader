@@ -15,8 +15,8 @@ const TradeHistoryApp = () =>
     const [dataService] = useState(new DataService());
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
-    const [stockCode, setStockCode] = useState(null);
-    const [client, setClient] = useState(null);
+    const [stockCode, setStockCode] = useState("0001.HK");
+    const [client, setClient] = useState("Goldman Sachs");
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
