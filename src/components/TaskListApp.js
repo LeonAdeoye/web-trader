@@ -6,6 +6,7 @@ import '../styles/css/main.css';
 import { LoggerService } from '../services/LoggerService';
 import {Sparklines, SparklinesBars} from "react-sparklines";
 import {createArrayFromScore} from "../utilities";
+import {FDC3Service} from "../services/FDC3Service";
 
 const TaskListApp = () =>
 {
@@ -54,7 +55,7 @@ const TaskListApp = () =>
     const selectTaskHandler = (task) =>
     {
         loggerService.logInfo(`Selected task in task app with Id: ${windowId} for context sharing with main: ${JSON.stringify(task)}`);
-        window.contextSharer.sendContextToMain(windowId, task);
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(task.stockCode, task.client), null, windowId);
     };
 
     const filterTaskTypes = (task) =>

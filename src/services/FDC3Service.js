@@ -29,4 +29,27 @@ export class FDC3Service
             }
         };
     }
+
+    static createContextShare = (symbol, client) =>
+    {
+        return {
+            type: "fdc3.context",
+            instruments: [
+                {
+                    type: "fdc3.instrument",
+                    id: {
+                        ticker: symbol
+                    }
+                }
+            ],
+            clients: [
+                {
+                    type: "fdc3.client",
+                    id: {
+                        name: client
+                    }
+                }
+            ]
+        };
+    }
 }

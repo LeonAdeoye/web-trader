@@ -69,50 +69,46 @@ const createWindow = () =>
 
 const handleOpenAppMessage = (event, {url, title}) =>
 {
-    const createChildWindow = () =>
+    let childWindow = new BrowserWindow({
+        parent: mainWindow,
+        title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
+        modal: false,
+        show: true,
+        frame: true,
+        width: 800,
+        height: 600,
+        icon: path.join(__dirname, `../assets/${title}.png`),
+        webPreferences: {nodeIntegration: true, preload: path.join(__dirname, 'preload.js')}
+    });
+
+    childWindow.removeMenu();
+    childWindow.webContents.openDevTools(); // TODO: Remove this line in production
+    childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
+    childWindowTitleMap.set(childWindow.getTitle(), childWindow);
+
+    childWindow.on('close', () =>
     {
-        let childWindow = new BrowserWindow({
-            parent: mainWindow,
-            title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
-            modal: false,
-            show: true,
-            frame: true,
-            width: 800,
-            height: 600,
-            icon: path.join(__dirname, `../assets/${title}.png`),
-            webPreferences: {nodeIntegration: true, preload: path.join(__dirname, 'preload.js')}
-        });
+        let title = childWindow.getTitle();
+        ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
+        removeWindowFromChannel(title);
+        saveWindowDimensions(childWindow)
+            .then(() => childWindowTitleMap.delete(title))
+            .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
+    });
 
-        childWindow.removeMenu();
-        childWindow.webContents.openDevTools(); // TODO: Remove this line in production
-        childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
-        childWindowTitleMap.set(childWindow.getTitle(), childWindow);
-
-        childWindow.on('close', () =>
-        {
-            let title = childWindow.getTitle();
-            ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
-            removeWindowFromChannel(title);
-            saveWindowDimensions(childWindow)
-                .then(() => childWindowTitleMap.delete(title))
-                .catch((err) => console.log(`Error saving child window position and size because of ${err}`));
-        });
-
-        // This is the legacy approach before the ipcRenderer invoke method was introduced.
-        // It is still used here because of the childWindow closure will not be available to the ipcMain event handler.
-        const handleGetWindowIdMessage = (event, windowTitle) =>
-        {
-            const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
-            childWindowIdMap.set(windowId, childWindow);
-            event.returnValue = windowId;
-        }
-
-        ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
-
-        addContextMenu(childWindow);
-        loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
+    // This is the legacy approach before the ipcRenderer invoke method was introduced.
+    // It is still used here because of the childWindow closure will not be available to the ipcMain event handler.
+    const handleGetWindowIdMessage = (event, windowTitle) =>
+    {
+        const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
+        childWindowIdMap.set(windowId, childWindow);
+        event.returnValue = windowId;
     }
-    createChildWindow();
+
+    ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
+
+    addContextMenu(childWindow);
+    loadWindowDimensions(childWindow).then(() => console.log("Child window configuration completed"));
 }
 
 const saveWindowDimensions = async (window) =>
@@ -217,42 +213,51 @@ const removeWindowFromChannel = (windowTitle) =>
 
 const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
-    // To send a message from main.js to a renderer process, use the webContents.send method on the target child window's webContents.
-    // The webContents.send method takes a channel name and a data payload as arguments.
-    // Iterate through each item in childWindowTitleMap and send a message to each child window that starts with the destination text value and optionally ends with a non-zero integer in brackets.
-    const regex = new RegExp(destination + "( \\(\\d+\\))?");
-    childWindowTitleMap.forEach((childWindow) =>
+    if(fdc3Context.type === "fdc3.context")
     {
-        if(regex.test(childWindow.getTitle()))
+        // Get the child window that sent the message.
+        const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
+        // Loop through each channel, and check if the channel contains the child window that sent the message.
+        channelsWindowMap.forEach((value, key) =>
         {
-            childWindow.webContents.send("message-to-renderer-from-main", destination, fdc3Context, source);
-            console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
-        }
-    });
+            // If the channel contains the child window that sent the message then exclude it from the destinations.
+            if(value.includes(sourceChildWindowTitle))
+            {
+                const destinationToExclude = value.indexOf(sourceChildWindowTitle);
+                const destinations = value.filter((element, index) => index !== destinationToExclude);
+                destinations.forEach((destinationWindowTitle) =>
+                {
+                    const destinationChildWindow = childWindowTitleMap.get(destinationWindowTitle);
+                    // Send the context to the child window that is in the same channel.
+                    destinationChildWindow.webContents.send("message-to-renderer-from-main", key + " channel", fdc3Context, sourceChildWindowTitle);
+                    console.log("Message sent to child window: " + destinationChildWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
+                });
+            }
+        });
+    }
+    else if(fdc3Context.type === "fdc3.chart")
+    {
+        const regex = new RegExp(destination + "( \\(\\d+\\))?");
+        childWindowTitleMap.forEach((childWindow) =>
+        {
+            if(regex.test(childWindow.getTitle()))
+            {
+                childWindow.webContents.send("message-to-renderer-from-main", destination, fdc3Context, source);
+                console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
+            }
+        });
+    }
 }
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
-const handleContextShareMessage = (_, windowId, {stockCode, client}) =>
-{
-    channelsWindowMap.forEach((value, key) =>
-    {
-        const child = childWindowIdMap.get(windowId);
-        const senderIndex = value.indexOf(child.getTitle());
-
-        if(senderIndex > -1 && value.length > 1)
-            console.log("Window with Id [" + windowId + "] and title [" + child.getTitle()
-                + "] is sending context: " + JSON.stringify({stockCode, client}) + " on channel: " + key
-                + " to all windows on the same channel [" + value.filter((_, index) => index !== senderIndex) + "]");
-    });
-}
-
 const handleCloseMessage = (_, windowTitle) => {};
 const handleMinimizeMessage = (_, windowTitle) => {};
 const handleMaximizeMessage = (_, windowTitle) => {};
 const handleOpenToolsMessage = (_, windowTitle) => {};
 const handleOpenChannelsMessage = (_, windowTitle) => {};
 
+// TODO what do I need this for? If not needed delete it.
 const handleGetContextShareChannelMessage = (event, windowTitle) =>
 {
     let channel = undefined;
@@ -272,7 +277,6 @@ app.whenReady().then(() =>
     ipcMain.on('message-to-main-from-renderer', handleMessageFromRenderer);
     ipcMain.on('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.handle('get-user-logged-in', handleGetLoggedInUserMessage);
-    ipcMain.on('share-context-with-main', handleContextShareMessage);
 
     ipcMain.on('close', handleCloseMessage);
     ipcMain.on('maximize', handleMaximizeMessage);
@@ -304,7 +308,6 @@ app.on('before-quit', () =>
 
     ipcMain.removeListener('set-user-logged-in', handleSetLoggedInUserMessage);
     ipcMain.removeListener('get-user-logged-in', handleGetLoggedInUserMessage);
-    ipcMain.removeListener('share-context-with-main', handleContextShareMessage);
 
     ipcMain.removeListener('close', handleCloseMessage);
     ipcMain.removeListener('maximize', handleMaximizeMessage);

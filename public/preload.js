@@ -21,8 +21,6 @@ contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title) => ipcRenderer.send('openApp', url, title)
 });
 
-contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);
-
 contextBridge.exposeInMainWorld('command', {
     close: (windowTitle) => ipcRenderer.send('close', windowTitle),
     maximize: (windowTitle) => ipcRenderer.send('maximize', windowTitle),
@@ -45,13 +43,6 @@ contextBridge.exposeInMainWorld('configurations', {
     setLoggedInUserId: (loggedInUserId) => ipcRenderer.send('set-user-logged-in', loggedInUserId),
     getLoggedInUserId: () => ipcRenderer.invoke('get-user-logged-in') // This get data from main and returns it back to the render in the same call.
 });
-
-contextBridge.exposeInMainWorld('contextSharer', {
-    sendContextToMain: (windowTitle, context) => ipcRenderer.send('share-context-with-main', windowTitle, context),
-    getChannel: (windowTitle) => ipcRenderer.sendSync('get-share-context-channel', windowTitle)
-});
-
-ipcRenderer
 
 // The below code accesses the Node.js process.versions object and runs a basic replaceText helper function to insert the version numbers into the HTML document.
 window.addEventListener('DOMContentLoaded', () =>
