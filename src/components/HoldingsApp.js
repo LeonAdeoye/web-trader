@@ -21,9 +21,12 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        //TODO: improve and then remove
-        console.log("windowId: " + windowId);
-    }, [windowId])
+        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        {
+            if(fdc3Context.type == "fdc3.context")
+                setStockCode(fdc3Context.instruments[0].id.ticker);
+        });
+    }, []);
 
     const clientColumnDefs = useMemo(() => ( [
         {

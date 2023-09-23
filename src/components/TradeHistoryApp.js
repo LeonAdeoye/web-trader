@@ -1,4 +1,4 @@
-import React, { useState, useMemo} from 'react';
+import React, { useState, useMemo, useEffect} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
@@ -20,6 +20,15 @@ const TradeHistoryApp = () =>
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
+
+    useEffect(() =>
+    {
+        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        {
+            if(fdc3Context.type == "fdc3.context")
+                setStockCode(fdc3Context.instruments[0].id.ticker);
+        });
+    }, []);
 
     const stockColumnDefs = useMemo(() => ( [
         {

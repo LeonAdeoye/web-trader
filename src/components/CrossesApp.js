@@ -107,6 +107,15 @@ const CrossesApp = () =>
 
     useEffect(() =>
     {
+        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        {
+            if(fdc3Context.type == "fdc3.context")
+                setStockCode(fdc3Context.instruments[0].id.ticker);
+        });
+    }, []);
+
+    useEffect(() =>
+    {
         if (worker)
             worker.onmessage = handleWorkerMessage;
 
@@ -187,7 +196,7 @@ const CrossesApp = () =>
                 </div>
             );
         }));
-    }, [exchangeRatesLoaded]);
+    }, [exchangeRatesLoaded, stockCode, client]);
 
     return (
         <div className="crosses-app">
