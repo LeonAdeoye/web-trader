@@ -215,20 +215,15 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
 {
     if(fdc3Context.type === "fdc3.context")
     {
-        // Get the child window that sent the message.
         const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
-        // Loop through each channel, and check if the channel contains the child window that sent the message.
         channelsWindowMap.forEach((value, key) =>
         {
-            // If the channel contains the child window that sent the message then exclude it from the destinations.
             if(value.includes(sourceChildWindowTitle))
             {
-                const destinationToExclude = value.indexOf(sourceChildWindowTitle);
-                const destinations = value.filter((element, index) => index !== destinationToExclude);
-                destinations.forEach((destinationWindowTitle) =>
+                const sourceIndexToExclude = value.indexOf(sourceChildWindowTitle);
+                value.filter((element, index) => index !== sourceIndexToExclude).forEach((destinationWindowTitle) =>
                 {
                     const destinationChildWindow = childWindowTitleMap.get(destinationWindowTitle);
-                    // Send the context to the child window that is in the same channel.
                     destinationChildWindow.webContents.send("message-to-renderer-from-main", key + " channel", fdc3Context, sourceChildWindowTitle);
                     console.log("Message sent to child window: " + destinationChildWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
                 });
@@ -257,20 +252,6 @@ const handleMaximizeMessage = (_, windowTitle) => {};
 const handleOpenToolsMessage = (_, windowTitle) => {};
 const handleOpenChannelsMessage = (_, windowTitle) => {};
 
-// TODO what do I need this for? If not needed delete it.
-const handleGetContextShareChannelMessage = (event, windowTitle) =>
-{
-    let channel = undefined;
-    channelsWindowMap.forEach((value, key) =>
-    {
-        if(value.includes(windowTitle))
-            channel = key;
-    });
-
-    console.log("Channel for window: " + windowTitle + " is: " + channel)
-    event.returnValue = channel;
-};
-
 app.whenReady().then(() =>
 {
     ipcMain.on('openApp', handleOpenAppMessage);
@@ -283,7 +264,6 @@ app.whenReady().then(() =>
     ipcMain.on('minimize', handleMinimizeMessage);
     ipcMain.on('open-tools', handleOpenToolsMessage);
     ipcMain.on('open-channel', handleOpenChannelsMessage);
-    ipcMain.on('get-context-share-channel', handleGetContextShareChannelMessage);
 
     createWindow();
     addContextMenu(mainWindow);
@@ -314,8 +294,6 @@ app.on('before-quit', () =>
     ipcMain.removeListener('minimize', handleMinimizeMessage);
     ipcMain.removeListener('open-tools', handleOpenToolsMessage);
     ipcMain.removeListener('open-channel', handleOpenChannelsMessage);
-
-    ipcMain.removeListener('get-context-share-channel', handleGetContextShareChannelMessage);
 
     childWindowTitleMap.forEach((childWindow) =>
     {

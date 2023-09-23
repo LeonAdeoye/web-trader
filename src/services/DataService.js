@@ -22,13 +22,17 @@ export class DataService
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering trade history for stock code: ${stockCode} and newer than ${days} days ago.`);
-            return {
+            const result = {
                 stockCode: stockCode,
                 buyTrades: tradeHistory.filter((item) => item.stockCode === stockCode && new Date(item.date) > filterDate && item.side === "Buy"),
                 sellTrades: tradeHistory.filter((item) => item.stockCode === stockCode && new Date(item.date) > filterDate && item.side === "Sell")
             };
+
+            if(result.buyTrades.length !== 0 || result.sellTrades.length !== 0)
+                return result;
         }
-        else if(client)
+
+        if(client)
         {
             this.#loggerService.logInfo(`Filtering trade history for client: ${client} and newer than ${days} days ago.`);
             return {
@@ -44,12 +48,16 @@ export class DataService
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering holdings for stock code: ${stockCode}.`);
-            return {
+            const result = {
                 stockCode: stockCode,
                 holdings: holdings.filter((item) => item.stockCode === stockCode)
             };
+
+            if(result.holdings.length !== 0)
+                return result;
         }
-        else if(client)
+
+        if(client)
         {
             this.#loggerService.logInfo(`Filtering holdings for client: ${client}.`);
             return {
@@ -57,8 +65,6 @@ export class DataService
                 holdings: holdings.filter((item) => item.client === client)
             };
         }
-        else
-            return holdings;
     }
 
     #filterCrosses(crosses, stockCode, client)
@@ -66,9 +72,11 @@ export class DataService
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering crosses for stock code: ${stockCode}.`);
-            return crosses.filter((item) => item.stockCode === stockCode);
+            const result = crosses.filter((item) => item.stockCode === stockCode);
+            if(result.length !== 0)
+                return result;
         }
-        else if(client)
+        if(client)
         {
             this.#loggerService.logInfo(`Filtering crosses for client: ${client}.`);
             const result = [];

@@ -481,7 +481,7 @@ export const tasks = [
         metadata: "Contact Lee McQueen",
         ranking: 9,
         desk: "Block desk HK",
-        client: "JP Morgan Chase",
+        client: "JP Morgan",
         quantity: 45000,
         trader: "Harper",
         side: "Sell",
@@ -556,7 +556,7 @@ export const tasks = [
         market: "TK",
         metadata: "VWAP algo paused",
         ranking: 1,
-        client: "JP Morgan Chase",
+        client: "JP Morgan",
         quantity: 45000,
         side: "Sell",
         orderId: 1234567

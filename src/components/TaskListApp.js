@@ -181,6 +181,7 @@ const TaskListApp = () =>
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Quantity: {task.quantity.toLocaleString()}</span>}
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Side: {task.side}</span>}
                                                 {task.type === "Desk Cross"  && <span className="task-detail">Order Id: {task.orderId}</span>}
+                                                {task.type === "Desk Cross"  && <span className="task-detail">Client: {task.client}</span>}
                                                 {task.type === "IOI Cross"  && <span className="task-detail">Trader: {task.trader}</span>}
                                                 {task.type === "IOI Cross"  && <span className="task-detail">Quantity: {task.quantity.toLocaleString()}</span>}
                                                 {task.type === "IOI Cross"  && <span className="task-detail">Side: {task.side}</span>}

@@ -23,8 +23,14 @@ const HoldingsApp = () =>
     {
         window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
         {
-            if(fdc3Context.type == "fdc3.context")
-                setStockCode(fdc3Context.instruments[0].id.ticker);
+            if(fdc3Context.type === "fdc3.context")
+            {
+                if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
+                    setStockCode(fdc3Context.instruments[0].id.ticker);
+
+                if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
+                    setClient(fdc3Context.clients[0].id.name);
+            }
         });
     }, []);
 
