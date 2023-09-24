@@ -209,12 +209,16 @@ const TradeHistoryApp = () =>
 
                 {selectedTab === "1" && (
                 <TabPanel value="1" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client" dataId="client_trade_history" columnDefs={clientColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client"
+                                                dataId="client_trade_history" columnDefs={clientColumnDefs}
+                                                windowId={windowId}/>
                 </TabPanel>)}
 
                 {selectedTab === "2" && (
                 <TabPanel value="2" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode" dataId="stock_trade_history" columnDefs={stockColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode"
+                                                dataId="stock_trade_history" columnDefs={stockColumnDefs}
+                                                windowId={windowId}/>
                 </TabPanel>)}
             </TabContext>
         </div>

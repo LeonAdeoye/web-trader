@@ -17,12 +17,12 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
         return getRowIdValue(rowIdArray, row.data);
     }, []);
 
-    const onSelectionChanged = () =>
+    const onSelectionChanged = useCallback(() =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         if(selectedRows.length === 1)
             setSelectedGenericGridRow(selectedRows[0]);
-    };
+    }, []);
 
     const updateRows = useCallback((row) =>
     {
@@ -49,8 +49,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}
-                headerHeight={rowHeight}
-            />
+                headerHeight={rowHeight}/>
         </div>
     );
 };

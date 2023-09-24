@@ -32,24 +32,30 @@ export class FDC3Service
 
     static createContextShare = (symbol, client) =>
     {
-        return {
+        let fdc3Context = {
             type: "fdc3.context",
-            instruments: [
-                {
-                    type: "fdc3.instrument",
-                    id: {
-                        ticker: symbol
-                    }
-                }
-            ],
-            clients: [
-                {
-                    type: "fdc3.client",
-                    id: {
-                        name: client
-                    }
-                }
-            ]
         };
+
+        if(symbol)
+        {
+            fdc3Context["instruments"] = [                {
+                type: "fdc3.instrument",
+                id: {
+                    ticker: symbol
+                }
+            }];
+        }
+
+        if(client)
+        {
+            fdc3Context["clients"] = [                {
+                type: "fdc3.client",
+                id: {
+                    name: client
+                }
+            }];
+        }
+
+        return fdc3Context;
     }
 }

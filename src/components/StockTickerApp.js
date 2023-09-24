@@ -1,8 +1,9 @@
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef, useCallback, useMemo} from "react";
 import {Command} from "amps";
+import {FDC3Service} from "../services/FDC3Service";
 
 const columnDefs = [
     {headerName: 'Symbol', field: 'symbol'},
@@ -26,8 +27,6 @@ const processOOF = (message, rowData) =>
     }
     return rowData;
 }
-
-
 
 // On the other side, when AMPS notifies us that new information has arrived,
 // we use the data in that message to update the grid. Similar to processOOF,
@@ -54,6 +53,9 @@ export const StockTickerApp = ({client}) =>
     const [rowData, setRowData] = useState([]);
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
+
+    // Used for context sharing between child windows.
+    const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
 
     // Keep a reference to the subscription ID.
     const subIdTef = useRef();
@@ -88,10 +90,21 @@ export const StockTickerApp = ({client}) =>
         return () => web_worker.terminate();
     }, []);
 
+    const onSelectionChanged = useCallback(() =>
+    {
+        const selectedRows = gridApiRef.current.api.getSelectedRows();
+        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].symbol;
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+    }, []);
+
     return (
         <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
-            <AgGridReact columnDefs={columnDefs}
-                 rowHeight={25}
+            <AgGridReact
+                columnDefs={columnDefs}
+                ref={gridApiRef}
+                rowSelection={'single'}
+                onSelectionChanged={onSelectionChanged}
+                rowHeight={25}
                 // we now use state to track row data changes
                 rowData={rowData}
                 // unique identification of the row based on the SowKey

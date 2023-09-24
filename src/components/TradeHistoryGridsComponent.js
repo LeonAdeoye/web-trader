@@ -1,13 +1,16 @@
-import React, { useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
+import {FDC3Service} from "../services/FDC3Service";
 
-const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs}) =>
+const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, windowId}) =>
 {
     const gridDimensions = useMemo(() => ({ height: 'calc(100vh - 190px)'}), []);
+    const buyGridApiRef = useRef();
+    const sellGridApiRef = useRef();
     const [totalBuyQty, setTotalBuyQty] = useState(0);
     const [totalSellQty, setTotalSellQty] = useState(0);
     const [totalBuyNotional, setTotalBuyNotional] = useState(0);
@@ -52,6 +55,20 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs})
 
     }, [totalSellNotional, totalBuyNotional]);
 
+    const onBuySelectionChanged = useCallback(() =>
+    {
+        const selectedRows = buyGridApiRef.current.api.getSelectedRows();
+        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+    }, []);
+
+    const onSellSelectionChanged = useCallback(() =>
+    {
+        const selectedRows = sellGridApiRef.current.api.getSelectedRows();
+        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+    }, []);
+
     return (
         <div className="trade-history-app">
             <div className={dataId}>
@@ -69,9 +86,12 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs})
                                 </div>
                                 <div className="ag-theme-balham" style={gridDimensions}>
                                     <AgGridReact
+                                        ref={buyGridApiRef}
                                         columnDefs={columnDefs}
                                         rowData={rows.buyTrades}
                                         domLayout="autoHeight"
+                                        rowSelection={'single'}
+                                        onSelectionChanged={onBuySelectionChanged}
                                         headerHeight={25}
                                         rowHeight={20}
                                         height
@@ -86,9 +106,12 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs})
                                 </div>
                                 <div className="ag-theme-balham" style={gridDimensions}>
                                     <AgGridReact
+                                        ref={sellGridApiRef}
                                         columnDefs={columnDefs}
                                         rowData={rows.sellTrades}
                                         domLayout="autoHeight"
+                                        rowSelection={'single'}
+                                        onSelectionChanged={onSellSelectionChanged}
                                         headerHeight={25}
                                         rowHeight={20}
                                     />

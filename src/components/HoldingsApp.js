@@ -8,6 +8,9 @@ import {DataService} from "../services/DataService";
 import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import SparklineRenderer from './SparklineRenderer';
+import {useRecoilState} from "recoil";
+import {selectedGenericGridRowState} from "../atoms/dialog-state";
+import {FDC3Service} from "../services/FDC3Service";
 
 const HoldingsApp = () =>
 {
@@ -17,6 +20,7 @@ const HoldingsApp = () =>
     const [client, setClient] = useState("Schroders");
     const [clientHoldings, setClientHoldings] = useState([]);
     const [stockHoldings, setStockHoldings] = useState([]);
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
@@ -35,6 +39,12 @@ const HoldingsApp = () =>
             }
         });
     }, []);
+
+    useEffect(() =>
+    {
+        if(selectedGenericGridRow)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedGenericGridRow.stockCode, selectedGenericGridRow.client), null, windowId);
+    }, [selectedGenericGridRow]);
 
     useEffect(() =>
     {
@@ -192,7 +202,8 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["stockCode"]}
                                               columnDefs={clientColumnDefs}
-                                              gridData={clientHoldings}/>
+                                              gridData={clientHoldings}
+                                              windowId={windowId}/>
                     </TabPanel>)}
 
                 {selectedTab === "2" && (
@@ -201,7 +212,8 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["client"]}
                                               columnDefs={stockColumnDefs}
-                                              gridData={stockHoldings}/>
+                                              gridData={stockHoldings}
+                                              windowId={windowId}/>
                     </TabPanel>)}
             </TabContext>
         </div>
