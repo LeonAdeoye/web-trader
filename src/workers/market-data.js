@@ -5,13 +5,7 @@ const PORT = '9008';
 const TOPIC = 'market_data';
 const PUBLISH_RATE_PER_SECOND = 200;
 
-const SYMBOLS = [
-    'MMM', 'ABBV', 'ALV', 'GOOGL', 'AMZN', 'AMGN', 'ABI', 'APPL', 'BHP', 'BA', 'BP',
-    'BATS', 'CVX', 'CSCO', 'C', 'KO', 'DD', 'XOM', 'FB', 'GE', 'GSK', 'HSBA', 'INTC',
-    'IBM', 'JNJ', 'JPM', 'MA', 'MCD', 'MRK', 'MSFT', 'NESN', 'NOVN', 'NVDA', 'ORCL',
-    'PEP', 'PFE', 'PM', 'PG', 'ROG', 'RY', 'RDSA', 'SMSN', 'SAN', 'SIE', 'TSM', 'TOT',
-    'V', 'WMT', 'DIS'
-];
+const SYMBOLS = ['0001.HK', '0002.HK', '0001.HK', '0005.HK', '8604.T', '8602.T', '0007.HK', '2800.HK', '0700.HK', '0388.HK', '2318.HK'];
 
 // The randInt function returns a random integer value between min and max arguments.
 // Math.random() returns a random number between 0 (inclusive),  and 1 (exclusive).

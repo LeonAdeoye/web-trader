@@ -17,8 +17,8 @@ const TradeHistoryApp = () =>
     const [filterDays] = useRecoilState(filterDaysState);
     const [stockCode, setStockCode] = useState("0001.HK");
     const [client, setClient] = useState("Goldman Sachs");
-    const [clientTradeHistory, setClientTradeHistory] = useState([]);
-    const [stockTradeHistory, setStockTradeHistory] = useState([]);
+    const [clientTradeHistory, setClientTradeHistory] = useState({client: "Goldman Sachs", buyTrades: [], sellTrades: []});
+    const [stockTradeHistory, setStockTradeHistory] = useState({stock: "0001.HK", buyTrades: [], sellTrades: []});
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
@@ -42,8 +42,7 @@ const TradeHistoryApp = () =>
     {
         setClientTradeHistory(dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays));
         setStockTradeHistory(dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays));
-
-    }, [stockCode, client]);
+    }, [stockCode, client, filterDays]);
 
     const stockColumnDefs = useMemo(() => ( [
         {

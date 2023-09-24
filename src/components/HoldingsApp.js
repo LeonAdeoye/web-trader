@@ -38,8 +38,13 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        setClientHoldings(dataService.getData(DataService.HOLDINGS, null, client).holdings);
-        setStockHoldings(dataService.getData(DataService.HOLDINGS, stockCode, null).holdings);
+        let result = dataService.getData(DataService.HOLDINGS, null, client);
+        if(result)
+            setClientHoldings(result.holdings);
+
+        result = dataService.getData(DataService.HOLDINGS, stockCode, null);
+        if(result)
+            setStockHoldings(result.holdings);
 
     }, [stockCode, client]);
 

@@ -14,14 +14,14 @@ export class DataService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    #filterTradeHistory(tradeHistory, stockCode, client, days)
+    #filterTradeHistory(tradeHistory, stockCode, client, filterDays)
     {
         const filterDate = new Date();
-        filterDate.setDate(filterDate.getDate() - days);
+        filterDate.setDate(filterDate.getDate() - filterDays);
 
         if(stockCode)
         {
-            this.#loggerService.logInfo(`Filtering trade history for stock code: ${stockCode} and newer than ${days} days ago.`);
+            this.#loggerService.logInfo(`Filtering trade history for stock code: ${stockCode} and newer than ${filterDays} days ago.`);
             const result = {
                 stockCode: stockCode,
                 buyTrades: tradeHistory.filter((item) => item.stockCode === stockCode && new Date(item.date) > filterDate && item.side === "Buy"),
@@ -30,16 +30,31 @@ export class DataService
 
             if(result.buyTrades.length !== 0 || result.sellTrades.length !== 0)
                 return result;
+            else
+                return {
+                    stockCode: stockCode,
+                    buyTrades: [],
+                    sellTrades: []
+                };
         }
 
         if(client)
         {
-            this.#loggerService.logInfo(`Filtering trade history for client: ${client} and newer than ${days} days ago.`);
-            return {
+            this.#loggerService.logInfo(`Filtering trade history for client: ${client} and newer than ${filterDays} days ago.`);
+            const result = {
                 client: client,
                 buyTrades: tradeHistory.filter((item) => item.client === client && new Date(item.date) > filterDate && item.side === "Buy"),
                 sellTrades: tradeHistory.filter((item) => item.client === client && new Date(item.date) > filterDate && item.side === "Sell")
-            }
+            };
+
+            if(result.buyTrades.length !== 0 || result.sellTrades.length !== 0)
+                return result;
+            else
+                return {
+                    client: client,
+                    buyTrades: [],
+                    sellTrades: []
+                };
         }
     }
 
