@@ -38,23 +38,27 @@ export class FDC3Service
 
         if(symbol)
         {
-            fdc3Context["instruments"] = [                {
+            fdc3Context["instruments"] = [{
                 type: "fdc3.instrument",
                 id: {
                     ticker: symbol
                 }
             }];
         }
+        else
+            fdc3Context["instruments"] = [];
 
         if(client)
         {
-            fdc3Context["clients"] = [                {
+            fdc3Context["clients"] = [{
                 type: "fdc3.client",
                 id: {
                     name: client
                 }
             }];
         }
+        else
+            fdc3Context["clients"] = [];
 
         return fdc3Context;
     }

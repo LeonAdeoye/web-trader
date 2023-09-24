@@ -33,9 +33,13 @@ const HoldingsApp = () =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
 
                 if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
                     setClient(fdc3Context.clients[0].id.name);
+                else
+                    setClient(null);
             }
         });
     }, []);
@@ -51,10 +55,14 @@ const HoldingsApp = () =>
         let result = dataService.getData(DataService.HOLDINGS, null, client);
         if(result)
             setClientHoldings(result.holdings);
+        else
+            setClientHoldings([]);
 
         result = dataService.getData(DataService.HOLDINGS, stockCode, null);
         if(result)
             setStockHoldings(result.holdings);
+        else
+            setStockHoldings([]);
 
     }, [stockCode, client]);
 
