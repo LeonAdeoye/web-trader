@@ -224,7 +224,7 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
                 value.filter((element, index) => index !== sourceIndexToExclude).forEach((destinationWindowTitle) =>
                 {
                     const destinationChildWindow = childWindowTitleMap.get(destinationWindowTitle);
-                    destinationChildWindow.webContents.send("message-to-renderer-from-main", key + " channel", fdc3Context, sourceChildWindowTitle);
+                    destinationChildWindow.webContents.send("message-to-renderer-from-main", fdc3Context, key + " channel", sourceChildWindowTitle);
                     console.log("Message sent to child window: " + destinationChildWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
                 });
             }
@@ -237,7 +237,7 @@ const handleMessageFromRenderer = (_, fdc3Context, destination, source) =>
         {
             if(regex.test(childWindow.getTitle()))
             {
-                childWindow.webContents.send("message-to-renderer-from-main", destination, fdc3Context, source);
+                childWindow.webContents.send("message-to-renderer-from-main", fdc3Context, destination, source);
                 console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Context));
             }
         });

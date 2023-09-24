@@ -17,13 +17,15 @@ const TradeHistoryApp = () =>
     const [filterDays] = useRecoilState(filterDaysState);
     const [stockCode, setStockCode] = useState("0001.HK");
     const [client, setClient] = useState("Goldman Sachs");
+    const [clientTradeHistory, setClientTradeHistory] = useState([]);
+    const [stockTradeHistory, setStockTradeHistory] = useState([]);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
 
     useEffect(() =>
     {
-        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        window.messenger.handleMessageFromMain((fdc3Context, _, __) =>
         {
             if(fdc3Context.type === "fdc3.context")
             {
@@ -35,6 +37,13 @@ const TradeHistoryApp = () =>
             }
         });
     }, []);
+
+    useEffect(() =>
+    {
+        setClientTradeHistory(dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays));
+        setStockTradeHistory(dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays));
+
+    }, [stockCode, client]);
 
     const stockColumnDefs = useMemo(() => ( [
         {
@@ -201,12 +210,12 @@ const TradeHistoryApp = () =>
 
                 {selectedTab === "1" && (
                 <TabPanel value="1" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays)} historyProperty="client" dataId="client_trade_history" columnDefs={clientColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client" dataId="client_trade_history" columnDefs={clientColumnDefs}/>
                 </TabPanel>)}
 
                 {selectedTab === "2" && (
                 <TabPanel value="2" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays)} historyProperty="stockCode" dataId="stock_trade_history" columnDefs={stockColumnDefs}/>
+                    <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode" dataId="stock_trade_history" columnDefs={stockColumnDefs}/>
                 </TabPanel>)}
             </TabContext>
         </div>

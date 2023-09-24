@@ -15,13 +15,15 @@ const HoldingsApp = () =>
     const [selectedTab, setSelectedTab] = useState("1");
     const [stockCode, setStockCode] = useState("0001.HK");
     const [client, setClient] = useState("Schroders");
+    const [clientHoldings, setClientHoldings] = useState([]);
+    const [stockHoldings, setStockHoldings] = useState([]);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
 
     useEffect(() =>
     {
-        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        window.messenger.handleMessageFromMain((fdc3Context, _, __) =>
         {
             if(fdc3Context.type === "fdc3.context")
             {
@@ -33,6 +35,13 @@ const HoldingsApp = () =>
             }
         });
     }, []);
+
+    useEffect(() =>
+    {
+        setClientHoldings(dataService.getData(DataService.HOLDINGS, null, client).holdings);
+        setStockHoldings(dataService.getData(DataService.HOLDINGS, stockCode, null).holdings);
+
+    }, [stockCode, client]);
 
     const clientColumnDefs = useMemo(() => ( [
         {
@@ -178,7 +187,7 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["stockCode"]}
                                               columnDefs={clientColumnDefs}
-                                              gridData={dataService.getData(DataService.HOLDINGS, null, client).holdings}/>
+                                              gridData={clientHoldings}/>
                     </TabPanel>)}
 
                 {selectedTab === "2" && (
@@ -187,7 +196,7 @@ const HoldingsApp = () =>
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["client"]}
                                               columnDefs={stockColumnDefs}
-                                              gridData={dataService.getData(DataService.HOLDINGS, stockCode, null).holdings}/>
+                                              gridData={stockHoldings}/>
                     </TabPanel>)}
             </TabContext>
         </div>

@@ -27,6 +27,8 @@ const processOOF = (message, rowData) =>
     return rowData;
 }
 
+
+
 // On the other side, when AMPS notifies us that new information has arrived,
 // we use the data in that message to update the grid. Similar to processOOF,
 // the processPublish function is declared outside the Grid component,
@@ -51,6 +53,8 @@ export const StockTickerApp = ({client}) =>
 {
     const [rowData, setRowData] = useState([]);
     const [worker, setWorker] = useState(null);
+    const [stockCode, setStockCode] = useState(null);
+
     // Keep a reference to the subscription ID.
     const subIdTef = useRef();
     const gridApiRef = useRef();
@@ -64,6 +68,18 @@ export const StockTickerApp = ({client}) =>
                 client.unsubscribe(subIdTef.current);
         }
     }, [client]);
+
+    useEffect(() =>
+    {
+        window.messenger.handleMessageFromMain((fdc3Context, _, __) =>
+        {
+            if(fdc3Context.type === "fdc3.context")
+            {
+                if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
+                    setStockCode(fdc3Context.instruments[0].id.ticker);
+            }
+        });
+    }, []);
 
     useEffect(() =>
     {

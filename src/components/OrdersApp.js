@@ -7,15 +7,32 @@ export const OrdersApp = () =>
 {
     const [orders, setOrders] = useState([]);
     const [worker, setWorker] = useState(null);
+    const [stockCode, setStockCode] = useState(null);
+    const [client, setClient] = useState(null);
+
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("orders"), []);
-
 
     useEffect(() =>
     {
         const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
         setWorker(webWorker);
         return () => webWorker.terminate();
+    }, []);
+
+    useEffect(() =>
+    {
+        window.messenger.handleMessageFromMain((fdc3Context, _, __) =>
+        {
+            if(fdc3Context.type === "fdc3.context")
+            {
+                if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
+                    setStockCode(fdc3Context.instruments[0].id.ticker);
+
+                if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
+                    setClient(fdc3Context.clients[0].id.name);
+            }
+        });
     }, []);
 
     const handleWorkerMessage = useCallback((event) =>

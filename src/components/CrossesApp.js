@@ -8,7 +8,6 @@ import {useEffect} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {currencyFormatter, numberFormatter} from "../utilities";
 
-
 const CrossesApp = () =>
 {
     const [dataService] = useState(new DataService());
@@ -107,7 +106,7 @@ const CrossesApp = () =>
 
     useEffect(() =>
     {
-        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        window.messenger.handleMessageFromMain((fdc3Context, _, __) =>
         {
             if(fdc3Context.type === "fdc3.context")
             {

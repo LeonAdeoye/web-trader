@@ -150,10 +150,7 @@ const TaskListApp = () =>
                                             <span className="task-stock-code">{task.stockCode}</span>
                                             <span className="task-type-label">{task.type.toUpperCase()}</span>
                                         </>}
-                                    secondary={
-                                        <>
-                                            <span className="task-metadata">{task.metadata}</span>
-                                        </>}
+                                    secondary={<span className="task-metadata">{task.metadata}</span>}
                                 />
                                 {task.isLive && (
                                     <span className="task-live-label">LIVE</span>

@@ -76,6 +76,7 @@ export class DataService
             if(result.length !== 0)
                 return result;
         }
+
         if(client)
         {
             this.#loggerService.logInfo(`Filtering crosses for client: ${client}.`);
@@ -101,9 +102,12 @@ export class DataService
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering tasks for stock code: ${stockCode}.`);
-            return tasks.filter((item) => item.stockCode === stockCode);
+            const result = tasks.filter((item) => item.stockCode === stockCode);
+            if(result.length !== 0)
+                return result;
         }
-        else if(client)
+
+        if(client)
         {
             this.#loggerService.logInfo(`Filtering tasks for client: ${client}.`);
             return tasks.filter((item) => item.client === client);
