@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, Typography } from '@mui/material';
 import '../styles/css/main.css';
-import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
+import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
 const ConfigurationDialogComponent = ({ onCloseHandler }) =>

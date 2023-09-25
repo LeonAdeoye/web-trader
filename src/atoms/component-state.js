@@ -10,5 +10,10 @@ export const selectedGenericGridRowState = atom({
     default: undefined
 });
 
+export const selectedContextShareState = atom({
+    key: 'selectedContextShareState',
+    default: []
+});
+
 
 

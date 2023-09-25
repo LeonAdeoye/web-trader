@@ -9,7 +9,7 @@ import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import SparklineRenderer from './SparklineRenderer';
 import {useRecoilState} from "recoil";
-import {selectedGenericGridRowState} from "../atoms/dialog-state";
+import {selectedContextShareState, selectedGenericGridRowState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 
 const HoldingsApp = () =>
@@ -20,7 +20,7 @@ const HoldingsApp = () =>
     const [client, setClient] = useState("Schroders");
     const [clientHoldings, setClientHoldings] = useState([]);
     const [stockHoldings, setStockHoldings] = useState([]);
-    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    const [selectedContextShare] = useRecoilState(selectedContextShareState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
@@ -46,9 +46,20 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        if(selectedGenericGridRow)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedGenericGridRow.stockCode, selectedGenericGridRow.client), null, windowId);
-    }, [selectedGenericGridRow]);
+        if(selectedContextShare.length === 1)
+        {
+            if(selectedContextShare[0].contextShareKey === 'stockCode')
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
+            else
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, selectedContextShare[0].contextShareValue), null, windowId);
+        }
+        else if(selectedContextShare.length === 2)
+        {
+            const stockCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'stockCode').contextShareValue;
+            const client = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'client').contextShareValue;
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+        }
+    }, [selectedContextShare]);
 
     useEffect(() =>
     {

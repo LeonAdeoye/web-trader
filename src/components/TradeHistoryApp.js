@@ -31,9 +31,13 @@ const TradeHistoryApp = () =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
 
                 if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
                     setClient(fdc3Context.clients[0].id.name);
+                else
+                    setClient(null);
             }
         });
     }, []);

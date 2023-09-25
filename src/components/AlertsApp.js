@@ -2,6 +2,9 @@ import * as React from 'react';
 import {GenericGridComponent} from "./GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
 import {numberFormatter} from "../utilities";
+import {useRecoilState} from "recoil";
+import {selectedContextShareState} from "../atoms/component-state";
+import {FDC3Service} from "../services/FDC3Service";
 
 export const AlertsApp = () =>
 {
@@ -9,6 +12,8 @@ export const AlertsApp = () =>
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
+    const [selectedContextShare] = useRecoilState(selectedContextShareState);
+
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("alerts"), []);
 
@@ -27,9 +32,13 @@ export const AlertsApp = () =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
 
                 if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
                     setClient(fdc3Context.clients[0].id.name);
+                else
+                    setClient(null);
             }
         });
     }, []);
@@ -52,6 +61,36 @@ export const AlertsApp = () =>
         });
 
     }, []);
+
+    const filterAlertsUsingContext = useMemo(() =>
+    {
+        if(stockCode && client)
+            return alerts.filter((alert) => alert.stockCode === stockCode && alert.client === client);
+        else if(stockCode)
+            return alerts.filter((alert) => alert.stockCode === stockCode);
+        else if(client)
+            return alerts.filter((alert) => alert.client === client);
+        else
+            return alerts;
+
+    }, [alerts, stockCode, client]);
+
+    useEffect(() =>
+    {
+        if(selectedContextShare.length == 1)
+        {
+            if(selectedContextShare[0].contextShareKey === 'stockCode')
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
+            else
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, selectedContextShare[0].contextShareValue), null, windowId);
+        }
+        else if(selectedContextShare.length == 2)
+        {
+            const stockCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'stockCode').contextShareValue;
+            const client = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'client').contextShareValue;
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+        }
+    }, [selectedContextShare]);
 
     useEffect(() =>
     {
@@ -87,5 +126,5 @@ export const AlertsApp = () =>
                                   gridTheme={"ag-theme-alpine"}
                                   rowIdArray={["id"]}
                                   columnDefs={columnDefs}
-                                  gridData={alerts}/>);
+                                  gridData={filterAlertsUsingContext()}/>);
 };

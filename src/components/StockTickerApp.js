@@ -55,7 +55,7 @@ export const StockTickerApp = ({client}) =>
     const [stockCode, setStockCode] = useState(null);
 
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
+    const windowId = useMemo(() => window.command.getWindowId("stock-ticker"), []);
 
     // Keep a reference to the subscription ID.
     const subIdTef = useRef();
@@ -79,6 +79,8 @@ export const StockTickerApp = ({client}) =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
             }
         });
     }, []);
@@ -89,6 +91,15 @@ export const StockTickerApp = ({client}) =>
         setWorker(web_worker);
         return () => web_worker.terminate();
     }, []);
+
+    const filterTicksUsingContext = useMemo(() =>
+    {
+        if(stockCode)
+            return rowData.filter(tick => tick.symbol === stockCode);
+        else
+            return rowData;
+
+    }, [stockCode, rowData]);
 
     const onSelectionChanged = useCallback(() =>
     {
@@ -106,7 +117,7 @@ export const StockTickerApp = ({client}) =>
                 onSelectionChanged={onSelectionChanged}
                 rowHeight={25}
                 // we now use state to track row data changes
-                rowData={rowData}
+                rowData={filterTicksUsingContext()}
                 // unique identification of the row based on the SowKey
                 getRowId={({data: { key }}) => key}
                 // resize columns on grid resize

@@ -4,9 +4,10 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import {AgGridReact} from 'ag-grid-react';
 import {DataService} from "../services/DataService";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {currencyFormatter, numberFormatter} from "../utilities";
+import {FDC3Service} from "../services/FDC3Service";
 
 const CrossesApp = () =>
 {
@@ -17,9 +18,12 @@ const CrossesApp = () =>
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
+    const buyGridApiRef = useRef();
+    const sellGridApiRef = useRef();
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
+
     const columnDefs = useMemo(() => ([
         {
             headerName: 'Desk',
@@ -112,9 +116,13 @@ const CrossesApp = () =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
 
                 if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
                     setClient(fdc3Context.clients[0].id.name);
+                else
+                    setClient(null);
             }
         });
     }, []);
@@ -149,6 +157,32 @@ const CrossesApp = () =>
         return { minimumQuantity, minimumNotionalValue };
     };
 
+    const onBuySelectionChanged = useCallback((params) =>
+    {
+        handleSelectionChanged(buyGridApiRef, params);
+    }, []);
+
+    const onSellSelectionChanged = useCallback((params) =>
+    {
+        handleSelectionChanged(sellGridApiRef, params);
+    }, []);
+
+    const handleSelectionChanged = useCallback((gridRef, params) =>
+    {
+        const selectedRows = gridRef.current.api.getSelectedRows();
+        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
+        let client = selectedRows.length === 0 || selectedRows[0].client === "Client Masked" ? null : selectedRows[0].client;
+
+        const { colDef } = params;
+
+        if (colDef.field === 'stockCode' && stockCode)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+        else if (colDef.field === 'client' && client)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, client), null, windowId);
+        else
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+    }, []);
+
     useEffect(() =>
     {
         if(!exchangeRatesLoaded)
@@ -180,6 +214,9 @@ const CrossesApp = () =>
                                         columnDefs={columnDefs}
                                         rowData={stock.buyOrders}
                                         domLayout='autoHeight'
+                                        rowSelection={'single'}
+                                        onSelectionChanged={onBuySelectionChanged}
+                                        ref={buyGridApiRef}
                                         headerHeight={25}
                                         rowHeight={20}
                                     />
@@ -190,6 +227,9 @@ const CrossesApp = () =>
                                     <AgGridReact
                                         columnDefs={columnDefs}
                                         rowData={stock.sellOrders}
+                                        rowSelection={'single'}
+                                        onSelectionChanged={onSellSelectionChanged}
+                                        ref={sellGridApiRef}
                                         domLayout='autoHeight'
                                         headerHeight={25}
                                         rowHeight={20}

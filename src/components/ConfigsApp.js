@@ -8,7 +8,7 @@ import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "./appTheme";
 import '../styles/css/main.css';
 import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
-import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/dialog-state";
+import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
 

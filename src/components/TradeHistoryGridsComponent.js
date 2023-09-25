@@ -55,18 +55,30 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
 
     }, [totalSellNotional, totalBuyNotional]);
 
-    const onBuySelectionChanged = useCallback(() =>
+    const onBuySelectionChanged = useCallback((params) =>
     {
-        const selectedRows = buyGridApiRef.current.api.getSelectedRows();
-        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
-        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+        handleSelectionChanged(buyGridApiRef, params);
     }, []);
 
-    const onSellSelectionChanged = useCallback(() =>
+    const onSellSelectionChanged = useCallback((params) =>
     {
-        const selectedRows = sellGridApiRef.current.api.getSelectedRows();
+        handleSelectionChanged(sellGridApiRef, params);
+    }, []);
+
+    const handleSelectionChanged = useCallback((gridRef, params) =>
+    {
+        const selectedRows = gridRef.current.api.getSelectedRows();
         let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
-        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+        let client = selectedRows.length === 0 || selectedRows[0].client === "Client Masked" ? null : selectedRows[0].client;
+
+        const { colDef } = params;
+
+        if (colDef.field === 'stockCode' && stockCode)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
+        else if (colDef.field === 'client' && client)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, client), null, windowId);
+        else
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
     }, []);
 
     return (
