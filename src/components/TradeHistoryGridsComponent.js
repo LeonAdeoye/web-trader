@@ -5,6 +5,8 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
 import TradeHistoryFilterComponent from "./TradeHistoryFilterComponent";
 import {FDC3Service} from "../services/FDC3Service";
+import {useRecoilState} from "recoil";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 
 const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, windowId}) =>
 {
@@ -17,6 +19,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
     const [totalSellNotional, setTotalSellNotional] = useState(0);
     const [sellSkew, setSellSkew] = useState(0);
     const [buySkew, setBuySkew] = useState(0);
+    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     useEffect(() =>
     {
@@ -55,29 +58,34 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
 
     }, [totalSellNotional, totalBuyNotional]);
 
-    const onBuySelectionChanged = useCallback((params) =>
+    const onBuySelectionChanged = useCallback(() =>
     {
-        handleSelectionChanged(buyGridApiRef, params);
+        handleSelectionChanged(buyGridApiRef);
     }, []);
 
-    const onSellSelectionChanged = useCallback((params) =>
+    const onSellSelectionChanged = useCallback(() =>
     {
-        handleSelectionChanged(sellGridApiRef, params);
+        handleSelectionChanged(sellGridApiRef);
     }, []);
 
-    const handleSelectionChanged = useCallback((gridRef, params) =>
+    const handleSelectionChanged = useCallback((gridRef) =>
     {
         const selectedRows = gridRef.current.api.getSelectedRows();
-        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
-        let client = selectedRows.length === 0 || selectedRows[0].client === "Client Masked" ? null : selectedRows[0].client;
+        if(selectedRows.length === 1)
+            setSelectedGenericGridRow(selectedRows[0]);
+    }, []);
 
-        const { colDef } = params;
+    const onCellClicked = useCallback((params) =>
+    {
+        const {colDef, data} = params;
+        let client = data.client === "Client Masked" ? null : data.client;
+        let stockCode = data.stockCode;
 
         if (colDef.field === 'stockCode' && stockCode)
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
         else if (colDef.field === 'client' && client)
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, client), null, windowId);
-        else
+        else if(stockCode && client)
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
     }, []);
 
@@ -104,6 +112,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                         domLayout="autoHeight"
                                         rowSelection={'single'}
                                         onSelectionChanged={onBuySelectionChanged}
+                                        onCellClicked={onCellClicked}
                                         headerHeight={25}
                                         rowHeight={20}
                                         height
@@ -124,6 +133,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                         domLayout="autoHeight"
                                         rowSelection={'single'}
                                         onSelectionChanged={onSellSelectionChanged}
+                                        onCellClicked={onCellClicked}
                                         headerHeight={25}
                                         rowHeight={20}
                                     />

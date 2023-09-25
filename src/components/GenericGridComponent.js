@@ -18,13 +18,16 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
         return getRowIdValue(rowIdArray, row.data);
     }, []);
 
-    const onSelectionChanged = useCallback((params) =>
+    const onSelectionChanged = useCallback(() =>
     {
         const selectedRows = gridApiRef.current.api.getSelectedRows();
         if(selectedRows.length === 1)
             setSelectedGenericGridRow(selectedRows[0]);
+    }, []);
 
-        const { colDef, data } = params;
+    const onCellClicked = useCallback((params) =>
+    {
+        const {colDef, data} = params;
 
         if (colDef.field === 'stockCode')
             setSelectedContextShare([{ contextShareKey: 'stockCode', contextShareValue: data.stockCode }]);
@@ -32,8 +35,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
             setSelectedContextShare([{ contextShareKey: 'client', contextShareValue: data.client }]);
         else
             setSelectedContextShare([{ contextShareKey: 'stockCode', contextShareValue: data.stockCode },
-            { contextShareKey: 'client', contextShareValue: data.client }]);
-
+                { contextShareKey: 'client', contextShareValue: data.client }]);
     }, []);
 
     const updateRows = useCallback((row) =>
@@ -57,7 +59,8 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}
-                onSelectionChanged={() => onSelectionChanged()}
+                onSelectionChanged={onSelectionChanged}
+                onCellClicked={onCellClicked}
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}

@@ -19,6 +19,8 @@ const TradeHistoryApp = () =>
     const [client, setClient] = useState("Goldman Sachs");
     const [clientTradeHistory, setClientTradeHistory] = useState({client: "Goldman Sachs", buyTrades: [], sellTrades: []});
     const [stockTradeHistory, setStockTradeHistory] = useState({stock: "0001.HK", buyTrades: [], sellTrades: []});
+    const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
+    const [stockTradeHistoryTabLabel, setStockTradeHistoryTabLabel] = useState("Stock Trade History");
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
@@ -41,6 +43,20 @@ const TradeHistoryApp = () =>
             }
         });
     }, []);
+
+    useEffect(() =>
+    {
+        if(stockCode)
+            setStockTradeHistoryTabLabel("Stock Trade History (" + stockCode + ")");
+        else
+            setStockTradeHistoryTabLabel("Stock Trade History");
+
+        if(client)
+            setClientTradeHistoryTabLabel("Client Trade History (" + client + ")");
+        else
+            setClientTradeHistoryTabLabel("Client Trade History");
+
+    }, [stockCode, client])
 
     useEffect(() =>
     {
@@ -207,8 +223,8 @@ const TradeHistoryApp = () =>
         <div className="trade-history-app">
             <TabContext value={selectedTab}>
                 <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
-                    <Tab className="client-trade-history-tab" label="Client History" value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
-                    <Tab className="client-trade-history-tab" label="Stock History" value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
+                    <Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
+                    <Tab className="client-trade-history-tab" label={stockTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
                 </TabList>
 
                 {selectedTab === "1" && (

@@ -126,5 +126,5 @@ export const AlertsApp = () =>
                                   gridTheme={"ag-theme-alpine"}
                                   rowIdArray={["id"]}
                                   columnDefs={columnDefs}
-                                  gridData={filterAlertsUsingContext()}/>);
+                                  gridData={filterAlertsUsingContext}/>);
 };

@@ -60,24 +60,28 @@ export class DataService
 
     #filterHoldings(holdings, stockCode, client)
     {
-        if(stockCode)
+        if(stockCode && client)
+        {
+            this.#loggerService.logInfo(`Filtering holdings for stock code: ${stockCode} and by client: ${client}.`);
+            return {
+                stockCode: stockCode,
+                holdings: holdings.filter((holding) => holding.stockCode === stockCode || holding.client === client)
+            };
+        }
+        else if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering holdings for stock code: ${stockCode}.`);
-            const result = {
+            return {
                 stockCode: stockCode,
-                holdings: holdings.filter((item) => item.stockCode === stockCode)
+                holdings: holdings.filter((holding) => holding.stockCode === stockCode)
             };
-
-            if(result.holdings.length !== 0)
-                return result;
         }
-
-        if(client)
+        else if(client)
         {
             this.#loggerService.logInfo(`Filtering holdings for client: ${client}.`);
             return {
                 client: client,
-                holdings: holdings.filter((item) => item.client === client)
+                holdings: holdings.filter((holding) => holding.client === client)
             };
         }
     }

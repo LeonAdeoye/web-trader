@@ -132,6 +132,6 @@ export const OrdersApp = () =>
     ];
 
     return (<GenericGridComponent rowHeight={25} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]}
-                                  columnDefs={columnDefs} gridData={filterOrdersUsingContext()}/>);
+                                  columnDefs={columnDefs} gridData={filterOrdersUsingContext}/>);
 
 }

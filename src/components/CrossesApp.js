@@ -8,6 +8,8 @@ import {useEffect, useRef} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {currencyFormatter, numberFormatter} from "../utilities";
 import {FDC3Service} from "../services/FDC3Service";
+import {selectedGenericGridRowState} from "../atoms/component-state";
+import {useRecoilState} from "recoil";
 
 const CrossesApp = () =>
 {
@@ -20,6 +22,7 @@ const CrossesApp = () =>
     const [client, setClient] = useState(null);
     const buyGridApiRef = useRef();
     const sellGridApiRef = useRef();
+    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
@@ -157,30 +160,33 @@ const CrossesApp = () =>
         return { minimumQuantity, minimumNotionalValue };
     };
 
-    const onBuySelectionChanged = useCallback((params) =>
+    const onBuySelectionChanged = useCallback(() =>
     {
-        handleSelectionChanged(buyGridApiRef, params);
+        handleSelectionChanged(buyGridApiRef);
     }, []);
 
-    const onSellSelectionChanged = useCallback((params) =>
+    const onSellSelectionChanged = useCallback(() =>
     {
-        handleSelectionChanged(sellGridApiRef, params);
+        handleSelectionChanged(sellGridApiRef);
     }, []);
 
-    const handleSelectionChanged = useCallback((gridRef, params) =>
+    const handleSelectionChanged = useCallback((gridApiRef) =>
     {
-        const selectedRows = gridRef.current.api.getSelectedRows();
-        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
-        let client = selectedRows.length === 0 || selectedRows[0].client === "Client Masked" ? null : selectedRows[0].client;
+        const selectedRows = gridApiRef.current.api.getSelectedRows();
+        if(selectedRows.length === 1)
+            setSelectedGenericGridRow(selectedRows[0]);
+    }, []);
 
-        const { colDef } = params;
+    const onCellClicked = useCallback((params) =>
+    {
+        const {colDef, data} = params;
 
-        if (colDef.field === 'stockCode' && stockCode)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
-        else if (colDef.field === 'client' && client)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, client), null, windowId);
+        if (colDef.field === 'stockCode')
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(data.stockCode, null), null, windowId);
+        else if (colDef.field === 'client' && data.client !== "Client Masked")
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, data.client), null, windowId);
         else
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(data.stockCode, data.client), null, windowId);
     }, []);
 
     useEffect(() =>
@@ -216,6 +222,7 @@ const CrossesApp = () =>
                                         domLayout='autoHeight'
                                         rowSelection={'single'}
                                         onSelectionChanged={onBuySelectionChanged}
+                                        onCellClicked={onCellClicked}
                                         ref={buyGridApiRef}
                                         headerHeight={25}
                                         rowHeight={20}
@@ -229,6 +236,7 @@ const CrossesApp = () =>
                                         rowData={stock.sellOrders}
                                         rowSelection={'single'}
                                         onSelectionChanged={onSellSelectionChanged}
+                                        onCellClicked={onCellClicked}
                                         ref={sellGridApiRef}
                                         domLayout='autoHeight'
                                         headerHeight={25}

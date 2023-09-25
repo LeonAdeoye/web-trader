@@ -9,7 +9,7 @@ import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import SparklineRenderer from './SparklineRenderer';
 import {useRecoilState} from "recoil";
-import {selectedContextShareState, selectedGenericGridRowState} from "../atoms/component-state";
+import {selectedContextShareState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 
 const HoldingsApp = () =>
@@ -21,6 +21,8 @@ const HoldingsApp = () =>
     const [clientHoldings, setClientHoldings] = useState([]);
     const [stockHoldings, setStockHoldings] = useState([]);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
+    const [clientHoldingsTabLabel, setClientHoldingsTabLabel] = useState("Client Holdings");
+    const [stockHoldingsTabLabel, setStockHoldingsTabLabel] = useState("Stock Holdings")
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
@@ -63,19 +65,52 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        let result = dataService.getData(DataService.HOLDINGS, null, client);
-        if(result)
-            setClientHoldings(result.holdings);
+        if(stockCode && client)
+        {
+            let result = dataService.getData(DataService.HOLDINGS, stockCode, client);
+            if(result)
+            {
+                setStockHoldings(result.holdings);
+                setClientHoldings(result.holdings);
+            }
+        }
+        else if(stockCode)
+        {
+            let result = dataService.getData(DataService.HOLDINGS, stockCode, null);
+            if(result)
+            {
+                setStockHoldings(result.holdings);
+                setClientHoldings(prev => prev.filter((holding) => holding.stockCode === stockCode));
+            }
+            else
+                setStockHoldings([]);
+        }
         else
-            setClientHoldings([]);
+        {
+            let result = dataService.getData(DataService.HOLDINGS, null, client);
+            if(result)
+            {
+                setClientHoldings(result.holdings);
+                setStockHoldings(prev => prev.filter((holding) => holding.client === client));
+            }
+            else
+                setClientHoldings([]);
+        }
+    }, [stockCode, client])
 
-        result = dataService.getData(DataService.HOLDINGS, stockCode, null);
-        if(result)
-            setStockHoldings(result.holdings);
+    useEffect(() =>
+    {
+        if(stockCode)
+            setStockHoldingsTabLabel("Stock Holdings (" + stockCode + ")");
         else
-            setStockHoldings([]);
+            setStockHoldingsTabLabel("Stock Holdings");
 
-    }, [stockCode, client]);
+        if(client)
+            setClientHoldingsTabLabel("Client Holdings (" + client + ")")
+        else
+            setClientHoldingsTabLabel("Client Holdings");
+
+    }, [stockCode, client])
 
     const clientColumnDefs = useMemo(() => ( [
         {
@@ -86,6 +121,14 @@ const HoldingsApp = () =>
             cellDataType: 'object',
             valueFormatter: numberFormatter, // Needed otherwise ag-grid warning.
             cellRenderer: SparklineRenderer
+        },
+        {
+            headerName: 'ClientX',
+            field: 'client',
+            width: 230,
+            headerTooltip: 'Client',
+            sortable: true,
+            filter: true,
         },
         {
             headerName: 'Symbol',
@@ -164,6 +207,14 @@ const HoldingsApp = () =>
             filter: true,
         },
         {
+            headerName: 'SymbolX',
+            field: 'stockCode',
+            width: 100,
+            headerTooltip: 'Stock symbol',
+            sortable: true,
+            filter: true,
+        },
+        {
             headerName: 'Notional Value',
             field: 'notionalValue',
             width: 170,
@@ -211,8 +262,8 @@ const HoldingsApp = () =>
             <TabContext value={selectedTab}>
 
                 <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                    <Tab className="holdings-tab" label="Client Holdings" value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
-                    <Tab className="holdings-tab" label="Stock Holdings" value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
+                    <Tab className="holdings-tab" label={`${clientHoldingsTabLabel}`}  value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
+                    <Tab className="holdings-tab" label={`${stockHoldingsTabLabel}`}  value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
                 </TabList>
 
                 {selectedTab === "1" && (

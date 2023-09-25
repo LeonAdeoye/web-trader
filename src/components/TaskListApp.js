@@ -52,10 +52,14 @@ const TaskListApp = () =>
         setExpandedAccordion(null);
     }, [searchValue, searchType]);
 
-    const selectTaskHandler = (task) =>
+    const selectTaskDetailHandler = (task) =>
     {
-        loggerService.logInfo(`Selected task in task app with Id: ${windowId} for context sharing with main: ${JSON.stringify(task)}`);
-        window.messenger.sendMessageToMain(FDC3Service.createContextShare(task.stockCode, task.client), null, windowId);
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(task.stockCode, task.client !== "Client Masked" ? task.client : null), null, windowId);
+    };
+
+    const selectTaskSummaryHandler = (task) =>
+    {
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(task.stockCode, null), null, windowId);
     };
 
     const filterTaskTypes = (task) =>
@@ -135,7 +139,7 @@ const TaskListApp = () =>
                         <Accordion disableGutters key={index}
                                    expanded={expandedAccordion === `panel${index}`}
                                    onChange={handleAccordionChange(`panel${index}`)}>
-                            <AccordionSummary className="task-list-summary" onClick={() => selectTaskHandler(task)}>
+                            <AccordionSummary className="task-list-summary" onClick={() => selectTaskSummaryHandler(task)}>
                                 <ListItemIcon className="task-icon">
                                     {task.type === 'Desk Cross' && <SwapHorizontalCircle style={{ color: '#404040' }} />}
                                     {task.type === 'Potential Cross' && <VisibilityOff style={{ color: '#404040' }} />}
@@ -161,7 +165,7 @@ const TaskListApp = () =>
                                     </Sparklines>
                                 </div>
                             </AccordionSummary>
-                            <AccordionDetails className="task-list-detail">
+                            <AccordionDetails className="task-list-detail" onClick={() => selectTaskDetailHandler(task)}>
                                 <ListItemText
                                     primary={
                                         <>
