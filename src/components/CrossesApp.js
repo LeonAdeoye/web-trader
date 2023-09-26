@@ -45,6 +45,14 @@ const CrossesApp = () =>
             filter: true,
         },
         {
+            headerName: 'Symbol',
+            field: 'stockCode',
+            width: 100,
+            sortable: true,
+            filter: true,
+            hide: true
+        },
+        {
             headerName: 'Qty',
             field: 'quantity',
             width: 80,
@@ -149,6 +157,9 @@ const CrossesApp = () =>
 
     const calculateMaximumCrossableAmount = (buyOrders, sellOrders, currency) =>
     {
+        if(buyOrders.length === 0 || sellOrders.length === 0)
+            return { minimumQuantity: 0, minimumNotionalValue: 0 };
+
         const totalNotionalBuy = buyOrders.reduce((total, order) => total + order.notionalValue, 0);
         const totalNotionalSell = sellOrders.reduce((total, order) => total + order.notionalValue, 0);
 
@@ -194,18 +205,25 @@ const CrossesApp = () =>
         if(!exchangeRatesLoaded)
             return;
 
-        setStockRows(dataService.getData(DataService.CROSSES, stockCode, client).map((stock) =>
+        console.log(dataService.getData(DataService.CROSSES, stockCode, client))
+
+        dataService.getData(DataService.CROSSES, stockCode, client).map((cross) => console.log(cross));
+
+        setStockRows(dataService.getData(DataService.CROSSES, stockCode, client).map((cross, index) =>
         {
-            const { minimumQuantity, minimumNotionalValue } = calculateMaximumCrossableAmount(stock.buyOrders, stock.sellOrders, stock.currency);
+            if(cross.length === 0)
+                return (<React.Fragment key={index} />);
+
+            const { minimumQuantity, minimumNotionalValue } = calculateMaximumCrossableAmount(cross.buyOrders, cross.sellOrders, cross.currency);
 
             return (
-                <div key={stock.stockCode} className="opportunity-row">
+                <div key={index} className="opportunity-row">
                     <div className="stock-info">
                         <div className="top-part">
                             <div className="stock-label buy-label">BUY</div>
-                            <div className="stock-code">{stock.stockCode}</div>
-                            <div className="stock-currency">({stock.currency})</div>
-                            <div className="stock-description">{stock.stockDescription}</div>
+                            <div className="stock-code">{cross.stockCode}</div>
+                            <div className="stock-currency">({cross.currency})</div>
+                            <div className="stock-description">{cross.stockDescription}</div>
                             <div className="summary-info">
                                 <span>Max. Crossable Qty: {minimumQuantity.toLocaleString() }</span>
                                 <span className="summary-gap"></span>
@@ -218,7 +236,7 @@ const CrossesApp = () =>
                                 <div className="ag-theme-balham">
                                     <AgGridReact
                                         columnDefs={columnDefs}
-                                        rowData={stock.buyOrders}
+                                        rowData={cross.buyOrders}
                                         domLayout='autoHeight'
                                         rowSelection={'single'}
                                         onSelectionChanged={onBuySelectionChanged}
@@ -233,7 +251,7 @@ const CrossesApp = () =>
                                 <div className="ag-theme-balham">
                                     <AgGridReact
                                         columnDefs={columnDefs}
-                                        rowData={stock.sellOrders}
+                                        rowData={cross.sellOrders}
                                         rowSelection={'single'}
                                         onSelectionChanged={onSellSelectionChanged}
                                         onCellClicked={onCellClicked}

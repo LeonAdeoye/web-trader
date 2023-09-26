@@ -23,6 +23,9 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
 
     useEffect(() =>
     {
+        if(!rows)
+            return;
+
         if(rows.buyTrades.length === 0)
         {
             setTotalBuyNotional(0);
@@ -95,7 +98,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                 <div className="trade-history-row">
                     <div className="stock-info">
                         <div className="top-part">
-                            <TradeHistoryFilterComponent historyPropertyValue={`Trade history of ${rows[historyProperty]}`} buySkew={buySkew} sellSkew={sellSkew}/>
+                            <TradeHistoryFilterComponent historyPropertyValue={`${rows ? rows[historyProperty] : ''} Trade History`} buySkew={buySkew} sellSkew={sellSkew}/>
                         </div>
                         <div className="bottom-part">
                             <div className="buy-orders">
@@ -108,7 +111,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                     <AgGridReact
                                         ref={buyGridApiRef}
                                         columnDefs={columnDefs}
-                                        rowData={rows.buyTrades}
+                                        rowData={rows ? rows.buyTrades: []}
                                         domLayout="autoHeight"
                                         rowSelection={'single'}
                                         onSelectionChanged={onBuySelectionChanged}
@@ -129,7 +132,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                     <AgGridReact
                                         ref={sellGridApiRef}
                                         columnDefs={columnDefs}
-                                        rowData={rows.sellTrades}
+                                        rowData={rows ? rows.sellTrades : []}
                                         domLayout="autoHeight"
                                         rowSelection={'single'}
                                         onSelectionChanged={onSellSelectionChanged}

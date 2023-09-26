@@ -11,7 +11,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-    const [selectedContextShare, setSelectedContextShare] = useRecoilState(selectedContextShareState);
+    const [, setSelectedContextShare] = useRecoilState(selectedContextShareState);
 
     const getRowId = useMemo(() => (row) =>
     {

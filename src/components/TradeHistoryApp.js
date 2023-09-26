@@ -33,7 +33,7 @@ const TradeHistoryApp = () =>
             {
                 if(fdc3Context.instruments.length > 0 && fdc3Context.instruments[0].id.ticker)
                     setStockCode(fdc3Context.instruments[0].id.ticker);
-                else
+               else
                     setStockCode(null);
 
                 if(fdc3Context.clients.length > 0 && fdc3Context.clients[0].id.name)
@@ -60,8 +60,8 @@ const TradeHistoryApp = () =>
 
     useEffect(() =>
     {
-        setClientTradeHistory(dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays));
         setStockTradeHistory(dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays));
+        setClientTradeHistory(dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays));
     }, [stockCode, client, filterDays]);
 
     const stockColumnDefs = useMemo(() => ( [

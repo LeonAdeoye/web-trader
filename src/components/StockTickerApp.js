@@ -117,7 +117,7 @@ export const StockTickerApp = ({client}) =>
                 onSelectionChanged={onSelectionChanged}
                 rowHeight={25}
                 // we now use state to track row data changes
-                rowData={filterTicksUsingContext()}
+                rowData={filterTicksUsingContext}
                 // unique identification of the row based on the SowKey
                 getRowId={({data: { key }}) => key}
                 // resize columns on grid resize

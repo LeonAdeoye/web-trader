@@ -22,53 +22,35 @@ export class DataService
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering trade history for stock code: ${stockCode} and newer than ${filterDays} days ago.`);
-            const result = {
+            return {
                 stockCode: stockCode,
                 buyTrades: tradeHistory.filter((item) => item.stockCode === stockCode && new Date(item.date) > filterDate && item.side === "Buy"),
                 sellTrades: tradeHistory.filter((item) => item.stockCode === stockCode && new Date(item.date) > filterDate && item.side === "Sell")
             };
-
-            if(result.buyTrades.length !== 0 || result.sellTrades.length !== 0)
-                return result;
-            else
-                return {
-                    stockCode: stockCode,
-                    buyTrades: [],
-                    sellTrades: []
-                };
         }
 
         if(client)
         {
             this.#loggerService.logInfo(`Filtering trade history for client: ${client} and newer than ${filterDays} days ago.`);
-            const result = {
+            return {
                 client: client,
                 buyTrades: tradeHistory.filter((item) => item.client === client && new Date(item.date) > filterDate && item.side === "Buy"),
                 sellTrades: tradeHistory.filter((item) => item.client === client && new Date(item.date) > filterDate && item.side === "Sell")
             };
+        }
 
-            if(result.buyTrades.length !== 0 || result.sellTrades.length !== 0)
-                return result;
-            else
-                return {
-                    client: client,
-                    buyTrades: [],
-                    sellTrades: []
-                };
+        this.#loggerService.logInfo("Both the stockCode and client are NULL so return no trade history.");
+        return {
+            stockCode: "",
+            client: "",
+            buyTrades: [],
+            sellTrades: []
         }
     }
 
     #filterHoldings(holdings, stockCode, client)
     {
-        if(stockCode && client)
-        {
-            this.#loggerService.logInfo(`Filtering holdings for stock code: ${stockCode} and by client: ${client}.`);
-            return {
-                stockCode: stockCode,
-                holdings: holdings.filter((holding) => holding.stockCode === stockCode || holding.client === client)
-            };
-        }
-        else if(stockCode)
+        if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering holdings for stock code: ${stockCode}.`);
             return {
@@ -76,7 +58,8 @@ export class DataService
                 holdings: holdings.filter((holding) => holding.stockCode === stockCode)
             };
         }
-        else if(client)
+
+        if(client)
         {
             this.#loggerService.logInfo(`Filtering holdings for client: ${client}.`);
             return {
@@ -84,36 +67,43 @@ export class DataService
                 holdings: holdings.filter((holding) => holding.client === client)
             };
         }
+
+        this.#loggerService.logInfo("Both the stockCode and client are NULL so return no trade history.");
+        return {
+            stockCode: "",
+            client: "",
+            buyTrades: [],
+            sellTrades: []
+        }
     }
 
     #filterCrosses(crosses, stockCode, client)
     {
+        let result = [];
         if(stockCode)
         {
             this.#loggerService.logInfo(`Filtering crosses for stock code: ${stockCode}.`);
-            const result = crosses.filter((item) => item.stockCode === stockCode);
-            if(result.length !== 0)
-                return result;
+            result = crosses.filter((item) => item.stockCode === stockCode);
         }
 
         if(client)
         {
             this.#loggerService.logInfo(`Filtering crosses for client: ${client}.`);
-            const result = [];
             for (const cross of crosses)
             {
                 const { buyOrders, sellOrders, ...rest } = cross;
-
-                const hasMatchingBuy = buyOrders.some((order) => order.client === client);
-                const hasMatchingSell = sellOrders.some((order) => order.client === client);
+                const hasMatchingBuy = buyOrders.some((order) => order.client === client && order.stockCode !== stockCode);
+                const hasMatchingSell = sellOrders.some((order) => order.client === client && order.stockCode !== stockCode);
 
                 if (hasMatchingBuy || hasMatchingSell)
                     result.push({ ...rest, buyOrders, sellOrders });
             }
-            return result;
         }
-        else
+
+        if(!client && !stockCode)
             return crosses;
+
+        return result;
     }
 
     #filterTasks(tasks, stockCode, client)

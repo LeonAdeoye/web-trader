@@ -65,37 +65,8 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        if(stockCode && client)
-        {
-            let result = dataService.getData(DataService.HOLDINGS, stockCode, client);
-            if(result)
-            {
-                setStockHoldings(result.holdings);
-                setClientHoldings(result.holdings);
-            }
-        }
-        else if(stockCode)
-        {
-            let result = dataService.getData(DataService.HOLDINGS, stockCode, null);
-            if(result)
-            {
-                setStockHoldings(result.holdings);
-                setClientHoldings(prev => prev.filter((holding) => holding.stockCode === stockCode));
-            }
-            else
-                setStockHoldings([]);
-        }
-        else
-        {
-            let result = dataService.getData(DataService.HOLDINGS, null, client);
-            if(result)
-            {
-                setClientHoldings(result.holdings);
-                setStockHoldings(prev => prev.filter((holding) => holding.client === client));
-            }
-            else
-                setClientHoldings([]);
-        }
+        setStockHoldings(dataService.getData(DataService.HOLDINGS, stockCode, null).holdings);
+        setClientHoldings(dataService.getData(DataService.HOLDINGS, null, client).holdings);
     }, [stockCode, client])
 
     useEffect(() =>
@@ -121,14 +92,6 @@ const HoldingsApp = () =>
             cellDataType: 'object',
             valueFormatter: numberFormatter, // Needed otherwise ag-grid warning.
             cellRenderer: SparklineRenderer
-        },
-        {
-            headerName: 'ClientX',
-            field: 'client',
-            width: 230,
-            headerTooltip: 'Client',
-            sortable: true,
-            filter: true,
         },
         {
             headerName: 'Symbol',
@@ -203,14 +166,6 @@ const HoldingsApp = () =>
             field: 'client',
             width: 230,
             headerTooltip: 'Client',
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'SymbolX',
-            field: 'stockCode',
-            width: 100,
-            headerTooltip: 'Stock symbol',
             sortable: true,
             filter: true,
         },
