@@ -1,11 +1,8 @@
 import React, {useMemo, useState, useCallback} from 'react';
 import '../styles/css/main.css';
 import {DataService} from "../services/DataService";
-import {useEffect, useRef} from "react";
+import {useEffect} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
-import {FDC3Service} from "../services/FDC3Service";
-import {selectedGenericGridRowState} from "../atoms/component-state";
-import {useRecoilState} from "recoil";
 import {CrossesSummaryComponent} from "./CrossesSummaryComponent";
 import {CrossesDetailComponent} from "./CrossesDetailComponent";
 
@@ -18,9 +15,6 @@ const CrossesApp = () =>
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
-    const buyGridApiRef = useRef();
-    const sellGridApiRef = useRef();
-    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
@@ -35,7 +29,7 @@ const CrossesApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const newCross = event.data.cross;
-        setStockRows((prevData) => [...prevData, newCross]);
+        setStockRows((prevData) => [...prevData, newCross]); //TODO
     }, []);
 
     useEffect(() =>
@@ -89,35 +83,6 @@ const CrossesApp = () =>
         const maximumCrossableNotionalValue = Math.round(Math.min(totalNotionalBuy, totalNotionalSell) / exchangeRateService.getExchangeRate(currency));
         return { maximumCrossableQuantity, maximumCrossableNotionalValue };
     };
-
-    const onBuySelectionChanged = useCallback(() =>
-    {
-        handleSelectionChanged(buyGridApiRef);
-    }, []);
-
-    const onSellSelectionChanged = useCallback(() =>
-    {
-        handleSelectionChanged(sellGridApiRef);
-    }, []);
-
-    const handleSelectionChanged = useCallback((gridApiRef) =>
-    {
-        const selectedRows = gridApiRef.current.api.getSelectedRows();
-        if(selectedRows.length === 1)
-            setSelectedGenericGridRow(selectedRows[0]);
-    }, []);
-
-    const onCellClicked = useCallback((params) =>
-    {
-        const {colDef, data} = params;
-
-        if (colDef.field === 'stockCode')
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(data.stockCode, null), null, windowId);
-        else if (colDef.field === 'client' && data.client !== "Client Masked")
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, data.client), null, windowId);
-        else
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(data.stockCode, data.client), null, windowId);
-    }, []);
 
     useEffect(() =>
     {
