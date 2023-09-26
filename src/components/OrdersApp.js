@@ -107,7 +107,8 @@ export const OrdersApp = () =>
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Client Order Id", field: "clientOrderId", sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Instruction", field: "instruction", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "Arrived", field: "ArrivalTime", sortable: true, minWidth: 100, width: 100},
+        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 100, width: 100},
+        {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 100, width: 100},
         {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 180, width: 180, filter: true},
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 180, width: 180, filter: true},
         {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 250, filter: true},
@@ -125,10 +126,11 @@ export const OrdersApp = () =>
         {headerName: "Exec Notional", field: "executedNotionalValue", sortable: true, minWidth: 150, width: 150, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
         {headerName: "Order Notional", field: "orderNotionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
         {headerName: "Residual Notional", field: "residualNotionalValue", sortable: true, minWidth: 150, width: 150, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "IVWAP", field: "ivwap", headerTooltip: 'Interval VWAP', hide: false, sortable: false, minWidth: 100, width: 150, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival", field: "performanceVsArrival", headerTooltip: 'Performance versus arrival in USD', hide: false, sortable: false, minWidth: 100, width: 150, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival (bps)", field: "performanceVsArrivalBPS", headerTooltip: 'Performance versus arrival in bps', hide: false, sortable: false, minWidth: 100, width: 150, filter: false},
         {headerName: "Perf IVWAP", field: "performanceVsIVWAP", headerTooltip: 'Performance versus interval VWAP in USD', hide: false, sortable: false, minWidth: 100, width: 150, filter: false, valueFormatter: numberFormatter},
-        {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPlBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 150, filter: false},
+        {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 150, filter: false},
     ];
 
     return (<GenericGridComponent rowHeight={25} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]}
