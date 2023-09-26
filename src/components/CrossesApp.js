@@ -1,15 +1,13 @@
 import React, {useMemo, useState, useCallback} from 'react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-balham.css';
 import '../styles/css/main.css';
-import {AgGridReact} from 'ag-grid-react';
 import {DataService} from "../services/DataService";
 import {useEffect, useRef} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
-import {currencyFormatter, numberFormatter} from "../utilities";
 import {FDC3Service} from "../services/FDC3Service";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
+import {CrossesSummaryComponent} from "./CrossesSummaryComponent";
+import {CrossesDetailComponent} from "./CrossesDetailComponent";
 
 const CrossesApp = () =>
 {
@@ -26,85 +24,6 @@ const CrossesApp = () =>
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
-
-    const columnDefs = useMemo(() => ([
-        {
-            headerName: 'Desk',
-            field: 'desk',
-            width: 100,
-            headerTooltip: "Trader's desk",
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Trader',
-            field: 'trader',
-            width: 100,
-            headerTooltip: "Trader's name",
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Symbol',
-            field: 'stockCode',
-            width: 100,
-            sortable: true,
-            filter: true,
-            hide: true
-        },
-        {
-            headerName: 'Qty',
-            field: 'quantity',
-            width: 80,
-            headerTooltip: 'Remaining quantity of the order',
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Notional',
-            field: 'notionalValue',
-            valueFormatter: currencyFormatter,
-            width: 100,
-            cellDataType: 'number',
-            headerTooltip: 'Notional value in USD',
-            sortable: true,
-            filter: true
-
-        },
-        {
-            headerName: 'Instr',
-            field: 'instruction',
-            width: 80,
-            headerTooltip: "Client's instructions",
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Px',
-            field: 'price',
-            width: 80,
-            headerTooltip: "Order price in local currency",
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Client',
-            field: 'client',
-            width: 100,
-            headerTooltip: "The client of the order",
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Time',
-            field: 'time',
-            width: 100,
-            sortable: true,
-            filter: true,
-        },
-    ]), []);
 
     useEffect(() =>
     {
@@ -166,9 +85,9 @@ const CrossesApp = () =>
         const totalQuantityBuy = buyOrders.reduce((total, order) => total + order.quantity, 0);
         const totalQuantitySell = sellOrders.reduce((total, order) => total + order.quantity, 0);
 
-        const minimumQuantity = Math.min(totalQuantityBuy, totalQuantitySell);
-        const minimumNotionalValue = Math.round(Math.min(totalNotionalBuy, totalNotionalSell) / exchangeRateService.getExchangeRate(currency));
-        return { minimumQuantity, minimumNotionalValue };
+        const maximumCrossableQuantity = Math.min(totalQuantityBuy, totalQuantitySell);
+        const maximumCrossableNotionalValue = Math.round(Math.min(totalNotionalBuy, totalNotionalSell) / exchangeRateService.getExchangeRate(currency));
+        return { maximumCrossableQuantity, maximumCrossableNotionalValue };
     };
 
     const onBuySelectionChanged = useCallback(() =>
@@ -205,68 +124,35 @@ const CrossesApp = () =>
         if(!exchangeRatesLoaded)
             return;
 
-        console.log(dataService.getData(DataService.CROSSES, stockCode, client))
+        const result = dataService.getData(DataService.CROSSES, stockCode, client);
 
-        dataService.getData(DataService.CROSSES, stockCode, client).map((cross) => console.log(cross));
-
-        setStockRows(dataService.getData(DataService.CROSSES, stockCode, client).map((cross, index) =>
+        if(result.length === 0)
         {
-            if(cross.length === 0)
-                return (<React.Fragment key={index} />);
+            setStockRows([<div className="opportunity-row">
+                <div className="stock-info">
+                    <CrossesSummaryComponent stockCode={stockCode || "No Crossable Stocks"} stockCurrency={''} stockDescription={''}
+                                             maxCrossableQty={0} maxCrossableNotional={0} />
+                    <CrossesDetailComponent windowId={windowId} buyOrders={[]} sellOrders={[]}/>
+                </div>
+            </div>]);
+        }
+        else
+        {
+            setStockRows(result.map((cross, index) =>
+            {
+                const { maximumCrossableQuantity, maximumCrossableNotionalValue } = calculateMaximumCrossableAmount(cross.buyOrders, cross.sellOrders, cross.currency);
 
-            const { minimumQuantity, minimumNotionalValue } = calculateMaximumCrossableAmount(cross.buyOrders, cross.sellOrders, cross.currency);
-
-            return (
-                <div key={index} className="opportunity-row">
-                    <div className="stock-info">
-                        <div className="top-part">
-                            <div className="stock-label buy-label">BUY</div>
-                            <div className="stock-code">{cross.stockCode}</div>
-                            <div className="stock-currency">({cross.currency})</div>
-                            <div className="stock-description">{cross.stockDescription}</div>
-                            <div className="summary-info">
-                                <span>Max. Crossable Qty: {minimumQuantity.toLocaleString() }</span>
-                                <span className="summary-gap"></span>
-                                <span>Max. Crossable Notional: {minimumNotionalValue.toLocaleString()} USD</span>
-                            </div>
-                            <div className="stock-label sell-label">SELL</div>
-                        </div>
-                        <div className="bottom-part">
-                            <div className="buy-orders">
-                                <div className="ag-theme-balham">
-                                    <AgGridReact
-                                        columnDefs={columnDefs}
-                                        rowData={cross.buyOrders}
-                                        domLayout='autoHeight'
-                                        rowSelection={'single'}
-                                        onSelectionChanged={onBuySelectionChanged}
-                                        onCellClicked={onCellClicked}
-                                        ref={buyGridApiRef}
-                                        headerHeight={25}
-                                        rowHeight={20}
-                                    />
-                                </div>
-                            </div>
-                            <div className="sell-orders">
-                                <div className="ag-theme-balham">
-                                    <AgGridReact
-                                        columnDefs={columnDefs}
-                                        rowData={cross.sellOrders}
-                                        rowSelection={'single'}
-                                        onSelectionChanged={onSellSelectionChanged}
-                                        onCellClicked={onCellClicked}
-                                        ref={sellGridApiRef}
-                                        domLayout='autoHeight'
-                                        headerHeight={25}
-                                        rowHeight={20}
-                                    />
-                                </div>
-                            </div>
+                return (
+                    <div key={index} className="opportunity-row">
+                        <div className="stock-info">
+                            <CrossesSummaryComponent stockCode={cross.stockCode} stockCurrency={cross.currency} stockDescription={cross.stockDescription}
+                                                     maxCrossableQty={maximumCrossableQuantity.toLocaleString()} maxCrossableNotional={maximumCrossableNotionalValue.toLocaleString()}/>
+                            <CrossesDetailComponent windowId={windowId} buyOrders={cross.buyOrders} sellOrders={cross.sellOrders}/>
                         </div>
                     </div>
-                </div>
-            );
-        }));
+                );
+            }));
+        }
     }, [exchangeRatesLoaded, stockCode, client]);
 
     return (
