@@ -34,10 +34,10 @@ export const onAmpsTaskMessage = (message) =>
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", rate: message.data});
+            postMessage({messageType: "snapshot", task: message.data});
             break;
         case 'p':
-            postMessage({messageType: "update", rate: message.data});
+            postMessage({messageType: "update", task: message.data});
             break;
         default:
             break;
@@ -49,10 +49,10 @@ export const onAmpsAlertMessage = (message) =>
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", rate: message.data});
+            postMessage({messageType: "snapshot", alert: message.data});
             break;
         case 'p':
-            postMessage({messageType: "update", rate: message.data});
+            postMessage({messageType: "update", alert: message.data});
             break;
         default:
             break;
@@ -64,10 +64,10 @@ export const onAmpsCrossMessage = (message) =>
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", rate: message.data});
+            postMessage({messageType: "snapshot", cross: message.data});
             break;
         case 'p':
-            postMessage({messageType: "update", rate: message.data});
+            postMessage({messageType: "update", cross: message.data});
             break;
         default:
             break;
@@ -79,10 +79,10 @@ export const onAmpsOrderMessage = (message) =>
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", rate: message.data});
+            postMessage({messageType: "snapshot", order: message.data});
             break;
         case 'p':
-            postMessage({messageType: "update", rate: message.data});
+            postMessage({messageType: "update", order: message.data});
             break;
         default:
             break;
