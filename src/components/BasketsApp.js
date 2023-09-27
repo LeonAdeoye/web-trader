@@ -15,8 +15,8 @@ export const BasketsApp = () =>
     return (
         // Setting this to from 100vh to 98vh eliminated the vertical scroll bar on the right side of the screen.
         <Grid container direction="column" style={{ height: '98vh', overflow: 'hidden' }}>
-            <Resizable defaultSize={{ width: '100%', height: '39%' }}>
-                <BasketChartComponent loggerService={loggerService}/>
+            <Resizable defaultSize={{ width: '100%', height: '39%'}}>
+                <BasketChartComponent/>
             </Resizable>
             <Divider orientation="horizontal" style={{backgroundColor:'#404040', height: '1px'}}/>
             <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '58%' }}>
