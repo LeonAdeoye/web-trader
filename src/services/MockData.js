@@ -600,6 +600,7 @@ export const baskets = [
         name: 'Hong Kong Portfolio',
         basketId: 1,
         numberOfConstituents: 8,
+        client: 'JP Morgan',
         orderNotionalValue: 0,
         executedNotionalValue: 0,
         constituents:  [{
@@ -839,6 +840,7 @@ export const baskets = [
     {
         name: 'Tokyo Portfolio',
         basketId: 2,
+        client: "Schroders",
         numberOfConstituents: 10,
         orderNotionalValue: 0,
         executedNotionalValue: 0,
@@ -1137,6 +1139,7 @@ export const baskets = [
     {
         name: 'Singapore Portfolio',
         basketId: 3,
+        client: "Deutsche Bank",
         numberOfConstituents: 12,
         orderNotionalValue: 0,
         executedNotionalValue: 0,

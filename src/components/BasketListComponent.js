@@ -1,7 +1,7 @@
 import '../styles/css/main.css';
 import {selectedBasketState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useState, useMemo, useRef} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -10,14 +10,13 @@ import {DataService} from "../services/DataService";
 import BasketListSummaryRenderer from "./BasketListSummaryRenderer";
 import {numberFormatter} from "../utilities";
 
-export const BasketListComponent = ({loggerService}) =>
+export const BasketListComponent = () =>
 {
     const [, setSelectedBasket] = useRecoilState(selectedBasketState);
     const [dataService] = useState(new DataService());
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [basketList, setBasketList] = useState([]);
-
     const columnDefs = useMemo(() => ([
         {
             headerName: 'Basket List',
@@ -38,7 +37,7 @@ export const BasketListComponent = ({loggerService}) =>
         {
             headerName: 'Client',
             field: 'client',
-            width: 0,
+            width: 200,
             hide: true
         },
         {
@@ -73,9 +72,24 @@ export const BasketListComponent = ({loggerService}) =>
 
     const handleRowClick = (event) =>
     {
-        loggerService.logInfo(`User clicked on basket: ${event.data.basketId}`);
         setSelectedBasket(event.data.basketId);
     };
+
+    const handleSearchChange = (event) =>
+    {
+        setSearchTerm(event.target.value);
+    }
+
+    useEffect(() =>
+    {
+        if(gridApi)
+        {
+            if(searchTerm)
+                gridApi.setQuickFilter(searchTerm);
+            else
+                gridApi.setQuickFilter(null);
+        }
+    }, [searchTerm, gridApi]);
 
     useEffect(() =>
     {
@@ -86,8 +100,8 @@ export const BasketListComponent = ({loggerService}) =>
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
             <TextField
                 size='small'
-                label="Search by basket name or client."
-                onChange={(e) => setSearchTerm(e.target.value)}
+                label="Search by basket name."
+                onChange={handleSearchChange}
                 style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}
             />
             <div style={{ height: '14px', width: '100%', backgroundColor: "white"}}></div>
@@ -108,6 +122,5 @@ export const BasketListComponent = ({loggerService}) =>
         </div>
 
     );
-
 }
 
