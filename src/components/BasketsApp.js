@@ -21,7 +21,7 @@ export const BasketsApp = () =>
     useEffect(() =>
     {
         if(selectedBasketId)
-            window.messenger.sendMessageToMain(FDC3Service.createBasketChartContext(selectedBasketId), "basket-chart", windowId);
+            window.messenger.sendMessageToMain(FDC3Service.createBasketChartContext(selectedBasketId), "Basket Chart", windowId);
     }, [selectedBasketId]);
 
     return (<Grid container direction="column" style={{ height: '100%', overflow: 'hidden' }}>

@@ -213,7 +213,7 @@ const removeWindowFromChannel = (windowTitle) =>
 
 const handleMessageFromRenderer = (_, fdc3Message, destination, source) =>
 {
-    console.log("Received message from child window: " + source + " with context: " + JSON.stringify(fdc3Message) + " to be sent to destination child window(s): " + destination ? destination : "NOT SET");
+    console.log("Received message from child window: " + source + " with context: " + JSON.stringify(fdc3Message) + " to be sent to destination child window(s): " + (destination ? destination : "NOT SET"));
     if(fdc3Message.type === "fdc3.context")
     {
         const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
