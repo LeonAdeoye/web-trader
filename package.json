@@ -81,6 +81,7 @@
     "gulp": "^4.0.2",
     "gulp-cli": "^2.3.0",
     "gulp-sass": "^5.1.0",
+    "re-resizable": "^6.9.11",
     "sass": "^1.66.1",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"

@@ -15,8 +15,8 @@ export const selectedContextShareState = atom({
     default: []
 });
 
-export const selectedBasket = atom({
-    key: 'selectedBasket',
+export const selectedBasketState = atom({
+    key: 'selectedBasketState',
     default: ''
 });
 

@@ -17,6 +17,7 @@ import HoldingsApp from "./components/HoldingsApp";
 import TaskListApp from "./components/TaskListApp";
 import {AlertsApp} from "./components/AlertsApp";
 import {OrdersApp} from "./components/OrdersApp";
+import {BasketsApp} from "./components/BasketsApp";
 
 
 const App = ({}) =>
@@ -39,7 +40,8 @@ const App = ({}) =>
             { name: 'Holdings', path: '/holdings', component: HoldingsApp },
             { name: 'Tasks', path: '/tasks', component: TaskListApp },
             { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
-            { name: 'Configs', path: '/configs', component: ConfigsApp}
+            { name: 'Configs', path: '/configs', component: ConfigsApp},
+            { name: 'Baskets', path: '/baskets', component: BasketsApp}
         ];
 
     useEffect( () =>
