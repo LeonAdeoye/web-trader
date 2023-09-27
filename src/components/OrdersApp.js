@@ -112,11 +112,35 @@ export const OrdersApp = () =>
         {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 180, width: 180, filter: true},
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 180, width: 180, filter: true},
         {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 250, filter: true},
-        {headerName: "Order State", field: "orderState", sortable: true, minWidth: 100, width: 130, filter: true},
+        {headerName: "Order State", field: "orderState", sortable: true, minWidth: 100, width: 130, filter: true,
+            cellStyle: params => {
+                const styleMapping = {
+                    'FULLY FILLED': { backgroundColor: 'darkgreen', color: 'white' },
+                    'PARTIALLY FILLED': { backgroundColor: 'lightgreen', color: 'white' },
+                    'NEW ORDER': { backgroundColor: 'darkblue', color: 'white' },
+                    'ACKED': { backgroundColor: 'lightblue', color: 'white' },
+                };
+                const value = params.value.trim();
+                const style = styleMapping[value] || {};
+                return style;
+            }
+        },
         {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: true, sortable: true, minWidth: 200, width: 200, filter: true},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true,
+            cellStyle: params => {
+                const side = params.value.toLowerCase();
+                if (side === 'buy')
+                    return { color: '#346bb4', fontWeight: 'bold' };
+                else if (side === 'sell')
+                    return { color: '#528c74', fontWeight: 'bold' };
+                else if (side === 'short sell')
+                    return { color: 'red', fontWeight: 'bold' };
+                else
+                    return {};
+            }
+        },
         {headerName: "Px", field: "price", sortable: false, minWidth: 100, width: 100, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 100, width: 100, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "ADV20", field: "adv20", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},

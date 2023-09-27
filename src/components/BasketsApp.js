@@ -26,7 +26,7 @@ export const BasketsApp = () =>
 
     return (<Grid container direction="column" style={{ height: '100%', overflow: 'hidden' }}>
             <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
-                <Resizable defaultSize={{ width: '25%', height: '100%' }}>
+                <Resizable defaultSize={{ width: '15%', height: '100%' }}>
                     <BasketListComponent loggerService={loggerService}/>
                 </Resizable>
                 <Divider orientation="vertical" style={{backgroundColor:'#404040', width: '1px'}}/>

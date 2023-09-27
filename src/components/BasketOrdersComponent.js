@@ -15,13 +15,37 @@ export const BasketOrdersComponent = ({loggerService}) =>
 
     const columnDefs = [
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 120, filter: true, headerTooltip: 'Current state of parent order'},
+        {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 120, filter: true, headerTooltip: 'Current state of parent order',
+            cellStyle: params => {
+                const styleMapping = {
+                    'FILLED': { backgroundColor: 'darkgreen', color: 'white' },
+                    'PARTIAL FILL': { backgroundColor: 'lightgreen', color: 'white' },
+                    'NEW ORDER': { backgroundColor: 'darkblue', color: 'white' },
+                    'ACKED': { backgroundColor: 'lightblue', color: 'white' },
+                };
+                const value = params.value.trim();
+                const style = styleMapping[value] || {};
+                return style;
+            }
+        },
         {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: false, sortable: true, minWidth: 180, width: 180, filter: true},
         {headerName: "Qty", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 100, width: 100, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 100, width: 100, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 85, width: 85, filter: true,
+            cellStyle: params => {
+                const side = params.value.toLowerCase();
+                if (side === 'buy')
+                    return { color: '#346bb4', fontWeight: 'bold' };
+                else if (side === 'sell')
+                    return { color: '#528c74', fontWeight: 'bold' };
+                else if (side === 'short sell')
+                    return { color: 'red', fontWeight: 'bold' };
+                else
+                    return {};
+            }
+        },
         {headerName: "Px", field: "price", sortable: false, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 100, width: 100, filter: true},

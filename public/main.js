@@ -82,7 +82,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
     });
 
     childWindow.removeMenu();
-    childWindow.webContents.openDevTools(); // TODO: Remove this line in production
+    //childWindow.webContents.openDevTools(); // TODO: Remove this line in production
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowTitleMap.set(childWindow.getTitle(), childWindow);
 
