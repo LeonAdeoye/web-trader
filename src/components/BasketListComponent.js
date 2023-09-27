@@ -88,9 +88,9 @@ export const BasketListComponent = ({loggerService}) =>
                 size='small'
                 label="Search by basket name or client."
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '6px', marginRight: '6px'}}
+                style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}
             />
-            <div style={{ height: '12px', width: '100%', backgroundColor: "white"}}></div>
+            <div style={{ height: '14px', width: '100%', backgroundColor: "white"}}></div>
             <div className="ag-theme-alpine" style={{ height: 'calc(100% - 45px)', width: 'calc(100%- 3px)'}}>
                 <AgGridReact
                     columnDefs={columnDefs}

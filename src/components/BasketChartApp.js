@@ -1,36 +1,13 @@
 import '../styles/css/main.css';
-import { selectedBasketState} from "../atoms/component-state";
-import {useRecoilState} from "recoil";
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {AgChartsReact} from 'ag-charts-react';
 import {DataService} from "../services/DataService";
 
-export const BasketChartComponent = () =>
+export const BasketChartApp = () =>
 {
-    const [selectedBasket] = useRecoilState(selectedBasketState);
     const [dataService] = useState(new DataService());
-
-    useEffect(() =>
-    {
-        if(selectedBasket)
-        {
-             setOptions((prevOptions) =>
-             {
-                 return {
-                     ...prevOptions,
-                     series: [{
-                             ...prevOptions.series[0],
-                             data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === selectedBasket)[0].constituents.filter(constituent => constituent.side === 'Buy')
-                         },
-                         {
-                             ...prevOptions.series[1],
-                             data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === selectedBasket)[0].constituents.filter(constituent => constituent.side === 'Sell')
-                         }]
-                 }
-             });
-        }
-    }, [selectedBasket]);
-
+    const windowId = useMemo(() => window.command.getWindowId("basket-chart"), []);
+    const [basketId, setBasketId] = useState(null);
     const [options, setOptions] = useState({
         autoSize: true,
         title: {
@@ -112,6 +89,41 @@ export const BasketChartComponent = () =>
             }
         ]
     });
+
+    useEffect(() =>
+    {
+        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        {
+            if(fdc3Message.type === "fdc3.chart")
+            {
+                if(fdc3Message.products.length > 0 && fdc3Message.products[0].id.ticker)
+                    setBasketId(fdc3Message.products[0].id.ticker);
+                else
+                    setBasketId(null);
+            }
+        });
+    }, []);
+
+    useEffect(() =>
+    {
+        if(basketId)
+        {
+            setOptions((prevOptions) =>
+            {
+                return {
+                    ...prevOptions,
+                    series: [{
+                        ...prevOptions.series[0],
+                        data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Buy')
+                    },
+                        {
+                            ...prevOptions.series[1],
+                            data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Sell')
+                        }]
+                }
+            });
+        }
+    }, [basketId]);
 
     return (
         <AgChartsReact options={options}/>

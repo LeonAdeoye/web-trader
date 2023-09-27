@@ -102,9 +102,9 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
 
     useEffect(() =>
     {
-        window.messenger.handleMessageFromMain((destination, fdc3Context, _) =>
+        window.messenger.handleMessageFromMain((fdc3Message, destination, _) =>
         {
-            let newSymbol = fdc3Context.instruments[0].id.ticker;
+            let newSymbol = fdc3Message.instruments[0].id.ticker;
             setNewlySelectedSymbol(newSymbol);
         });
     }, []);

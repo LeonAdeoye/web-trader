@@ -30,6 +30,21 @@ export class FDC3Service
         };
     }
 
+    static createBasketChartContext = (basketId) =>
+    {
+        return {
+            type: "fdc3.chart",
+            products: [
+                {
+                    type: "fdc3.product",
+                    id: {
+                        ticker: basketId
+                    }
+                }
+            ]
+        };
+    }
+
     static createContextShare = (symbol, client) =>
     {
         let fdc3Context = {

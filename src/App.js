@@ -18,6 +18,7 @@ import TaskListApp from "./components/TaskListApp";
 import {AlertsApp} from "./components/AlertsApp";
 import {OrdersApp} from "./components/OrdersApp";
 import {BasketsApp} from "./components/BasketsApp";
+import {BasketChartApp} from "./components/BasketChartApp";
 
 
 const App = ({}) =>
@@ -41,7 +42,8 @@ const App = ({}) =>
             { name: 'Tasks', path: '/tasks', component: TaskListApp },
             { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp},
-            { name: 'Baskets', path: '/baskets', component: BasketsApp}
+            { name: 'Baskets', path: '/baskets', component: BasketsApp},
+            { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp}
         ];
 
     useEffect( () =>

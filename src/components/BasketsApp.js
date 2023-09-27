@@ -5,21 +5,27 @@ import {Divider, Grid} from "@mui/material";
 import '../styles/css/main.css';
 import {BasketListComponent} from "./BasketListComponent";
 import {BasketOrdersComponent} from "./BasketOrdersComponent";
-import {BasketChartComponent} from "./BasketChartComponent";
 import {Resizable} from "re-resizable";
+import {useMemo} from "react";
+import {useRecoilState} from "recoil";
+import {selectedBasketState} from "../atoms/component-state";
+import {useEffect} from "react";
+import {FDC3Service} from "../services/FDC3Service";
 
 export const BasketsApp = () =>
 {
     const [loggerService] = useState(new LoggerService(BasketsApp.name));
+    const windowId = useMemo(() => window.command.getWindowId("baskets"), []);
+    const [selectedBasketId] = useRecoilState(selectedBasketState);
 
-    return (
-        // Setting this to from 100vh to 98vh eliminated the vertical scroll bar on the right side of the screen.
-        <Grid container direction="column" style={{ height: '98vh', overflow: 'hidden' }}>
-            <Resizable defaultSize={{ width: '100%', height: '39%'}}>
-                <BasketChartComponent/>
-            </Resizable>
-            <Divider orientation="horizontal" style={{backgroundColor:'#404040', height: '1px'}}/>
-            <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '58%' }}>
+    useEffect(() =>
+    {
+        if(selectedBasketId)
+            window.messenger.sendMessageToMain(FDC3Service.createBasketChartContext(selectedBasketId), "basket-chart", windowId);
+    }, [selectedBasketId]);
+
+    return (<Grid container direction="column" style={{ height: '100%', overflow: 'hidden' }}>
+            <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
                 <Resizable defaultSize={{ width: '25%', height: '100%' }}>
                     <BasketListComponent loggerService={loggerService}/>
                 </Resizable>
@@ -28,6 +34,5 @@ export const BasketsApp = () =>
                     <BasketOrdersComponent loggerService={loggerService}/>
                 </Grid>
             </Grid>
-        </Grid>
-    );
+        </Grid>);
 }
