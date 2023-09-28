@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {GenericGridComponent} from "./GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
-import {numberFormatter} from "../utilities";
+import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
@@ -88,14 +88,14 @@ export const OrdersApp = () =>
 
     useEffect(() =>
     {
-        if(selectedContextShare.length == 1)
+        if(selectedContextShare.length === 1)
         {
             if(selectedContextShare[0].contextShareKey === 'stockCode')
                 window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
             else
                 window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, selectedContextShare[0].contextShareValue), null, windowId);
         }
-        else if(selectedContextShare.length == 2)
+        else if(selectedContextShare.length === 2)
         {
             const stockCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'stockCode').contextShareValue;
             const client = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'client').contextShareValue;
@@ -112,35 +112,11 @@ export const OrdersApp = () =>
         {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "Client", field: "client", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 100, filter: true,
-            cellStyle: params => {
-                const styleMapping = {
-                    'FULLY FILLED': { backgroundColor: 'darkgreen', color: 'white' },
-                    'PARTIALLY FILLED': { backgroundColor: 'lightgreen', color: 'white' },
-                    'NEW ORDER': { backgroundColor: 'darkblue', color: 'white' },
-                    'ACKED': { backgroundColor: 'lightblue', color: 'white' },
-                };
-                const value = params.value.trim();
-                const style = styleMapping[value] || {};
-                return style;
-            }
-        },
+        {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 100, filter: true, cellStyle: params => orderStateStyling(params.value)},
         {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true,
-            cellStyle: params => {
-                const side = params.value.toLowerCase();
-                if (side === 'buy')
-                    return { color: '#346bb4', fontWeight: 'bold' };
-                else if (side === 'sell')
-                    return { color: '#528c74', fontWeight: 'bold' };
-                else if (side === 'short sell')
-                    return { color: 'red', fontWeight: 'bold' };
-                else
-                    return {};
-            }
-        },
+        {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "ADV20", field: "adv20", sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},

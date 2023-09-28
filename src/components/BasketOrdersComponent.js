@@ -1,5 +1,5 @@
 import React from 'react';
-import {numberFormatter} from "../utilities";
+import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities";
 import {useEffect, useState, useMemo} from "react";
 import '../styles/css/main.css';
 import {selectedBasketState} from "../atoms/component-state";
@@ -15,37 +15,13 @@ export const BasketOrdersComponent = ({loggerService}) =>
 
     const columnDefs = useMemo(() => ([
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 120, width: 120, filter: true},
-        {headerName: "State", field: "orderState", sortable: true, minWidth: 105, width: 105, filter: true, headerTooltip: 'Current state of parent order',
-            cellStyle: params => {
-                const styleMapping = {
-                    'FILLED': { backgroundColor: 'darkgreen', color: 'white' },
-                    'PARTIAL FILL': { backgroundColor: 'lightgreen', color: 'white' },
-                    'NEW ORDER': { backgroundColor: 'darkblue', color: 'white' },
-                    'ACKED': { backgroundColor: 'lightblue', color: 'white' },
-                };
-                const value = params.value.trim();
-                const style = styleMapping[value] || {};
-                return style;
-            }
-        },
+        {headerName: "State", field: "orderState", sortable: true, minWidth: 105, width: 105, filter: true, headerTooltip: 'Current state of parent order', cellStyle: params => orderStateStyling(params.value)},
         {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true,
-            cellStyle: params => {
-                const side = params.value.toLowerCase();
-                if (side === 'buy')
-                    return { color: '#346bb4', fontWeight: 'bold' };
-                else if (side === 'sell')
-                    return { color: '#528c74', fontWeight: 'bold' };
-                else if (side === 'short sell')
-                    return { color: 'red', fontWeight: 'bold' };
-                else
-                    return {};
-            }
-        },
+        {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Px", field: "price", sortable: false, minWidth: 80, width: 80, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 80, width: 80, filter: true},

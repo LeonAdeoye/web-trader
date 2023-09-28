@@ -39,4 +39,32 @@ export const createArrayFromScore = (score) =>
         throw new Error("Input must be a positive integer");
 }
 
+export const orderStateStyling = (orderState) =>
+{
+    const styleMapping = {
+        'FILLED': { backgroundColor: '#528c74', color: 'white' },
+        'FULLY FILLED': { backgroundColor: '#528c74', color: 'white' },
+        'PARTIAL FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
+        'PARTIALLY FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
+        'NEW ORDER': { backgroundColor: '#4F81BD', color: 'white' },
+        'ACKED': { backgroundColor: 'lightblue', color: 'white' },
+    };
+    const value = orderState.trim();
+    const style = styleMapping[value] || {};
+    return style;
+}
+
+export const orderSideStyling = (orderSide) =>
+{
+    const side = orderSide.toLowerCase();
+    if (side === 'buy')
+        return { color: '#346bb4', fontWeight: 'bold' };
+    else if (side === 'sell')
+        return { color: '#528c74', fontWeight: 'bold' };
+    else if (side === 'short sell')
+        return { color: 'red', fontWeight: 'bold' };
+    else
+        return {};
+}
+
 

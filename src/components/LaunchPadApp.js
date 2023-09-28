@@ -10,8 +10,6 @@ const LaunchPadApp = () =>
     const [apps, setApps] = useState([]);
     const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
     const [configurationService] = useState(new ConfigurationService());
-    // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("launch-pad"), []);
 
     useEffect(() =>
     {
