@@ -51,11 +51,11 @@ export const BasketOrdersComponent = ({loggerService}) =>
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 80, width: 80, filter: true},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80},
         {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
+        {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "ADV20", field: "adv20", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},
-        {headerName: "Exec Notional", field: "executedNotionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Order Notional", field: "orderNotionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Residual Notional", field: "residualNotionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Exec Notional", field: "executedNotionalValue", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Order Notional", field: "orderNotionalValue", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Residual Notional", field: "residualNotionalValue", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
     ]), []);
 
     useEffect(() =>
