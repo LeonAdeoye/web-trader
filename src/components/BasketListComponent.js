@@ -9,7 +9,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {DataService} from "../services/DataService";
 import BasketListSummaryRenderer from "./BasketListSummaryRenderer";
 import {numberFormatter} from "../utilities";
-import {GenericGridComponent} from "./GenericGridComponent";
 
 export const BasketListComponent = () =>
 {
