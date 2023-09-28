@@ -116,8 +116,8 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                         rowSelection={'single'}
                                         onSelectionChanged={onBuySelectionChanged}
                                         onCellClicked={onCellClicked}
-                                        headerHeight={25}
-                                        rowHeight={20}
+                                        headerHeight={22}
+                                        rowHeight={22}
                                         height
                                     />
                                 </div>
@@ -137,8 +137,8 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                                         rowSelection={'single'}
                                         onSelectionChanged={onSellSelectionChanged}
                                         onCellClicked={onCellClicked}
-                                        headerHeight={25}
-                                        rowHeight={20}
+                                        headerHeight={22}
+                                        rowHeight={22}
                                     />
                                 </div>
                             </div>

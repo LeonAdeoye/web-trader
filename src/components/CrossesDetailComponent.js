@@ -133,8 +133,8 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
                         onSelectionChanged={onBuySelectionChanged}
                         onCellClicked={onCellClicked}
                         ref={buyGridApiRef}
-                        headerHeight={25}
-                        rowHeight={20}
+                        headerHeight={22}
+                        rowHeight={22}
                     />
                 </div>
             </div>
@@ -148,8 +148,8 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
                         onCellClicked={onCellClicked}
                         ref={sellGridApiRef}
                         domLayout='autoHeight'
-                        headerHeight={25}
-                        rowHeight={20}
+                        headerHeight={22}
+                        rowHeight={22}
                     />
                 </div>
             </div>

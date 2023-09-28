@@ -223,7 +223,7 @@ const HoldingsApp = () =>
 
                 {selectedTab === "1" && (
                     <TabPanel value="1" className="holdings-panel">
-                        <GenericGridComponent rowHeight={25}
+                        <GenericGridComponent rowHeight={22}
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["stockCode"]}
                                               columnDefs={clientColumnDefs}
@@ -233,7 +233,7 @@ const HoldingsApp = () =>
 
                 {selectedTab === "2" && (
                     <TabPanel value="2" className="holdings-panel">
-                        <GenericGridComponent rowHeight={25}
+                        <GenericGridComponent rowHeight={22}
                                               gridTheme={"ag-theme-alpine"}
                                               rowIdArray={["client"]}
                                               columnDefs={stockColumnDefs}

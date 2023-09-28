@@ -122,7 +122,7 @@ export const AlertsApp = () =>
         {headerName: "Notional USD", field: "notionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Notional value in USD', valueFormatter: numberFormatter}
     ];
 
-    return (<GenericGridComponent rowHeight={25}
+    return (<GenericGridComponent rowHeight={22}
                                   gridTheme={"ag-theme-alpine"}
                                   rowIdArray={["id"]}
                                   columnDefs={columnDefs}

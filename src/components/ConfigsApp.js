@@ -144,7 +144,7 @@ export const ConfigsApp = () =>
         <div className="app-parent-with-action-button">
             <div>
                 <GenericGridComponent
-                    rowHeight={25}
+                    rowHeight={22}
                     gridTheme="ag-theme-alpine"
                     rowIdArray={['id']}
                     columnDefs={columnDefs}

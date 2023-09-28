@@ -98,8 +98,8 @@ export const GridTickerApp = ({webWorkerUrl}) =>
                 onSelectionChanged={onSelectionChanged}
                 animateRows={true}
                 getRowId={getRowId}
-                rowHeight={25}
-                headerHeight={25}
+                rowHeight={22}
+                headerHeight={22}
             />
         </div>
     );

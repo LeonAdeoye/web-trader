@@ -9,6 +9,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {DataService} from "../services/DataService";
 import BasketListSummaryRenderer from "./BasketListSummaryRenderer";
 import {numberFormatter} from "../utilities";
+import {GenericGridComponent} from "./GenericGridComponent";
 
 export const BasketListComponent = () =>
 {
@@ -17,6 +18,7 @@ export const BasketListComponent = () =>
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [basketList, setBasketList] = useState([]);
+
     const columnDefs = useMemo(() => ([
         {
             headerName: 'Basket List',
@@ -115,12 +117,10 @@ export const BasketListComponent = () =>
                     enableCellChangeFlash={true}
                     rowSelection={'single'}
                     animateRows={true}
-                    rowHeight={25}
-                    headerHeight={25}
+                    rowHeight={22}
+                    headerHeight={22}
                 />
             </div>
-        </div>
-
-    );
+        </div>);
 }
 

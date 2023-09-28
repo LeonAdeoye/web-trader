@@ -28,5 +28,5 @@ export const UsersApp = () =>
         {headerName: "Location", field: "location", sortable: true, minWidth: 150, maxWidth: 150, width: 150},
         {headerName: "Is Active", field: "active", minWidth: 120, maxWidth: 120, width: 120}];
 
-    return (<GenericGridComponent rowHeight={25} gridTheme={"ag-theme-alpine"} rowIdArray={["userId"]} columnDefs={columnDefs} gridData={gridData}/>);
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["userId"]} columnDefs={columnDefs} gridData={gridData}/>);
 };
