@@ -100,9 +100,14 @@ export const BasketListComponent = () =>
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
             <TextField
-                size='small'
+                size='small' className='search-text'
                 label="Search by basket name."
                 onChange={handleSearchChange}
+                InputProps={{
+                    style: {
+                        fontSize: '15px'
+                    }
+                }}
                 style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}
             />
             <div style={{ height: '14px', width: '100%', backgroundColor: "white"}}></div>
