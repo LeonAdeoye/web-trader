@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {isEmptyString, transformLocalDataTime} from "../utilities";
-import {GenericGridComponent} from "./GenericGridComponent";
+import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useMemo} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {LoggerService} from "../services/LoggerService";
 import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
-import appTheme from "./appTheme";
+import appTheme from "../components/appTheme";
 import '../styles/css/main.css';
-import ConfigurationDialogComponent from "./ConfigurationDialogComponent";
+import ConfigurationDialogComponent from "../components/ConfigurationDialogComponent";
 import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 

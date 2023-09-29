@@ -3,8 +3,8 @@ import '../styles/css/main.css';
 import {DataService} from "../services/DataService";
 import {useEffect} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
-import {CrossesSummaryComponent} from "./CrossesSummaryComponent";
-import {CrossesDetailComponent} from "./CrossesDetailComponent";
+import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
+import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
 
 const CrossesApp = () =>
 {

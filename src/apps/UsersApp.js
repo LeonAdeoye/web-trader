@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {GenericGridComponent} from "./GenericGridComponent";
+import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useMemo} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {DataService} from "../services/DataService";

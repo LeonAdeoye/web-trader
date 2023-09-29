@@ -3,7 +3,7 @@ import '../styles/css/main.css';
 import {useCallback, useEffect, useState, useMemo} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
-import LoginDialogComponent from "./LoginDialogComponent";
+import LoginDialogComponent from "../components/LoginDialogComponent";
 
 const LaunchPadApp = () =>
 {

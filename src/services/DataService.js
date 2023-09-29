@@ -1,5 +1,5 @@
 import {LoggerService} from "./LoggerService";
-import {tasks, tradeHistory, holdings, crosses, baskets} from "./MockData";
+import {tasks, tradeHistory, holdings, crosses, baskets, clients, blasts} from "./MockData";
 
 export class DataService
 {
@@ -8,6 +8,9 @@ export class DataService
     static TRADE_HISTORY = "tradeHistory";
     static TASKS = "tasks";
     static BASKETS = "baskets";
+    static CLIENTS = "clients";
+    static INTERESTS = "interests";
+    static BLASTS = "blasts";
     #loggerService;
 
     constructor()
@@ -140,6 +143,10 @@ export class DataService
                 return this.#filterTasks(tasks, stock, client);
             case DataService.BASKETS:
                 return baskets;
+            case DataService.CLIENTS:
+                return clients;
+            case DataService.BLASTS:
+                return blasts;
             default:
                 return [];
         }

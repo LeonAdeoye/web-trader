@@ -1496,4 +1496,26 @@ export const baskets = [
 
     },
 ];
+export const clients = [{clientName: "Schroders", clientId: 1}, {clientName: "Nomura", clientId: 2}, {clientName: "Deutsche Bank", clientId: 3}, {clientName: "J.P. Morgan", clientId: 4}, {clientName: "Morgan Stanley", clientId: 5}, {clientName: "Citibank", clientId: 6}];
+export const blasts = [
+    {
+        blastId: 1,
+        blastName: "Schroders' Blasts",
+        contents: ["News", "Holdings", "Flows"],
+        markets: ["JP", "HK"],
+        clientId: 1,
+        triggerTime:"09:10:00",
+        advFilter: 2.5,
+        notionalValueFilter: 1000000
+    },
+    {
+        blastId: 2,
+        blastName: "Nomura's Blasts",
+        contents: ["News", "Flows"],
+        markets: ["JP"],
+        clientId: 2,
+        triggerTime: "09:00:00",
+        advFilter: 3,
+        notionalValueFilter: 2000000
+    }];
 

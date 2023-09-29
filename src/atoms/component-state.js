@@ -20,5 +20,10 @@ export const selectedBasketState = atom({
     default: ''
 });
 
+export const selectedClientState = atom({
+    key: 'selectedClientState',
+    default: ''
+});
+
 
 

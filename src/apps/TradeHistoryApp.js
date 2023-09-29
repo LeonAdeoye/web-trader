@@ -4,7 +4,7 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
-import TradeHistoryGridsComponent from "./TradeHistoryGridsComponent";
+import TradeHistoryGridsComponent from "../components/TradeHistoryGridsComponent";
 import {DataService} from "../services/DataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";

@@ -1,24 +1,26 @@
 import './App.css';
-import {GridTickerApp} from "./components/GridTickerApp";
-import {PriceChartApp} from "./components/PriceChartApp";
-import {StockTickerApp} from "./components/StockTickerApp";
+import {GridTickerApp} from "./apps/GridTickerApp";
+import {PriceChartApp} from "./apps/PriceChartApp";
+import {StockTickerApp} from "./apps/StockTickerApp";
 import React, {useEffect, useState} from "react";
 import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
-import LaunchPadApp from "./components/LaunchPadApp";
+import LaunchPadApp from "./apps/LaunchPadApp";
 import { Route, Routes} from "react-router-dom";
-import {UsersApp} from "./components/UsersApp";
-import {ConfigsApp} from "./components/ConfigsApp";
+import {UsersApp} from "./apps/UsersApp";
+import {ConfigsApp} from "./apps/ConfigsApp";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
-import CrossesApp from "./components/CrossesApp";
-import {FxRatesApp} from "./components/FxRatesApp";
-import TradeHistoryApp from "./components/TradeHistoryApp";
-import HoldingsApp from "./components/HoldingsApp";
-import TaskListApp from "./components/TaskListApp";
-import {AlertsApp} from "./components/AlertsApp";
-import {OrdersApp} from "./components/OrdersApp";
-import {BasketsApp} from "./components/BasketsApp";
-import {BasketChartApp} from "./components/BasketChartApp";
+import CrossesApp from "./apps/CrossesApp";
+import {FxRatesApp} from "./apps/FxRatesApp";
+import TradeHistoryApp from "./apps/TradeHistoryApp";
+import HoldingsApp from "./apps/HoldingsApp";
+import TaskListApp from "./apps/TaskListApp";
+import {AlertsApp} from "./apps/AlertsApp";
+import {OrdersApp} from "./apps/OrdersApp";
+import {BasketsApp} from "./apps/BasketsApp";
+import {BasketChartApp} from "./apps/BasketChartApp";
+import {ClientInterestsApp} from "./apps/ClientInterestsApp";
+import {BlastsApp} from "./apps/BlastsApp";
 
 
 const App = ({}) =>
@@ -43,7 +45,9 @@ const App = ({}) =>
             { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp},
             { name: 'Baskets', path: '/baskets', component: BasketsApp},
-            { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp}
+            { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp},
+            { name: 'Client Interests', path: '/client-interests', component: ClientInterestsApp},
+            { name: 'Blasts', path: '/blasts', component: BlastsApp}
         ];
 
     useEffect( () =>

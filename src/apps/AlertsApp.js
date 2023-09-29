@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {GenericGridComponent} from "./GenericGridComponent";
+import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
 import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
