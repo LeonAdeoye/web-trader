@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState, useEffect, useMemo} from "react";
+import {useState, useEffect, useMemo, useRef} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
 import {CacheService} from "../services/CacheService";
@@ -10,7 +10,7 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
     const [symbol, setSymbol] = useState(null);
     const [newlySelectedSymbol, setNewlySelectedSymbol] = useState(null);
     const [connectionId, setConnectionId] = useState(null);
-    const [cacheService] = useState(new CacheService());
+    const cacheService = useRef(new CacheService()).current;
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("price-chart"), []);
     const [options, setOptions] = useState({

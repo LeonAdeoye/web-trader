@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect, useRef} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
@@ -14,7 +14,7 @@ import {FDC3Service} from "../services/FDC3Service";
 
 const HoldingsApp = () =>
 {
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [selectedTab, setSelectedTab] = useState("1");
     const [stockCode, setStockCode] = useState("0001.HK");
     const [client, setClient] = useState("Schroders");

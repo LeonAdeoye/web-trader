@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText, ListItemIcon, Typography, Accordion, AccordionSummary, AccordionDetails, Tooltip, Button } from '@mui/material';
 import { Send, VisibilityOff, SwapHorizontalCircle, NewReleases, CircleNotifications, Podcasts } from '@mui/icons-material';
 import { DataService } from '../services/DataService';
@@ -13,8 +13,8 @@ const TaskListApp = () =>
     const [searchValue, setSearchValue] = useState('');
     const [searchType, setSearchType] = useState('All');
     const [tasks, setTasks] = useState([]);
-    const [dataService] = useState(new DataService());
-    const [loggerService] = useState(new LoggerService(TaskListApp.name));
+    const dataService = useRef(new DataService()).current;
+    const loggerService = useRef(new LoggerService(TaskListApp.name)).current;
     const [worker, setWorker] = useState(null);
     const [expandedAccordion, setExpandedAccordion] = useState(null);
     const [stockCode, setStockCode] = useState(null);

@@ -1,6 +1,6 @@
 import React from 'react';
 import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities";
-import {useEffect, useState, useMemo} from "react";
+import {useEffect, useState, useMemo, useRef} from "react";
 import '../styles/css/main.css';
 import {selectedBasketState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
@@ -10,7 +10,7 @@ import {GenericGridComponent} from "./GenericGridComponent";
 export const BasketOrdersComponent = ({loggerService}) =>
 {
     const [selectedBasket] = useRecoilState(selectedBasketState);
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [orders, setOrders] = useState([]);
 
     const columnDefs = useMemo(() => ([

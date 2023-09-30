@@ -4,12 +4,11 @@ import '../styles/css/main.css';
 import {ClientListComponent} from "../components/ClientListComponent";
 import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
 import {Resizable} from "re-resizable";
-import React, {useState} from "react";
+import React, {useRef} from "react";
 
 export const ClientInterestsApp = () =>
 {
-    const [loggerService] = useState(new LoggerService(ClientInterestsApp.name));
-
+    const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
     return (<Grid container direction="column" style={{ height: '100%', overflow: 'hidden' }}>
         <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
             <Resizable defaultSize={{ width: '17%', height: '100%' }}>

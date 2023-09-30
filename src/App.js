@@ -2,7 +2,7 @@ import './App.css';
 import {GridTickerApp} from "./apps/GridTickerApp";
 import {PriceChartApp} from "./apps/PriceChartApp";
 import {StockTickerApp} from "./apps/StockTickerApp";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
 import LaunchPadApp from "./apps/LaunchPadApp";
 import { Route, Routes} from "react-router-dom";
@@ -26,8 +26,8 @@ import {BlastsApp} from "./apps/BlastsApp";
 const App = ({}) =>
 {
     const [client, setClient] = useState(null);
-    const [configurationService] = useState(new ConfigurationService());
-    const [loggerService] = useState(new LoggerService(App.name));
+    const configurationService = useRef(new ConfigurationService()).current;
+    const loggerService = useRef(new LoggerService(App.name)).current;
 
     const apps =
         [

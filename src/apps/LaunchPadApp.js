@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '../styles/css/main.css';
-import {useCallback, useEffect, useState, useMemo} from "react";
+import {useCallback, useEffect, useState, useRef} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 import LoginDialogComponent from "../components/LoginDialogComponent";
@@ -8,8 +8,8 @@ import LoginDialogComponent from "../components/LoginDialogComponent";
 const LaunchPadApp = () =>
 {
     const [apps, setApps] = useState([]);
-    const [loggerService] = useState(new LoggerService(LaunchPadApp.name));
-    const [configurationService] = useState(new ConfigurationService());
+    const loggerService = useRef(new LoggerService(LaunchPadApp.name)).current;
+    const configurationService = useRef(new ConfigurationService()).current;
 
     useEffect(() =>
     {

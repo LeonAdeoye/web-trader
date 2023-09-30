@@ -13,7 +13,7 @@ import {numberFormatter} from "../utilities";
 export const BasketListComponent = () =>
 {
     const [, setSelectedBasket] = useRecoilState(selectedBasketState);
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [basketList, setBasketList] = useState([]);

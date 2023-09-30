@@ -1,11 +1,11 @@
 import '../styles/css/main.css';
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {AgChartsReact} from 'ag-charts-react';
 import {DataService} from "../services/DataService";
 
 export const BasketChartApp = () =>
 {
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("basket-chart"), []);
     const [basketId, setBasketId] = useState(null);
     const [options, setOptions] = useState({

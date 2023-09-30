@@ -1,16 +1,16 @@
-import React, {useMemo, useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback, useRef, useEffect} from 'react';
 import '../styles/css/main.css';
 import {DataService} from "../services/DataService";
-import {useEffect} from "react";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
 import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
 
+
 const CrossesApp = () =>
 {
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [stockRows, setStockRows] = useState([]);
-    const [exchangeRateService] = useState(new ExchangeRateService());
+    const exchangeRateService = useRef(new ExchangeRateService()).current;
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);

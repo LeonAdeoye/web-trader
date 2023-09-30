@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect} from 'react';
+import React, { useState, useMemo, useEffect, useRef} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
@@ -12,7 +12,6 @@ import {numberFormatter} from "../utilities";
 
 const TradeHistoryApp = () =>
 {
-    const [dataService] = useState(new DataService());
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
     const [stockCode, setStockCode] = useState("0001.HK");
@@ -21,6 +20,7 @@ const TradeHistoryApp = () =>
     const [stockTradeHistory, setStockTradeHistory] = useState({stock: "0001.HK", buyTrades: [], sellTrades: []});
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
     const [stockTradeHistoryTabLabel, setStockTradeHistoryTabLabel] = useState("Stock Trade History");
+    const dataService = useRef(new DataService()).current;
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);

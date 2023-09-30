@@ -1,6 +1,6 @@
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useState, useMemo, useRef} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -11,7 +11,7 @@ import {selectedClientState} from "../atoms/component-state";
 export const ClientListComponent = () =>
 {
     const [, setSelectedClient] = useRecoilState(selectedClientState);
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 

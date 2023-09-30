@@ -1,6 +1,6 @@
 import React from 'react';
 import {orderSideStyling} from "../utilities";
-import {useEffect, useState, useMemo} from "react";
+import {useEffect, useState, useMemo, useRef} from "react";
 import '../styles/css/main.css';
 import {selectedClientState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
@@ -10,7 +10,7 @@ import {GenericGridComponent} from "./GenericGridComponent";
 export const ClientInterestsComponent = ({loggerService}) =>
 {
     const [selectedClient] = useRecoilState(selectedClientState);
-    const [dataService] = useState(new DataService());
+    const dataService = useRef(new DataService()).current;
     const [interests, setInterests] = useState([]);
 
     const columnDefs = useMemo(() => ([

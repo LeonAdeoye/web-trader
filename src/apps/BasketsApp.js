@@ -1,20 +1,17 @@
-import * as React from 'react';
-import {useState} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {Divider, Grid} from "@mui/material";
 import '../styles/css/main.css';
 import {BasketListComponent} from "../components/BasketListComponent";
 import {BasketOrdersComponent} from "../components/BasketOrdersComponent";
 import {Resizable} from "re-resizable";
-import {useMemo} from "react";
+import React, {useMemo, useEffect, useRef} from "react";
 import {useRecoilState} from "recoil";
 import {selectedBasketState} from "../atoms/component-state";
-import {useEffect} from "react";
 import {FDC3Service} from "../services/FDC3Service";
 
 export const BasketsApp = () =>
 {
-    const [loggerService] = useState(new LoggerService(BasketsApp.name));
+    const loggerService = useRef(new LoggerService(BasketsApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("baskets"), []);
     const [selectedBasketId] = useRecoilState(selectedBasketState);
 
