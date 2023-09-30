@@ -104,7 +104,7 @@ export const AlertsApp = () =>
         };
     }, [worker]);
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => ([
         {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 130, width: 130},
         {headerName: "Type", field: "type", sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Alert Details", field: "alertDetails", sortable: true, minWidth: 400, width: 400, filter: true},
@@ -120,7 +120,7 @@ export const AlertsApp = () =>
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 100, width: 120, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 100, width: 100, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "Notional USD", field: "notionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Notional value in USD', valueFormatter: numberFormatter}
-    ];
+    ]), []);
 
     return (<GenericGridComponent rowHeight={22}
                                   gridTheme={"ag-theme-alpine"}

@@ -8,7 +8,8 @@ import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "../components/appTheme";
 import '../styles/css/main.css';
 import ConfigurationDialogComponent from "../components/ConfigurationDialogComponent";
-import {configDialogDisplayState, selectedGenericGridRowState} from "../atoms/component-state";
+import {selectedGenericGridRowState} from "../atoms/component-state";
+import {configDialogDisplayState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
 
 export const ConfigsApp = () =>
@@ -22,7 +23,7 @@ export const ConfigsApp = () =>
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("configs"), []);
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => ([
         { headerName: "Id", field: 'id', hide: true },
         { headerName: "Owner", field: 'owner', sortable: true, minWidth: 100, width: 130 },
         { headerName: "Key", field: 'key', sortable: true, minWidth: 150, width: 200 },
@@ -32,7 +33,7 @@ export const ConfigsApp = () =>
         {
             let timestamp = Number((params.data["lastUpdatedOn"]));
             return transformLocalDataTime(timestamp.valueOf());
-        }}];
+        }}]), []);
 
     useEffect(() =>
     {

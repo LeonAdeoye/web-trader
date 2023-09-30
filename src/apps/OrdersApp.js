@@ -103,7 +103,7 @@ export const OrdersApp = () =>
         }
     }, [selectedContextShare]);
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => ([
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "Client Order Id", field: "clientOrderId", sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "Instruction", field: "instruction", sortable: true, minWidth: 110, width: 110, filter: true},
@@ -131,7 +131,7 @@ export const OrdersApp = () =>
         {headerName: "Perf Arrival (bps)", field: "performanceVsArrivalBPS", headerTooltip: 'Performance versus arrival in bps', hide: false, sortable: false, minWidth: 100, width: 130, filter: false},
         {headerName: "Perf IVWAP", field: "performanceVsIVWAP", headerTooltip: 'Performance versus interval VWAP in USD', hide: false, sortable: false, minWidth: 100, width: 110, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 120, filter: false},
-    ];
+    ]), []);
 
     return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]}
                                   columnDefs={columnDefs} gridData={filterOrdersUsingContext}/>);

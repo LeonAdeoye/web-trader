@@ -8,39 +8,24 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 const ActionIconsRenderer = (params) =>
 {
     const {blastId} = params.data;
+    const {handleAction} = params.context;
 
-    const handleDelete = () =>
-    {
-        console.log(`Delete: ${blastId}`);
-    };
-
-    const handleEdit = () =>
-    {
-        console.log(`Edit: ${blastId}`);
-    };
-
-    const handleClone = () =>
-    {
-        console.log(`Clone: ${blastId}`);
-    };
-
-    const handleAdd = () =>
-    {
-        console.log(`Add: ${blastId}`);
-    };
-
-    const handlePlay = () =>
-    {
-        console.log(`Play: ${blastId}`);
+    const ACTIONS = {
+        DELETE: 'delete',
+        EDIT: 'edit',
+        CLONE: 'clone',
+        ADD: 'add',
+        PLAY: 'play',
     };
 
     return (<div>
-            <PlayCircleIcon onClick={handlePlay} style={{cursor: 'pointer', marginRight: '5px', color:'#4F81BD', height:'20px'}}/>
-            <DeleteIcon onClick={handleDelete} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
-            <EditIcon onClick={handleEdit} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
-            <FileCopyIcon onClick={handleClone} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
-            <AddBoxIcon onClick={handleAdd} style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
-        </div>);
+        <PlayCircleIcon onClick={() => handleAction(ACTIONS.PLAY, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#4F81BD', height:'20px'}}/>
+        <DeleteIcon onClick={() => handleAction(ACTIONS.DELETE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+        <EditIcon onClick={() => handleAction(ACTIONS.EDIT, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+        <FileCopyIcon onClick={() => handleAction(ACTIONS.CLONE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+        <AddBoxIcon onClick={() => handleAction(ACTIONS.ADD, blastId)} style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
+    </div>);
 };
+
 
 export default ActionIconsRenderer;

@@ -5,12 +5,6 @@ import {useEffect, useState, useRef, useCallback, useMemo} from "react";
 import {Command} from "amps";
 import {FDC3Service} from "../services/FDC3Service";
 
-const columnDefs = [
-    {headerName: 'Symbol', field: 'symbol'},
-    {headerName: 'Bid', field: 'bid',sort: 'desc'},
-    {headerName: 'Ask', field: 'ask'}
-];
-
 // In both cases we try to find the index of the existing row by using a matcher:
 const matcher = ({ header }) => ({ key }) => key === header.sowKey();
 
@@ -50,6 +44,12 @@ const processPublish = (message, rowData) =>
 
 export const StockTickerApp = ({client}) =>
 {
+    const columnDefs = useMemo(() => ([
+        {headerName: 'Symbol', field: 'symbol'},
+        {headerName: 'Bid', field: 'bid',sort: 'desc'},
+        {headerName: 'Ask', field: 'ask'}
+    ]), []);
+
     const [rowData, setRowData] = useState([]);
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);

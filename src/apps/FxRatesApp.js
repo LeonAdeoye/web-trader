@@ -48,11 +48,11 @@ export const FxRatesApp = () =>
         };
     }, [worker]);
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => ([
         {headerName: "Currency", field: "currency", sortable: true, minWidth: 130, width: 130},
         {headerName: "Bid", field: "bid", sortable: false, minWidth: 100, width: 100},
         {headerName: "Ask", field: "ask", sortable: false, minWidth: 100, width: 100},
-        {headerName: "Mid", field: "mid", sortable: false, minWidth: 100, width: 100}];
+        {headerName: "Mid", field: "mid", sortable: false, minWidth: 100, width: 100}]), []);
 
     return (<GenericGridComponent rowHeight={25}
                                   gridTheme={"ag-theme-alpine"}
