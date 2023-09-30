@@ -9,3 +9,8 @@ export const blastPlayDialogDisplayState = atom({
     key: 'blastPlayDialogDisplayState',
     default: false
 });
+
+export const blastConfigurationDialogDisplayState = atom({
+    key: 'blastConfigurationDialogDisplayState',
+    default: false
+});

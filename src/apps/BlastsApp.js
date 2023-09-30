@@ -8,14 +8,16 @@ import BlastContentRenderer from "../components/BlastContentRenderer";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import BlastPlayDialogComponent from "../components/BlastPlayDialogComponent";
 import {useRecoilState} from "recoil";
-import {blastPlayDialogDisplayState} from "../atoms/dialog-state";
+import {blastConfigurationDialogDisplayState, blastPlayDialogDisplayState} from "../atoms/dialog-state";
 import {LoggerService} from "../services/LoggerService";
+import BlastConfigurationDialogComponent from "../components/BlastConfigurationDialogComponent";
 
 export const BlastsApp = () =>
 {
     const dataService = useRef(new DataService()).current;
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
     const [blastPlayDialogOpenFlag, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
+    const [blastConfigurationDialogOpenFlag, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Blast Id", field: "blastId", sortable: true, minWidth: 85, width: 85, filter: true, hide:true},
@@ -39,15 +41,18 @@ export const BlastsApp = () =>
                 loggerService.logInfo(`User opened blast template for blastId: ${id}`);
                 break;
             case "edit":
+                setBlastConfigurationDialogOpenFlag(true);
                 loggerService.logInfo(`User editing blastId: ${id}`);
                 break;
             case "delete":
                 loggerService.logInfo(`User deleting blastId: ${id}`);
                 break;
             case "clone":
+                setBlastConfigurationDialogOpenFlag(true)
                 loggerService.logInfo(`User cloning blastId: ${id}`);
                 break;
             case "add":
+                setBlastConfigurationDialogOpenFlag(true)
                 loggerService.logInfo(`User adding blastId: ${id}`);
                 break;
             default:
@@ -60,6 +65,7 @@ export const BlastsApp = () =>
         <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
             <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={dataService.getData(DataService.BLASTS)} handleAction={handleAction}/>
         </div>
+        <BlastConfigurationDialogComponent onCloseHandler={ console.log("closed")}/>
         <BlastPlayDialogComponent onCloseHandler={ console.log("closed")}/>
     </div>);
 }
