@@ -65,7 +65,7 @@ export const BlastsApp = () =>
         <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
             <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={dataService.getData(DataService.BLASTS)} handleAction={handleAction}/>
         </div>
-        <BlastConfigurationDialogComponent onCloseHandler={ console.log("closed")}/>
+        <BlastConfigurationDialogComponent onCloseHandler={ console.log("closed")} dataService={dataService}/>
         <BlastPlayDialogComponent onCloseHandler={ console.log("closed")}/>
     </div>);
 }
