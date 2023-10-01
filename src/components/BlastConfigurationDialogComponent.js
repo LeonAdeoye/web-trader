@@ -1,21 +1,11 @@
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    MenuItem,
-    TextField,
-    Tooltip,
-    Typography
-} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography} from "@mui/material";
 import React, {useState, useMemo, useEffect} from "react";
 import {useRecoilState} from "recoil";
 import {blastConfigurationDialogDisplayState} from "../atoms/dialog-state";
 import {Autocomplete} from "@mui/material";
 import {DataService} from "../services/DataService";
 import {AgGridReact} from "ag-grid-react";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 
 const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
 {
@@ -28,6 +18,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
     const [gridApi, setGridApi] = useState(null);
     const [gridColumnApi, setGridColumnApi] = useState(null);
     const [rowMarketData, setRowMarketData] = useState([]);
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = useMemo(() => ([
         { headerName: "Market", field: "market", width: 150},
@@ -86,15 +77,13 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
         if(markets.length > 0)
         {
             const newRows = markets.map(market => ({ market, adv: '', notional: '' }));
-            setRowMarketData([...rowMarketData, ...newRows]);
+            setRowMarketData([...newRows]);
         }
     }, [markets]);
 
-    // {selectedGenericGridRow !== undefined ? "Update Existing Configuration" : "Add New Configuration"}
-
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={Boolean(blastConfigDialogOpenFlag)} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
-            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Blast Configuration</DialogTitle>
+            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow !== undefined ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>

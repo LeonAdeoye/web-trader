@@ -3,7 +3,6 @@ import {useMemo, useRef} from "react";
 import '../styles/css/main.css';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {DataService} from "../services/DataService";
-import {numberFormatter} from "../utilities";
 import BlastContentRenderer from "../components/BlastContentRenderer";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import BlastPlayDialogComponent from "../components/BlastPlayDialogComponent";
@@ -11,6 +10,7 @@ import {useRecoilState} from "recoil";
 import {blastConfigurationDialogDisplayState, blastPlayDialogDisplayState} from "../atoms/dialog-state";
 import {LoggerService} from "../services/LoggerService";
 import BlastConfigurationDialogComponent from "../components/BlastConfigurationDialogComponent";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 
 export const BlastsApp = () =>
 {
@@ -18,15 +18,22 @@ export const BlastsApp = () =>
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
     const [blastPlayDialogOpenFlag, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
     const [blastConfigurationDialogOpenFlag, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
+    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Blast Id", field: "blastId", sortable: true, minWidth: 85, width: 85, filter: true, hide:true},
         {headerName: "Blast Name", field: "blastName", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
-        {headerName: "Contents", field: "contents", sortable: true, minWidth: 170, width: 170, filter: true, valueFormatter: params => params.value ? params.value.join(", ") : "",  cellRenderer: BlastContentRenderer },
+        {headerName: "Contents", field: "contents", sortable: true, minWidth: 200, width: 200, filter: true, valueFormatter: params => params.value ? params.value.join(", ") : "",  cellRenderer: BlastContentRenderer },
         {headerName: "Markets", field: "markets", sortable: true, minWidth: 110, width: 110, filter: true, valueFormatter: params => params.value ? params.value.join(", ") : "", },
-        {headerName: "ADV% Filter", field: "advFilter", sortable: false, minWidth: 100, width: 100, filter: false},
-        {headerName: "Notional Val. Filter", field: "notionalValueFilter", sortable: false, minWidth: 110, width: 110, filter: false, valueFormatter: numberFormatter},
-        {headerName: "Client", field: "clientId", sortable: true, minWidth: 80, width: 80, filter: true},
+        {headerName: "ADV Filter", field: "advFilter", sortable: false, minWidth: 150, width: 150, filter: false,
+            valueGetter: params => params.data.advFilter,
+            valueFormatter: params => Object.entries(params.value).map(([key, value]) => `${key}: ${value}%`).join(", ")},
+        {headerName: "Notional Val. Filter", field: "notionalValueFilter", sortable: false, minWidth: 160, width: 160, filter: false,
+            valueGetter: params => params.data.notionalValueFilter,
+            valueFormatter: params => Object.entries(params.value).map(([key, value]) => `${key}: ${value / 1000000}m`).join(", ")},
+        {headerName: "Client", field: "clientId", sortable: true, minWidth: 80, width: 80, filter: true,
+            valueGetter: params => params.data.clientId,
+            valueFormatter: params => dataService.getData(DataService.CLIENTS).find(client => client.clientId === params.value).clientName},
         {headerName: "Trigger Time", field: "triggerTime", sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);

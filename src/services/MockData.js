@@ -1501,12 +1501,12 @@ export const blasts = [
     {
         blastId: 1,
         blastName: "Schroders' Blasts",
-        contents: ["News", "Holdings", "Flows"],
+        contents: ["News", "Holdings", "Flows", "IOIs"],
         markets: ["JP", "HK"],
         clientId: 1,
         triggerTime:"09:10:00",
-        advFilter: 2.5,
-        notionalValueFilter: 1000000
+        advFilter: {JP: 3, HK: 2},
+        notionalValueFilter: {JP: 2000000, HK: 50000}
     },
     {
         blastId: 2,
@@ -1515,7 +1515,7 @@ export const blasts = [
         markets: ["JP"],
         clientId: 2,
         triggerTime: "09:00:00",
-        advFilter: 3,
-        notionalValueFilter: 2000000
+        advFilter: {JP: 3},
+        notionalValueFilter: {JP: 2000000}
     }];
 
