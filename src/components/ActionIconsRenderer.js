@@ -19,7 +19,7 @@ const ActionIconsRenderer = (params) =>
     };
 
     return (<div>
-        <PlayCircleIcon onClick={() => handleAction(ACTIONS.PLAY, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#4F81BD', height:'20px'}}/>
+        <PlayCircleIcon onClick={() => handleAction(ACTIONS.PLAY, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
         <DeleteIcon onClick={() => handleAction(ACTIONS.DELETE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
         <EditIcon onClick={() => handleAction(ACTIONS.EDIT, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
         <FileCopyIcon onClick={() => handleAction(ACTIONS.CLONE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
