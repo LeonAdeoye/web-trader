@@ -91,7 +91,7 @@ export const BlastsApp = () =>
     {
         try
         {
-            loggerService.logInfo(`Deleting existing blast configuration: ${JSON.stringify(selectedGenericGridRow)}`);
+            loggerService.logInfo(`Deleting existing blast configuration with blastId: ${blastId}`);
             blastService.deleteBlastConfiguration("leon", blastId)
                 .then(() => setBlasts(previousBlasts =>
                 {
@@ -99,6 +99,20 @@ export const BlastsApp = () =>
                     previousBlasts.splice(index, 1);
                     return [...previousBlasts];
                 }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const cloneBlastConfiguration = async (blastId) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Cloning existing blast configuration with blastId: ${blastId}`);
+            blastService.addNewBlastConfiguration("leon")
+                .then((id) => setBlasts([...blasts, {...selectedGenericGridRow, blastId: id}]));
         }
         catch (error)
         {
@@ -117,6 +131,7 @@ export const BlastsApp = () =>
             case "edit":
                 setBlastConfigurationDialogOpenFlag(true);
                 loggerService.logInfo(`User editing blastId: ${id}`);
+                await updateBlastConfiguration(selectedGenericGridRow);
                 break;
             case "delete":
                 loggerService.logInfo(`User deleting blastId: ${id}`);
@@ -125,10 +140,12 @@ export const BlastsApp = () =>
             case "clone":
                 setBlastConfigurationDialogOpenFlag(true)
                 loggerService.logInfo(`User cloning blastId: ${id}`);
+                await cloneBlastConfiguration(id);
                 break;
             case "add":
                 setBlastConfigurationDialogOpenFlag(true)
                 loggerService.logInfo(`User adding blastId: ${id}`);
+                await saveBlastConfiguration(selectedGenericGridRow);
                 break;
             default:
                 loggerService.logError(`Unknown action: ${action} for blastId: ${id}`);
