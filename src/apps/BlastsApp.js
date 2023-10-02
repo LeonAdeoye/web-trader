@@ -117,7 +117,7 @@ export const BlastsApp = () =>
 
     useEffect(() =>
     {
-        setBlasts(dataService.getData(DataService.BLASTS));
+        setBlasts(blastService.getBlasts());
     }, []);
 
     return (
@@ -125,7 +125,7 @@ export const BlastsApp = () =>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
                 <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
             </div>
-            <BlastConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveBlastConfiguration : updateBlastConfiguration} dataService={dataService}/>
+            <BlastConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveBlastConfiguration : updateBlastConfiguration} dataService={dataService} blastService={blastService}/>
             <BlastPlayDialogComponent onCloseHandler={onCloseHandler}/>
         </div>);
 }

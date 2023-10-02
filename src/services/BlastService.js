@@ -10,6 +10,37 @@ export class BlastService
     {
         this.#blasts = new Map();
         this.#loggerService = new LoggerService(this.constructor.name);
+        this.#blasts.set("leon", [
+            {
+                blastId: 1,
+                blastName: "Schroders' Blasts",
+                contents: ["News", "Holdings", "Flows", "IOIs"],
+                markets: ["JP", "HK"],
+                clientId: 1,
+                triggerTime:"09:10:00",
+                advFilter: {JP: 3, HK: 2},
+                notionalValueFilter: {JP: 2000000, HK: 50000}
+            },
+            {
+                blastId: 2,
+                blastName: "Nomura's Blasts",
+                contents: ["News", "Flows"],
+                markets: ["JP"],
+                clientId: 2,
+                triggerTime: "09:00:00",
+                advFilter: {JP: 3},
+                notionalValueFilter: {JP: 2000000}
+            },
+            {
+                blastId: 3,
+                blastName: "Horatio's Blasts",
+                contents: ["Flows"],
+                markets: ["AU"],
+                clientId: 2,
+                triggerTime: "",
+                advFilter: {},
+                notionalValueFilter: {AU: 2000000}
+            }]);
     }
 
     async loadBlasts(owner)
@@ -101,5 +132,10 @@ export class BlastService
                 this.#loggerService.logInfo(`Updated blast configuration: ${updatedBlastConfiguration} for owner: ${owner}`);
             })
             .catch(error => this.#loggerService.logError(error));
+    }
+
+    getBlasts(owner)
+    {
+        return this.#blasts.get("leon");
     }
 }

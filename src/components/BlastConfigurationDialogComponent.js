@@ -7,7 +7,7 @@ import {DataService} from "../services/DataService";
 import {AgGridReact} from "ag-grid-react";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 
-const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
+const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService, blastService}) =>
 {
     const [blastConfigDialogOpenFlag, setBlastConfigDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
     const [nameOfBlast, setNameOfBlast] = useState( '');
@@ -92,7 +92,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
             setScheduledTime(selectedGenericGridRow.triggerTime);
             setBlastId(selectedGenericGridRow.blastId);
             setMarkets(selectedGenericGridRow.markets);
-            const marketRows = dataService.getData(DataService.BLASTS).find(blast => blast.blastId === selectedGenericGridRow.blastId).markets;
+            const marketRows = blastService.getBlasts().find(blast => blast.blastId === selectedGenericGridRow.blastId).markets;
             if(marketRows.length > 0)
             {
                 const gridRows = marketRows.map(market => ({ market, adv: selectedGenericGridRow.advFilter[market] , notional: (selectedGenericGridRow.notionalValueFilter[market]) ? String((selectedGenericGridRow.notionalValueFilter[market]/1000000)) + "m" : ""}));
