@@ -11,6 +11,7 @@ export class DataService
     static CLIENTS = "clients";
     static INTERESTS = "interests";
     static BLASTS = "blasts";
+
     #loggerService;
 
     constructor()

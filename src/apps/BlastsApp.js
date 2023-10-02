@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import '../styles/css/main.css';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {DataService} from "../services/DataService";
@@ -11,14 +11,18 @@ import {blastConfigurationDialogDisplayState, blastPlayDialogDisplayState} from 
 import {LoggerService} from "../services/LoggerService";
 import BlastConfigurationDialogComponent from "../components/BlastConfigurationDialogComponent";
 import {selectedGenericGridRowState} from "../atoms/component-state";
+import {isEmptyString} from "../utilities";
+import {BlastService} from "../services/BlastService";
 
 export const BlastsApp = () =>
 {
     const dataService = useRef(new DataService()).current;
+    const blastService = useRef(new BlastService()).current;
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
-    const [blastPlayDialogOpenFlag, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
-    const [blastConfigurationDialogOpenFlag, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
-    const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    const [, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
+    const [, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
+    const [selectedGenericGridRow, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+    const [blasts, setBlasts] = useState([]);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Blast Id", field: "blastId", sortable: true, minWidth: 85, width: 85, filter: true, hide:true},
@@ -38,9 +42,53 @@ export const BlastsApp = () =>
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
 
+    const onCloseHandler = (event) =>
+    {
+
+    }
+
+    const saveBlastConfiguration = async (blastConfiguration) =>
+    {
+        try
+        {
+            if(isEmptyString(blastConfiguration.blastName) || isEmptyString(blastConfiguration.clientId) || blastConfiguration.contents.length === 0 || blastConfiguration.markets.length === 0)
+                return;
+
+            loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfiguration)}`);
+            blastService.addNewBlastConfiguration("leon", blastConfiguration)
+                .then((id) => setBlasts([...blasts, {...blastConfiguration}]));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const updateBlastConfiguration = async (blastConfiguration) =>
+    {
+        try
+        {
+            if(isEmptyString(blastConfiguration.blastName) || isEmptyString(blastConfiguration.clientId) || blastConfiguration.contents.length === 0 || blastConfiguration.markets.length === 0)
+                return;
+
+            loggerService.logInfo(`Updating existing blast configuration:${JSON.stringify(blastConfiguration)}`);
+            blastService.updateBlastConfiguration("leon", blastConfiguration)
+                .then(() => setBlasts(previousBlasts =>
+                {
+                    const index = previousBlasts.findIndex(config => config.id === blastConfiguration.blastId);
+                    previousBlasts[index] = blastConfiguration;
+                    setSelectedGenericGridRow(previousBlasts[index]);
+                    return [...previousBlasts];
+                }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
     const handleAction = (action, id) =>
     {
-        console.log(`${action}: ${id}`);
         switch(action)
         {
             case "play":
@@ -67,12 +115,17 @@ export const BlastsApp = () =>
         }
     };
 
+    useEffect(() =>
+    {
+        setBlasts(dataService.getData(DataService.BLASTS));
+    }, []);
+
     return (
-    <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
-        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-            <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={dataService.getData(DataService.BLASTS)} handleAction={handleAction}/>
-        </div>
-        <BlastConfigurationDialogComponent onCloseHandler={ console.log("closed")} dataService={dataService}/>
-        <BlastPlayDialogComponent onCloseHandler={ console.log("closed")}/>
-    </div>);
+        <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
+            <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
+            </div>
+            <BlastConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveBlastConfiguration : updateBlastConfiguration} dataService={dataService}/>
+            <BlastPlayDialogComponent onCloseHandler={onCloseHandler}/>
+        </div>);
 }

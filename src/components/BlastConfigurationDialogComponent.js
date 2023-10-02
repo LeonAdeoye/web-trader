@@ -14,10 +14,10 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
     const [client, setClient] = useState( '');
     const [markets, setMarkets] = useState([]);
     const [contents, setContents] = useState( [] );
-    const [blastId, setBlastId] = useState( );
+    const [, setBlastId] = useState( );
     const [scheduledTime, setScheduledTime] = useState( '' );
-    const [gridApi, setGridApi] = useState(null);
-    const [gridColumnApi, setGridColumnApi] = useState(null);
+    const [, setGridApi] = useState(null);
+    const [, setGridColumnApi] = useState(null);
     const [rowMarketData, setRowMarketData] = useState([]);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
@@ -104,6 +104,11 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
 
     }, [blastConfigDialogOpenFlag]);
 
+    const validValues = () =>
+    {
+        return (nameOfBlast !== '' && client !== '' && markets.length > 0 && contents.length > 0);
+    }
+
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={Boolean(blastConfigDialogOpenFlag)} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow !== undefined ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
@@ -140,17 +145,17 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
             <DialogActions style={{height: '35px'}}>
                 <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
                     <span>
-                        <Button className="dialog-action-button" disabled={false} variant='contained' onClick={handleClear}>Clear</Button>
+                        <Button className="dialog-action-button" disabled={validValues()} variant='contained' onClick={handleClear}>Clear</Button>
                     </span>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Cancel and close configuration dialog window.</Typography>}>
                     <span>
-                        <Button className="dialog-action-button" color="primary"variant='contained' onClick={handleCancel}>Cancel</Button>
+                        <Button className="dialog-action-button" color="primary" variant='contained' onClick={handleCancel}>Cancel</Button>
                     </span>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>
                     <span>
-                        <Button className="dialog-action-button submit" color="primary" disabled={false} variant='contained' onClick={handleSubmit}>Submit</Button>
+                        <Button className="dialog-action-button submit" color="primary" disabled={!validValues()} variant='contained' onClick={handleSubmit}>Submit</Button>
                     </span>
                 </Tooltip>
             </DialogActions>
