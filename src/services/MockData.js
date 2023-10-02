@@ -1517,5 +1517,15 @@ export const blasts = [
         triggerTime: "09:00:00",
         advFilter: {JP: 3},
         notionalValueFilter: {JP: 2000000}
+    },
+    {
+        blastId: 3,
+        blastName: "Horatio's Blasts",
+        contents: ["Flows"],
+        markets: ["AU"],
+        clientId: 2,
+        triggerTime: "",
+        advFilter: {},
+        notionalValueFilter: {AU: 2000000}
     }];
 

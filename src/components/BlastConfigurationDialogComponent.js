@@ -14,7 +14,8 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
     const [client, setClient] = useState( '');
     const [markets, setMarkets] = useState([]);
     const [contents, setContents] = useState( [] );
-    const [scheduledTime, setScheduledTime] = useState( null );
+    const [blastId, setBlastId] = useState( );
+    const [scheduledTime, setScheduledTime] = useState( '' );
     const [gridApi, setGridApi] = useState(null);
     const [gridColumnApi, setGridColumnApi] = useState(null);
     const [rowMarketData, setRowMarketData] = useState([]);
@@ -81,26 +82,48 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService}) =>
         }
     }, [markets]);
 
+    useEffect(() =>
+    {
+        if(selectedGenericGridRow !== undefined)
+        {
+            setClient(dataService.getData(DataService.CLIENTS).find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
+            setContents(selectedGenericGridRow.contents);
+            setNameOfBlast(selectedGenericGridRow.blastName);
+            setScheduledTime(selectedGenericGridRow.triggerTime);
+            setBlastId(selectedGenericGridRow.blastId);
+            setMarkets(selectedGenericGridRow.markets);
+            const marketRows = dataService.getData(DataService.BLASTS).find(blast => blast.blastId === selectedGenericGridRow.blastId).markets;
+            if(marketRows.length > 0)
+            {
+                const gridRows = marketRows.map(market => ({ market, adv: selectedGenericGridRow.advFilter[market] , notional: (selectedGenericGridRow.notionalValueFilter[market]) ? String((selectedGenericGridRow.notionalValueFilter[market]/1000000)) + "m" : ""}));
+                setRowMarketData([...gridRows]);
+            }
+        }
+        else
+            cleanUp();
+
+    }, [blastConfigDialogOpenFlag]);
+
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={Boolean(blastConfigDialogOpenFlag)} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow !== undefined ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>
-                        <TextField size='small' label='Enter the blast name' value={nameOfBlast} onChange={handleNameOfBlastChange} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '5px', width:'400px'}} required/>
+                        <TextField size='small' label='Enter the blast name' value={nameOfBlast} onChange={handleNameOfBlastChange} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px', width:'400px'}} required/>
                         <Autocomplete size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
                                       options={dataService.getData(DataService.CLIENTS).map(client => client.clientName)} value={client} onChange={(event, newValue) => setClient(newValue)} freeSolo required />
-                        <TextField size='small' label='Select the contents...' select value={contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}>
+                        <TextField size='small' label='Select the contents' select value={contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}>
                             <MenuItem value='News'>News</MenuItem>
                             <MenuItem value='Flows'>Flows</MenuItem>
                             <MenuItem value='Holdings'>Holdings</MenuItem>
                             <MenuItem value='IOIs'>IOIs</MenuItem>
                         </TextField>
-                        <TextField size='small' id="time" label="Schedule Run Time" type="time" defaultValue="" style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
+                        <TextField size='small' id="time" label="Schedule Run Time" type="time" value={scheduledTime} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
                                    InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }} onChange={(e) => setScheduledTime(e.target.value)}/>
                     </Grid>
                     <Grid item xs={6}>
-                        <TextField size='small' label='Select applicable markets...' select value={markets} onChange={handleMarketsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '10px', marginBottom: '5px', width:'400px'}}>
+                        <TextField size='small' label='Select applicable markets...' select value={markets} onChange={handleMarketsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '35px', marginBottom: '5px', width:'400px'}}>
                             <MenuItem value='HK'>Hong Kong</MenuItem>
                             <MenuItem value='JP'>Japan</MenuItem>
                             <MenuItem value='SG'>Singapore</MenuItem>
