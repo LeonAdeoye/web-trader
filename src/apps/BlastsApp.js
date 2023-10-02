@@ -42,7 +42,7 @@ export const BlastsApp = () =>
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
 
-    const onCloseHandler = (event) =>
+    const onCloseHandler = () =>
     {
 
     }
@@ -55,7 +55,7 @@ export const BlastsApp = () =>
                 return;
 
             loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfiguration)}`);
-            blastService.addNewBlastConfiguration("leon", blastConfiguration)
+            blastService.addNewBlastConfiguration("leon", blastConfiguration) //TODO
                 .then((id) => setBlasts([...blasts, {...blastConfiguration}]));
         }
         catch (error)
@@ -72,7 +72,7 @@ export const BlastsApp = () =>
                 return;
 
             loggerService.logInfo(`Updating existing blast configuration:${JSON.stringify(blastConfiguration)}`);
-            blastService.updateBlastConfiguration("leon", blastConfiguration)
+            blastService.updateBlastConfiguration("leon", blastConfiguration) //TODO
                 .then(() => setBlasts(previousBlasts =>
                 {
                     const index = previousBlasts.findIndex(config => config.id === blastConfiguration.blastId);
@@ -87,7 +87,26 @@ export const BlastsApp = () =>
         }
     }
 
-    const handleAction = (action, id) =>
+    const deleteBlastConfiguration = async (blastId) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Deleting existing blast configuration: ${JSON.stringify(selectedGenericGridRow)}`);
+            blastService.deleteBlastConfiguration("leon", blastId)
+                .then(() => setBlasts(previousBlasts =>
+                {
+                    const index = previousBlasts.findIndex(blast => blast.blastId === blastId);
+                    previousBlasts.splice(index, 1);
+                    return [...previousBlasts];
+                }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const handleAction = async (action, id) =>
     {
         switch(action)
         {
@@ -101,6 +120,7 @@ export const BlastsApp = () =>
                 break;
             case "delete":
                 loggerService.logInfo(`User deleting blastId: ${id}`);
+                await deleteBlastConfiguration(id);
                 break;
             case "clone":
                 setBlastConfigurationDialogOpenFlag(true)
