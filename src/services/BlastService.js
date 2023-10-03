@@ -8,61 +8,33 @@ export class BlastService
 
     constructor()
     {
-        this.#blasts = new Map();
+        this.#blasts = [];
         this.#loggerService = new LoggerService(this.constructor.name);
-        this.#blasts.set("leon", [
-            {
-                blastId: 1,
-                blastName: "Schroders' Blasts",
-                contents: ["News", "Holdings", "Flows", "IOIs"],
-                markets: ["JP", "HK"],
-                clientId: 1,
-                triggerTime:"09:10:00",
-                advFilter: {JP: 3, HK: 2},
-                notionalValueFilter: {JP: 2000000, HK: 50000}
-            },
-            {
-                blastId: 2,
-                blastName: "Nomura's Blasts",
-                contents: ["News", "Flows"],
-                markets: ["JP"],
-                clientId: 2,
-                triggerTime: "09:00:00",
-                advFilter: {JP: 3},
-                notionalValueFilter: {JP: 2000000}
-            },
-            {
-                blastId: 3,
-                blastName: "Horatio's Blasts",
-                contents: ["Flows"],
-                markets: ["AU"],
-                clientId: 2,
-                triggerTime: "",
-                advFilter: {},
-                notionalValueFilter: {AU: 2000000}
-            }]);
     }
 
-    async loadBlasts(owner)
+    async loadBlasts(ownerId)
     {
-        if(isEmptyString(owner))
+        if(isEmptyString(ownerId))
             return;
 
-        await fetch(`http://localhost:20009/blasts?owner=${owner}`)
+        await fetch(`http://localhost:20009/blast?ownerId=${ownerId}`)
             .then(response => response.json())
             .then(data =>
             {
                 if(data.length > 0)
-                    this.#blasts.set(owner, data);
+                {
+                    this.#blasts = data;
+                    this.#loggerService.logInfo(`Loaded ${data.length} blasts for owner: ${ownerId}`);
+                }
                 else
-                    this.#loggerService.logInfo(`Loaded zero blasts for owner: ${owner}`);
+                    this.#loggerService.logInfo(`Loaded zero blasts for owner: ${ownerId}`);
             })
             .catch(err => this.#loggerService.logError(err));
     }
 
-    async addNewBlastConfiguration(owner, newBlastConfiguration)
+    async addNewBlastConfiguration(ownerId, newBlastConfiguration)
     {
-        this.#loggerService.logInfo(`Saving blast configuration: ${newBlastConfiguration} for owner: ${owner}.`);
+        this.#loggerService.logInfo(`Saving blast configuration: ${newBlastConfiguration} for owner: ${ownerId}.`);
         return await fetch("http://localhost:20009/blast", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -70,14 +42,9 @@ export class BlastService
             .then(response => response.json())
             .then((blastResponse) =>
             {
-                if(this.#blasts.has(owner))
-                    this.#blasts.get(owner).push(blastResponse);
-                else
-                    this.#blasts.set(owner, [blastResponse]);
-
-                this.#loggerService.logInfo(`Successfully saved blast configuration: ${newBlastConfiguration}for owner: ${owner}.`);
-
-                return blastResponse.id;
+                this.#blasts.push(blastResponse);
+                this.#loggerService.logInfo(`Successfully saved blast configuration: ${blastResponse}for owner: ${ownerId}.`);
+                return blastResponse;
             })
             .catch(error => this.#loggerService.logError(error));
     }
@@ -87,55 +54,50 @@ export class BlastService
         this.#blasts.clear();
     }
 
-    async deleteBlastConfiguration(blastId)
+    async deleteBlastConfiguration(ownerId, blastId)
     {
-        fetch(`http://localhost:20009/blast?id=${blastId}`, {method: "DELETE"})
+        fetch(`http://localhost:20009/blast?ownerId=${ownerId}&blastId=${blastId}`, {method: "DELETE"})
             .then(() =>
             {
-                for(const listOfBlasts of this.#blasts.values())
+                for(const current of this.#blasts)
                 {
-                    for(const current of listOfBlasts)
+                    if(current.blastId === blastId)
                     {
-                        if(current.blastId === blastId)
-                        {
-                            listOfBlasts.splice(listOfBlasts.indexOf(current), 1);
-                            this.#loggerService.logInfo(`Successfully deleted blast configuration with id: ${blastId}`);
-                            return;
-                        }
+                        this.#blasts.splice(this.#blasts.indexOf(current), 1);
+                        this.#loggerService.logInfo(`Successfully deleted blast configuration with ownerId: ${ownerId} and blast Id: ${blastId}`);
+                        break;
                     }
                 }
             })
             .catch(error => this.#loggerService.logError(error));
     }
 
-    async updateBlastConfiguration(owner, updatedBlastConfiguration)
+    async updateBlastConfiguration(ownerId, updatedBlastConfiguration)
     {
-        this.#loggerService.logInfo(`Updating blast configuration: ${updatedBlastConfiguration} for owner: ${owner}`);
-        return await fetch("http://localhost:20009/blast", {
+        this.#loggerService.logInfo(`Updating blast configuration: ${updatedBlastConfiguration} for owner: ${ownerId}`);
+        return await fetch(`http://localhost:20009/blast?ownerId=${ownerId}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedBlastConfiguration)})
             .then(response => response.json())
             .then((blastResponse) =>
             {
-                const listOfBlasts = this.#blasts.get(owner);
-                for(const current of listOfBlasts)
+                for(const current of this.#blasts)
                 {
                     if(current.blastId === updatedBlastConfiguration.blastId)
                     {
-                        listOfBlasts[listOfBlasts.indexOf(current)] = blastResponse;
-                        this.#blasts.set(owner, listOfBlasts);
+                        this.#blasts[this.#blasts.indexOf(current)] = blastResponse;
                         break;
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated blast configuration: ${updatedBlastConfiguration} for owner: ${owner}`);
+                this.#loggerService.logInfo(`Updated blast configuration: ${updatedBlastConfiguration} for owner id: ${ownerId}`);
             })
             .catch(error => this.#loggerService.logError(error));
     }
 
-    getBlasts(owner)
+    getBlasts()
     {
-        return this.#blasts.get("leon");
+        return this.#blasts;
     }
 }

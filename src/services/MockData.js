@@ -1500,7 +1500,7 @@ export const clients = [
     {clientName: "Schroders", clientId: 1},
     {clientName: "Nomura", clientId: 2},
     {clientName: "Deutsche Bank", clientId: 3},
-    {clientName: "J.P. Morgan", clientId: 4},
+    {clientName: "JP Morgan", clientId: 4},
     {clientName: "Morgan Stanley", clientId: 5},
     {clientName: "Citibank", clientId: 6}];
 

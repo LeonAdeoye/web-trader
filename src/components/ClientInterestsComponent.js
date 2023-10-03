@@ -17,6 +17,7 @@ export const ClientInterestsComponent = ({loggerService}) =>
         {headerName: "Symbol", field: "stockCode", sortable: true, minWidth: 115, width: 115, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value)},
+        {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false}
     ]), []);
 
     useEffect(() =>

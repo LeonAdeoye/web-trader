@@ -3,11 +3,10 @@ import React, {useState, useMemo, useEffect} from "react";
 import {useRecoilState} from "recoil";
 import {blastConfigurationDialogDisplayState} from "../atoms/dialog-state";
 import {Autocomplete} from "@mui/material";
-import {DataService} from "../services/DataService";
 import {AgGridReact} from "ag-grid-react";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 
-const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService, blastService}) =>
+const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, blastService}) =>
 {
     const [blastConfigDialogOpenFlag, setBlastConfigDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
     const [nameOfBlast, setNameOfBlast] = useState( '');
@@ -86,7 +85,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService, blast
     {
         if(selectedGenericGridRow !== undefined)
         {
-            setClient(dataService.getData(DataService.CLIENTS).find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
+            setClient(clientService.getClients().find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
             setContents(selectedGenericGridRow.contents);
             setNameOfBlast(selectedGenericGridRow.blastName);
             setScheduledTime(selectedGenericGridRow.triggerTime);
@@ -117,12 +116,13 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , dataService, blast
                     <Grid item xs={6}>
                         <TextField size='small' label='Enter the blast name' value={nameOfBlast} onChange={handleNameOfBlastChange} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px', width:'400px'}} required/>
                         <Autocomplete size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
-                                      options={dataService.getData(DataService.CLIENTS).map(client => client.clientName)} value={client} onChange={(event, newValue) => setClient(newValue)} freeSolo required />
+                                      options={clientService.getClients().map(client => client.clientName)} value={client} onChange={(event, newValue) => setClient(newValue)} freeSolo required />
                         <TextField size='small' label='Select the contents' select value={contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}>
-                            <MenuItem value='News'>News</MenuItem>
-                            <MenuItem value='Flows'>Flows</MenuItem>
-                            <MenuItem value='Holdings'>Holdings</MenuItem>
+                            <MenuItem value='NEWS'>News</MenuItem>
+                            <MenuItem value='FLOWS'>Flows</MenuItem>
+                            <MenuItem value='HOLDINGS'>Holdings</MenuItem>
                             <MenuItem value='IOIs'>IOIs</MenuItem>
+                            <MenuItem value='BLOCKS'>Blocks</MenuItem>
                         </TextField>
                         <TextField size='small' id="time" label="Schedule Run Time" type="time" value={scheduledTime} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
                                    InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }} onChange={(e) => setScheduledTime(e.target.value)}/>
