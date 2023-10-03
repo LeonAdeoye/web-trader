@@ -9,12 +9,12 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, blastService}) =>
 {
     const [blastConfigDialogOpenFlag, setBlastConfigDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
-    const [nameOfBlast, setNameOfBlast] = useState( '');
-    const [client, setClient] = useState( '');
+    const [blastName, setBlastName] = useState( '');
+    const [clientId, setClientId] = useState( '');
     const [markets, setMarkets] = useState([]);
     const [contents, setContents] = useState( [] );
     const [, setBlastId] = useState( );
-    const [scheduledTime, setScheduledTime] = useState( '' );
+    const [triggerTime, setTriggerTime] = useState( '' );
     const [, setGridApi] = useState(null);
     const [, setGridColumnApi] = useState(null);
     const [rowMarketData, setRowMarketData] = useState([]);
@@ -42,14 +42,15 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
         setBlastConfigDialogOpenFlag(false);
     }
 
-    const handleNameOfBlastChange = (event) =>
+    const handleBlastNameChange = (event) =>
     {
-        setNameOfBlast(event.target.value);
+        setBlastName(event.target.value);
     }
 
     const handleSubmit = () =>
     {
         setBlastConfigDialogOpenFlag(false);
+        onCloseHandler(blastName, clientId, markets, contents, rowMarketData, triggerTime);
     }
 
     const handleContentsChange = (event) =>
@@ -65,8 +66,8 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
 
     const cleanUp = () =>
     {
-        setNameOfBlast('');
-        setClient('');
+        setBlastName('');
+        setClientId('');
         setMarkets([]);
         setContents([]);
         setRowMarketData([]);
@@ -83,12 +84,12 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
 
     useEffect(() =>
     {
-        if(selectedGenericGridRow !== undefined)
+        if(selectedGenericGridRow)
         {
-            setClient(clientService.getClients().find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
+            setClientId(clientService.getClients().find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
             setContents(selectedGenericGridRow.contents);
-            setNameOfBlast(selectedGenericGridRow.blastName);
-            setScheduledTime(selectedGenericGridRow.triggerTime);
+            setBlastName(selectedGenericGridRow.blastName);
+            setTriggerTime(selectedGenericGridRow.triggerTime);
             setBlastId(selectedGenericGridRow.blastId);
             setMarkets(selectedGenericGridRow.markets);
             const marketRows = blastService.getBlasts().find(blast => blast.blastId === selectedGenericGridRow.blastId).markets;
@@ -105,18 +106,18 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
 
     const validValues = () =>
     {
-        return (nameOfBlast !== '' && client !== '' && markets.length > 0 && contents.length > 0);
+        return (blastName !== '' && clientId !== '' && markets.length > 0 && contents.length > 0);
     }
 
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={Boolean(blastConfigDialogOpenFlag)} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
-            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow !== undefined ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
+            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>
-                        <TextField size='small' label='Enter the blast name' value={nameOfBlast} onChange={handleNameOfBlastChange} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px', width:'400px'}} required/>
+                        <TextField size='small' label='Enter the blast name' value={blastName} onChange={handleBlastNameChange} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px', width:'400px'}} required/>
                         <Autocomplete size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
-                                      options={clientService.getClients().map(client => client.clientName)} value={client} onChange={(event, newValue) => setClient(newValue)} freeSolo required />
+                                      options={clientService.getClients().map(client => client.clientName)} value={clientId} onChange={(event, newValue) => setClientId(newValue)} freeSolo required />
                         <TextField size='small' label='Select the contents' select value={contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}>
                             <MenuItem value='NEWS'>News</MenuItem>
                             <MenuItem value='FLOWS'>Flows</MenuItem>
@@ -124,8 +125,8 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
                             <MenuItem value='IOIs'>IOIs</MenuItem>
                             <MenuItem value='BLOCKS'>Blocks</MenuItem>
                         </TextField>
-                        <TextField size='small' id="time" label="Schedule Run Time" type="time" value={scheduledTime} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
-                                   InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }} onChange={(e) => setScheduledTime(e.target.value)}/>
+                        <TextField size='small' id="time" label="Schedule Run Time" type="time" value={triggerTime} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
+                                   InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }} onChange={(e) => setTriggerTime(e.target.value)}/>
                     </Grid>
                     <Grid item xs={6}>
                         <TextField size='small' label='Select applicable markets...' select value={markets} onChange={handleMarketsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '35px', marginBottom: '5px', width:'400px'}}>

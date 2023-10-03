@@ -12,18 +12,18 @@ const ActionIconsRenderer = (params) =>
 
     const ACTIONS = {
         DELETE: 'delete',
-        EDIT: 'edit',
+        UPDATE: 'update',
         CLONE: 'clone',
         ADD: 'add',
-        PLAY: 'play',
+        PLAY: 'play'
     };
 
     return (<div>
         <PlayCircleIcon onClick={() => handleAction(ACTIONS.PLAY, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
         <DeleteIcon onClick={() => handleAction(ACTIONS.DELETE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
-        <EditIcon onClick={() => handleAction(ACTIONS.EDIT, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+        <EditIcon onClick={() => handleAction(ACTIONS.UPDATE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
         <FileCopyIcon onClick={() => handleAction(ACTIONS.CLONE, blastId)} style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
-        <AddBoxIcon onClick={() => handleAction(ACTIONS.ADD, blastId)} style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
+        <AddBoxIcon onClick={() => handleAction(ACTIONS.ADD)} style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
     </div>);
 };
 
