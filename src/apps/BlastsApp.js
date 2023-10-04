@@ -48,22 +48,25 @@ export const BlastsApp = () =>
 
     }
 
-    const onCrudCloseHandler = async (blastName, clientId, markets, contents, rowMarketData, triggerTime) =>
+    const onCrudCloseHandler = async (blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, blastId) =>
     {
-        await saveBlastConfiguration(blastName, clientId, markets, contents, rowMarketData, triggerTime);
+        if(blastId)
+            await updateBlastConfiguration({blastId, blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, ownerId});
+        else
+            await saveBlastConfiguration({blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, ownerId});
     }
 
-    const saveBlastConfiguration = async (blastName, clientId, markets, contents, rowMarketData, triggerTime) =>
+    const saveBlastConfiguration = async (blastConfigurationToSave) =>
     {
         try
         {
-            if(isEmptyString(blastName) || isEmptyString(clientId) || contents.length === 0 || markets.length === 0 || rowMarketData.length === 0)
+            if(isEmptyString(blastConfigurationToSave.ownerId) || isEmptyString(blastConfigurationToSave.blastName) || isEmptyString(blastConfigurationToSave.clientId)
+                || blastConfigurationToSave.contents.length === 0 || blastConfigurationToSave.markets.length === 0)
                 return;
 
-            const blastConfiguration = {blastName, clientId, markets, contents, rowMarketData, triggerTime};
-            loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfiguration)}`);
-            blastService.addNewBlastConfiguration(ownerId, blastConfiguration)
-                .then((id) => setBlasts([...blasts, {...blastConfiguration}]));
+            loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfigurationToSave)}`);
+            blastService.addNewBlastConfiguration(ownerId, blastConfigurationToSave)
+                .then((id) => setBlasts([...blasts, {...blastConfigurationToSave}]));
         }
         catch (error)
         {
@@ -71,19 +74,20 @@ export const BlastsApp = () =>
         }
     }
 
-    const updateBlastConfiguration = async (blastConfiguration) =>
+    const updateBlastConfiguration = async (blastConfigurationToUpdate) =>
     {
         try
         {
-            if(isEmptyString(blastConfiguration.blastName) || isEmptyString(blastConfiguration.clientId) || blastConfiguration.contents.length === 0 || blastConfiguration.markets.length === 0)
+            if(isEmptyString(blastConfigurationToUpdate.ownerId) || isEmptyString(blastConfigurationToUpdate.blastName) || isEmptyString(blastConfigurationToUpdate.clientId)
+                || blastConfigurationToUpdate.contents.length === 0 || blastConfigurationToUpdate.markets.length === 0 || isEmptyString(blastConfigurationToUpdate.blastId))
                 return;
 
-            loggerService.logInfo(`Updating existing blast configuration:${JSON.stringify(blastConfiguration)}`);
-            blastService.updateBlastConfiguration(ownerId, blastConfiguration)
+            loggerService.logInfo(`Updating existing blast configuration:${JSON.stringify(blastConfigurationToUpdate)}`);
+            blastService.updateBlastConfiguration(blastConfigurationToUpdate)
                 .then(() => setBlasts(previousBlasts =>
                 {
-                    const index = previousBlasts.findIndex(config => config.id === blastConfiguration.blastId);
-                    previousBlasts[index] = blastConfiguration;
+                    const index = previousBlasts.findIndex(currentBlast => currentBlast.blastId === blastConfigurationToUpdate.blastId);
+                    previousBlasts[index] = blastConfigurationToUpdate;
                     setSelectedGenericGridRow(previousBlasts[index]);
                     return [...previousBlasts];
                 }));
@@ -136,22 +140,18 @@ export const BlastsApp = () =>
                 loggerService.logInfo(`User opened blast template for blastId: ${blastId}`);
                 break;
             case "update":
-                loggerService.logInfo(`User updating blast Id: ${blastId}`);
                 setSelectedGenericGridRow(blasts.find(blast => blast.blastId === blastId));
                 setBlastConfigurationDialogOpenFlag(true);
                 break;
             case "delete":
-                loggerService.logInfo(`User deleting blast Id: ${blastId}`);
                 await deleteBlastConfiguration(ownerId, blastId);
                 break;
             case "clone":
-                loggerService.logInfo(`User cloning blast Id: ${blastId}`);
                 setSelectedGenericGridRow(blasts.find(blast => blast.blastId === blastId));
                 setBlastConfigurationDialogOpenFlag(true);
                 await cloneBlastConfiguration(blastId);
                 break;
             case "add":
-                loggerService.logInfo(`User adding new blast`);
                 setSelectedGenericGridRow(null);
                 setBlastConfigurationDialogOpenFlag(true);
                 break;
@@ -162,9 +162,8 @@ export const BlastsApp = () =>
 
     useEffect(() =>
     {
-        clientService.loadClients().then(() => loggerService.logInfo("Clients loaded"));
+        clientService.loadClients().then(() => loggerService.logInfo("Clients loaded."));
         blastService.loadBlasts(ownerId).then(() => setBlasts(blastService.getBlasts()));
-
     }, []);
 
     return (
@@ -172,7 +171,7 @@ export const BlastsApp = () =>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
                 <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
             </div>
-            <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService} blastService={blastService}/>
+            <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
             <BlastPlayDialogComponent onCloseHandler={onPlayCloseHandler}/>
         </div>);
 }

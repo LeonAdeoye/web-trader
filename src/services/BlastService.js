@@ -32,9 +32,9 @@ export class BlastService
             .catch(err => this.#loggerService.logError(err));
     }
 
-    async addNewBlastConfiguration(ownerId, newBlastConfiguration)
+    async addNewBlastConfiguration(newBlastConfiguration)
     {
-        this.#loggerService.logInfo(`Saving blast configuration: ${newBlastConfiguration} for owner: ${ownerId}.`);
+        this.#loggerService.logInfo(`Saving blast configuration: ${JSON.stringify(newBlastConfiguration)}.`);
         return await fetch("http://localhost:20009/blast", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -43,7 +43,7 @@ export class BlastService
             .then((blastResponse) =>
             {
                 this.#blasts.push(blastResponse);
-                this.#loggerService.logInfo(`Successfully saved blast configuration: ${blastResponse}for owner: ${ownerId}.`);
+                this.#loggerService.logInfo(`Successfully saved blast configuration: ${JSON.stringify(blastResponse)}.`);
                 return blastResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -72,10 +72,10 @@ export class BlastService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    async updateBlastConfiguration(ownerId, updatedBlastConfiguration)
+    async updateBlastConfiguration(updatedBlastConfiguration)
     {
-        this.#loggerService.logInfo(`Updating blast configuration: ${updatedBlastConfiguration} for owner: ${ownerId}`);
-        return await fetch(`http://localhost:20009/blast?ownerId=${ownerId}`, {
+        this.#loggerService.logInfo(`Updating blast configuration: ${JSON.stringify(updatedBlastConfiguration)}`);
+        return await fetch("http://localhost:20009/blast", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedBlastConfiguration)})
@@ -91,7 +91,7 @@ export class BlastService
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated blast configuration: ${updatedBlastConfiguration} for owner id: ${ownerId}`);
+                this.#loggerService.logInfo(`Successfully updated blast configuration: ${JSON.stringify(updatedBlastConfiguration)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

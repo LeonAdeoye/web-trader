@@ -5,15 +5,16 @@ import {blastConfigurationDialogDisplayState} from "../atoms/dialog-state";
 import {Autocomplete} from "@mui/material";
 import {AgGridReact} from "ag-grid-react";
 import {selectedGenericGridRowState} from "../atoms/component-state";
+import {isEmptyString, numberFormatter} from "../utilities";
 
-const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, blastService}) =>
+const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =>
 {
     const [blastConfigDialogOpenFlag, setBlastConfigDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
     const [blastName, setBlastName] = useState( '');
-    const [clientId, setClientId] = useState( '');
+    const [clientName, setClientName] = useState( '');
     const [markets, setMarkets] = useState([]);
     const [contents, setContents] = useState( [] );
-    const [, setBlastId] = useState( );
+    const [blastId, setBlastId] = useState(null);
     const [triggerTime, setTriggerTime] = useState( '' );
     const [, setGridApi] = useState(null);
     const [, setGridColumnApi] = useState(null);
@@ -21,9 +22,9 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const columnDefs = useMemo(() => ([
-        { headerName: "Market", field: "market", width: 150},
+        { headerName: "Market", field: "market", width: 140},
         { headerName: "ADV%", field: "adv" , width:90, editable: true},
-        { headerName: "Notional", field: "notional", width: 90, editable: true}
+        { headerName: "Notional", field: "notional", width: 110, editable: true, valueFormatter: numberFormatter}
     ]), []);
 
     const onGridReady = params => {
@@ -33,8 +34,21 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
 
     const handleMarketsChange = (event) =>
     {
-        const value = event.target.value;
-        setMarkets(typeof value === 'string' ? value.split(',') : value);
+        const selectedMarkets = event.target.value;
+        setMarkets(selectedMarkets);
+        setRowMarketData(previousRowMarketData =>
+        {
+            const newRows = [];
+            for(let market of selectedMarkets)
+            {
+                const row = previousRowMarketData.find(row => row.market === market);
+                if(row)
+                    newRows.push(row);
+                else
+                    newRows.push({market: market});
+            }
+            return newRows;
+        });
     }
 
     const handleCancel = () =>
@@ -47,10 +61,37 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
         setBlastName(event.target.value);
     }
 
+    const handleClientChange = (event) =>
+    {
+        setClientName(event.target.value);
+    }
+
+    const convertToFilters = (rows) =>
+    {
+        let advFilter = {};
+        let notionalValueFilter = {};
+
+        for(let row of rows)
+        {
+            if (row.market && row.adv)
+                advFilter[row.market] = row.adv;
+
+            if (row.market && row.notional)
+                notionalValueFilter[row.market] = row.notional;
+        }
+
+        return {
+            advFilter: advFilter,
+            notionalValueFilter: notionalValueFilter
+        };
+    }
+
     const handleSubmit = () =>
     {
         setBlastConfigDialogOpenFlag(false);
-        onCloseHandler(blastName, clientId, markets, contents, rowMarketData, triggerTime);
+        const {advFilter, notionalValueFilter} = convertToFilters(rowMarketData);
+        const clientId = clientService.getClients().find(client => client.clientName === clientName).clientId;
+        onCloseHandler(blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, blastId);
     }
 
     const handleContentsChange = (event) =>
@@ -67,46 +108,45 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
     const cleanUp = () =>
     {
         setBlastName('');
-        setClientId('');
+        setClientName('');
         setMarkets([]);
         setContents([]);
         setRowMarketData([]);
+        setTriggerTime('');
+        setBlastId(null);
     }
 
     useEffect(() =>
     {
-        if(markets.length > 0)
+        if(selectedGenericGridRow && blastConfigDialogOpenFlag)
         {
-            const newRows = markets.map(market => ({ market, adv: '', notional: '' }));
-            setRowMarketData([...newRows]);
-        }
-    }, [markets]);
-
-    useEffect(() =>
-    {
-        if(selectedGenericGridRow)
-        {
-            setClientId(clientService.getClients().find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
+            setClientName(clientService.getClients().find(client => client.clientId === selectedGenericGridRow.clientId).clientName);
             setContents(selectedGenericGridRow.contents);
             setBlastName(selectedGenericGridRow.blastName);
-            setTriggerTime(selectedGenericGridRow.triggerTime);
-            setBlastId(selectedGenericGridRow.blastId);
             setMarkets(selectedGenericGridRow.markets);
-            const marketRows = blastService.getBlasts().find(blast => blast.blastId === selectedGenericGridRow.blastId).markets;
-            if(marketRows.length > 0)
-            {
-                const gridRows = marketRows.map(market => ({ market, adv: selectedGenericGridRow.advFilter[market] , notional: (selectedGenericGridRow.notionalValueFilter[market]) ? String((selectedGenericGridRow.notionalValueFilter[market]/1000000)) + "m" : ""}));
-                setRowMarketData([...gridRows]);
-            }
+
+            if(selectedGenericGridRow.markets.length > 0)
+                setRowMarketData(selectedGenericGridRow.markets.map(market => ({ market, adv: selectedGenericGridRow.advFilter[market] , notional: selectedGenericGridRow.notionalValueFilter[market]})));
+
+            if(!isEmptyString(selectedGenericGridRow.triggerTime))
+                setTriggerTime(selectedGenericGridRow.triggerTime);
+
+            if(!isEmptyString(selectedGenericGridRow.blastId))
+                setBlastId(selectedGenericGridRow.blastId);
         }
         else
             cleanUp();
 
     }, [blastConfigDialogOpenFlag]);
 
-    const validValues = () =>
+    const canClear = () =>
     {
-        return (blastName !== '' && clientId !== '' && markets.length > 0 && contents.length > 0);
+        return (blastName !== '' || clientName !== '' || markets.length > 0 || contents.length > 0 || rowMarketData.length > 0 || triggerTime !== '');
+    }
+
+    const canSubmit = () =>
+    {
+        return (blastName !== '' && clientName !== '' && markets.length > 0 && contents.length > 0);
     }
 
     return (
@@ -117,7 +157,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
                     <Grid item xs={6}>
                         <TextField size='small' label='Enter the blast name' value={blastName} onChange={handleBlastNameChange} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px', width:'400px'}} required/>
                         <Autocomplete size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}
-                                      options={clientService.getClients().map(client => client.clientName)} value={clientId} onChange={(event, newValue) => setClientId(newValue)} freeSolo required />
+                                      options={clientService.getClients().map(client => client.clientName)} value={clientName} onChange={handleClientChange} freeSolo required />
                         <TextField size='small' label='Select the contents' select value={contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px' , width:'400px'}}>
                             <MenuItem value='NEWS'>News</MenuItem>
                             <MenuItem value='FLOWS'>Flows</MenuItem>
@@ -146,7 +186,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
             <DialogActions style={{height: '35px'}}>
                 <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
                     <span>
-                        <Button className="dialog-action-button" disabled={validValues()} variant='contained' onClick={handleClear}>Clear</Button>
+                        <Button className="dialog-action-button" disabled={!canClear()} variant='contained' onClick={handleClear}>Clear</Button>
                     </span>
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Cancel and close configuration dialog window.</Typography>}>
@@ -156,7 +196,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService, bla
                 </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>
                     <span>
-                        <Button className="dialog-action-button submit" color="primary" disabled={!validValues()} variant='contained' onClick={handleSubmit}>Submit</Button>
+                        <Button className="dialog-action-button submit" color="primary" disabled={!canSubmit()} variant='contained' onClick={handleSubmit}>Submit</Button>
                     </span>
                 </Tooltip>
             </DialogActions>
