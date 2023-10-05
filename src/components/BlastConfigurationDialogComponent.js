@@ -37,9 +37,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
     const handleMarketsChange = (event) =>
     {
         const selectedMarkets = event.target.value;
-
         handleInputChange('markets', selectedMarkets);
-
         setBlastConfiguration(prevState =>
         {
             const updatedRowMarketData = selectedMarkets.map(market =>
@@ -61,7 +59,6 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
     {
         const advFilter = {};
         const notionalValueFilter = {};
-
         for(let row of rows)
         {
             if(!row.market)
@@ -166,9 +163,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
                         <TextField className="blast-contents" size='small' label='Select the contents' select value={blastConfiguration.contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px'}}>
                             <MenuItem value='NEWS'>News</MenuItem>
                             <MenuItem value='FLOWS'>Flows</MenuItem>
-                            <MenuItem value='HOLDINGS'>Holdings</MenuItem>
                             <MenuItem value='IOIs'>IOIs</MenuItem>
-                            <MenuItem value='BLOCKS'>Blocks</MenuItem>
                         </TextField>
                         <TextField className="blast-trigger-time" size='small' id="time" label="Schedule Run Time" type="time" value={blastConfiguration.triggerTime} style={{marginTop: '5px', marginBottom: '5px', width: '400px'}}
                                    InputLabelProps={{ shrink: true }} inputProps={{ step: 300 }} onChange={(e) => handleInputChange('triggerTime', e.target.value)}/>

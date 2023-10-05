@@ -6,7 +6,6 @@
     height: 20px;
   }
 
-
   & .blast-name,
   & .blast-client,
   & .blast-contents,
@@ -14,3 +13,11 @@
     width: 400px !Important;
   }
 }
+
+.grid-title {
+  text-align: center;
+  background-color: #404040;
+  color: white;
+  font-size: 15px;
+}
+
