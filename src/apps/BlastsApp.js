@@ -162,9 +162,16 @@ export const BlastsApp = () =>
 
     useEffect(() =>
     {
-        clientService.loadClients().then(() => loggerService.logInfo("Clients loaded."));
-        blastService.loadBlasts(ownerId).then(() => setBlasts(blastService.getBlasts()));
+        const loadData = async () =>
+        {
+            await clientService.loadClients();
+            const blastsData = await blastService.loadBlasts(ownerId);
+            setBlasts(blastsData);
+        };
+
+        loadData();
     }, []);
+
 
     return (
         <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
