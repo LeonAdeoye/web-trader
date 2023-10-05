@@ -1,0 +1,16 @@
+.blast-dialog {
+  & .dialog-title {
+    font-size: 15px;
+    background-color: #404040;
+    color: white;
+    height: 20px;
+  }
+
+
+  & .blast-name,
+  & .blast-client,
+  & .blast-contents,
+  & .blast-markets {
+    width: 400px !Important;
+  }
+}

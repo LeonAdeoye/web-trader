@@ -34,15 +34,13 @@ const BlastPlayDialogComponent = ({ onCloseHandler }) =>
         return () => document.removeEventListener('click', clickHandler);
     }, []);
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => [
         { headerName: 'Name', field: 'name', colId: 'name' },
         { headerName: 'Age', field: 'age', colId: 'age' },
-    ];
+    ], []);
 
     const rowData = [
-        { name: 'John', age: 25 },
-        { name: 'Mike', age: 30 },
-        { name: 'Sara', age: 35 },
+
     ];
 
     const handleCancel = () => {
@@ -50,7 +48,7 @@ const BlastPlayDialogComponent = ({ onCloseHandler }) =>
     }
 
     return(
-        <Dialog aria-labelledby='dialog-title' open={Boolean(blastPlayDialogOpenFlag)} onClose={handleCancel}>
+        <Dialog aria-labelledby='dialog-title' open={blastPlayDialogOpenFlag} onClose={handleCancel}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Blast</DialogTitle>
             <DialogContent>
                 <div className="ag-theme-alpine" style={{ height: 400, width: 600 }}>

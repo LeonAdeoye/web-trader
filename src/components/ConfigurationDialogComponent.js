@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, Typography } from '@mui/material';
 import '../styles/css/main.css';
 import {configDialogDisplayState} from "../atoms/dialog-state";
@@ -15,32 +15,32 @@ const ConfigurationDialogComponent = ({ onCloseHandler }) =>
     const [value, setValue] = useState(  '' );
     const [id, setId] = useState(  '' );
 
-    const handleOwnerChange = (event) =>
+    const handleOwnerChange = useCallback((event) =>
     {
         setOwner(event.target.value);
-    };
+    }, []);
 
-    const handleKeyChange = (event) =>
+    const handleKeyChange = useCallback((event) =>
     {
         setKey(event.target.value);
-    };
+    }, []);
 
-    const handleValueChange = (event) =>
+    const handleValueChange = useCallback((event) =>
     {
         setValue(event.target.value);
-    };
+    }, []);
 
-    const handleSubmit = () =>
+    const handleSubmit = useCallback(() =>
     {
         onCloseHandler(owner, key, value, id);
         setConfigDialogOpenFlag(false);
-    };
+    }, []);
 
-    const handleCancel = () =>
+    const handleCancel = useCallback(() =>
     {
         cleanUp();
         setConfigDialogOpenFlag(false);
-    };
+    }, []);
 
     const cleanUp = () =>
     {
@@ -65,7 +65,7 @@ const ConfigurationDialogComponent = ({ onCloseHandler }) =>
     }, [configDialogOpenFlag])
 
     return (
-        <Dialog aria-labelledby='dialog-title' open={Boolean(configDialogOpenFlag)} onClose={handleCancel}>
+        <Dialog aria-labelledby='dialog-title' open={configDialogOpenFlag} onClose={handleCancel}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow !== undefined ? "Update Existing Configuration" : "Add New Configuration"}</DialogTitle>
             <DialogContent>
                 <TextField size='small' label='Enter the configuration owner' value={owner} onChange={handleOwnerChange} disabled={selectedGenericGridRow !== undefined} fullWidth margin='normal' style={{marginTop: '10px', marginBottom: '0px'}} required/>
