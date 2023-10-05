@@ -1503,4 +1503,72 @@ export const clients = [
     {clientName: "JP Morgan", clientId: 4},
     {clientName: "Morgan Stanley", clientId: 5},
     {clientName: "Citibank", clientId: 6}];
+export const flows = [
+    {
+        client: 'Client 1',
+        qty: '10000',
+        notional: '100000',
+        side: 'Buy',
+        symbol: 'AAPL',
+        stockDescription: 'Apple Inc'
+    },
+    {
+        client: 'Client 2',
+        qty: '200',
+        notional: '200000',
+        side: 'Sell',
+        symbol: 'MSFT',
+        stockDescription: 'Microsoft Corporation'
+    },
+    {
+        client: 'Client 3',
+        qty: '30000',
+        notional: '30000000',
+        side: 'Buy',
+        symbol: 'AMZN',
+        stockDescription: 'Amazon.com, Inc.'
+    }
+];
+export const news = [
+    {
+        symbol: 'AAPL',
+        source: 'Bloomberg',
+        description: "Apple's iPhone 13 proves a hit with consumers",
+        link: 'https://www.bloomberg.com/news/articles/2021-10-14/apple-s-iphone-13-proves-a-hit-with-consumers-analysts-say',
+        date: new Date().toLocaleDateString()
+    },
+    {
+        symbol: 'MSFT',
+        source: 'CNBC',
+        description: 'Microsoft shares rise after earnings beat expectations',
+        link: 'https://www.cnbc.com/2021/10/14/microsoft-msft-earnings-q1-2022.html',
+        date: new Date().toLocaleDateString()
+    }
+];
+export const iois = [
+    {
+        client: 'Client 1',
+        qty: '10000',
+        notional: '100000',
+        side: 'Buy',
+        symbol: 'AAPL',
+        stockDescription: 'Apple Inc'
+    },
+    {
+        client: 'Client 2',
+        qty: '200',
+        notional: '200000',
+        side: 'Sell',
+        symbol: 'MSFT',
+        stockDescription: 'Microsoft Corporation'
+    },
+    {
+        client: 'Client 3',
+        qty: '30000',
+        notional: '30000000',
+        side: 'Buy',
+        symbol: 'AMZN',
+        stockDescription: 'Amazon.com, Inc.'
+    }
+];
 

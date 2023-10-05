@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, clipboard } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 const settings = require("electron-settings");
@@ -85,6 +85,9 @@ const handleOpenAppMessage = (event, {url, title}) =>
     childWindow.webContents.openDevTools(); // TODO: Remove this line in production
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowTitleMap.set(childWindow.getTitle(), childWindow);
+
+
+    clipboard.writeText('Leon Adeoye');
 
     childWindow.on('close', () =>
     {
@@ -213,35 +216,41 @@ const removeWindowFromChannel = (windowTitle) =>
 
 const handleMessageFromRenderer = (_, fdc3Message, destination, source) =>
 {
-    console.log("Received message from child window: " + source + " with context: " + JSON.stringify(fdc3Message) + " to be sent to destination child window(s): " + (destination ? destination : "NOT SET"));
-    if(fdc3Message.type === "fdc3.context")
+    console.log("Received message from child window: " + source + " with context: " + JSON.stringify(fdc3Message) + (destination ? ` to be sent to destination child window(s): ${destination}` : ""));
+    switch (fdc3Message.type)
     {
-        const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
-        channelsWindowMap.forEach((value, key) =>
-        {
-            if(value.includes(sourceChildWindowTitle))
+        case "fdc3.instrument":
+            const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
+            channelsWindowMap.forEach((value, key) =>
             {
-                const sourceIndexToExclude = value.indexOf(sourceChildWindowTitle);
-                value.filter((element, index) => index !== sourceIndexToExclude).forEach((destinationWindowTitle) =>
+                if(value.includes(sourceChildWindowTitle))
                 {
-                    const destinationChildWindow = childWindowTitleMap.get(destinationWindowTitle);
-                    destinationChildWindow.webContents.send("message-to-renderer-from-main", fdc3Message, key + " channel", sourceChildWindowTitle);
-                    console.log("Message sent to child window: " + destinationChildWindow.getTitle() + " with context: " + JSON.stringify(fdc3Message));
-                });
-            }
-        });
-    }
-    else if(fdc3Message.type === "fdc3.chart")
-    {
-        const regex = new RegExp(destination + "( \\(\\d+\\))?");
-        childWindowTitleMap.forEach((childWindow) =>
-        {
-            if(regex.test(childWindow.getTitle()))
+                    const sourceIndexToExclude = value.indexOf(sourceChildWindowTitle);
+                    value.filter((element, index) => index !== sourceIndexToExclude).forEach((destinationWindowTitle) =>
+                    {
+                        const destinationChildWindow = childWindowTitleMap.get(destinationWindowTitle);
+                        destinationChildWindow.webContents.send("message-to-renderer-from-main", fdc3Message, key + " channel", sourceChildWindowTitle);
+                        console.log("Message sent to child window: " + destinationChildWindow.getTitle() + " with context: " + JSON.stringify(fdc3Message));
+                    });
+                }
+            });
+            break;
+        case "fdc3.chart":
+            const regex = new RegExp(destination + "( \\(\\d+\\))?");
+            childWindowTitleMap.forEach((childWindow) =>
             {
-                childWindow.webContents.send("message-to-renderer-from-main", fdc3Message, destination, source);
-                console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Message));
-            }
-        });
+                if(regex.test(childWindow.getTitle()))
+                {
+                    childWindow.webContents.send("message-to-renderer-from-main", fdc3Message, destination, source);
+                    console.log("Message sent to child window: " + childWindow.getTitle() + " with context: " + JSON.stringify(fdc3Message));
+                }
+            });
+            break;
+        case "fdc3.clipboard":
+            clipboard.writeText(fdc3Message.payload);
+            break;
+        default:
+            console.log("Message type not supported: " + fdc3Message.type);
     }
 }
 

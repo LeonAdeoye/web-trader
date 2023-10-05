@@ -1,5 +1,5 @@
 import {LoggerService} from "./LoggerService";
-import {tasks, tradeHistory, holdings, crosses, baskets, clients} from "./MockData";
+import {tasks, tradeHistory, holdings, crosses, baskets, clients, iois, flows, news} from "./MockData";
 
 export class DataService
 {
@@ -10,6 +10,9 @@ export class DataService
     static BASKETS = "baskets";
     static CLIENTS = "clients";
     static INTERESTS = "interests";
+    static FLOWS = "flows";
+    static IOIs = "IOIs";
+    static NEWS = "news";
 
     #loggerService;
 
@@ -145,6 +148,12 @@ export class DataService
                 return baskets;
             case DataService.CLIENTS:
                 return clients;
+            case DataService.IOIs:
+                return iois;
+            case DataService.FLOWS:
+                return flows;
+            case DataService.NEWS:
+                return news;
             default:
                 return [];
         }

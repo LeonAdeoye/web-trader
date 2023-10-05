@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('command', {
     setChannel: (windowTitle, channel) => ipcRenderer.send('open-channels', windowTitle, channel),
     openTools: () => ipcRenderer.send('open-tools'),
     getWindowId: (windowTitle) => ipcRenderer.sendSync('get-window-id', windowTitle)
+
 });
 
 contextBridge.exposeInMainWorld('messenger', {

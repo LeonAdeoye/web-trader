@@ -45,6 +45,14 @@ export class FDC3Service
         };
     }
 
+    static createBlastContextShare = (blastData) =>
+    {
+        return {
+            type: "fdc3.clipboard",
+            payload: blastData
+        };
+    }
+
     static createContextShare = (symbol, client) =>
     {
         let fdc3Context = {
