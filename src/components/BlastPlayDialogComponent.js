@@ -164,9 +164,9 @@ const BlastPlayDialogComponent = () =>
                         domLayout='autoHeight'
                         columnDefs={columnDefs}
                         rowData={dataService.getData(DataService.FLOWS)}
-                        onGridReady={params => {
-                            flowsGridApiRef.current = params.api;
-                            params.api.deselectAll();
+                        onGridReady={({ api }) => {
+                            flowsGridApiRef.current = api;
+                            api.deselectAll();
                         }}
                         rowSelection={'multiple'}
                         onSelectionChanged={handleRowSelectionChange}
@@ -179,9 +179,9 @@ const BlastPlayDialogComponent = () =>
                         domLayout='autoHeight'
                         columnDefs={newsColumnDefs}
                         rowData={dataService.getData(DataService.NEWS)}
-                        onGridReady={params => {
-                            newsGridApiRef.current = params.api;
-                            params.api.deselectAll();
+                        onGridReady={({ api }) => {
+                            newsGridApiRef.current = api;
+                            api.deselectAll();
                         }}
                         rowSelection={'multiple'}
                         onSelectionChanged={handleRowSelectionChange}
@@ -194,9 +194,9 @@ const BlastPlayDialogComponent = () =>
                         domLayout='autoHeight'
                         columnDefs={columnDefs}
                         rowData={dataService.getData(DataService.IOIs)}
-                        onGridReady={params => {
-                            ioisGridApiRef.current = params.api;
-                            params.api.deselectAll();
+                        onGridReady={({ api }) => {
+                            ioisGridApiRef.current = api;
+                            api.deselectAll();
                         }}
                         rowSelection={'multiple'}
                         onSelectionChanged={handleRowSelectionChange}
@@ -205,12 +205,12 @@ const BlastPlayDialogComponent = () =>
                 </div>}
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
-                <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
+                <Tooltip title={<Typography fontSize={12}>Copy selected rows to clipboard then close.</Typography>}>
                     <span>
                         <Button className="dialog-action-button" variant='contained' disabled={!isRowSelected} onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
                     </span>
                 </Tooltip>
-                <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>
+                <Tooltip title={<Typography fontSize={12}>Cancel and close.</Typography>}>
                     <span>
                         <Button className="dialog-action-button submit" color="primary" variant='contained' onClick={() => setBlastPlayDialogOpenFlag(false)}>Cancel</Button>
                     </span>
