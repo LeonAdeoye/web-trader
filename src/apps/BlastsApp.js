@@ -117,20 +117,6 @@ export const BlastsApp = () =>
         }
     }
 
-    const cloneBlastConfiguration = async (blastId) =>
-    {
-        try
-        {
-            loggerService.logInfo(`Cloning existing blast configuration with blastId: ${blastId}`);
-            blastService.addNewBlastConfiguration(ownerId)
-                .then((id) => setBlasts([...blasts, {...selectedGenericGridRow, blastId: id}]));
-        }
-        catch (error)
-        {
-            loggerService.logError(error);
-        }
-    }
-
     const handleAction = async (action, blastId) =>
     {
         switch(action)
@@ -147,9 +133,9 @@ export const BlastsApp = () =>
                 await deleteBlastConfiguration(ownerId, blastId);
                 break;
             case "clone":
-                setSelectedGenericGridRow(blasts.find(blast => blast.blastId === blastId));
+                let blast = blasts.find(blast => blast.blastId === blastId);
+                setSelectedGenericGridRow({...blast, blastId: null});
                 setBlastConfigurationDialogOpenFlag(true);
-                await cloneBlastConfiguration(blastId);
                 break;
             case "add":
                 setSelectedGenericGridRow(null);

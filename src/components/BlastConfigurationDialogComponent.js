@@ -142,9 +142,20 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
 
     }, [blastConfigDialogOpenFlag]);
 
+    const getTitle = () =>
+    {
+        if(!selectedGenericGridRow)
+            return "Add New Blast Configuration";
+
+        if(selectedGenericGridRow && selectedGenericGridRow.blastId)
+            return "Update Existing Blast Configuration";
+
+        return "Clone Blast Configuration";
+    }
+
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={blastConfigDialogOpenFlag} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
-            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{selectedGenericGridRow ? "Update Existing Blast Configuration" : "Add New Blast Configuration"}</DialogTitle>
+            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>
