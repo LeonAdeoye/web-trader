@@ -65,8 +65,8 @@ export const BlastsApp = () =>
                 return;
 
             loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfigurationToSave)}`);
-            blastService.addNewBlastConfiguration(ownerId, blastConfigurationToSave)
-                .then((id) => setBlasts([...blasts, {...blastConfigurationToSave}]));
+            blastService.addNewBlastConfiguration(blastConfigurationToSave)
+                .then((newBlast) => setBlasts([...blasts, newBlast]));
         }
         catch (error)
         {
@@ -88,7 +88,7 @@ export const BlastsApp = () =>
                 {
                     const index = previousBlasts.findIndex(currentBlast => currentBlast.blastId === blastConfigurationToUpdate.blastId);
                     previousBlasts[index] = blastConfigurationToUpdate;
-                    setSelectedGenericGridRow(previousBlasts[index]);
+                    setSelectedGenericGridRow(blastConfigurationToUpdate);
                     return [...previousBlasts];
                 }));
         }
