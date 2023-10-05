@@ -165,8 +165,8 @@ export const BlastsApp = () =>
         const loadData = async () =>
         {
             await clientService.loadClients();
-            const blastsData = await blastService.loadBlasts(ownerId);
-            setBlasts(blastsData);
+            await blastService.loadBlasts(ownerId);
+            setBlasts(blastService.getBlasts());
         };
 
         loadData();
