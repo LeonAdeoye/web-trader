@@ -7,17 +7,17 @@ export class LoggerService
         this.#logger = logger;
     }
 
-    logInfo(message)
+    logInfo = (message) =>
     {
         this.#logMessage(message, "INFO");
     }
 
-    logError(message)
+    logError = (message) =>
     {
         this.#logMessage(message, "ERROR");
     }
 
-    #logMessage(message, logLevel)
+    #logMessage = (message, logLevel) =>
     {
         fetch(`http://localhost:20002/log`, {
                 method: "POST",

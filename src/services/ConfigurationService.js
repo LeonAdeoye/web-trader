@@ -12,7 +12,7 @@ export class ConfigurationService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    async loadConfigurations(owner)
+    loadConfigurations = async (owner) =>
     {
         if(isEmptyString(owner))
             return;
@@ -29,14 +29,14 @@ export class ConfigurationService
             .catch(err => this.#loggerService.logError(err));
     }
 
-    reloadConfigurations()
+    reloadConfigurations = () =>
     {
         this.clear();
         this.loadConfigurations()
             .then(() => this.#loggerService.logInfo(`Reloaded configurations`));
     }
 
-    getConfigsBelongingToOwner(owner)
+    getConfigsBelongingToOwner = (owner) =>
     {
         if(this.#configurations.has(owner))
             return this.#configurations.get(owner);
@@ -44,7 +44,7 @@ export class ConfigurationService
             return [];
     }
 
-    getCachedConfigs()
+    getCachedConfigs = () =>
     {
         const configs = [];
 
@@ -54,7 +54,7 @@ export class ConfigurationService
         return configs;
     }
 
-    getConfigValue(owner, key)
+    getConfigValue = (owner, key) =>
     {
         if(this.#configurations.has(owner))
         {
@@ -66,7 +66,7 @@ export class ConfigurationService
         return null;
     }
 
-    async addNewConfiguration(owner, key, value)
+    addNewConfiguration = async (owner, key, value) =>
     {
         const newConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
         this.#loggerService.logInfo(`Saving configuration for owner: ${owner} and key: ${key} with value: ${value}`);
@@ -89,12 +89,12 @@ export class ConfigurationService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    clear()
+    clear = () =>
     {
         this.#configurations.clear();
     }
 
-    async deleteConfiguration(id)
+    deleteConfiguration = async (id) =>
     {
         fetch(`http://localhost:20001/configuration?id=${id}`, {method: "DELETE"})
             .then(() =>
@@ -115,17 +115,12 @@ export class ConfigurationService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    async uploadConfigurations(newConfigs)
+    uploadConfigurations = async (newConfigs) =>
     {
 
     }
 
-    parseCSVData(csvData)
-    {
-
-    }
-
-    async updateConfiguration(id, owner, key, value)
+    updateConfiguration = async (id, owner, key, value) =>
     {
         const updatedConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
         this.#loggerService.logInfo(`Updating configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value}`);

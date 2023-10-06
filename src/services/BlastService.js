@@ -12,7 +12,7 @@ export class BlastService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    async loadBlasts(ownerId)
+    loadBlasts = async (ownerId) =>
     {
         if(isEmptyString(ownerId))
             return;
@@ -32,7 +32,7 @@ export class BlastService
             .catch(err => this.#loggerService.logError(err));
     }
 
-    async addNewBlastConfiguration(newBlastConfiguration)
+    addNewBlastConfiguration = async (newBlastConfiguration) =>
     {
         this.#loggerService.logInfo(`Saving blast configuration: ${JSON.stringify(newBlastConfiguration)}.`);
         return await fetch("http://localhost:20009/blast", {
@@ -49,12 +49,12 @@ export class BlastService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    clear()
+    clear = () =>
     {
         this.#blasts.clear();
     }
 
-    async deleteBlastConfiguration(ownerId, blastId)
+    deleteBlastConfiguration = async (ownerId, blastId) =>
     {
         fetch(`http://localhost:20009/blast?ownerId=${ownerId}&blastId=${blastId}`, {method: "DELETE"})
             .then(() =>
@@ -72,7 +72,7 @@ export class BlastService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    async updateBlastConfiguration(updatedBlastConfiguration)
+    updateBlastConfiguration = async (updatedBlastConfiguration) =>
     {
         this.#loggerService.logInfo(`Updating blast configuration: ${JSON.stringify(updatedBlastConfiguration)}`);
         return await fetch("http://localhost:20009/blast", {
@@ -96,7 +96,7 @@ export class BlastService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    getBlasts()
+    getBlasts = () =>
     {
         return this.#blasts;
     }

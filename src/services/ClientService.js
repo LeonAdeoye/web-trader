@@ -11,8 +11,11 @@ export class ClientService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    async loadClients()
+    loadClients = async () =>
     {
+        if(this.#clients.length !== 0)
+            return;
+
         await fetch(`http://localhost:20009/client`)
             .then(response => response.json())
             .then(data =>
@@ -20,7 +23,7 @@ export class ClientService
                 if(data.length > 0)
                 {
                     this.#clients = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} clients.`);
+                    this.#loggerService.logInfo(`Loaded ${data.length} clients: ${JSON.stringify(this.#clients)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero clients.`);
@@ -28,7 +31,7 @@ export class ClientService
             .catch(err => this.#loggerService.logError(err));
     }
 
-    async addNewClient(newClient)
+    addNewClient = async (newClient) =>
     {
         this.#loggerService.logInfo(`Saving new client: ${newClient}.`);
         return await fetch("http://localhost:20009/client", {
@@ -45,12 +48,12 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    clear()
+    clear = () =>
     {
         this.#clients.clear();
     }
 
-    async deleteClient(clientId)
+    deleteClient = async (clientId) =>
     {
         fetch(`http://localhost:20009/client?clientId=${clientId}`, {method: "DELETE"})
             .then(() =>
@@ -68,7 +71,7 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    async updateClient(clientToUpdate)
+    updateClient = async (clientToUpdate) =>
     {
         this.#loggerService.logInfo(`Updating client: ${clientToUpdate}.`);
         return await fetch(`http://localhost:20009/client`, {
@@ -92,7 +95,7 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    getClients()
+    getClients = () =>
     {
         return this.#clients;
     }

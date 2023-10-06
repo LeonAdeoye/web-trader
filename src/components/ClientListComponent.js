@@ -5,15 +5,16 @@ import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {DataService} from "../services/DataService";
 import {selectedClientState} from "../atoms/component-state";
+import {ClientService} from "../services/ClientService";
 
 export const ClientListComponent = () =>
 {
     const [, setSelectedClient] = useRecoilState(selectedClientState);
-    const dataService = useRef(new DataService()).current;
+    const clientService = useRef(new ClientService()).current;
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [clients, setClients] = useState([]);
 
     const columnDefs = useMemo(() => ([
         {
@@ -30,9 +31,9 @@ export const ClientListComponent = () =>
         }
     ]), []);
 
-    const onGridReady = (params) =>
+    const onGridReady = ({api}) =>
     {
-        setGridApi(params.api);
+        setGridApi(api);
     };
 
     const onFilterChanged = () =>
@@ -41,14 +42,14 @@ export const ClientListComponent = () =>
             gridApi.setQuickFilter(searchTerm);
     };
 
-    const handleRowClick = (event) =>
+    const handleRowClick = ({data}) =>
     {
-        setSelectedClient(event.data.client);
+        setSelectedClient(data.client);
     };
 
-    const handleSearchChange = (event) =>
+    const handleSearchChange = ({target}) =>
     {
-        setSearchTerm(event.target.value);
+        setSearchTerm(target.value);
     }
 
     useEffect(() =>
@@ -61,6 +62,11 @@ export const ClientListComponent = () =>
                 gridApi.setQuickFilter(null);
         }
     }, [searchTerm, gridApi]);
+
+    useEffect(() =>
+    {
+        clientService.loadClients().then(() => setClients(clientService.getClients()));
+    }, []);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
@@ -79,7 +85,7 @@ export const ClientListComponent = () =>
                 <AgGridReact
                     columnDefs={columnDefs}
                     onGridReady={onGridReady}
-                    rowData={dataService.getData(DataService.CLIENTS)}
+                    rowData={clients}
                     onRowClicked={handleRowClick}
                     onFirstDataRendered={onFilterChanged}
                     enableCellChangeFlash={true}

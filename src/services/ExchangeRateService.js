@@ -11,7 +11,7 @@ export class ExchangeRateService
         this.#exchangeRates = {}
     }
 
-    async loadExchangeRates()
+    loadExchangeRates = async () =>
     {
         await fetch('https://openexchangerates.org/api/latest.json?app_id=62fe3c007da5482c8568c27cce515fbf')
             .then(response => response.json())
@@ -25,14 +25,14 @@ export class ExchangeRateService
     }
 
     // Function to get the exchange rate for a given currency
-    getExchangeRate(currencyCode)
+    getExchangeRate = (currencyCode) =>
     {
         const rate = this.exchangeRates[currencyCode.toUpperCase()];
         return rate !== undefined ? rate : 1.0;
     }
 
     // Function to convert an amount from one currency to another
-    convert(amount, fromCurrency, toCurrency)
+    convert = (amount, fromCurrency, toCurrency) =>
     {
         const fromRate = this.getExchangeRate(fromCurrency);
         const toRate = this.getExchangeRate(toCurrency);

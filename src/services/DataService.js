@@ -21,7 +21,7 @@ export class DataService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    #filterTradeHistory(tradeHistory, stockCode, client, filterDays)
+    #filterTradeHistory = (tradeHistory, stockCode, client, filterDays) =>
     {
         const filterDate = new Date();
         filterDate.setDate(filterDate.getDate() - filterDays);
@@ -55,7 +55,7 @@ export class DataService
         }
     }
 
-    #filterHoldings(holdings, stockCode, client)
+    #filterHoldings = (holdings, stockCode, client) =>
     {
         if(stockCode)
         {
@@ -84,7 +84,7 @@ export class DataService
         }
     }
 
-    #filterCrosses(crosses, stockCode, client)
+    #filterCrosses = (crosses, stockCode, client) =>
     {
         let result = [];
         if(stockCode)
@@ -113,7 +113,7 @@ export class DataService
         return result;
     }
 
-    #filterTasks(tasks, stockCode, client)
+    #filterTasks = (tasks, stockCode, client) =>
     {
         if(stockCode)
         {
@@ -132,7 +132,7 @@ export class DataService
             return tasks;
     }
 
-    getData(dataType, stock, client, days)
+    getData = (dataType, stock, client, days) =>
     {
         switch (dataType)
         {
@@ -159,7 +159,7 @@ export class DataService
         }
     }
 
-    async get(url)
+    get = async (url) =>
     {
         try
         {
