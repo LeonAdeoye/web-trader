@@ -33,7 +33,7 @@ export class ClientInterestService
 
     addNewClientInterest = async (newClientInterest) =>
     {
-        this.#loggerService.logInfo(`Saving new client interest: ${newClientInterest}.`);
+        this.#loggerService.logInfo(`Saving new client interest: ${JSON.stringify(newClientInterest)}.`);
         return await fetch("http://localhost:20009/interest", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -72,7 +72,7 @@ export class ClientInterestService
 
     updateClientInterest = async (clientInterestToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating clientInterest: ${clientInterestToUpdate}.`);
+        this.#loggerService.logInfo(`Updating clientInterest: ${JSON.stringify(clientInterestToUpdate)}.`);
         return await fetch(`http://localhost:20009/interest`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -89,7 +89,7 @@ export class ClientInterestService
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated clientInterest: ${clientInterestResponse}.`);
+                this.#loggerService.logInfo(`Successfully updated client interest: ${JSON.stringify(clientInterestResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }
