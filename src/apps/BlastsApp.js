@@ -123,7 +123,6 @@ export const BlastsApp = () =>
         {
             case "play":
                 setBlastPlayDialogOpenFlag(true);
-                loggerService.logInfo(`User opened blast template for blastId: ${blastId}`);
                 break;
             case "update":
                 setSelectedGenericGridRow(blasts.find(blast => blast.blastId === blastId));

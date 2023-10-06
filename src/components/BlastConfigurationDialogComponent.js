@@ -144,7 +144,7 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
         if(!selectedGenericGridRow)
             return "Add New Blast Configuration";
 
-        if(selectedGenericGridRow && selectedGenericGridRow.blastId)
+        if(selectedGenericGridRow?.blastId)
             return "Update Existing Blast Configuration";
 
         return "Clone Blast Configuration";

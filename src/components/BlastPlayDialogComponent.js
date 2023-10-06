@@ -18,6 +18,9 @@ const BlastPlayDialogComponent = () =>
     const ioisGridApiRef = useRef(null);
     const [isRowSelected, setIsRowSelected] = useState(false);
 
+    const unwantedHeaders = ['Qty', 'Notional', 'From Client'];
+    const unwantedFields = ['qty', 'notional', 'client'];
+
     const columnDefs = useMemo(() =>
     [
         { headerCheckboxSelection: true, checkboxSelection: true, width: 25},
@@ -45,15 +48,16 @@ const BlastPlayDialogComponent = () =>
             return;
 
         const selectedData = gridApi.current.getSelectedNodes().map(node => node.data);
+
         const headers = columnDefs
             .map(colDef => colDef.headerName)
-            .filter(header => header !== 'Qty' && header !== 'Notional' && header !== 'From Client')
+            .filter(header => !unwantedHeaders.includes(header))
             .join('\t');
 
         const rows = selectedData.map(data =>
         {
             return columnDefs
-                .filter(colDef => colDef.field !== 'qty' && colDef.field !== 'notional' && colDef.field !== 'client')
+                .filter(colDef => !unwantedFields.includes(colDef.field))
                 .map(colDef => data[colDef.field])
                 .join('\t');
         });
@@ -99,12 +103,13 @@ const BlastPlayDialogComponent = () =>
         handleCancel();
     }
 
+    // This is a workaround because getSelectedNodes() does not work as expected.
     const isAnyRowSelected = (gridApiRef) =>
     {
         let result = false;
         try
         {
-            result = gridApiRef && gridApiRef.current && gridApiRef.current.getSelectedNodes() && gridApiRef.current.getSelectedNodes().length > 0;
+            result = gridApiRef?.current?.getSelectedNodes()?.length > 0 || false;
         }
         catch (e)
         {
@@ -127,7 +132,7 @@ const BlastPlayDialogComponent = () =>
 
     const calculateDialogHeight = useCallback(() =>
     {
-        if(selectedGenericGridRow && selectedGenericGridRow.contents.length > 0)
+        if(selectedGenericGridRow?.contents.length > 0)
         {
             switch (selectedGenericGridRow.contents.length)
             {
@@ -152,13 +157,13 @@ const BlastPlayDialogComponent = () =>
         maxHeight: '100%',
         maxWidth: '100%',
         paddingBottom: '5px'
-};
+    };
 
     return(
         <Dialog aria-labelledby='dialog-title' open={blastPlayDialogOpenFlag} onClose={handleCancel} PaperProps={{ style: dialogStyles }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Prepare blast for clipboard copy</DialogTitle>
             <DialogContent>
-                {selectedGenericGridRow && selectedGenericGridRow.contents.includes("FLOWS") && <div className="flows ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '10px'}}>
+                {selectedGenericGridRow?.contents.includes("FLOWS") && <div className="flows ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '10px'}}>
                     <div className="grid-title">Interesting Flows</div>
                     <AgGridReact
                         domLayout='autoHeight'
@@ -173,7 +178,7 @@ const BlastPlayDialogComponent = () =>
                         rowHeight={25}
                         headerHeight={25}/>
                 </div>}
-                {selectedGenericGridRow && selectedGenericGridRow.contents.includes("NEWS") && <div className="news ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '8px'}}>
+                {selectedGenericGridRow?.contents.includes("NEWS") && <div className="news ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '8px'}}>
                     <div className="grid-title">Relevant News</div>
                     <AgGridReact
                         domLayout='autoHeight'
@@ -188,7 +193,7 @@ const BlastPlayDialogComponent = () =>
                         rowHeight={25}
                         headerHeight={25}/>
                 </div>}
-                {selectedGenericGridRow && selectedGenericGridRow.contents.includes("IOIs") && <div className="news ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '8px'}}>
+                {selectedGenericGridRow?.contents.includes("IOIs") && <div className="news ag-theme-alpine" style={{ height: '200px', width: '750px', marginTop: '8px'}}>
                     <div className="grid-title">Relevant IOIs</div>
                     <AgGridReact
                         domLayout='autoHeight'
