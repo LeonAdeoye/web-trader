@@ -14,3 +14,8 @@ export const blastConfigurationDialogDisplayState = atom({
     key: 'blastConfigurationDialogDisplayState',
     default: false
 });
+
+export const clientInterestDialogDisplayState = atom({
+    key: 'clientInterestDialogDisplayState',
+    default: false
+});
