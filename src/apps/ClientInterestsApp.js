@@ -6,18 +6,14 @@ import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
 import {Resizable} from "re-resizable";
 import React, {useEffect, useRef} from "react";
 import {useRecoilState} from "recoil";
-import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
-import {ClientService} from "../services/ClientService";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
 import {selectedClientState} from "../atoms/component-state";
 
 export const ClientInterestsApp = () =>
 {
-    const [, setClientInterestDialogOpenFlag] = useRecoilState(clientInterestDialogDisplayState)
-    const [selectedClient, setSelectedClient] = useRecoilState(selectedClientState);
-    const clientService = useRef(new ClientService()).current;
+    const [selectedClient] = useRecoilState(selectedClientState);
     const clientInterestService = useRef(new ClientInterestService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
     const instrumentService = useRef(new InstrumentService()).current;
@@ -25,8 +21,7 @@ export const ClientInterestsApp = () =>
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
-        side = side.toUpperCase();
-        await clientInterestService.addNewClientInterest({ownerId, side, stockCode, notes, selectedClient});
+        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), symbol:stockCode, notes, selectedClient});
     }
 
     useEffect( () =>
