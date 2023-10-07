@@ -74,7 +74,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
         title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
         modal: false,
         show: true,
-        frame: true,
+        frame: false,
         width: 800,
         height: 600,
         icon: path.join(__dirname, `../assets/${title}.png`),
@@ -85,9 +85,6 @@ const handleOpenAppMessage = (event, {url, title}) =>
     childWindow.webContents.openDevTools(); // TODO: Remove this line in production
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowTitleMap.set(childWindow.getTitle(), childWindow);
-
-
-    clipboard.writeText('Leon Adeoye');
 
     childWindow.on('close', () =>
     {
@@ -256,9 +253,10 @@ const handleMessageFromRenderer = (_, fdc3Message, destination, source) =>
 
 const handleSetLoggedInUserMessage = (_, userId) => loggedInUser = userId;
 const handleGetLoggedInUserMessage = () => loggedInUser;
-const handleCloseMessage = (_, windowTitle) => {};
-const handleMinimizeMessage = (_, windowTitle) => {};
-const handleMaximizeMessage = (_, windowTitle) => {};
+
+const handleCloseMessage = (_, windowId) => { childWindowIdMap.get(windowId).close(); };
+const handleMinimizeMessage = (_, windowId) => { console.log("Minimizing window: " + windowId); childWindowIdMap.get(windowId).minimize() };
+const handleMaximizeMessage = (_, windowId) => { console.log("Maximizing window: " + windowId); childWindowIdMap.get(windowId).maximize() };
 const handleOpenToolsMessage = (_, windowTitle) => {};
 const handleOpenChannelsMessage = (_, windowTitle) => {};
 
