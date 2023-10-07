@@ -21,12 +21,12 @@ export const ClientInterestsApp = () =>
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
-        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), symbol:stockCode, notes, selectedClient});
+        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), symbol:stockCode, notes, clientId:selectedClient});
     }
 
     useEffect( () =>
     {
-        instrumentService.loadInstruments();
+        instrumentService.loadInstruments().then(() => clientInterestService.loadClientInterests(ownerId));
     }, []);
 
     return (<Grid container direction="column" style={{ height: '100%', overflow: 'hidden' }}>
@@ -36,7 +36,7 @@ export const ClientInterestsApp = () =>
             </Resizable>
             <Divider orientation="vertical" style={{backgroundColor:'#404040', width: '1px'}}/>
             <Grid item style={{ flexGrow: 1, overflow: 'hidden' }}>
-                <ClientInterestsComponent loggerService={loggerService}/>
+                <ClientInterestsComponent instrumentService={instrumentService} clientInterestService={clientInterestService}/>
                 <ClientInterestDialogComponent closeHandler={closeHandler} instrumentService={instrumentService}/>
             </Grid>
         </Grid>

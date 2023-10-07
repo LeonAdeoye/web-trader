@@ -4,26 +4,33 @@ import {useEffect, useState, useMemo, useRef} from "react";
 import '../styles/css/main.css';
 import {selectedClientState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
-import {DataService} from "../services/DataService";
 import {GenericGridComponent} from "./GenericGridComponent";
 
-export const ClientInterestsComponent = ({loggerService}) =>
+export const ClientInterestsComponent = ({instrumentService, clientInterestService}) =>
 {
     const [selectedClient] = useRecoilState(selectedClientState);
-    const dataService = useRef(new DataService()).current;
     const [interests, setInterests] = useState([]);
 
     const columnDefs = useMemo(() => ([
-        {headerName: "Symbol", field: "stockCode", sortable: true, minWidth: 115, width: 115, filter: true},
-        {headerName: "Stock Desc.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
+        {headerName: "Stock Code", field: "symbol", sortable: true, minWidth: 115, width: 115, filter: true},
+        {headerName: "Stock Description.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false}
     ]), []);
 
     useEffect(() =>
     {
-        if(selectedClient)
-            setInterests(dataService.getData(DataService.INTERESTS).filter(client => client.client === selectedClient));
+        if(!selectedClient)
+            return;
+
+        const clientInterests = clientInterestService.getClientInterests().filter(client => client.clientId === selectedClient);
+        clientInterests.forEach(clientInterest =>
+        {
+            const instrument = instrumentService.getInstruments().find(instrument => instrument.stockCode === clientInterest.symbol);
+            clientInterest.stockDescription = instrument.description;
+        });
+        setInterests(clientInterests);
+
     }, [selectedClient]);
 
     return (

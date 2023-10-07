@@ -7,12 +7,10 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {selectedClientState} from "../atoms/component-state";
 import {ClientService} from "../services/ClientService";
-import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 
 export const ClientListComponent = () =>
 {
     const [, setSelectedClient] = useRecoilState(selectedClientState);
-    const [, setClientInterestDialogOpenFlag] = useRecoilState(clientInterestDialogDisplayState)
     const clientService = useRef(new ClientService()).current;
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -47,7 +45,6 @@ export const ClientListComponent = () =>
     const handleRowClick = ({data}) =>
     {
         setSelectedClient(data.clientId);
-        setClientInterestDialogOpenFlag(true);
     };
 
     const handleSearchChange = ({target}) =>
@@ -68,7 +65,8 @@ export const ClientListComponent = () =>
 
     useEffect(() =>
     {
-        clientService.loadClients().then(() => setClients(clientService.getClients()));
+        clientService.loadClients()
+            .then(() => setClients(clientService.getClients()));
     }, []);
 
     return (

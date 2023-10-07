@@ -11,12 +11,12 @@ export class ClientInterestService
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    loadClientInterests = async () =>
+    loadClientInterests = async (ownerId) =>
     {
         if(this.#clientInterests.length !== 0)
             return;
 
-        await fetch(`http://localhost:20009/interest`)
+        await fetch(`http://localhost:20009/interest?ownerId=${ownerId}`)
             .then(response => response.json())
             .then(data =>
             {
