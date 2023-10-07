@@ -21,7 +21,7 @@ export const BlastsApp = () =>
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
     const [, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
     const [, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
-    const [selectedGenericGridRow, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+    const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
     const [blasts, setBlasts] = useState([]);
     const ownerId = "leon";
 
@@ -42,11 +42,6 @@ export const BlastsApp = () =>
         {headerName: "Trigger Time", field: "triggerTime", sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
-
-    const onPlayCloseHandler = () =>
-    {
-
-    }
 
     const onCrudCloseHandler = async (blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, blastId) =>
     {
@@ -164,6 +159,6 @@ export const BlastsApp = () =>
                 <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
             </div>
             <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
-            <BlastPlayDialogComponent onCloseHandler={onPlayCloseHandler}/>
+            <BlastPlayDialogComponent/>
         </div>);
 }

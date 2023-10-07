@@ -69,6 +69,12 @@ export const ClientListComponent = () =>
             .then(() => setClients(clientService.getClients()));
     }, []);
 
+    useEffect(() =>
+    {
+        if(clients[0]?.clientId)
+            setSelectedClient(clients[0].clientId);
+    }, [clients]);
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
             <TextField
