@@ -24,7 +24,7 @@ const BlastPlayDialogComponent = () =>
     const columnDefs = useMemo(() =>
     [
         { headerCheckboxSelection: true, checkboxSelection: true, width: 25},
-        { headerName: 'Symbol', field: 'symbol', width: 100 },
+        { headerName: 'StockCode', field: 'stockCode', width: 100 },
         { headerName: 'Stock Desc.', field: 'stockDescription', width: 155},
         { headerName: 'Side', field: 'side' , width: 90},
         { headerName: 'Qty', field: 'qty' , width: 75, valueFormatter: numberFormatter, cellStyle: { backgroundColor: '#e0e0e0', color:'white'}},
@@ -35,7 +35,7 @@ const BlastPlayDialogComponent = () =>
     const newsColumnDefs = useMemo(() =>
         [
             { headerCheckboxSelection: true, checkboxSelection: true, width: 25},
-            { headerName: 'Symbol', field: 'symbol', width: 100},
+            { headerName: 'Stock code', field: 'stockCode', width: 100},
             { headerName: 'Source', field: 'source', width: 90},
             { headerName: 'Description', field: 'description', width: 390},
             { headerName: 'Date', field: 'date', width: 100},

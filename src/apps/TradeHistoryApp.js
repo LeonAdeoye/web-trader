@@ -75,7 +75,7 @@ const TradeHistoryApp = () =>
         },
         {
             headerName: 'Client',
-            field: 'client', // Replace with your data field for stock symbol
+            field: 'client', // Replace with your data field for stock code
             width: 150, // Adjust width as needed
             headerTooltip: 'Client name',
             sortable: true,
@@ -147,15 +147,15 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: 'Symbol',
-            field: 'stockCode', // Replace with your data field for stock symbol
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Stock Symbol (RIC)',
+            headerName: 'Stock Code',
+            field: 'stockCode', // Replace with your data field for stock code
+            width: 95, // Adjust width as needed
+            headerTooltip: 'Stock Code (RIC)',
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Description',
+            headerName: 'Stock Description',
             field: 'stockDescription', // Replace with your data field for stock description
             width: 140, // Adjust width as needed
             headerTooltip: 'Stock Description',

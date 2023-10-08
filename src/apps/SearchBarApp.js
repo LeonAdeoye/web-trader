@@ -10,7 +10,7 @@ export const SearchBarApp = () =>
 
     }
 
-    const handleSymbolSearchChange = () =>
+    const handleStockCodeSearchChange = () =>
     {
 
     }
@@ -18,8 +18,8 @@ export const SearchBarApp = () =>
     return (<div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
             <TextField
                 size='small' className='search-text'
-                label="Search by symbol."
-                onChange={handleSymbolSearchChange}
+                label="Search by StockCode."
+                onChange={handleStockCodeSearchChange}
                 InputProps={{ style: { fontSize: '15px' } }}
                 style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}/>
             <TextField

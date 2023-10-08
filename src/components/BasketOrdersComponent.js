@@ -16,8 +16,8 @@ export const BasketOrdersComponent = ({loggerService}) =>
     const columnDefs = useMemo(() => ([
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 120, width: 120, filter: true},
         {headerName: "State", field: "orderState", sortable: true, minWidth: 105, width: 105, filter: true, headerTooltip: 'Current state of parent order', cellStyle: params => orderStateStyling(params.value)},
-        {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "Stock Desc.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
+        {headerName: "StockCode", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "Stock Description", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},

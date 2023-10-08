@@ -26,7 +26,7 @@ export const ClientInterestsApp = () =>
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
-        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), symbol:stockCode, notes, clientId:selectedClient});
+        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), stockCode, notes, clientId:selectedClient});
     }
 
     useEffect( () =>

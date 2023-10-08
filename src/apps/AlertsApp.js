@@ -113,7 +113,7 @@ export const AlertsApp = () =>
         {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 250, filter: true},
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 100, width: 150, filter: true},
         {headerName: "Order State", field: "orderState", sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 100, width: 100, filter: true},
+        {headerName: "StockCode", field: "stockCode", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 100, width: 100, filter: true, headerTooltip: 'Original order price'},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 100, width: 120, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},

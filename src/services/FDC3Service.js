@@ -53,18 +53,18 @@ export class FDC3Service
         };
     }
 
-    static createContextShare = (symbol, client) =>
+    static createContextShare = (stockCode, client) =>
     {
         let fdc3Context = {
             type: "fdc3.context",
         };
 
-        if(symbol)
+        if(stockCode)
         {
             fdc3Context["instruments"] = [{
                 type: "fdc3.instrument",
                 id: {
-                    ticker: symbol
+                    ticker: stockCode
                 }
             }];
         }

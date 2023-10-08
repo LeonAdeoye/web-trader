@@ -32,7 +32,7 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
             filter: true,
         },
         {
-            headerName: 'Symbol',
+            headerName: 'Stock Code',
             field: 'stockCode',
             width: 100,
             sortable: true,

@@ -80,7 +80,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                             <Autocomplete
                                 className="client-interest-symbol"
                                 size='small'
-                                renderInput={(params) => <TextField {...params} label='Select the symbol' />}
+                                renderInput={(params) => <TextField {...params} label='Select the stock code' />}
                                 style={{ width: '203px', marginTop: '15px'}}
                                 value={clientInterest.stockCode}
                                 options={instrumentService.getInstruments().map(instrument => instrument.stockCode)}

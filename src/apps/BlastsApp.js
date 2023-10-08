@@ -13,6 +13,7 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {isEmptyString} from "../utilities";
 import {BlastService} from "../services/BlastService";
 import {ClientService} from "../services/ClientService";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const BlastsApp = () =>
 {
@@ -24,6 +25,7 @@ export const BlastsApp = () =>
     const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
     const [blasts, setBlasts] = useState([]);
     const ownerId = "leon";
+    const windowId = useMemo(() => window.command.getWindowId("client-blasts"), []);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Blast Id", field: "blastId", sortable: true, minWidth: 85, width: 85, filter: true, hide:true},
@@ -154,11 +156,17 @@ export const BlastsApp = () =>
 
 
     return (
-        <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
-            <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
+        <>
+            <TitleBarComponent title="Client Blasts" windowId={windowId} addButtonProps={{
+                handler:  () => setBlastConfigurationDialogOpenFlag(true),
+                tooltipText: "Add new client blast..."
+            }} showChannel={true} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'0px'}}>
+                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                    <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
+                </div>
+                <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
+                <BlastPlayDialogComponent/>
             </div>
-            <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
-            <BlastPlayDialogComponent/>
-        </div>);
+        </>);
 }

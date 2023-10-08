@@ -12,13 +12,12 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
     const handleMinimize = () => window.command.minimize(windowId);
     const handleMaximize = () => window.command.maximize(windowId);
     const handleClose = () => window.command.close(windowId);
-    const {handler, tooltipText} = addButtonProps;
 
     return(
         <div className="title-bar">
             <span className="title-bar-text">{title}</span>
             <div className="title-bar-controls">
-                {(addButtonProps !== undefined) && <Tooltip title={`${tooltipText}`}><IconButton className="title-bar-add" onClick={handler}>
+                {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
                 {showChannel && <IconButton className="title-bar-channel" onClick={handleChannel}>

@@ -1509,7 +1509,7 @@ export const flows = [
         qty: '10000',
         notional: '100000',
         side: 'Buy',
-        symbol: 'AAPL',
+        stockCode: 'AAPL',
         stockDescription: 'Apple Inc'
     },
     {
@@ -1517,7 +1517,7 @@ export const flows = [
         qty: '200',
         notional: '200000',
         side: 'Sell',
-        symbol: 'MSFT',
+        stockCode: 'MSFT',
         stockDescription: 'Microsoft Corporation'
     },
     {
@@ -1525,20 +1525,20 @@ export const flows = [
         qty: '30000',
         notional: '30000000',
         side: 'Buy',
-        symbol: 'AMZN',
+        stockCode: 'AMZN',
         stockDescription: 'Amazon.com, Inc.'
     }
 ];
 export const news = [
     {
-        symbol: 'AAPL',
+        stockCode: 'AAPL',
         source: 'Bloomberg',
         description: "Apple's iPhone 13 proves a hit with consumers",
         link: 'https://www.bloomberg.com/news/articles/2021-10-14/apple-s-iphone-13-proves-a-hit-with-consumers-analysts-say',
         date: new Date().toLocaleDateString()
     },
     {
-        symbol: 'MSFT',
+        stockCode: 'MSFT',
         source: 'CNBC',
         description: 'Microsoft shares rise after earnings beat expectations',
         link: 'https://www.cnbc.com/2021/10/14/microsoft-msft-earnings-q1-2022.html',
@@ -1551,7 +1551,7 @@ export const iois = [
         qty: '10000',
         notional: '100000',
         side: 'Buy',
-        symbol: 'AAPL',
+        stockCode: 'AAPL',
         stockDescription: 'Apple Inc'
     },
     {
@@ -1559,7 +1559,7 @@ export const iois = [
         qty: '200',
         notional: '200000',
         side: 'Sell',
-        symbol: 'MSFT',
+        stockCode: 'MSFT',
         stockDescription: 'Microsoft Corporation'
     },
     {
@@ -1567,7 +1567,7 @@ export const iois = [
         qty: '30000',
         notional: '30000000',
         side: 'Buy',
-        symbol: 'AMZN',
+        stockCode: 'AMZN',
         stockDescription: 'Amazon.com, Inc.'
     }
 ];

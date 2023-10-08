@@ -113,7 +113,7 @@ export const OrdersApp = () =>
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "Client", field: "client", sortable: true, minWidth: 160, width: 160, filter: true},
         {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 100, filter: true, cellStyle: params => orderStateStyling(params.value)},
-        {headerName: "RIC", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "Stock Code", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "Stock Desc.", field: "stockDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true, cellStyle: params => orderSideStyling(params.value)},

@@ -94,10 +94,10 @@ const HoldingsApp = () =>
             cellRenderer: SparklineRenderer
         },
         {
-            headerName: 'Symbol',
+            headerName: 'StockCode',
             field: 'stockCode',
             width: 100,
-            headerTooltip: 'Stock symbol',
+            headerTooltip: 'Stock code',
             sortable: true,
             filter: true,
         },
