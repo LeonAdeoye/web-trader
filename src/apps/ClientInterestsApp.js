@@ -51,7 +51,7 @@ export const ClientInterestsApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Client interest" windowId={windowId} addButtonProps={{
+            <TitleBarComponent title="Client Interests" windowId={windowId} addButtonProps={{
                 handler:  () => setClientInterestDialogOpen(true),
                 tooltipText: "Add new client interest..."
             }} showChannel={true} showTools={false}/>

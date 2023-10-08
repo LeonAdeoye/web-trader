@@ -44,7 +44,7 @@ const LaunchPadApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Launch Pad" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <TitleBarComponent title="Launch Pad" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={true}/>
             <div className="launch-pad">
                 <LoginDialogComponent/>
                 {apps.map((app) => (
