@@ -19,3 +19,8 @@ export const clientInterestDialogDisplayState = atom({
     key: 'clientInterestDialogDisplayState',
     default: false
 });
+
+export const alertDialogDisplayState = atom({
+    key: 'alertDialogDisplayState',
+    default: false
+});

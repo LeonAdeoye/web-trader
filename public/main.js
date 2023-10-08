@@ -65,6 +65,15 @@ const createWindow = () =>
         .then(() => console.log("Main window dimensions loaded from settings file."));
 
     mainWindow.on('close', () => saveWindowDimensions(mainWindow));
+
+    const handleGetWindowIdMessage = (event, windowTitle) =>
+    {
+        const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
+        childWindowIdMap.set(windowId, mainWindow);
+        event.returnValue = windowId;
+    }
+
+    ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
 }
 
 const handleOpenAppMessage = (event, {url, title}) =>

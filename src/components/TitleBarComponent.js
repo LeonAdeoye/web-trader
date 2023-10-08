@@ -1,6 +1,6 @@
 import React from 'react';
 import {IconButton, Tooltip} from '@mui/material';
-import { Close,  Minimize, Build, Lan} from '@mui/icons-material';
+import { Close,  Remove, Build, Lan} from '@mui/icons-material';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
@@ -27,7 +27,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                     <Build/>
                 </IconButton>}
                 <IconButton className="title-bar-minimize" onClick={handleMinimize}>
-                    <Minimize/>
+                    <Remove/>
                 </IconButton>
                 <IconButton className="title-bar-maximize" onClick={handleMaximize}>
                     <CropSquareRoundedIcon/>

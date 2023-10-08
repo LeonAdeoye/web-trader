@@ -5,6 +5,8 @@ import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
+import TitleBarComponent from "../components/TitleBarComponent";
+import {alertDialogDisplayState} from "../atoms/dialog-state";
 
 export const AlertsApp = () =>
 {
@@ -13,6 +15,7 @@ export const AlertsApp = () =>
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
+    const [alertDialogDisplayFlag, setAlertDialogDisplayFlag] = useRecoilState(alertDialogDisplayState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("alerts"), []);
@@ -77,7 +80,7 @@ export const AlertsApp = () =>
 
     useEffect(() =>
     {
-        if(selectedContextShare.length == 1)
+        if(selectedContextShare.length === 1)
         {
             if(selectedContextShare[0].contextShareKey === 'stockCode')
                 window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
@@ -122,9 +125,18 @@ export const AlertsApp = () =>
         {headerName: "Notional USD", field: "notionalValue", sortable: true, minWidth: 140, width: 140, filter: false, headerTooltip: 'Notional value in USD', valueFormatter: numberFormatter}
     ]), []);
 
-    return (<GenericGridComponent rowHeight={22}
-                                  gridTheme={"ag-theme-alpine"}
-                                  rowIdArray={["id"]}
-                                  columnDefs={columnDefs}
-                                  gridData={filterAlertsUsingContext}/>);
+    return (
+        <div>
+            <TitleBarComponent title="Alerts" windowId={windowId} addButtonProps={{
+                handler:  () => setAlertDialogDisplayFlag(true),
+                tooltipText: "Add new alert..."
+            }} showChannel={true} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'0px'}}>
+                <GenericGridComponent rowHeight={22}
+                                      gridTheme={"ag-theme-alpine"}
+                                      rowIdArray={["id"]}
+                                      columnDefs={columnDefs}
+                                      gridData={filterAlertsUsingContext}/>
+            </div>
+        </div>);
 };

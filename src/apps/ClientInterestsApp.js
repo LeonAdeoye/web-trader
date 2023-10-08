@@ -34,6 +34,21 @@ export const ClientInterestsApp = () =>
         instrumentService.loadInstruments().then(() => clientInterestService.loadClientInterests(ownerId));
     }, []);
 
+    useEffect(() =>
+    {
+        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        {
+            if(fdc3Message.type === "fdc3.context")
+            {
+                // TODO.
+/*                if(fdc3Message.clients.length > 0 && fdc3Message.clients[0].id.name)
+                    setClient(fdc3Message.clients[0].id.name);
+                else
+                    setClient(null);*/
+            }
+        });
+    }, []);
+
     return (
         <>
             <TitleBarComponent title="Client interest" windowId={windowId} addButtonProps={{

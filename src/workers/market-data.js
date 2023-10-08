@@ -5,7 +5,7 @@ const PORT = '9008';
 const TOPIC = 'market_data';
 const PUBLISH_RATE_PER_SECOND = 200;
 
-const SYMBOLS = ['0001.HK', '0002.HK', '0001.HK', '0005.HK', '8604.T', '8602.T', '0007.HK', '2800.HK', '0700.HK', '0388.HK', '2318.HK'];
+const SYMBOLS = ['0001.HK', '0002.HK', '0003.HK', '0005.HK', '8604.T', '8602.T', '0007.HK', '2800.HK', '0700.HK', '0388.HK', '2318.HK'];
 
 // The randInt function returns a random integer value between min and max arguments.
 // Math.random() returns a random number between 0 (inclusive),  and 1 (exclusive).
@@ -19,7 +19,7 @@ const timer = async interval => new Promise(resolve => setTimeout(resolve, inter
 
 // Create initial prices
 const pricing = {};
-SYMBOLS.map(symbol => pricing[symbol] = randInt(100, 1200));
+SYMBOLS.map(stockCode => pricing[stockCode] = randInt(100, 1200));
 
 // The purpose of this function is to generate a plausible update message for market data with adjusted prices.
 // It randomly selects a symbol, calculates bid and ask prices based on the last price,
@@ -31,8 +31,8 @@ const makeMessage = () =>
     // lastPrice is assigned the price associated with the randomly selected symbol from the pricing object.
     // bid is calculated as the lastPrice minus 0.5, rounded to 2 decimal places using the round function.
     // ask is calculated as the lastPrice plus 0.5, rounded to 2 decimal places using the round function.
-    const symbol = SYMBOLS[randInt(0, SYMBOLS.length - 1)];
-    let lastPrice = pricing[symbol];
+    const stockCode = SYMBOLS[randInt(0, SYMBOLS.length - 1)];
+    let lastPrice = pricing[stockCode];
     const bid = round(lastPrice - 0.5, 2);
     const ask = round(lastPrice + 0.5, 2);
 
@@ -60,9 +60,9 @@ const makeMessage = () =>
     // Finally, pricing[symbol] updates the pricing object by assigning the rounded value (1200.03) to the last price property with the key symbol ('GOOGL').
     // If the pricing object already had an entry for the 'GOOGL' symbol, it would be overwritten with the new value.
     // If it didn't have an entry, a new property would be added to the pricing object.
-    pricing[symbol] = round(lastPrice + randInt(-5, 5) / 100.0, 2);
+    pricing[stockCode] = round(lastPrice + randInt(-5, 5) / 100.0, 2);
 
-    return { symbol, bid, ask };
+    return { stockCode, bid, ask };
 };
 
 // connect to AMPS and publish the data

@@ -157,10 +157,7 @@ export const BlastsApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Client Blasts" windowId={windowId} addButtonProps={{
-                handler:  () => setBlastConfigurationDialogOpenFlag(true),
-                tooltipText: "Add new client blast..."
-            }} showChannel={true} showTools={false}/>
+            <TitleBarComponent title="Client Blasts" windowId={windowId} addButtonProps={{ handler:  () => setBlastConfigurationDialogOpenFlag(true), tooltipText: "Add new client blast..." }} showChannel={true} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'0px'}}>
                 <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
                     <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>

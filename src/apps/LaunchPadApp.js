@@ -47,7 +47,6 @@ const LaunchPadApp = () =>
             <TitleBarComponent title="Launch Pad" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div className="launch-pad">
                 <LoginDialogComponent/>
-
                 {apps.map((app) => (
                     <div key={app.title} className="launch-pad__app" onClick={() => launchApp(app.url, app.title)}>
                         <img className="launch-pad__icon" src={app.icon} alt={app.title}/>
