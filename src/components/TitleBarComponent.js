@@ -23,18 +23,24 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                 {showChannel && <IconButton className="title-bar-channel" onClick={handleChannel}>
                     <Lan/>
                 </IconButton>}
-                {showTools && <IconButton className="title-bar-tools" onClick={handleTools}>
+                {showTools && <Tooltip title={"Tools"}><IconButton className="title-bar-tools" onClick={handleTools}>
                     <Build/>
-                </IconButton>}
-                <IconButton className="title-bar-minimize" onClick={handleMinimize}>
-                    <Remove/>
-                </IconButton>
-                <IconButton className="title-bar-maximize" onClick={handleMaximize}>
-                    <CropSquareRoundedIcon/>
-                </IconButton>
-                <IconButton className="title-bar-close" onClick={handleClose}>
-                    <Close/>
-                </IconButton>
+                </IconButton></Tooltip>}
+                <Tooltip title={"Minimize window"}>
+                    <IconButton className="title-bar-minimize" onClick={handleMinimize}>
+                        <Remove/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title={"Maximize window"}>
+                    <IconButton className="title-bar-maximize" onClick={handleMaximize}>
+                        <CropSquareRoundedIcon/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title={"Maximize window"}>
+                    <IconButton className="title-bar-close" onClick={handleClose}>
+                        <Close/>
+                    </IconButton>
+                </Tooltip>
             </div>
         </div>);
 }
