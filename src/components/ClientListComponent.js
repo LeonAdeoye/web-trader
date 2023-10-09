@@ -5,12 +5,12 @@ import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {selectedClientState} from "../atoms/component-state";
-import {isEmptyString} from "../utilities";
+import {clientInterestsChangedState, selectedClientState} from "../atoms/component-state";
 
 export const ClientListComponent = ({listOfClients}) =>
 {
     const [selectedClient, setSelectedClient] = useRecoilState(selectedClientState);
+    const [clientInterestsChanged, setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -72,7 +72,6 @@ export const ClientListComponent = ({listOfClients}) =>
             });
         }
     }, [selectedClient]);
-
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>

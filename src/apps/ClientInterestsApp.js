@@ -34,7 +34,6 @@ export const ClientInterestsApp = () =>
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
-        setClientInterestsChanged(false);
         await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), stockCode, notes, clientId:selectedClient});
         setClientInterestsChanged(true);
     }
@@ -51,6 +50,7 @@ export const ClientInterestsApp = () =>
                         {
                             setListOfClients(loadedClients);
                             setSelectedClient(loadedClients[0].clientId);
+                            setClientInterestsChanged(true);
                         }
                     })));
     }, []);

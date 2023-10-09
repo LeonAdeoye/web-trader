@@ -24,3 +24,8 @@ export const alertDialogDisplayState = atom({
     key: 'alertDialogDisplayState',
     default: false
 });
+
+export const alertConfigurationsDialogDisplayState = atom({
+    key: 'alertConfigurationsDialogDisplayState',
+    default: false
+});

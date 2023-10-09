@@ -70,7 +70,6 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
         }
     };
 
-
     return (
         <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
