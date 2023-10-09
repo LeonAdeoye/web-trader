@@ -97,7 +97,7 @@ export const BasketChartApp = () =>
         {
             if(fdc3Message.type === "fdc3.chart")
             {
-                if(fdc3Message.products.length > 0 && fdc3Message.products[0].id.ticker)
+                if(fdc3Message.products?.[0]?.id.ticker)
                     setBasketId(fdc3Message.products[0].id.ticker);
                 else
                     setBasketId(null);

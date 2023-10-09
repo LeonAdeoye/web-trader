@@ -15,7 +15,7 @@ import React, {useCallback, useState} from "react";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 
-const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
+const ClientInterestDialogComponent = ({ closeHandler , instrumentService, clientInterestService }) =>
 {
     const defaultClientInterest =
     {
@@ -34,7 +34,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 
     const canSubmit = () =>
     {
-        return clientInterest.stockCode !== '' && clientInterest.side !== '';
+        return clientInterest.stockCode !== '' && clientInterest.side !== '' && clientInterestService.getClientInterests().find(interest => interest.stockCode === clientInterest.stockCode) === undefined;
     }
 
     const handleInputChange = useCallback((name, value) =>

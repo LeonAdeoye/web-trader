@@ -8,7 +8,7 @@ import {useRecoilState} from "recoil";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {selectedClientState} from "../atoms/component-state";
+import {clientInterestsChangedState, clientInterestsState, selectedClientState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {ClientService} from "../services/ClientService";
@@ -18,6 +18,7 @@ export const ClientInterestsApp = () =>
     const [selectedClient] = useRecoilState(selectedClientState);
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
     const [, setSelectedClient] = useRecoilState(selectedClientState);
+    const [,setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const clientInterestService = useRef(new ClientInterestService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
     const clientService = useRef(new ClientService()).current;
@@ -28,6 +29,7 @@ export const ClientInterestsApp = () =>
     const closeHandler = async ({stockCode, side, notes}) =>
     {
         await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), stockCode, notes, clientId:selectedClient});
+        setClientInterestsChanged(true);
     }
 
     useEffect( () =>
@@ -50,13 +52,10 @@ export const ClientInterestsApp = () =>
     {
         window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
         {
-            if(fdc3Message.type === "fdc3.context" && listOfClients.length > 0)
-            {
-                if(fdc3Message.clients.length > 0 && fdc3Message.clients[0].id.name)
+            if(fdc3Message.type === "fdc3.context" && fdc3Message.clients?.[0]?.id.name)
                     setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
-            }
         });
-    }, [listOfClients]);
+    }, []);
 
 
     return (<>
@@ -72,10 +71,8 @@ export const ClientInterestsApp = () =>
                 </Resizable>
                 <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
                 <Grid item style={{flexGrow: 1, overflow: 'hidden'}}>
-                    <ClientInterestsComponent instrumentService={instrumentService}
-                                              clientInterestService={clientInterestService}/>
-                    <ClientInterestDialogComponent closeHandler={closeHandler}
-                                                   instrumentService={instrumentService}/>
+                    <ClientInterestsComponent instrumentService={instrumentService} clientInterestService={clientInterestService}/>
+                    <ClientInterestDialogComponent closeHandler={closeHandler} instrumentService={instrumentService} clientInterestService={clientInterestService}/>
                 </Grid>
             </Grid>
         </Grid>

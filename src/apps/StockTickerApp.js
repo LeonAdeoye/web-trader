@@ -78,7 +78,7 @@ export const StockTickerApp = ({client}) =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
-                if(fdc3Message.instruments.length > 0 && fdc3Message.instruments[0].id.ticker)
+                if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else
                     setStockCode(null);

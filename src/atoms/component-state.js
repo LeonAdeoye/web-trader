@@ -20,6 +20,11 @@ export const selectedClientState = atom({
     default: ''
 });
 
+export const clientInterestsChangedState = atom({
+    key: 'clientInterestsChangedState',
+    default: false
+});
+
 
 
 

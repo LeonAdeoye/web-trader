@@ -104,7 +104,7 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
     {
         window.messenger.handleMessageFromMain((fdc3Message, destination, _) =>
         {
-            let newSymbol = fdc3Message.instruments[0].id.ticker;
+            let newSymbol = fdc3Message.instruments?.[0]?.id.ticker;
             setNewlySelectedSymbol(newSymbol);
         });
     }, []);

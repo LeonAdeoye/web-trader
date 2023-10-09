@@ -2,13 +2,14 @@ import React from 'react';
 import {orderSideStyling} from "../utilities";
 import {useEffect, useState, useMemo, useRef} from "react";
 import '../styles/css/main.css';
-import {selectedClientState} from "../atoms/component-state";
+import {clientInterestsChangedState, selectedClientState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 import {GenericGridComponent} from "./GenericGridComponent";
 
 export const ClientInterestsComponent = ({instrumentService, clientInterestService}) =>
 {
     const [selectedClient] = useRecoilState(selectedClientState);
+    const [clientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const [interests, setInterests] = useState([]);
 
     const columnDefs = useMemo(() => ([
@@ -24,19 +25,23 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
             return;
 
         const clientInterests = clientInterestService.getClientInterests().filter(client => client.clientId === selectedClient);
-        clientInterests.forEach(clientInterest =>
+        const updatedRows = clientInterests.map(row =>
         {
-            const instrument = instrumentService.getInstruments().find(instrument => instrument.stockCode === clientInterest.stockCode);
-            clientInterest.stockDescription = instrument.stockDescription;
+            const instrument = instrumentService.getInstruments().find(instrument => instrument.stockCode === row.stockCode);
+            return {
+                ...row,
+                stockDescription: instrument.stockDescription
+            };
         });
-        setInterests(clientInterests);
+        setInterests(updatedRows);
 
-    }, [selectedClient]);
+    }, [selectedClient, clientInterestsChanged]);
+
 
     return (
         <div style={{ width: '100%', height: '100%', float: 'left', padding: '0px', margin:'0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["stockCode"]} columnDefs={columnDefs} gridData={interests}/>
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["clientInterestId"]} columnDefs={columnDefs} gridData={interests}/>
             </div>
         </div>
     );
