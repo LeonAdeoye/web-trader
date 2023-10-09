@@ -2,6 +2,7 @@ import '../styles/css/main.css';
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {AgChartsReact} from 'ag-charts-react';
 import {DataService} from "../services/DataService";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const BasketChartApp = () =>
 {
@@ -126,7 +127,12 @@ export const BasketChartApp = () =>
     }, [basketId]);
 
     return (
-        <AgChartsReact options={options}/>
+        <>
+            <TitleBarComponent title="Basket Chart" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <AgChartsReact options={options}/>
+            </div>
+        </>
     );
 }
 

@@ -7,6 +7,7 @@ import { LoggerService } from '../services/LoggerService';
 import {Sparklines, SparklinesBars} from "react-sparklines";
 import {createArrayFromScore} from "../utilities";
 import {FDC3Service} from "../services/FDC3Service";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 const TaskListApp = () =>
 {
@@ -115,7 +116,8 @@ const TaskListApp = () =>
 
     return (
         <div className="task-list-app">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1px' }}>
+            <TitleBarComponent title="Tasks" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div style={{ display: 'flex', justifyContent: 'space-between', margin: '52px 5px 1px 5px'}}>
                 <TextField className="task-search" size='small' label="Search task details"
                            variant="outlined" fullWidth value={searchValue}
                            onChange={(e) => setSearchValue(e.target.value)}/>
@@ -138,7 +140,7 @@ const TaskListApp = () =>
                 {tasks.sort((first, second) => second.ranking - first.ranking).map((task, index) => (
                         <Accordion disableGutters key={index}
                                    expanded={expandedAccordion === `panel${index}`}
-                                   onChange={handleAccordionChange(`panel${index}`)}>
+                                   onChange={handleAccordionChange(`panel${index}`)} style={{margin: '5px'}}>
                             <AccordionSummary className="task-list-summary" onClick={() => selectTaskSummaryHandler(task)}>
                                 <ListItemIcon className="task-icon">
                                     {task.type === 'Desk Cross' && <SwapHorizontalCircle style={{ color: '#404040' }} />}

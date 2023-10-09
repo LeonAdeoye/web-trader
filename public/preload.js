@@ -34,10 +34,7 @@ contextBridge.exposeInMainWorld('command', {
 
 contextBridge.exposeInMainWorld('messenger', {
     sendMessageToMain: (fdc3Message, destination, source) => ipcRenderer.send('message-to-main-from-renderer', fdc3Message, destination, source),
-    handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer-from-main', (_, fdc3Message, destination, source) =>
-    {
-        callback(fdc3Message, destination, source);
-    })
+    handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer-from-main', (_, fdc3Message, destination, source) => callback(fdc3Message, destination, source))
 });
 
 contextBridge.exposeInMainWorld('configurations', {

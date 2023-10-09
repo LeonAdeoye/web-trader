@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   background-color: #404040;
-  height: 30px;
+  height: 40px;
   padding: 0px 0px 15px 0px;
   margin-bottom: 2px;
   -webkit-app-region: drag;
@@ -14,7 +14,7 @@
 {
   width: 24px;
   height: 24px;
-  margin-right: 5px;
+  margin-top: 10px;
 }
 
 .title-bar-text
@@ -22,6 +22,7 @@
   color: white;
   flex-grow: 1;
   margin-left: 0px;
+  margin-top: 10px;
   font-family: Calibri;
   font-weight: bold;
   font-size: 24px;
@@ -37,11 +38,18 @@
 .title-bar-controls .title-bar-tools,
 .title-bar-controls .title-bar-minimize,
 .title-bar-controls .title-bar-maximize,
-.title-bar-controls .title-bar-close,
 .title-bar-controls .title-bar-add
 {
   color: white;
+  margin-top: 10px;
   margin-right: 0px;
+}
+
+.title-bar-controls .title-bar-close
+{
+  color: white;
+  margin-top: 10px;
+  margin-right: 10px;
 }
 
 .title-bar-controls .title-bar-maximize

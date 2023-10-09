@@ -83,7 +83,7 @@ const App = ({}) =>
     }, []);
 
     if (!client)
-        return (<div>Loading...</div>);
+        return (<div id="loading">Loading...</div>);
 
   // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (

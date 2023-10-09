@@ -4,20 +4,22 @@ import '../styles/css/main.css';
 import {ClientListComponent} from "../components/ClientListComponent";
 import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
 import {Resizable} from "re-resizable";
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState, useMemo} from "react";
 import {useRecoilState} from "recoil";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {selectedClientState} from "../atoms/component-state";
+import {selectedClientState, selectedContextShareState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
-import {useMemo} from "react";
+import {FDC3Service} from "../services/FDC3Service";
 
 export const ClientInterestsApp = () =>
 {
     const [selectedClient] = useRecoilState(selectedClientState);
+    const [, setContextShareClient] = useState("schroders");
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
+    const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const clientInterestService = useRef(new ClientInterestService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
     const instrumentService = useRef(new InstrumentService()).current;
@@ -40,14 +42,33 @@ export const ClientInterestsApp = () =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
-                // TODO.
-/*                if(fdc3Message.clients.length > 0 && fdc3Message.clients[0].id.name)
-                    setClient(fdc3Message.clients[0].id.name);
+                if(fdc3Message.clients.length > 0 && fdc3Message.clients[0].id.name)
+                {
+                    console.log(fdc3Message.clients[0].id.name);
+                    setContextShareClient(fdc3Message.clients[0].id.name);
+                }
                 else
-                    setClient(null);*/
+                    setContextShareClient(null);
             }
         });
     }, []);
+
+    useEffect(() =>
+    {
+        if(selectedContextShare.length === 1)
+        {
+            if(selectedContextShare[0].contextShareKey === 'stockCode')
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
+            else
+                window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, selectedContextShare[0].contextShareValue), null, windowId);
+        }
+        else if(selectedContextShare.length === 2)
+        {
+            const stockCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'stockCode').contextShareValue;
+            const client = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'client').contextShareValue;
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+        }
+    }, [selectedContextShare]);
 
     return (
         <>
@@ -55,7 +76,7 @@ export const ClientInterestsApp = () =>
                 handler:  () => setClientInterestDialogOpen(true),
                 tooltipText: "Add new client interest..."
             }} showChannel={true} showTools={false}/>
-            <Grid container direction="column" style={{ height: 'calc(100vh - 67px)', overflow: 'hidden' }}>
+            <Grid container direction="column" style={{ margin:'45px 0px 0px 0px', height: 'calc(100vh - 65px)', overflow: 'hidden' }}>
                 <Grid container direction="row" style={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
                     <Resizable defaultSize={{ width: '17%', height: '100%' }}>
                         <ClientListComponent loggerService={loggerService}/>

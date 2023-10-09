@@ -14,7 +14,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
     const handleClose = () => window.command.close(windowId);
 
     return(
-        <div className="title-bar">
+        <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
             <span className="title-bar-text">{title}</span>
             <div className="title-bar-controls">
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>

@@ -112,7 +112,7 @@ export const StockTickerApp = ({client}) =>
     return (
         <div>
             <TitleBarComponent title="Stock Ticker" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-            <div className="ag-theme-alpine" style={{ width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'0px'}}>
+            <div className="ag-theme-alpine" style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <AgGridReact
                     columnDefs={columnDefs}
                     ref={gridApiRef}

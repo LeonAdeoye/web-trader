@@ -11,7 +11,17 @@
 
 body
 {
-  // TODO - can be used once you get the title bar component's title (for second windows) to work...
+  // TODO - get the title bar component's title (for second windows) to work...
   margin: 0px;
   border: 10px solid #404040;
+}
+
+#loading
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 54px;
+  color: darkred;
 }

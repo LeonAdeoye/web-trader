@@ -131,7 +131,7 @@ export const AlertsApp = () =>
                 handler:  () => setAlertDialogDisplayFlag(true),
                 tooltipText: "Add new alert..."
             }} showChannel={true} showTools={false}/>
-            <div style={{ width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'0px'}}>
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <GenericGridComponent rowHeight={22}
                                       gridTheme={"ag-theme-alpine"}
                                       rowIdArray={["id"]}

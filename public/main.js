@@ -91,7 +91,7 @@ const handleOpenAppMessage = (event, {url, title}) =>
     });
 
     childWindow.removeMenu();
-    //childWindow.webContents.openDevTools(); // TODO: Remove this line in production
+    childWindow.webContents.openDevTools(); // TODO: Remove this line in production
     childWindow.loadURL(url).then(() => console.log("Child window created with title: " + childWindow.getTitle()));
     childWindowTitleMap.set(childWindow.getTitle(), childWindow);
 
@@ -225,7 +225,7 @@ const handleMessageFromRenderer = (_, fdc3Message, destination, source) =>
     console.log("Received message from child window: " + source + " with context: " + JSON.stringify(fdc3Message) + (destination ? ` to be sent to destination child window(s): ${destination}` : ""));
     switch (fdc3Message.type)
     {
-        case "fdc3.instrument":
+        case "fdc3.context":
             const sourceChildWindowTitle = childWindowIdMap.get(source).getTitle();
             channelsWindowMap.forEach((value, key) =>
             {
