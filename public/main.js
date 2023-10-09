@@ -201,8 +201,7 @@ const addContextMenu = (window) =>
                     { type: 'separator' },
                     { label: 'No channel selected', click: () =>
                         {
-                            removeWindowFromChannel(window.getTitle())
-                            window.contextShareColour("white");
+                            removeWindowFromChannel(window.getTitle());
                             window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "white"}, window.getTitle(), "main");
                         }
                     }

@@ -3,12 +3,15 @@ import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {AgChartsReact} from 'ag-charts-react';
 import {DataService} from "../services/DataService";
 import TitleBarComponent from "../components/TitleBarComponent";
+import {useRecoilState} from "recoil";
+import {titleBarContextShareColourState} from "../atoms/component-state";
 
 export const BasketChartApp = () =>
 {
     const dataService = useRef(new DataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("basket-chart"), []);
     const [basketId, setBasketId] = useState(null);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [options, setOptions] = useState({
         autoSize: true,
         title: {
@@ -97,6 +100,9 @@ export const BasketChartApp = () =>
         {
             if(fdc3Message.type === "fdc3.chart")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.products?.[0]?.id.ticker)
                     setBasketId(fdc3Message.products[0].id.ticker);
                 else

@@ -3,7 +3,7 @@ import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
 import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities";
 import {useRecoilState} from "recoil";
-import {selectedContextShareState} from "../atoms/component-state";
+import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 
 export const OrdersApp = () =>
@@ -13,6 +13,7 @@ export const OrdersApp = () =>
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("orders"), []);
@@ -30,6 +31,9 @@ export const OrdersApp = () =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else

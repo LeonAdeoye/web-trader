@@ -5,6 +5,8 @@ import React,{useEffect, useState, useRef, useCallback, useMemo} from "react";
 import {Command} from "amps";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
+import {useRecoilState} from "recoil";
+import {titleBarContextShareColourState} from "../atoms/component-state";
 
 // In both cases we try to find the index of the existing row by using a matcher:
 const matcher = ({ header }) => ({ key }) => key === header.sowKey();
@@ -57,6 +59,7 @@ export const StockTickerApp = ({client}) =>
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("stock-ticker"), []);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Keep a reference to the subscription ID.
     const subIdTef = useRef();
@@ -78,6 +81,9 @@ export const StockTickerApp = ({client}) =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else

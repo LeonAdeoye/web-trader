@@ -9,7 +9,7 @@ import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import SparklineRenderer from '../components/SparklineRenderer';
 import {useRecoilState} from "recoil";
-import {selectedContextShareState} from "../atoms/component-state";
+import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 
 const HoldingsApp = () =>
@@ -22,7 +22,8 @@ const HoldingsApp = () =>
     const [stockHoldings, setStockHoldings] = useState([]);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [clientHoldingsTabLabel, setClientHoldingsTabLabel] = useState("Client Holdings");
-    const [stockHoldingsTabLabel, setStockHoldingsTabLabel] = useState("Stock Holdings")
+    const [stockHoldingsTabLabel, setStockHoldingsTabLabel] = useState("Stock Holdings");
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
@@ -33,6 +34,9 @@ const HoldingsApp = () =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else

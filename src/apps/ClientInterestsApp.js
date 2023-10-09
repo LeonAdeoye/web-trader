@@ -8,11 +8,7 @@ import {useRecoilState} from "recoil";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {
-    clientInterestsChangedState,
-    selectedClientState,
-    titleBarContextShareColourState
-} from "../atoms/component-state";
+import {clientInterestsChangedState, selectedClientState, titleBarContextShareColourState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {ClientService} from "../services/ClientService";
@@ -24,14 +20,17 @@ export const ClientInterestsApp = () =>
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
     const [, setSelectedClient] = useRecoilState(selectedClientState);
     const [,setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+
     const clientInterestService = useRef(new ClientInterestService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
     const clientService = useRef(new ClientService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
+
     const ownerId = useRef("leon").current;
     const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
     const [listOfClients, setListOfClients] = useState([]);
-    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
@@ -60,10 +59,14 @@ export const ClientInterestsApp = () =>
     {
         window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
         {
-            if(fdc3Message.type === "fdc3.context" && fdc3Message.clients?.[0]?.id.name)
-                setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
-            else if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
+            if(fdc3Message.type === "fdc3.context")
+            {
+                if(fdc3Message.contextShareColour)
                     setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
+                if(fdc3Message.clients?.[0]?.id.name)
+                    setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
+            }
         });
     }, []);
 

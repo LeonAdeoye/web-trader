@@ -15,7 +15,7 @@ export const AlertsApp = () =>
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
-    const [alertDialogDisplayFlag, setAlertDialogDisplayFlag] = useRecoilState(alertDialogDisplayState);
+    const [, setAlertDialogDisplayFlag] = useRecoilState(alertDialogDisplayState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
@@ -32,8 +32,11 @@ export const AlertsApp = () =>
     {
         window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
         {
-            if(fdc3Message.type === "fdc3.context" && !fdc3Message.contextShareColour)
+            if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else
@@ -43,13 +46,6 @@ export const AlertsApp = () =>
                     setClient(fdc3Message.clients[0].id.name);
                 else
                     setClient(null);
-            }
-            else if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
-            {
-                if(fdc3Message.contextShareColour === "NONE")
-                    setTitleBarContextShareColour("white");
-                else
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
             }
         });
     }, []);

@@ -9,6 +9,7 @@ import {DataService} from "../services/DataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 import {numberFormatter} from "../utilities";
+import {titleBarContextShareColourState} from "../atoms/component-state";
 
 const TradeHistoryApp = () =>
 {
@@ -21,6 +22,7 @@ const TradeHistoryApp = () =>
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
     const [stockTradeHistoryTabLabel, setStockTradeHistoryTabLabel] = useState("Stock Trade History");
     const dataService = useRef(new DataService()).current;
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
@@ -31,6 +33,9 @@ const TradeHistoryApp = () =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                else

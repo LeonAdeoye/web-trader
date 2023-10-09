@@ -4,6 +4,8 @@ import {DataService} from "../services/DataService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
 import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
+import {useRecoilState} from "recoil";
+import {titleBarContextShareColourState} from "../atoms/component-state";
 
 
 const CrossesApp = () =>
@@ -15,6 +17,7 @@ const CrossesApp = () =>
     const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
@@ -38,6 +41,9 @@ const CrossesApp = () =>
         {
             if(fdc3Message.type === "fdc3.context")
             {
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
                 else
