@@ -8,10 +8,11 @@ import {useRecoilState} from "recoil";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {clientInterestsChangedState, clientInterestsState, selectedClientState} from "../atoms/component-state";
+import {clientInterestsChangedState, selectedClientState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {ClientService} from "../services/ClientService";
+import {LoggerService} from "../services/LoggerService";
 
 export const ClientInterestsApp = () =>
 {
@@ -22,6 +23,7 @@ export const ClientInterestsApp = () =>
     const clientInterestService = useRef(new ClientInterestService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
     const clientService = useRef(new ClientService()).current;
+    const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
     const ownerId = useRef("leon").current;
     const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
     const [listOfClients, setListOfClients] = useState([]);
@@ -71,7 +73,7 @@ export const ClientInterestsApp = () =>
                 </Resizable>
                 <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
                 <Grid item style={{flexGrow: 1, overflow: 'hidden'}}>
-                    <ClientInterestsComponent instrumentService={instrumentService} clientInterestService={clientInterestService}/>
+                    <ClientInterestsComponent instrumentService={instrumentService} clientInterestService={clientInterestService} loggerService={loggerService}/>
                     <ClientInterestDialogComponent closeHandler={closeHandler} instrumentService={instrumentService} clientInterestService={clientInterestService}/>
                 </Grid>
             </Grid>

@@ -3,7 +3,7 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import '../styles/css/main.css';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import BlastContentRenderer from "../components/BlastContentRenderer";
-import ActionIconsRenderer from "../components/ActionIconsRenderer";
+import BlastActionIconsRenderer from "../components/BlastActionIconsRenderer";
 import BlastPlayDialogComponent from "../components/BlastPlayDialogComponent";
 import {useRecoilState} from "recoil";
 import {blastConfigurationDialogDisplayState, blastPlayDialogDisplayState} from "../atoms/dialog-state";
@@ -42,7 +42,7 @@ export const BlastsApp = () =>
             valueGetter: params => params.data.clientId,
             valueFormatter: params => clientService.getClients().find(client => client.clientId === params.value).clientName},
         {headerName: "Trigger Time", field: "triggerTime", sortable: true, minWidth: 120, width: 120, filter: true},
-        {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
+        {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: BlastActionIconsRenderer}
     ]), []);
 
     const onCrudCloseHandler = async (blastName, clientId, markets, contents, advFilter, notionalValueFilter, triggerTime, blastId) =>
