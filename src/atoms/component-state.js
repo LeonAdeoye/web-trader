@@ -25,6 +25,11 @@ export const clientInterestsChangedState = atom({
     default: false
 });
 
+export const titleBarContextShareColourState = atom({
+    key: 'titleBarContextShareColourState',
+    default: "white"
+});
+
 
 
 

@@ -8,7 +8,11 @@ import {useRecoilState} from "recoil";
 import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
 import {InstrumentService} from "../services/InstrumentService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {clientInterestsChangedState, selectedClientState} from "../atoms/component-state";
+import {
+    clientInterestsChangedState,
+    selectedClientState,
+    titleBarContextShareColourState
+} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {ClientService} from "../services/ClientService";
@@ -27,9 +31,11 @@ export const ClientInterestsApp = () =>
     const ownerId = useRef("leon").current;
     const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
     const [listOfClients, setListOfClients] = useState([]);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
+        setClientInterestsChanged(false);
         await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), stockCode, notes, clientId:selectedClient});
         setClientInterestsChanged(true);
     }
@@ -55,7 +61,9 @@ export const ClientInterestsApp = () =>
         window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
         {
             if(fdc3Message.type === "fdc3.context" && fdc3Message.clients?.[0]?.id.name)
-                    setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
+                setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
+            else if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
         });
     }, []);
 

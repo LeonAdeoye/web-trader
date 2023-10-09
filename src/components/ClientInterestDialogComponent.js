@@ -1,21 +1,9 @@
-import {
-    Autocomplete,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    MenuItem,
-    TextField,
-    Tooltip,
-    Typography
-} from "@mui/material";
+import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography } from "@mui/material";
 import React, {useCallback, useState} from "react";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 
-const ClientInterestDialogComponent = ({ closeHandler , instrumentService, clientInterestService }) =>
+const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 {
     const defaultClientInterest =
     {
@@ -34,7 +22,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService, clien
 
     const canSubmit = () =>
     {
-        return clientInterest.stockCode !== '' && clientInterest.side !== '' && clientInterestService.getClientInterests().find(interest => interest.stockCode === clientInterest.stockCode) === undefined;
+        return clientInterest.stockCode !== '' && clientInterest.side !== '';
     }
 
     const handleInputChange = useCallback((name, value) =>

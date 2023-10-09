@@ -52,14 +52,14 @@ export class ClientInterestService
         this.#clientInterests.clear();
     }
 
-    deleteClientInterest = async (clientInterestId) =>
+    deleteClientInterest = async (ownerId, clientInterestId) =>
     {
-        fetch(`http://localhost:20009/interest?clientInterestId=${clientInterestId}`, {method: "DELETE"})
+        fetch(`http://localhost:20009/interest?ownerId=${ownerId}&clientInterestId=${clientInterestId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#clientInterests)
                 {
-                    if(current.blastId === clientInterestId)
+                    if(current.clientInterestId === clientInterestId)
                     {
                         this.#clientInterests.splice(this.#clientInterests.indexOf(current), 1);
                         this.#loggerService.logInfo(`Successfully deleted client interest with client interest Id: ${clientInterestId}`);

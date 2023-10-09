@@ -11,7 +11,7 @@ import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 export const ClientInterestsComponent = ({instrumentService, clientInterestService, loggerService}) =>
 {
     const [selectedClient] = useRecoilState(selectedClientState);
-    const [clientInterestsChanged] = useRecoilState(clientInterestsChangedState);
+    const [clientInterestsChanged, setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const [interests, setInterests] = useState([]);
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
     const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -22,12 +22,12 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
         {headerName: "Stock Description.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false},
-        {headerName: "Actions", field: "actions", sortable: false, minWidth: 170, width: 170, filter: false, cellRenderer: ActionIconsRenderer}
+        {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
 
     useEffect(() =>
     {
-        if(!selectedClient)
+        if(!selectedClient || !clientInterestsChanged)
             return;
 
         const clientInterests = clientInterestService.getClientInterests().filter(client => client.clientId === selectedClient);
@@ -45,6 +45,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
 
     const handleAction = async (action, data) =>
     {
+        setClientInterestsChanged(false);
         switch(action)
         {
             case "update":
@@ -52,8 +53,8 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
                 setClientInterestDialogOpen(true);
                 break;
             case "delete":
-                //TODO - implement delete
-                //await deleteBlastConfiguration(ownerId, clientInterestId);
+                await clientInterestService.deleteClientInterest(ownerId, data.clientInterestId);
+                setClientInterestsChanged(true);
                 break;
             case "clone":
                 let interest = clientInterestService.getClientInterests().find(interest => interest["clientInterestId"] === data.clientInterestId);

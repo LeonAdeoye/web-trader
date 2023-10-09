@@ -4,6 +4,9 @@ import { Close,  Remove, Build, Lan} from '@mui/icons-material';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
+import {useRecoilState} from "recoil";
+import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
+import {titleBarContextShareColourState} from "../atoms/component-state";
 
 const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTools}) =>
 {
@@ -12,6 +15,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
     const handleMinimize = () => window.command.minimize(windowId);
     const handleMaximize = () => window.command.maximize(windowId);
     const handleClose = () => window.command.close(windowId);
+    const [titleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     return(
         <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
@@ -20,9 +24,11 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
-                {showChannel && <IconButton className="title-bar-channel" onClick={handleChannel}>
+                {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={`Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
+                    <IconButton className="title-bar-channel" style={{color:`${titleBarContextShareColour}`}} onClick={handleChannel}>
                     <Lan/>
-                </IconButton>}
+                    </IconButton>
+                </Tooltip>}
                 {showTools && <Tooltip title={"Tools"}><IconButton className="title-bar-tools" onClick={handleTools}>
                     <Build/>
                 </IconButton></Tooltip>}

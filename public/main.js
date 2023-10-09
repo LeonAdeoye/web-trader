@@ -167,15 +167,45 @@ const addContextMenu = (window) =>
             ]},
             { type: 'separator' },
             { label: 'Context Sharing Channel', submenu: [
-                    { label: 'Set channel to red', icon: path.join(__dirname, '../assets', 'red.png'), click: () => addWindowToChannel('red', window.getTitle()) },
+                    { label: 'Set channel to red', icon: path.join(__dirname, '../assets', 'red.png'), click: () =>
+                        {
+                            removeWindowFromChannel(window.getTitle());
+                            addWindowToChannel('red', window.getTitle());
+                            window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "red"}, window.getTitle(), "main");
+                        }
+                    },
                     { type: 'separator' },
-                    { label: 'Set channel to blue', icon: path.join(__dirname, '../assets', 'blue.png'), click: () => addWindowToChannel('blue', window.getTitle()) },
+                    { label: 'Set channel to blue', icon: path.join(__dirname, '../assets', 'blue.png'), click: () =>
+                        {
+                            removeWindowFromChannel(window.getTitle());
+                            addWindowToChannel('blue', window.getTitle());
+                            window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "blue"}, window.getTitle(), "main");
+                        }
+                    },
                     { type: 'separator' },
-                    { label: 'Set channel to green', icon: path.join(__dirname, '../assets', 'green.png'), click: () => addWindowToChannel('green', window.getTitle()) },
+                    { label: 'Set channel to green', icon: path.join(__dirname, '../assets', 'green.png'), click: () =>
+                        {
+                            removeWindowFromChannel(window.getTitle());
+                            addWindowToChannel('green', window.getTitle());
+                            window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "green"}, window.getTitle(), "main");
+                        }
+                    },
                     { type: 'separator' },
-                    { label: 'Set channel to yellow', icon: path.join(__dirname, '../assets', 'yellow.png'), click: () => addWindowToChannel('yellow', window.getTitle()) },
+                    { label: 'Set channel to yellow', icon: path.join(__dirname, '../assets', 'yellow.png'), click: () =>
+                        {
+                            removeWindowFromChannel(window.getTitle());
+                            addWindowToChannel('yellow', window.getTitle());
+                            window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "yellow"}, window.getTitle(), "main");
+                        }
+                    },
                     { type: 'separator' },
-                    { label: 'No channel selected', click: () => removeWindowFromChannel(window.getTitle()) }
+                    { label: 'No channel selected', click: () =>
+                        {
+                            removeWindowFromChannel(window.getTitle())
+                            window.contextShareColour("white");
+                            window.webContents.send("message-to-renderer-from-main", {type: "fdc3.context", contextShareColour: "white"}, window.getTitle(), "main");
+                        }
+                    }
                 ]},
             { type: 'separator' },
             { label: 'Close current window', click: () => saveWindowDimensions(window).then(() => window.close()) },

@@ -3,7 +3,7 @@ import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
 import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
-import {selectedContextShareState} from "../atoms/component-state";
+import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {alertDialogDisplayState} from "../atoms/dialog-state";
@@ -16,6 +16,7 @@ export const AlertsApp = () =>
     const [client, setClient] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [alertDialogDisplayFlag, setAlertDialogDisplayFlag] = useRecoilState(alertDialogDisplayState);
+    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("alerts"), []);
@@ -31,7 +32,7 @@ export const AlertsApp = () =>
     {
         window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
         {
-            if(fdc3Message.type === "fdc3.context")
+            if(fdc3Message.type === "fdc3.context" && !fdc3Message.contextShareColour)
             {
                 if(fdc3Message.instruments?.[0]?.id.ticker)
                     setStockCode(fdc3Message.instruments[0].id.ticker);
@@ -42,6 +43,13 @@ export const AlertsApp = () =>
                     setClient(fdc3Message.clients[0].id.name);
                 else
                     setClient(null);
+            }
+            else if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
+            {
+                if(fdc3Message.contextShareColour === "NONE")
+                    setTitleBarContextShareColour("white");
+                else
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
             }
         });
     }, []);
