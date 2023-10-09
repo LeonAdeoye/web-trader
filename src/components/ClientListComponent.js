@@ -1,26 +1,24 @@
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
-import React, {useEffect, useState, useMemo, useRef} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {selectedClientState} from "../atoms/component-state";
-import {ClientService} from "../services/ClientService";
+import {isEmptyString} from "../utilities";
 
-export const ClientListComponent = () =>
+export const ClientListComponent = ({listOfClients}) =>
 {
-    const [, setSelectedClient] = useRecoilState(selectedClientState);
-    const clientService = useRef(new ClientService()).current;
+    const [selectedClient, setSelectedClient] = useRecoilState(selectedClientState);
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [clients, setClients] = useState([]);
 
     const columnDefs = useMemo(() => ([
         {
             headerName: 'Client Id',
             field: 'clientId',
-            width: 10,
+            width: 100,
             hide: true
         },
         {
@@ -65,34 +63,28 @@ export const ClientListComponent = () =>
 
     useEffect(() =>
     {
-        clientService.loadClients()
-            .then(() => setClients(clientService.getClients()));
-    }, []);
+        if (gridApi && selectedClient && listOfClients.length > 0)
+        {
+            gridApi.forEachNode(node =>
+            {
+                if (node.data.clientId === selectedClient)
+                    node.setSelected(true);
+            });
+        }
+    }, [selectedClient]);
 
-    useEffect(() =>
-    {
-        if(clients[0]?.clientId)
-            setSelectedClient(clients[0].clientId);
-    }, [clients]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-            <TextField
-                size='small' className='search-text'
-                label="Search by client name."
-                onChange={handleSearchChange}
-                InputProps={{
-                    style: {
-                        fontSize: '15px'
-                    }
-                }}
-                style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}/>
+            <TextField size='small' className='search-text' label="Search by client name." onChange={handleSearchChange} InputProps={{ style: { fontSize: '15px' } }}
+                style={{ height: '30px', boxSizing: 'border-box', margin: '6px 6px 3px 5px'}}/>
             <div style={{ height: '14px', width: '100%', backgroundColor: "white"}}></div>
             <div className="ag-theme-alpine" style={{ height: 'calc(100% - 45px)', width: 'calc(100%- 3px)'}}>
                 <AgGridReact
                     columnDefs={columnDefs}
                     onGridReady={onGridReady}
-                    rowData={clients}
+                    rowData={listOfClients}
+                    getRowNodeId={data => data.clientId}
                     onRowClicked={handleRowClick}
                     onFirstDataRendered={onFilterChanged}
                     enableCellChangeFlash={true}

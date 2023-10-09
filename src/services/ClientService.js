@@ -95,6 +95,11 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
+    getClientId = (clientName) =>
+    {
+        return this.#clients.find(client => client.clientName === clientName).clientId;
+    }
+
     getClients = () =>
     {
         return this.#clients;
