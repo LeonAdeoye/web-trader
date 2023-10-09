@@ -1,16 +1,18 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useRef} from "react";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {AlertConfigurationsDialogComponent} from "../components/AlertConfigurationsDialogComponent";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
+import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 
 export const AlertConfigurationsApp = () =>
 {
     const [, setAlertConfigurationsDialogDisplay] = useRecoilState(alertConfigurationsDialogDisplayState);
     const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
     const [alertConfigs, setAlertConfigs] = useState([]);
+    const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
 
     const columnDefs = useMemo(() => ([
         {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 130, width: 130},
