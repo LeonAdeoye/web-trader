@@ -26,6 +26,9 @@ export const AlertConfigurationsApp = () =>
 
     useEffect(() =>
     {
+        alertConfigurationsService.loadAlertConfigurations()
+            .then((configs) => setAlertConfigs(configs));
+
         setAlertConfigs([{id:1, alertName: "Alert 1", type: "Price", time: "10:00", priority: "High", client: "Client 1"},
             {id:2, alertName: "Alert 2", type: "Price", time: "10:00", priority: "High", client: "Client 1"}]);
 
