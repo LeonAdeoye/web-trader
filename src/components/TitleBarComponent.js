@@ -22,7 +22,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
-                {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={`Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
+                {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={titleBarContextShareColour.toUpperCase() === "WHITE" ? "Context sharing not enabled." : `Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
                     <IconButton className="title-bar-channel" style={{color:`${titleBarContextShareColour}`}}>
                     <Lan/>
                     </IconButton>

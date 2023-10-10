@@ -11,6 +11,7 @@ import SparklineRenderer from '../components/SparklineRenderer';
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 const HoldingsApp = () =>
 {
@@ -24,8 +25,6 @@ const HoldingsApp = () =>
     const [clientHoldingsTabLabel, setClientHoldingsTabLabel] = useState("Client Holdings");
     const [stockHoldingsTabLabel, setStockHoldingsTabLabel] = useState("Stock Holdings");
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
 
     useEffect(() =>
@@ -217,36 +216,38 @@ const HoldingsApp = () =>
     ]), []);
 
     return (
-        <div className="holdings-app" style={{height: '100%', width: '100%'}}>
-            <TabContext value={selectedTab}>
+        <>
+            <TitleBarComponent title="Holdings" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div className="holdings-app" style={{width: '100%', height: 'calc(100vh - 45px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <TabContext value={selectedTab}>
 
-                <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                    <Tab className="holdings-tab" label={`${clientHoldingsTabLabel}`}  value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
-                    <Tab className="holdings-tab" label={`${stockHoldingsTabLabel}`}  value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
-                </TabList>
+                    <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
+                        <Tab className="holdings-tab" label={`${clientHoldingsTabLabel}`}  value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
+                        <Tab className="holdings-tab" label={`${stockHoldingsTabLabel}`}  value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
+                    </TabList>
 
-                {selectedTab === "1" && (
-                    <TabPanel value="1" className="holdings-panel">
-                        <GenericGridComponent rowHeight={22}
-                                              gridTheme={"ag-theme-alpine"}
-                                              rowIdArray={["stockCode"]}
-                                              columnDefs={clientColumnDefs}
-                                              gridData={clientHoldings}
-                                              windowId={windowId}/>
-                    </TabPanel>)}
+                    {selectedTab === "1" && (
+                        <TabPanel value="1" className="holdings-panel">
+                            <GenericGridComponent rowHeight={22}
+                                                  gridTheme={"ag-theme-alpine"}
+                                                  rowIdArray={["stockCode"]}
+                                                  columnDefs={clientColumnDefs}
+                                                  gridData={clientHoldings}
+                                                  windowId={windowId}/>
+                        </TabPanel>)}
 
-                {selectedTab === "2" && (
-                    <TabPanel value="2" className="holdings-panel">
-                        <GenericGridComponent rowHeight={22}
-                                              gridTheme={"ag-theme-alpine"}
-                                              rowIdArray={["client"]}
-                                              columnDefs={stockColumnDefs}
-                                              gridData={stockHoldings}
-                                              windowId={windowId}/>
-                    </TabPanel>)}
-            </TabContext>
-        </div>
-    );
+                    {selectedTab === "2" && (
+                        <TabPanel value="2" className="holdings-panel">
+                            <GenericGridComponent rowHeight={22}
+                                                  gridTheme={"ag-theme-alpine"}
+                                                  rowIdArray={["client"]}
+                                                  columnDefs={stockColumnDefs}
+                                                  gridData={stockHoldings}
+                                                  windowId={windowId}/>
+                        </TabPanel>)}
+                </TabContext>
+            </div>
+        </>);
 };
 
 export default HoldingsApp;
