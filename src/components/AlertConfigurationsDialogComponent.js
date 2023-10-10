@@ -1,16 +1,5 @@
-import {
-    Autocomplete,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    MenuItem,
-    TextField,
-    Tooltip,
-    Typography
-} from "@mui/material";
+import {Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
+import {MenuItem, TextField, Tooltip, Typography} from "@mui/material";
 import React, {useCallback, useState} from "react";
 import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
@@ -63,11 +52,6 @@ export const AlertConfigurationsDialogComponent = ({ onCloseHandler , clientServ
         });
     }
 
-    const canSubmit = () =>
-    {
-        return false;
-    }
-
     const getTitle = () =>
     {
         if(!selectedGenericGridRow)
@@ -82,12 +66,6 @@ export const AlertConfigurationsDialogComponent = ({ onCloseHandler , clientServ
     const handleInputChange = useCallback((name, value) =>
     {
         setAlertConfiguration(prevData => ({ ...prevData, [name]: value }));
-    }, []);
-
-    const handleSideChange = useCallback((event) =>
-    {
-        const value = event.target.value;
-        handleInputChange('side', value);
     }, []);
 
     return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '570px' } }}>

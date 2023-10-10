@@ -218,12 +218,12 @@ const HoldingsApp = () =>
     return (
         <>
             <TitleBarComponent title="Holdings" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-            <div className="holdings-app" style={{width: '100%', height: 'calc(100vh - 45px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+            <div className="holdings-app" style={{width: '100%', height: 'calc(100vh)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <TabContext value={selectedTab}>
 
                     <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                        <Tab className="holdings-tab" label={`${clientHoldingsTabLabel}`}  value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}, marginRight: "5px"}}/>
-                        <Tab className="holdings-tab" label={`${stockHoldingsTabLabel}`}  value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
+                        <Tab className="holdings-tab" label={`${clientHoldingsTabLabel}`}  value="1" sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#7a7a7a',  color: "white"}, marginRight: "5px"}}/>
+                        <Tab className="holdings-tab" label={`${stockHoldingsTabLabel}`}  value="2"  sx={{ backgroundColor: "#bdbaba", '&.Mui-selected': {backgroundColor: '#7a7a7a', color: "white"}}}/>
                     </TabList>
 
                     {selectedTab === "1" && (
