@@ -2,7 +2,7 @@ import React, {useState, useCallback} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
 import '../styles/css/main.css';
 
-const LoginDialogComponent = () =>
+const LoginDialog = () =>
 {
     const [loginDialogDisplay, setLoginDialogDisplay] = useState(true);
     const [userId, setUserId] = useState('');
@@ -27,4 +27,4 @@ const LoginDialogComponent = () =>
     );
 };
 
-export default LoginDialogComponent;
+export default LoginDialog;

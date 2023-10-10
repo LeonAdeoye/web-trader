@@ -6,7 +6,7 @@ import {AgGridReact} from "ag-grid-react";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {numberFormatter} from "../utilities";
 
-const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =>
+const BlastConfigurationDialog = ({ onCloseHandler , clientService }) =>
 {
     const defaultBlastConfiguration =
     {
@@ -204,4 +204,4 @@ const BlastConfigurationDialogComponent = ({ onCloseHandler , clientService }) =
     );
 }
 
-export default BlastConfigurationDialogComponent;
+export default BlastConfigurationDialog;

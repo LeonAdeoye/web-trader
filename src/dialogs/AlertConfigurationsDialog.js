@@ -5,7 +5,7 @@ import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 
-export const AlertConfigurationsDialogComponent = ({ onCloseHandler , clientService }) =>
+export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
 {
     const defaultAlertConfiguration =
         {

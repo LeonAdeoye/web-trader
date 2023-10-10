@@ -8,7 +8,7 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {DataService} from "../services/DataService";
 import {FDC3Service} from "../services/FDC3Service";
 
-const BlastPlayDialogComponent = () =>
+const BlastPlayDialog = () =>
 {
     const dataService = useRef(new DataService()).current;
     const [blastPlayDialogOpenFlag, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
@@ -225,4 +225,4 @@ const BlastPlayDialogComponent = () =>
     );
 }
 
-export default BlastPlayDialogComponent;
+export default BlastPlayDialog;

@@ -7,7 +7,7 @@ import {LoggerService} from "../services/LoggerService";
 import {Button, ThemeProvider, Tooltip, Typography} from "@mui/material";
 import appTheme from "../components/appTheme";
 import '../styles/css/main.css';
-import ConfigurationDialogComponent from "../components/ConfigurationDialogComponent";
+import ConfigurationDialog from "../dialogs/ConfigurationDialog";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {configDialogDisplayState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
@@ -171,6 +171,6 @@ export const ConfigsApp = () =>
                     </Tooltip>
                 </ThemeProvider>
             </div> {/* If a row is already selected then an UPDATE handler will be used after submission otherwise a SAVE handler will be used. */}
-            <ConfigurationDialogComponent onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
+            <ConfigurationDialog onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
         </div>);
 };

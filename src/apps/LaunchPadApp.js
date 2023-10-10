@@ -3,7 +3,7 @@ import '../styles/css/main.css';
 import {useCallback, useEffect, useState, useRef} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
-import LoginDialogComponent from "../components/LoginDialogComponent";
+import LoginDialog from "../dialogs/LoginDialog";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {useMemo} from "react";
 
@@ -46,7 +46,7 @@ const LaunchPadApp = () =>
         <>
             <TitleBarComponent title="Launch Pad" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={true}/>
             <div className="launch-pad" style={{marginTop: '55px'}}>
-                <LoginDialogComponent/>
+                <LoginDialog/>
                 {apps.map((app) => (
                     <div key={app.title} className="launch-pad__app" onClick={() => launchApp(app.url, app.title)}>
                         <img className="launch-pad__icon" src={app.icon} alt={app.title}/>

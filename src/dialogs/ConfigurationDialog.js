@@ -5,7 +5,7 @@ import {configDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
-const ConfigurationDialogComponent = ({ onCloseHandler }) =>
+const ConfigurationDialog = ({ onCloseHandler }) =>
 {
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const [configDialogOpenFlag, setConfigDialogOpenFlag ] = useRecoilState(configDialogDisplayState);
@@ -93,4 +93,4 @@ const ConfigurationDialogComponent = ({ onCloseHandler }) =>
     );
 };
 
-export default ConfigurationDialogComponent;
+export default ConfigurationDialog;

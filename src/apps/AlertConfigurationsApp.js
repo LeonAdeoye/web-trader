@@ -3,7 +3,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
-import {AlertConfigurationsDialogComponent} from "../components/AlertConfigurationsDialogComponent";
+import {AlertConfigurationsDialog} from "../dialogs/AlertConfigurationsDialog";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {selectedGenericGridRowState} from "../atoms/component-state";
@@ -149,7 +149,7 @@ export const AlertConfigurationsApp = () =>
                                       columnDefs={columnDefs}
                                       gridData={alertConfigurations}
                                       handleAction={handleAction}/>
-                <AlertConfigurationsDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
+                <AlertConfigurationsDialog onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
             </div>
         </>
     );

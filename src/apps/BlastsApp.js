@@ -4,11 +4,11 @@ import '../styles/css/main.css';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import BlastContentRenderer from "../components/BlastContentRenderer";
 import BlastActionIconsRenderer from "../components/BlastActionIconsRenderer";
-import BlastPlayDialogComponent from "../components/BlastPlayDialogComponent";
+import BlastPlayDialog from "../dialogs/BlastPlayDialog";
 import {useRecoilState} from "recoil";
 import {blastConfigurationDialogDisplayState, blastPlayDialogDisplayState} from "../atoms/dialog-state";
 import {LoggerService} from "../services/LoggerService";
-import BlastConfigurationDialogComponent from "../components/BlastConfigurationDialogComponent";
+import BlastConfigurationDialog from "../dialogs/BlastConfigurationDialog";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {isEmptyString} from "../utilities";
 import {BlastService} from "../services/BlastService";
@@ -162,8 +162,8 @@ export const BlastsApp = () =>
                 <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
                     <GenericGridComponent rowHeight={26} gridTheme={"ag-theme-alpine"} rowIdArray={["blastId"]} columnDefs={columnDefs} gridData={blasts} handleAction={handleAction}/>
                 </div>
-                <BlastConfigurationDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
-                <BlastPlayDialogComponent/>
+                <BlastConfigurationDialog onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
+                <BlastPlayDialog/>
             </div>
         </>);
 }
