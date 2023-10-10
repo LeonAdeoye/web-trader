@@ -6,32 +6,134 @@ import {GenericGridComponent} from "../components/GenericGridComponent";
 import {AlertConfigurationsDialogComponent} from "../components/AlertConfigurationsDialogComponent";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
+import {selectedGenericGridRowState} from "../atoms/component-state";
+import {LoggerService} from "../services/LoggerService";
+import {ClientService} from "../services/ClientService";
 
 export const AlertConfigurationsApp = () =>
 {
     const [, setAlertConfigurationsDialogDisplay] = useRecoilState(alertConfigurationsDialogDisplayState);
+    const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
-    const [alertConfigs, setAlertConfigs] = useState([]);
+    const [alertConfigurations, setAlertConfigurations] = useState([]);
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
+    const loggerService = useRef(new LoggerService(AlertConfigurationsApp.name)).current;
+    const clientService = useRef(new ClientService()).current;
+    const ownerId = "leon";
 
     const columnDefs = useMemo(() => ([
-        {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 130, width: 130},
-        {headerName: "Type", field: "type", sortable: true, minWidth: 170, width: 170, filter: true},
-        {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 400, width: 400, filter: true},
-        {headerName: "Time", field: "time", sortable: true, minWidth: 90, width: 90},
-        {headerName: "Priority", field: "priority", sortable: true, minWidth: 100, width: 100, filter: true},
-        {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 250, filter: true},
+        {headerName: "Id", field: "alertConfigurationId", hide: true, sortable: false, minWidth: 130, width: 130},
+        {headerName: "Type", field: "type", sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 160, width: 160, filter: true},
+        {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 100, width: 100},
+        {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 200, filter: true},
+        {headerName: "Desk", field: "desk", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
+        {headerName: "Customizations", field: "client", sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Is Active", field: "isActive", sortable: true, minWidth: 90, width: 90, filter: true},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
 
+    const saveAlertConfiguration = async (alertConfigurationToSave) =>
+    {
+        try
+        {
+            loggerService.logInfo(`User adding new alert configuration: ${JSON.stringify(alertConfigurationToSave)}`);
+            alertConfigurationsService.addNewAlertConfiguration(alertConfigurationToSave)
+                .then((newAlertConfiguration) => setAlertConfigurations([...alertConfigurations, newAlertConfiguration]));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const updateAlertConfiguration = async (alertConfigurationToUpdate) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Updating existing alert configuration:${JSON.stringify(alertConfigurationToUpdate)}`);
+            alertConfigurationsService.updateAlertConfiguration(alertConfigurationToUpdate)
+                .then(() => setAlertConfigurations(previousAlertConfigurations =>
+                {
+                    const index = previousAlertConfigurations.findIndex(currentAlertConfiguration => currentAlertConfiguration.alertConfigurationId === alertConfigurationToUpdate.alertConfigurationId);
+                    previousAlertConfigurations[index] = alertConfigurationToUpdate;
+                    setSelectedGenericGridRow(alertConfigurationToUpdate);
+                    return [...previousAlertConfigurations];
+                }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const deleteAlertConfiguration = async (alertConfigurationId) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Deleting existing alert configuration with owner Id: ${ownerId} alertConfigurationId: ${alertConfigurationId}.`);
+            alertConfigurationsService.deleteAlertConfiguration(ownerId, alertConfigurationId)
+                .then(() => setAlertConfigurations(previousAlertConfigurations =>
+                {
+                    const index = previousAlertConfigurations.findIndex(alertConfiguration => alertConfiguration.alertConfigurationId === alertConfigurationId);
+                    previousAlertConfigurations.splice(index, 1);
+                    return [...previousAlertConfigurations];
+                }));
+        }
+        catch (error)
+        {
+            loggerService.logError(error);
+        }
+    }
+
+    const onCrudCloseHandler = async (alertConfiguration) =>
+    {
+        if(alertConfiguration.alertConfigurationId)
+            await updateAlertConfiguration({...alertConfiguration, ownerId});
+        else
+            await saveAlertConfiguration({...alertConfiguration, ownerId});
+    }
+
+    const handleAction = async (action, alertConfigurationId) =>
+    {
+        switch(action)
+        {
+            case "update":
+                setSelectedGenericGridRow(alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId));
+                setAlertConfigurationsDialogDisplay(true);
+                break;
+            case "delete":
+                await deleteAlertConfiguration(windowId, alertConfigurationId)
+                break;
+            case "clone":
+                let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId);
+                setSelectedGenericGridRow({...alertConfig, alertConfigurationId: null});
+                setAlertConfigurationsDialogDisplay(true);
+                break;
+            case "add":
+                setSelectedGenericGridRow(null);
+                setAlertConfigurationsDialogDisplay(true);
+                break;
+            default:
+                loggerService.logError(`Unknown action: ${action} for alertConfigurationId: ${alertConfigurationId}`);
+        }
+    };
+
     useEffect(() =>
     {
-        alertConfigurationsService.loadAlertConfigurations()
-            .then((configs) => setAlertConfigs(configs));
+        const loadData = async () =>
+        {
+            await clientService.loadClients();
+            await alertConfigurationsService.loadAlertConfigurations();
+        };
 
-        setAlertConfigs([{id:1, alertName: "Alert 1", type: "Price", time: "10:00", priority: "High", client: "Client 1"},
-            {id:2, alertName: "Alert 2", type: "Price", time: "10:00", priority: "High", client: "Client 1"}]);
-
+        loadData().then(() =>
+        {
+            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejected", time: "10:00", priority: "High", clientId: "Client 1"},
+                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejects", time: "10:00", priority: "High", clientId: null}])
+        });
     }, [])
 
     return(
@@ -43,10 +145,11 @@ export const AlertConfigurationsApp = () =>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <GenericGridComponent rowHeight={22}
                                       gridTheme={"ag-theme-alpine"}
-                                      rowIdArray={["id"]}
+                                      rowIdArray={["alertConfigurationId"]}
                                       columnDefs={columnDefs}
-                                      gridData={alertConfigs}/>
-                <AlertConfigurationsDialogComponent/>
+                                      gridData={alertConfigurations}
+                                      handleAction={handleAction}/>
+                <AlertConfigurationsDialogComponent onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
             </div>
         </>
     );

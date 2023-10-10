@@ -108,7 +108,7 @@ export const BasketListComponent = () =>
                         fontSize: '15px'
                     }
                 }}
-                style={{ height: '30px', boxSizing: 'border-box', marginBottom: '3px', marginTop: '5px', marginRight: '6px'}}
+                style={{ height: '30px', boxSizing: 'border-box', margin: '6px 5px 2px 5px'}}
             />
             <div style={{ height: '14px', width: '100%', backgroundColor: "white"}}></div>
             <div className="ag-theme-alpine" style={{ height: 'calc(100% - 45px)', width: 'calc(100%- 3px)'}}>

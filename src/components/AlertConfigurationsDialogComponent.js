@@ -1,11 +1,29 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Tooltip, Typography} from "@mui/material";
-import React from "react";
+import {Autocomplete,Button, Dialog,DialogActions, DialogContent, DialogTitle, Grid, TextField, Tooltip, Typography} from "@mui/material";
+import React, {useCallback, useState} from "react";
 import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 
-export const AlertConfigurationsDialogComponent = () =>
+export const AlertConfigurationsDialogComponent = ({ onCloseHandler , clientService }) =>
 {
+    const defaultAlertConfiguration =
+        {
+            alertConfigurationId: "",
+            alertName: "",
+            type: "",
+            frequency: "",
+            clientId: "",
+            desk: "",
+            side: "",
+            exchanges: "",
+            customizations: "",
+            isActive: "",
+        }
+
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const [alertConfigurationsDialogDisplay, setAlertConfigurationsDialogDisplay] = useRecoilState(alertConfigurationsDialogDisplayState);
+    const [alertConfiguration, setAlertConfiguration] = useState(defaultAlertConfiguration);
+
 
     const handleCancel = () =>
     {
@@ -15,6 +33,7 @@ export const AlertConfigurationsDialogComponent = () =>
     const handleSubmit = () =>
     {
         setAlertConfigurationsDialogDisplay(false);
+        onCloseHandler(alertConfiguration);
     }
 
     const handleClear = () =>
@@ -29,7 +48,13 @@ export const AlertConfigurationsDialogComponent = () =>
 
     const getTitle = () =>
     {
+        if(!selectedGenericGridRow)
+            return "Add New Alert Configuration";
 
+        if(selectedGenericGridRow?.alertConfigurationId)
+            return "Update Existing Alert Configuration";
+
+        return "Clone Existing Alert Configuration";
     }
 
     const canSubmit = () =>
@@ -37,11 +62,20 @@ export const AlertConfigurationsDialogComponent = () =>
 
     }
 
+    const handleInputChange = useCallback((name, value) =>
+    {
+        setAlertConfiguration(prevData => ({ ...prevData, [name]: value }));
+    }, []);
+
     return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '870px' } }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>
+                        <TextField className="alert-name" size='small' label='Enter the alert name' value={alertConfiguration.alertName} onChange={(e) => handleInputChange('blastName', e.target.value)} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px'}} required/>
+                        <Autocomplete className="alert-client" size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px'}}
+                                      getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
+                                      value={alertConfiguration.clientName} onChange={(_, newValue) => handleInputChange('clientName', newValue)} required />
                     </Grid>
                     <Grid item xs={6}>
                     </Grid>

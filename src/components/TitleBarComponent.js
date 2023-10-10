@@ -5,12 +5,10 @@ import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
-import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
 const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTools}) =>
 {
-    const handleChannel = () =>  window.command.openChannels();
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
     const handleMaximize = () => window.command.maximize(windowId);
@@ -25,7 +23,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
                 {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={`Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
-                    <IconButton className="title-bar-channel" style={{color:`${titleBarContextShareColour}`}} onClick={handleChannel}>
+                    <IconButton className="title-bar-channel" style={{color:`${titleBarContextShareColour}`}}>
                     <Lan/>
                     </IconButton>
                 </Tooltip>}
@@ -42,7 +40,7 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                         <CropSquareRoundedIcon/>
                     </IconButton>
                 </Tooltip>
-                <Tooltip title={"Maximize window"}>
+                <Tooltip title={"Close window"}>
                     <IconButton className="title-bar-close" onClick={handleClose}>
                         <Close/>
                     </IconButton>
