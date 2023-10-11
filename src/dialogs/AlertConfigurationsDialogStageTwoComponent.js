@@ -4,12 +4,27 @@ import React from "react";
 export const AlertConfigurationsDialogStageTwoComponent = ({clientService, handleInputChange, alertConfiguration}) =>
 {
     return (<div className={"alert-config-stage-two"}>
-                <TextField className="alert-desk" style={{marginTop: '5px', marginBottom: '5px', width:'500px'}} size='small' label='Select the desk'
-                           onChange={(event) => handleInputChange('desk', event.target.value)} select value={alertConfiguration.desk}>
-                    <MenuItem value='LT'>Low touch</MenuItem>
-                    <MenuItem value='PT'>Program Trading</MenuItem>
-                    <MenuItem value='HT'>High Touch</MenuItem>
-                    <MenuItem value='FACIL'>Facilitation</MenuItem>
+                <TextField className="alert-market" style={{marginTop: '10px', marginBottom: '5px', width:'200px', marginRight:'200px'}} size='small' label='Select the market'
+                           onChange={(event) => handleInputChange('desk', event.target.value)} select value={alertConfiguration.market}>
+                    <MenuItem value='HK'>Hong Kong</MenuItem>
+                    <MenuItem value='TK'>Tokyo</MenuItem>
+                    <MenuItem value='SG'>Singapore</MenuItem>
+                    <MenuItem value='AU'>Australia</MenuItem>
+                    <MenuItem value='IN'>India</MenuItem>
+                    <MenuItem value='KR'>Korea</MenuItem>
                 </TextField>
-        </div>);
+                <TextField className="alert-configurations-adv-min" size='small' value={alertConfiguration.advMin}
+                           onChange={(e) => handleInputChange('advMin', e.target.value)} margin='normal' label='ADV% Min'
+                           style={{marginTop: '5px', marginBottom: '5px', width:'150px', marginRight:'10px'}}/>
+                <TextField className="alert-configurations-adv-max" size='small' value={alertConfiguration.advMax}
+                           onChange={(e) => handleInputChange('advMax', e.target.value)} margin='normal' label='ADV% Max'
+                           style={{marginTop: '5px', marginBottom: '5px', width:'150px', marginRight:'200px'}}/>
+
+                <TextField className="alert-configurations-notional-min" size='small' value={alertConfiguration.notionalMin}
+                           onChange={(e) => handleInputChange('notionalMin', e.target.value)} margin='normal' label='Notional Min'
+                           style={{marginTop: '5px', marginBottom: '5px', width:'150px', marginRight:'10px'}}/>
+                <TextField className="alert-configurations-notional-max" size='small' value={alertConfiguration.notionalMax}
+                           onChange={(e) => handleInputChange('notionalMax', e.target.value)} margin='normal' label='Notional Max'
+                           style={{marginTop: '5px', marginBottom: '5px', width:'150px', marginRight:'200px'}}/>
+            </div>);
 };

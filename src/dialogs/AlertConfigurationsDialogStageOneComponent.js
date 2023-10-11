@@ -5,7 +5,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
 {
     return (
         <div className={"alert-config-stage-one"}>
-            <TextField className="alert-name" size='small' label='Enter the alert name' value={alertConfiguration.alertName}
+            <TextField className="alert-configurations-name" size='small' label='Enter the alert name' value={alertConfiguration.alertName}
                        onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'
                        style={{marginTop: '10px', marginBottom: '5px', width:'500px'}} required/>
 
@@ -14,7 +14,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
                           getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
                           onChange={(_, newValue) => handleInputChange('clientName', newValue)} required />
 
-            <TextField className="alert-desk" style={{marginTop: '5px', marginBottom: '5px', width:'500px'}} size='small' label='Select the desk'
+            <TextField className="alert-configurations-desk" style={{marginTop: '5px', marginBottom: '5px', width:'200px', marginRight: '200px'}} size='small' label='Select the desk'
                        onChange={(event) => handleInputChange('desk', event.target.value)} select value={alertConfiguration.desk}>
                 <MenuItem value='LT'>Low touch</MenuItem>
                 <MenuItem value='PT'>Program Trading</MenuItem>
@@ -22,7 +22,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
                 <MenuItem value='FACIL'>Facilitation</MenuItem>
             </TextField>
 
-            <TextField className="alert-side" stye={{marginTop: '5px', marginBottom: '5px', width:'500px'}} size='small' label='Select the side'
+            <TextField className="alert-configurations-side" style={{marginTop: '5px', marginBottom: '5px', width: '200px', marginRight: '200px'}} size='small' label='Select the side'
                        onChange={(event) => handleInputChange('side', event.target.value)} select value={alertConfiguration.side}>
                 <MenuItem value='N/A'>Not Applicable</MenuItem>
                 <MenuItem value='Sell'>Sell</MenuItem>

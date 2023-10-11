@@ -19,9 +19,13 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         clientId: "",
         desk: "",
         side: "",
-        exchanges: "",
+        markets: "",
         customizations: "",
         isActive: "true",
+        advMin: "",
+        advMax: "",
+        notionalMin: "",
+        notionalMax: ""
     };
 
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -55,15 +59,15 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         });
     }
 
-    const getTitle = () =>
+    const getTitle = (stage) =>
     {
         if(!selectedGenericGridRow)
-            return "Add New Alert Configuration";
+            return "Add New Alert Configuration" + stage;
 
         if(selectedGenericGridRow?.alertConfigurationId)
-            return "Update Existing Alert Configuration";
+            return "Update Existing Alert Configuration" + stage;
 
-        return "Clone Existing Alert Configuration";
+        return "Clone Existing Alert Configuration" + stage;
     }
 
     const handleInputChange = useCallback((name, value) =>
@@ -71,8 +75,10 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         setAlertConfiguration(prevData => ({ ...prevData, [name]: value }));
     }, []);
 
+    const stage = ` [ stage: ${currentStage} ]`;
+
     return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '570px' } }}>
-                <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
+                <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle(stage)}</DialogTitle>
                 <DialogContent>
                     {currentStage === 1 ?<AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/>: ""}
                     {currentStage === 2 ?<AlertConfigurationsDialogStageTwoComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/>:""}
