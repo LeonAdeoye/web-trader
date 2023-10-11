@@ -1,7 +1,7 @@
 import {MenuItem, TextField} from "@mui/material";
 import React from "react";
 
-export const AlertConfigurationsDialogStageTwoComponent = ({clientService, handleInputChange, alertConfiguration}) =>
+export const AlertConfigurationsDialogStageTwoComponent = ({handleInputChange, alertConfiguration}) =>
 {
     return (<div className={"alert-config-stage-two"}>
                 <TextField className="alert-market" style={{marginTop: '10px', marginBottom: '5px', width:'200px', marginRight:'200px'}} size='small' label='Select the market'
@@ -13,6 +13,7 @@ export const AlertConfigurationsDialogStageTwoComponent = ({clientService, handl
                     <MenuItem value='IN'>India</MenuItem>
                     <MenuItem value='KR'>Korea</MenuItem>
                 </TextField>
+
                 <TextField className="alert-configurations-adv-min" size='small' value={alertConfiguration.advMin}
                            onChange={(e) => handleInputChange('advMin', e.target.value)} margin='normal' label='ADV% Min'
                            style={{marginTop: '5px', marginBottom: '5px', width:'150px', marginRight:'10px'}}/>

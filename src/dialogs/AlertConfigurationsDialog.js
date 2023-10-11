@@ -6,6 +6,8 @@ import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {AlertConfigurationsDialogStageOneComponent} from "../dialogs/AlertConfigurationsDialogStageOneComponent";
 import {AlertConfigurationsDialogStageTwoComponent} from "../dialogs/AlertConfigurationsDialogStageTwoComponent";
+import {AlertConfigurationsDialogStageThreeComponent} from "./AlertConfigurationsDialogStageThreeComponent";
+import {AlertConfigurationsDialogStageFourComponent} from "./AlertConfigurationsDialogStageFourComponent";
 
 
 export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
@@ -25,7 +27,8 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         advMin: "",
         advMax: "",
         notionalMin: "",
-        notionalMax: ""
+        notionalMax: "",
+        messageTemplate: ""
     };
 
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -62,12 +65,12 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
     const getTitle = (stage) =>
     {
         if(!selectedGenericGridRow)
-            return "Add New Alert Configuration" + stage;
+            return "Add New Alert Configuration Wizard" + stage;
 
         if(selectedGenericGridRow?.alertConfigurationId)
-            return "Update Existing Alert Configuration" + stage;
+            return "Update Existing Alert Configuration Wizard" + stage;
 
-        return "Clone Existing Alert Configuration" + stage;
+        return "Clone Existing Alert Configuration Wizard" + stage;
     }
 
     const handleInputChange = useCallback((name, value) =>
@@ -75,13 +78,16 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         setAlertConfiguration(prevData => ({ ...prevData, [name]: value }));
     }, []);
 
-    const stage = ` [ stage: ${currentStage} ]`;
+    const stage = ` [stage: ${currentStage}]`;
+    const maxStage = 4;
 
     return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '570px' } }}>
                 <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle(stage)}</DialogTitle>
                 <DialogContent>
-                    {currentStage === 1 ?<AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/>: ""}
-                    {currentStage === 2 ?<AlertConfigurationsDialogStageTwoComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/>:""}
+                    {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                    {currentStage === 2 ? <AlertConfigurationsDialogStageTwoComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                    {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                    {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                 </DialogContent>
                 <DialogActions style={{height: '35px'}}>
                     <Tooltip title={<Typography fontSize={12}>Cancel and close configuration dialog window.</Typography>}>
@@ -89,7 +95,7 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
                             <Button className="dialog-action-button" color="primary" variant='contained' onClick={handleCancel}>Cancel</Button>
                         </span>
                     </Tooltip>
-                    {currentStage < 2 ? <Tooltip title={<Typography fontSize={12}>Go to next configuration stage.</Typography>}>
+                    {currentStage < maxStage ? <Tooltip title={<Typography fontSize={12}>Go to next configuration stage.</Typography>}>
                         <span>
                             <Button className="dialog-action-button next" color="primary" variant='contained' onClick={handleNext}>Next</Button>
                         </span>
@@ -99,7 +105,7 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
                             <Button className="dialog-action-button next" color="primary" variant='contained' onClick={handleBack}>Back</Button>
                         </span>
                     </Tooltip>: ""}
-                    {currentStage === 2 ? <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>
+                    {currentStage === maxStage ? <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>
                         <span>
                             <Button className="dialog-action-button submit" color="primary" variant='contained' onClick={handleSubmit}>Submit</Button>
                         </span>
