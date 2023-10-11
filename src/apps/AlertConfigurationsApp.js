@@ -9,6 +9,7 @@ import {AlertConfigurationsService} from "../services/AlertConfigurationsService
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
+import CheckboxRenderer from "../components/CheckboxRenderer";
 
 export const AlertConfigurationsApp = () =>
 {
@@ -31,7 +32,7 @@ export const AlertConfigurationsApp = () =>
         {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 110, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
         {headerName: "Customizations", field: "client", sortable: true, minWidth: 150, width: 150, filter: true},
-        {headerName: "Is Active", field: "isActive", sortable: true, minWidth: 90, width: 90, filter: true},
+        {headerName: "Is Active", field: "isActive", sortable: false, minWidth: 90, width: 90, filter: false, cellRenderer: CheckboxRenderer},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
 
@@ -131,8 +132,8 @@ export const AlertConfigurationsApp = () =>
 
         loadData().then(() =>
         {
-            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejected", time: "10:00", priority: "High", clientId: "Client 1"},
-                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejects", time: "10:00", priority: "High", clientId: null}])
+            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejected", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
+                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejects", time: "10:00", priority: "High", clientId: null, isActive: false}])
         });
     }, [])
 
