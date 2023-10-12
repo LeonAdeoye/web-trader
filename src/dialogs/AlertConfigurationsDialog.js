@@ -10,7 +10,7 @@ import {AlertConfigurationsDialogStageThreeComponent} from "./AlertConfiguration
 import {AlertConfigurationsDialogStageFourComponent} from "./AlertConfigurationsDialogStageFourComponent";
 
 
-export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
+export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, alertConfigurationsService}) =>
 {
     const defaultAlertConfiguration =
     {
@@ -19,9 +19,9 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
         type: "",
         frequency: "",
         clientId: "",
-        desk: "",
-        side: "",
-        markets: "",
+        desk: "HT",
+        side: "Not Applicable",
+        markets: "HK",
         customizations: "",
         isActive: "true",
         advMin: "",
@@ -86,7 +86,8 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
                 <DialogContent>
                     {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                     {currentStage === 2 ? <AlertConfigurationsDialogStageTwoComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
-                    {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                    {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}
+                                                                                        alertConfigurationsService={alertConfigurationsService}/> : ""}
                     {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                 </DialogContent>
                 <DialogActions style={{height: '35px'}}>
@@ -95,14 +96,14 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService }) =>
                             <Button className="dialog-action-button" color="primary" variant='contained' onClick={handleCancel}>Cancel</Button>
                         </span>
                     </Tooltip>
-                    {currentStage < maxStage ? <Tooltip title={<Typography fontSize={12}>Go to next configuration stage.</Typography>}>
-                        <span>
-                            <Button className="dialog-action-button next" color="primary" variant='contained' onClick={handleNext}>Next</Button>
-                        </span>
-                    </Tooltip>: ""}
                     {currentStage > 1 ? <Tooltip title={<Typography fontSize={12}>Go back to previous configuration stage.</Typography>}>
                         <span>
                             <Button className="dialog-action-button next" color="primary" variant='contained' onClick={handleBack}>Back</Button>
+                        </span>
+                    </Tooltip>: ""}
+                    {currentStage < maxStage ? <Tooltip title={<Typography fontSize={12}>Go to next configuration stage.</Typography>}>
+                        <span>
+                            <Button className="dialog-action-button next" color="primary" variant='contained' onClick={handleNext}>Next</Button>
                         </span>
                     </Tooltip>: ""}
                     {currentStage === maxStage ? <Tooltip title={<Typography fontSize={12}>Submit the changes.</Typography>}>

@@ -4,13 +4,19 @@ import {isEmptyString} from "../utilities";
 export class AlertConfigurationsService
 {
     #alertConfigurations;
+    #alertTypes;
     #loggerService;
 
     constructor()
     {
         this.#alertConfigurations = [];
+        this.#alertTypes =
+        [
+            {type: "Order Not Complete", classification: "Order", explanation: "Live order quantity more than cumulative quantity after reference time.", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > referenceTime", messageTemplate: "After reference time: #{referenceTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There is #{remainingQuantity} remaining."},
+            {type: "Algo Expired With Executions Outstanding", classification: "Order", explanation: "Order with order quantity more than cumulative quantity after ALgo expiry", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > algoEndTime", messageTemplate: "After Algo end time: #{algoEndTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There is #{remainingQuantity} remaining."}
+        ];
         this.#loggerService = new LoggerService(this.constructor.name);
-    }
+    };
 
     loadAlertConfigurations = async (ownerId) =>
     {
@@ -30,7 +36,24 @@ export class AlertConfigurationsService
                     this.#loggerService.logInfo(`Loaded zero alertConfigurations for owner: ${ownerId}`);
             })
             .catch(err => this.#loggerService.logError(err));
-    }
+    };
+
+    loadAlertTypes = async () =>
+    {
+        await fetch(`http://localhost:20011/alertConfigurations/alertTypes`)
+            .then(response => response.json())
+            .then(data =>
+            {
+                if(data.length > 0)
+                {
+                    this.#alertTypes = data;
+                    this.#loggerService.logInfo(`Loaded ${data.length} alert types.`);
+                }
+                else
+                    this.#loggerService.logInfo(`Loaded zero alert types`);
+            })
+            .catch(err => this.#loggerService.logError(err));
+    };
 
     addNewAlertConfiguration = async (newAlertConfigurationsConfiguration) =>
     {
@@ -47,12 +70,12 @@ export class AlertConfigurationsService
                 return alertConfigurationsResponse;
             })
             .catch(error => this.#loggerService.logError(error));
-    }
+    };
 
     clear = () =>
     {
         this.#alertConfigurations.clear();
-    }
+    };
 
     deleteAlertConfiguration = async (ownerId, alertConfigurationsId) =>
     {
@@ -70,7 +93,7 @@ export class AlertConfigurationsService
                 }
             })
             .catch(error => this.#loggerService.logError(error));
-    }
+    };
 
     updateAlertConfiguration = async (updatedAlertConfigurationsConfiguration) =>
     {
@@ -94,10 +117,15 @@ export class AlertConfigurationsService
                 this.#loggerService.logInfo(`Successfully updated alertConfigurations configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
-    }
+    };
 
     getAlertConfigurations = () =>
     {
         return this.#alertConfigurations;
-    }
+    };
+
+    getTypes = () =>
+    {
+        return this.#alertTypes;
+    };
 }

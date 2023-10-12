@@ -150,7 +150,7 @@ export const AlertConfigurationsApp = () =>
                                       columnDefs={columnDefs}
                                       gridData={alertConfigurations}
                                       handleAction={handleAction}/>
-                <AlertConfigurationsDialog onCloseHandler={onCrudCloseHandler} clientService={clientService}/>
+                <AlertConfigurationsDialog onCloseHandler={onCrudCloseHandler} clientService={clientService} alertConfigurationsService={alertConfigurationsService}/>
             </div>
         </>
     );
