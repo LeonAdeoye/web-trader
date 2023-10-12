@@ -8,7 +8,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
                        onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'/>
 
             <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />} size='small'
-                           value={alertConfiguration.clientName} className="alert-client"
+                           value={alertConfiguration.clientName} className="alert-configurations-client"
                           getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
                           onChange={(_, newValue) => handleInputChange('clientName', newValue)} required />
 
@@ -38,6 +38,12 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
                 <MenuItem value='AU'>Australia</MenuItem>
                 <MenuItem value='IN'>India</MenuItem>
                 <MenuItem value='KR'>Korea</MenuItem>
+            </TextField>
+            <TextField className="alert-configurations-priority"  size='small' label='Select the priority'
+                       onChange={(event) => handleInputChange('priority', event.target.value)} select value={alertConfiguration.priority}>
+                <MenuItem value='High'>High</MenuItem>
+                <MenuItem value='Medium'>Medium</MenuItem>
+                <MenuItem value='Low'>Low</MenuItem>
             </TextField>
         </div>);
 };

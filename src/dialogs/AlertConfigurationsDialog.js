@@ -29,7 +29,8 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, aler
         advMax: "",
         notionalMin: "",
         notionalMax: "",
-        messageTemplate: ""
+        messageTemplate: "",
+        priority: "High"
     };
 
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
