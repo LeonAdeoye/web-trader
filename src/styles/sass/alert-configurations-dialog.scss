@@ -1,0 +1,82 @@
+.alert-config-stage-one
+{
+  .alert-configurations-name,
+  {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    width: 500px;
+  }
+  .alert-configurations-desk,
+  .alert-configurations-side,
+  .alert-configurations-market,
+  .alert-client,
+  .alert-configurations-type
+  {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 500px;
+  }
+}
+
+.alert-config-stage-two {
+  .alert-configurations-adv-min,
+  .alert-configurations-adv-max,
+  .alert-configurations-notional-min,
+  .alert-configurations-notional-max {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 150px;
+    margin-right: 10px;
+  }
+
+  .dialog-action-button {
+    &.AND, &.OR {
+      color: white;
+    }
+  }
+}
+
+.alert-config-stage-three
+{
+  .alert-configurations-type
+  {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 600px
+  }
+
+  .alert-configurations-classification,
+  .alert-configurations-explanation,
+  .alert-configurations-expression,
+  .alert-configurations-message-template
+  {
+    .alert-configurations-value
+    {
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    span
+    {
+      font-weight: 800;
+      font-size: 13px;
+    }
+  }
+
+  Card {
+    width: 600px;
+    height: 450px;
+  }
+}
+
+.alert-config-stage-four
+{
+  .alert-configurations-message-template
+  {
+    margin-top: 10px;
+    width: 600px;
+    height: 250px;
+    .MuiInputBase-input {
+      font-size: 14px;
+    }
+  }
+}

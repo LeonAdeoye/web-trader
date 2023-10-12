@@ -8,6 +8,7 @@ import {AlertConfigurationsDialogStageOneComponent} from "../dialogs/AlertConfig
 import {AlertConfigurationsDialogStageTwoComponent} from "../dialogs/AlertConfigurationsDialogStageTwoComponent";
 import {AlertConfigurationsDialogStageThreeComponent} from "./AlertConfigurationsDialogStageThreeComponent";
 import {AlertConfigurationsDialogStageFourComponent} from "./AlertConfigurationsDialogStageFourComponent";
+import {AlertConfigurationsDialogStageFiveComponent} from "./AlertConfigurationsDialogStageFiveComponent";
 
 
 export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, alertConfigurationsService}) =>
@@ -19,9 +20,9 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, aler
         type: "",
         frequency: "",
         clientId: "",
-        desk: "HT",
-        side: "Not Applicable",
-        markets: "HK",
+        desk: "ALL",
+        side: "N/A",
+        market: "ALL",
         customizations: "",
         isActive: "true",
         advMin: "",
@@ -62,15 +63,15 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, aler
         });
     }
 
-    const getTitle = (stage) =>
+    const getTitle = () =>
     {
         if(!selectedGenericGridRow)
-            return "Add New Alert Configuration Wizard" + stage;
+            return "Add New Alert Configuration Wizard";
 
         if(selectedGenericGridRow?.alertConfigurationId)
-            return "Update Existing Alert Configuration Wizard" + stage;
+            return "Update Existing Alert Configuration Wizard";
 
-        return "Clone Existing Alert Configuration Wizard" + stage;
+        return "Clone Existing Alert Configuration Wizard";
     }
 
     const handleInputChange = useCallback((name, value) =>
@@ -79,16 +80,16 @@ export const AlertConfigurationsDialog = ({ onCloseHandler , clientService, aler
     }, []);
 
     const stage = ` [stage: ${currentStage}]`;
-    const maxStage = 4;
+    const maxStage = 5;
 
-    return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '570px' } }}>
-                <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle(stage)}</DialogTitle>
+    return (<Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={alertConfigurationsDialogDisplay} onClose={handleCancel} PaperProps={{ style: { width: '650px', height: '450px' } }}>
+                <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
                 <DialogContent>
                     {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                     {currentStage === 2 ? <AlertConfigurationsDialogStageTwoComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
-                    {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}
-                                                                                        alertConfigurationsService={alertConfigurationsService}/> : ""}
+                    {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration} alertConfigurationsService={alertConfigurationsService}/> : ""}
                     {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                    {currentStage === 5 ? <AlertConfigurationsDialogStageFiveComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                 </DialogContent>
                 <DialogActions style={{height: '35px'}}>
                     <Tooltip title={<Typography fontSize={12}>Cancel and close configuration dialog window.</Typography>}>

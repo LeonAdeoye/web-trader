@@ -12,8 +12,8 @@ export class AlertConfigurationsService
         this.#alertConfigurations = [];
         this.#alertTypes =
         [
-            {type: "Order Not Complete", classification: "Order", explanation: "Live order quantity more than cumulative quantity after reference time.", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > referenceTime", messageTemplate: "After reference time: #{referenceTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There is #{remainingQuantity} remaining."},
-            {type: "Algo Expired With Executions Outstanding", classification: "Order", explanation: "Order with order quantity more than cumulative quantity after ALgo expiry", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > algoEndTime", messageTemplate: "After Algo end time: #{algoEndTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There is #{remainingQuantity} remaining."}
+            {type: "Order Not Complete", classification: "Order", explanation: "Live order quantity more than cumulative quantity after reference time.", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > referenceTime", messageTemplate: "After reference time: #{referenceTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There are #{remainingQuantity} remaining."},
+            {type: "Algo Expired With Executions Outstanding", classification: "Order", explanation: "Order with order quantity more than cumulative quantity after Algo expiry", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > algoEndTime", messageTemplate: "After Algo end time: #{algoEndTime} the order: #{orderId} for #{stockCode} with size: #{quantity} at price: #{price} is NOT complete. There are #{remainingQuantity} remaining."}
         ];
         this.#loggerService = new LoggerService(this.constructor.name);
     };

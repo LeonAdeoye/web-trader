@@ -1,10 +1,13 @@
 import {Autocomplete, Card, CardContent, TextField, Typography} from "@mui/material";
+import {alertConfigurationsDialogMessageTemplateState} from "../atoms/dialog-state";
 import React from "react";
-import {blue} from "@mui/material/colors";
+import {useRecoilState} from "recoil";
 
 export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfiguration, alertConfigurationsService}) =>
 {
     const [alertType, setAlertType] = React.useState({});
+    const [alertConfigurationsDialogMessageTemplate, setAlertConfigurationsDialogMessageTemplate] = useRecoilState(alertConfigurationsDialogMessageTemplateState);
+
 
     const findAlertByType = (type) =>
     {
@@ -14,6 +17,7 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
     const handleTypeChange = (_, newValue) =>
     {
         setAlertType(findAlertByType(newValue));
+        setAlertConfigurationsDialogMessageTemplate(findAlertByType(newValue)?.messageTemplate || '');
     };
 
     return (
@@ -21,51 +25,49 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
             <Autocomplete
                 renderInput={(params) => <TextField {...params} label='Select the alert type' />}
                 size='small'
-                style={{marginTop: '10px', marginBottom: '10px', width:'500px' }}
                 value={alertConfiguration.type}
-                className="alert-type"
+                className="alert-configurations-type"
                 getOptionLabel={(option) => String(option)}
                 options={alertConfigurationsService.getTypes().map(alert => alert.type)}
                 onChange={handleTypeChange}
                 required />
-            <Card sx={{ minWidth: 300, minHeight: 300, backgroundColor: blue }}>
+            <Card>
                 <CardContent>
-                    <div style={{marginBottom: '20px'}}>
-                        <Typography component="span" sx={{ fontWeight: 'bold', fontSize: 16}}>
+                    <div className="alert-configurations-classification">
+                        <Typography component="span">
                             {`Classification:   `}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 14}}>
-                            {alertType.classification || ''}
+                        <Typography className="alert-configurations-value">
+                            {alertType?.classification || ''}
                         </Typography>
                     </div>
-                    <div style={{marginBottom: '20px'}}>
-                        <Typography component="span" sx={{ fontWeight: 'bold', fontSize: 16}}>
+                    <div className="alert-configurations-explanation">
+                        <Typography component="span">
                             {`Explanation:   `}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 14}}>
-                            {alertType.explanation || ''}
+                        <Typography className="alert-configurations-value">
+                            {alertType?.explanation || ''}
                         </Typography>
                     </div>
-                    <div style={{marginBottom: '20px'}}>
-                        <Typography component="span" sx={{ fontWeight: 'bold', fontSize: 16}}>
+                    <div className="alert-configurations-expression">
+                        <Typography component="span">
                             {`Expression:   `}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 14}}>
-                            {alertType.expression || ''}
+                        <Typography className="alert-configurations-value">
+                            {alertType?.expression || ''}
                         </Typography>
                     </div>
-                    <div>
-                        <Typography component="span" sx={{ fontWeight: 'bold', fontSize: 16}}>
+                    <div className="alert-configurations-message-template">
+                        <Typography component="span">
                             {`Message Template:   `}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 14}}>
-                            {alertType.messageTemplate || ''}
+                        <Typography className="alert-configurations-value">
+                            {alertType?.messageTemplate || ''}
                         </Typography>
                     </div>
                 </CardContent>
             </Card>
         </div>
     );
-
 };
 
