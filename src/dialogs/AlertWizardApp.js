@@ -9,8 +9,6 @@ import {AlertConfigurationsService} from "../services/AlertConfigurationsService
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import TitleBarComponent from "../components/TitleBarComponent";
-import {useRecoilState} from "recoil";
-import {selectedGenericGridRowState} from "../atoms/component-state";
 import '../styles/css/main.css';
 
 export const AlertWizardApp = () =>
@@ -37,12 +35,11 @@ export const AlertWizardApp = () =>
 
     const maxStage = 5;
     const [currentStage, setCurrentStage] = useState(1);
-    const [alertConfiguration, setAlertConfiguration] = useState(defaultAlertConfiguration);
+    const [alertConfiguration] = useState(defaultAlertConfiguration);
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
     const loggerService = useRef(new LoggerService(AlertWizardApp.name)).current;
     const clientService = useRef(new ClientService()).current;
     const windowId = useMemo(() => window.command.getWindowId("alert-wizard"), []);
-    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const handleCancel = () =>
     {
@@ -70,17 +67,6 @@ export const AlertWizardApp = () =>
     const handleInputChange = useCallback((name, value) =>
     {
     }, []);
-
-    const getTitle = () =>
-    {
-        if(!selectedGenericGridRow)
-            return "Add New Alert Configuration Wizard";
-
-        if(selectedGenericGridRow?.alertConfigurationId)
-            return "Update Existing Alert Configuration Wizard";
-
-        return "Clone Existing Alert Configuration Wizard";
-    };
 
     useEffect(() =>
     {

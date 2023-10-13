@@ -1,13 +1,9 @@
 import {Card, CardContent, List, ListItem, ListItemButton, ListItemText, TextField} from "@mui/material";
-import {alertConfigurationsDialogMessageTemplateState} from "../atoms/dialog-state";
 import React, {useEffect, useRef, useState} from "react";
-import {useRecoilState} from "recoil";
 
 export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfiguration, alertConfigurationsService}) =>
 {
-    const [alertType, setAlertType] = useState("");
-    const [isAlertTypeVisible, setIsAlertTypeVisible] = useState(false);
-    const [alertConfigurationsDialogMessageTemplate, setAlertConfigurationsDialogMessageTemplate] = useRecoilState(alertConfigurationsDialogMessageTemplateState);
+    const [, setIsAlertTypeVisible] = useState(false);
     const [selectedAlert, setSelectedAlert] = useState("");
     const listItemRef = useRef(null);
 
@@ -21,23 +17,11 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
         }
     }, []);
 
-    const findAlertByType = (type) =>
-    {
-        return alertConfigurationsService.getTypes().find(alert => alert.type === type);
-    };
-
     const handleAlertTypeSelection = (alertConfig) =>
     {
         setSelectedAlert(alertConfig);
         alertConfiguration.type = alert.type;
     }
-
-    const handleTypeChange = (_, newValue) =>
-    {
-        setIsAlertTypeVisible(true);
-        setAlertType(findAlertByType(newValue));
-        setAlertConfigurationsDialogMessageTemplate(findAlertByType(newValue)?.messageTemplate || '');
-    };
 
     const handle = (value) => setSelectedAlert(value);
 

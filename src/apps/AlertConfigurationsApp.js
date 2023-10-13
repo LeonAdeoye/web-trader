@@ -88,14 +88,6 @@ export const AlertConfigurationsApp = () =>
         }
     }
 
-    const onCrudCloseHandler = async (alertConfiguration) =>
-    {
-        if(alertConfiguration.alertConfigurationId)
-            await updateAlertConfiguration({...alertConfiguration, ownerId});
-        else
-            await saveAlertConfiguration({...alertConfiguration, ownerId});
-    }
-
     const handleAction = async (action, alertConfigurationId) =>
     {
         switch(action)
