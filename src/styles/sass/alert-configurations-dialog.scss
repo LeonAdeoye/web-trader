@@ -19,19 +19,23 @@
   }
 }
 
-.alert-config-stage-two {
+.alert-config-stage-two
+{
   .alert-configurations-adv-min,
   .alert-configurations-adv-max,
   .alert-configurations-notional-min,
-  .alert-configurations-notional-max {
+  .alert-configurations-notional-max
+  {
     margin-top: 10px;
     margin-bottom: 10px;
     width: 150px;
     margin-right: 10px;
   }
 
-  .dialog-action-button {
-    &.AND, &.OR {
+  .dialog-action-button
+  {
+    &.AND, &.OR
+    {
       color: white;
     }
   }
@@ -63,8 +67,9 @@
     }
   }
 
-  Card {
-    width: 600px;
+  Card
+  {
+    width: 400px;
     height: 450px;
   }
 }
@@ -73,10 +78,11 @@
 {
   .alert-configurations-message-template
   {
-    margin-top: 10px;
-    width: 600px;
-    height: 250px;
-    .MuiInputBase-input {
+    margin: 10px;
+    width: 400px;
+    height: 200px;
+    .MuiInputBase-input
+    {
       font-size: 14px;
     }
   }

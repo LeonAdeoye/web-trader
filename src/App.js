@@ -22,6 +22,7 @@ import {BasketChartApp} from "./apps/BasketChartApp";
 import {ClientInterestsApp} from "./apps/ClientInterestsApp";
 import {BlastsApp} from "./apps/BlastsApp";
 import {AlertConfigurationsApp} from "./apps/AlertConfigurationsApp";
+import {AlertWizardApp} from "./dialogs/AlertWizardApp";
 
 
 const App = ({}) =>
@@ -49,7 +50,8 @@ const App = ({}) =>
             { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp},
             { name: 'Client Interests', path: '/client-interests', component: ClientInterestsApp},
             { name: 'Blasts', path: '/blasts', component: BlastsApp},
-            { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp}
+            { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
+            { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp}
         ];
 
     useEffect( () =>

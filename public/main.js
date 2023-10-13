@@ -76,12 +76,12 @@ const createWindow = () =>
     ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
 }
 
-const handleOpenAppMessage = (event, {url, title}) =>
+const handleOpenAppMessage = (event, {url, title, modalFlag}) =>
 {
     let childWindow = new BrowserWindow({
         parent: mainWindow,
         title: childWindowTitleMap.has(title) ? `${title} (${childWindowTitleMap.size})` : title,
-        modal: false,
+        modal: modalFlag !== undefined ? modalFlag : false,
         show: true,
         frame: false,
         width: 800,

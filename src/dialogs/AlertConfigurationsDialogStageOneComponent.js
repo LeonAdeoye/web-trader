@@ -3,34 +3,34 @@ import React from "react";
 
 export const AlertConfigurationsDialogStageOneComponent = ({clientService, handleInputChange, alertConfiguration}) =>
 {
-    return (<div className={"alert-config-stage-one"}>
+    return (
+        <div className={"alert-config-stage-one"}>
             <TextField className="alert-configurations-name" size='small' label='Enter the name of the new alert...' value={alertConfiguration.alertName}
                        onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'/>
-
-            <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />} size='small'
-                           value={alertConfiguration.clientName} className="alert-configurations-client"
+            <br/>
+            <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />}
+                          value={alertConfiguration.clientName} className="alert-configurations-client" size='small' required
                           getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
-                          onChange={(_, newValue) => handleInputChange('clientName', newValue)} required />
-
-            <TextField className="alert-configurations-desk"  size='small' label='Select the desk'
-                       onChange={(event) => handleInputChange('desk', event.target.value)} select value={alertConfiguration.desk}>
+                          onChange={(_, newValue) => handleInputChange('clientName', newValue)}/>
+            <TextField className="alert-configurations-desk"  size='small' label='Select the desk' select value={alertConfiguration.desk}
+                       onChange={(event) => handleInputChange('desk', event.target.value)}>
                 <MenuItem value='ALL'>All Desks</MenuItem>
                 <MenuItem value='LT'>Low Touch</MenuItem>
                 <MenuItem value='PT'>Program Trading</MenuItem>
                 <MenuItem value='HT'>High Touch</MenuItem>
                 <MenuItem value='FACIL'>Facilitation</MenuItem>
             </TextField>
-
-            <TextField className="alert-configurations-side"  size='small' label='Select the side'
-                       onChange={(event) => handleInputChange('side', event.target.value)} select value={alertConfiguration.side}>
+            <br/>
+            <TextField className="alert-configurations-side"  size='small' label='Select the side' select value={alertConfiguration.side}
+                       onChange={(event) => handleInputChange('side', event.target.value)}>
                 <MenuItem value='N/A'>Not Applicable</MenuItem>
                 <MenuItem value='Sell'>Sell</MenuItem>
                 <MenuItem value='shortSell'>Short Sell</MenuItem>
                 <MenuItem value='Buy'>Buy</MenuItem>
             </TextField>
-
-            <TextField className="alert-configurations-market"  size='small' label='Select the market'
-                       onChange={(event) => handleInputChange('market', event.target.value)} select value={alertConfiguration.market}>
+            <br/>
+            <TextField className="alert-configurations-market"  size='small' label='Select the market' select value={alertConfiguration.market}
+                       onChange={(event) => handleInputChange('market', event.target.value)}>
                 <MenuItem value='ALL'>All Markets</MenuItem>
                 <MenuItem value='HK'>Hong Kong</MenuItem>
                 <MenuItem value='TK'>Tokyo</MenuItem>
@@ -39,8 +39,9 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
                 <MenuItem value='IN'>India</MenuItem>
                 <MenuItem value='KR'>Korea</MenuItem>
             </TextField>
-            <TextField className="alert-configurations-priority"  size='small' label='Select the priority'
-                       onChange={(event) => handleInputChange('priority', event.target.value)} select value={alertConfiguration.priority}>
+            <br/>
+            <TextField className="alert-configurations-priority"  size='small' label='Select the priority' select value={alertConfiguration.priority}
+                       onChange={(event) => handleInputChange('priority', event.target.value)}>
                 <MenuItem value='High'>High</MenuItem>
                 <MenuItem value='Medium'>Medium</MenuItem>
                 <MenuItem value='Low'>Low</MenuItem>

@@ -18,7 +18,7 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('launchPad', {
-    openApp: (url, title) => ipcRenderer.send('openApp', url, title)
+    openApp: (url, title, modalFlag) => ipcRenderer.send('openApp', url, title, modalFlag)
 });
 
 contextBridge.exposeInMainWorld('command', {

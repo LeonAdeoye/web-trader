@@ -3,7 +3,6 @@ import TitleBarComponent from "../components/TitleBarComponent";
 import {useRecoilState} from "recoil";
 import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
-import {AlertConfigurationsDialog} from "../dialogs/AlertConfigurationsDialog";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {selectedGenericGridRowState} from "../atoms/component-state";
@@ -135,12 +134,18 @@ export const AlertConfigurationsApp = () =>
             setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejected", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
                 {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejects", time: "10:00", priority: "High", clientId: null, isActive: false}])
         });
-    }, [])
+    }, []);
+
+    const launchWizardApp = () =>
+    {
+        //TODO move to config
+        window.launchPad.openApp({url: 'http://localhost:3000/alert-wizard', title: "Alert Configurations Wizard", modalFlag: true});
+    }
 
     return(
         <>
             <TitleBarComponent title="Alert Configurations" windowId={windowId} addButtonProps={{
-                handler: () => setAlertConfigurationsDialogDisplay(true),
+                handler: () => launchWizardApp(),
                 tooltipText: "Add new alert configuration..."
             }} showChannel={false} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
@@ -150,8 +155,6 @@ export const AlertConfigurationsApp = () =>
                                       columnDefs={columnDefs}
                                       gridData={alertConfigurations}
                                       handleAction={handleAction}/>
-                <AlertConfigurationsDialog onCloseHandler={onCrudCloseHandler} clientService={clientService} alertConfigurationsService={alertConfigurationsService}/>
             </div>
-        </>
-    );
+        </>);
 }
