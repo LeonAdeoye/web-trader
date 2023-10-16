@@ -1,16 +1,15 @@
 import {Card, CardContent, Typography} from "@mui/material";
 
-export const AlertTypeCardComponent = (alertType) =>
+export const AlertTypeDetailsCardComponent = ({alertSelection}) =>
 {
-    return(
-    <Card>
+    return(<Card style={{width: '800px', height: '320px'}}>
         <CardContent>
             <div className="alert-configurations-classification">
                 <Typography component="span">
                     {`Classification:   `}
                 </Typography>
                 <Typography className="alert-configurations-value">
-                    {alertType?.classification || ''}
+                    {alertSelection?.classification || ''}
                 </Typography>
             </div>
             <div className="alert-configurations-explanation">
@@ -18,7 +17,7 @@ export const AlertTypeCardComponent = (alertType) =>
                     {`Explanation:   `}
                 </Typography>
                 <Typography className="alert-configurations-value">
-                    {alertType?.explanation || ''}
+                    {alertSelection?.explanation || ''}
                 </Typography>
             </div>
             <div className="alert-configurations-expression">
@@ -26,7 +25,7 @@ export const AlertTypeCardComponent = (alertType) =>
                     {`Expression:   `}
                 </Typography>
                 <Typography className="alert-configurations-value">
-                    {alertType?.expression || ''}
+                    {alertSelection?.expression || ''}
                 </Typography>
             </div>
             <div className="alert-configurations-message-template">
@@ -34,7 +33,7 @@ export const AlertTypeCardComponent = (alertType) =>
                     {`Message Template:   `}
                 </Typography>
                 <Typography className="alert-configurations-value">
-                    {alertType?.messageTemplate || ''}
+                    {alertSelection?.messageTemplate || ''}
                 </Typography>
             </div>
         </CardContent>

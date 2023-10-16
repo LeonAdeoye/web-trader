@@ -9,7 +9,6 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import CheckboxRenderer from "../components/CheckboxRenderer";
-import {List, ListItem, ListItemButton, ListItemText} from "@mui/material";
 
 export const AlertConfigurationsApp = () =>
 {
