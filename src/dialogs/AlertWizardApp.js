@@ -64,24 +64,21 @@ export const AlertWizardApp = () =>
         });
     };
 
-    const handleInputChange = useCallback((name, value) =>
-    {
-    }, []);
-
     useEffect(() =>
     {
-        const loadData = async () =>
-        {
-            await clientService.loadClients();
-        };
+        const loadClientAsync = async () => await clientService.loadClients();
+        loadClientAsync().then(() => loggerService.logInfo("Clients loaded successfully: " + JSON.stringify(clientService.getClients()))).catch((error) => loggerService.logError("Error loading clients.", error));
+    }, [clientService]);
 
-        loadData().then(() => loggerService.logInfo("Clients loaded successfully: " + JSON.stringify(clientService.getClients())));
+    const handleInputChange = useCallback((name, value) =>
+    {
+
     }, []);
 
     return(<>
             <TitleBarComponent title="Alert Configurations Wizard" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 10px'}}>
-                {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clientService={clientService} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
+                {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clients={clientService.getClients()} handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                 {currentStage === 2 ? <AlertConfigurationsDialogStageTwoComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}
                 {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration} alertConfigurationsService={alertConfigurationsService}/> : ""}
                 {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange} alertConfiguration={alertConfiguration}/> : ""}

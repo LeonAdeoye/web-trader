@@ -4,38 +4,24 @@ import React, {useEffect, useRef, useState} from "react";
 export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfiguration, alertConfigurationsService}) =>
 {
     const [, setIsAlertTypeVisible] = useState(false);
-    const [selectedAlert, setSelectedAlert] = useState("");
+    const [selectedAlertType, setSelectedAlertType] = useState('');
     const listItemRef = useRef(null);
-
-    useEffect(() =>
-    {
-        const currentListItem = listItemRef.current;
-        if (currentListItem)
-        {
-            currentListItem.addEventListener('click', () => handleAlertTypeSelection({}));
-            return () => currentListItem.removeEventListener('click', () => handleAlertTypeSelection('Using useRef'));
-        }
-    }, []);
 
     const handleAlertTypeSelection = (alertConfig) =>
     {
-        setSelectedAlert(alertConfig);
-        alertConfiguration.type = alert.type;
-    }
-
-    const handle = (value) => setSelectedAlert(value);
+        setSelectedAlertType(alertConfig.type);
+    };
 
     return (
         <div className={"alert-config-stage-three"}>
-            <TextField className="alert-configurations-name" size='small' label='Enter the type of the alert...' value={selectedAlert}
-               onFocus={() => setIsAlertTypeVisible(true)} onBlur={() => setIsAlertTypeVisible(false)}
-               onChange={(e) => handle(e.target.value)} margin='normal' style={{width: '400px'}}/>
-            <Card style={{width:'800px', marginBottom:'10px'}}>
+            <TextField className="alert-configurations-name" size='small' label='Enter the type of the alert...' value={selectedAlertType} style={{width: '400px'}}
+               onFocus={() => setIsAlertTypeVisible(true)} onBlur={() => setIsAlertTypeVisible(false)} margin='normal' onChange={(e) => setSelectedAlertType(e.target.value)} />
+            <Card style={{width:'800px', height: '320px', marginBottom:'10px'}}>
                 <CardContent>
                     <List>
-                        {alertConfigurationsService.getTypes().filter(config => config.type.toUpperCase().includes(selectedAlert.toUpperCase()) || selectedAlert === "").map((alertConfig, index) => (
+                        {alertConfigurationsService.getTypes().filter(config => config.type.toUpperCase().includes(selectedAlertType.toUpperCase()) || selectedAlertType.trim() === "").slice(0,4).map((alertConfig, index) => (
                         <ListItem key={index} disablePadding ref={listItemRef}>
-                            <ListItemButton>
+                            <ListItemButton onClick={() => handleAlertTypeSelection(alertConfig)}>
                                 <ListItemText className="customListItemText" primary={alertConfig.type} secondary={alertConfig.expression}
                                   sx={{
                                         '.MuiListItemText-primary':

@@ -9,6 +9,7 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import CheckboxRenderer from "../components/CheckboxRenderer";
+import {List, ListItem, ListItemButton, ListItemText} from "@mui/material";
 
 export const AlertConfigurationsApp = () =>
 {
@@ -21,7 +22,8 @@ export const AlertConfigurationsApp = () =>
     const clientService = useRef(new ClientService()).current;
     const ownerId = "leon";
 
-    const columnDefs = useMemo(() => ([
+    const columnDefs = useMemo(() =>
+    ([
         {headerName: "Id", field: "alertConfigurationId", hide: true, sortable: false, minWidth: 130, width: 130},
         {headerName: "Type", field: "type", sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 160, width: 160, filter: true},
@@ -123,8 +125,9 @@ export const AlertConfigurationsApp = () =>
 
         loadData().then(() =>
         {
-            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejected", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
-                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejects", time: "10:00", priority: "High", clientId: null, isActive: false}])
+            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
+                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", clientId: null, isActive: false},
+                {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", clientId: null, isActive: true}])
         });
     }, []);
 
@@ -134,19 +137,15 @@ export const AlertConfigurationsApp = () =>
         window.launchPad.openApp({url: 'http://localhost:3000/alert-wizard', title: "Alert Configurations Wizard", modalFlag: true});
     }
 
-    return(
+   return(
         <>
             <TitleBarComponent title="Alert Configurations" windowId={windowId} addButtonProps={{
                 handler: () => launchWizardApp(),
                 tooltipText: "Add new alert configuration..."
             }} showChannel={false} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-                <GenericGridComponent rowHeight={22}
-                                      gridTheme={"ag-theme-alpine"}
-                                      rowIdArray={["alertConfigurationId"]}
-                                      columnDefs={columnDefs}
-                                      gridData={alertConfigurations}
-                                      handleAction={handleAction}/>
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["alertConfigurationId"]}
+                                      columnDefs={columnDefs} gridData={alertConfigurations} handleAction={handleAction}/>
             </div>
         </>);
 }

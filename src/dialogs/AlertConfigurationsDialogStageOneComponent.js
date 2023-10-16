@@ -1,7 +1,7 @@
 import {Autocomplete, MenuItem, TextField} from "@mui/material";
-import React from "react";
+import React, {useEffect} from "react";
 
-export const AlertConfigurationsDialogStageOneComponent = ({clientService, handleInputChange, alertConfiguration}) =>
+export const AlertConfigurationsDialogStageOneComponent = ({clients, handleInputChange, alertConfiguration}) =>
 {
     return (
         <div className={"alert-config-stage-one"}>
@@ -10,7 +10,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({clientService, handl
             <br/>
             <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />}
                           value={alertConfiguration.clientName} className="alert-configurations-client" size='small' required
-                          getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
+                          getOptionLabel={(option) => String(option)} options={clients.map(client => client.clientName)}
                           onChange={(_, newValue) => handleInputChange('clientName', newValue)}/>
             <TextField className="alert-configurations-desk"  size='small' label='Select the desk' select value={alertConfiguration.desk}
                        onChange={(event) => handleInputChange('desk', event.target.value)}>
