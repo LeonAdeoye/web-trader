@@ -1,8 +1,11 @@
 import {Autocomplete, MenuItem, TextField} from "@mui/material";
 import React, {useEffect} from "react";
+import {useRecoilState} from "recoil";
+import {alertConfigurationState} from "../atoms/component-state";
 
-export const AlertConfigurationsDialogStageOneComponent = ({clients, handleInputChange, alertConfiguration}) =>
+export const AlertConfigurationsDialogStageOneComponent = ({clients, handleInputChange}) =>
 {
+    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     return (
         <div className={"alert-config-stage-one"}>
             <TextField className="alert-configurations-name" size='small' label='Enter the name of the new alert...' value={alertConfiguration.alertName}

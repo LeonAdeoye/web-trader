@@ -7,7 +7,7 @@
   }
 
   .client-trade-history-tab {
-    min-height: 25px;
+    min-height: 22px;
     height: 25px;
     text-transform: none;
     color: white;
@@ -16,7 +16,7 @@
   }
 
   .stock-trade-history-tab {
-    min-height: 25px;
+    min-height: 24px;
     height: 25px;
     text-transform: none;
     color: white;
@@ -35,7 +35,7 @@
         .top-part {
           font-weight: bold;
           font-family: Arial, sans-serif;
-          background-color: #404040;
+          background-color: #656161;
           display: flex;
           align-items: center;
           color: white;
@@ -60,7 +60,7 @@
               font-family: Arial, sans-serif;
               font-weight: bold;
               color: #4F81BD;
-              background-color: #404040;
+              background-color: #656161;
               display: flex;
               gap: 50px;
               align-items: center;
@@ -91,7 +91,7 @@
               font-size: 12px;
               font-family: Arial, sans-serif;
               color: #528c74;
-              background-color: #404040;
+              background-color: #656161;
               display: flex;
               gap: 50px;
               align-items: center;

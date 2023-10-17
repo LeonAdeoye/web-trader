@@ -30,6 +30,31 @@ export const titleBarContextShareColourState = atom({
     default: "white"
 });
 
+const defaultAlertConfiguration =
+    {
+        alertConfigurationId: "",
+        alertName: "",
+        type: "",
+        frequency: "",
+        clientId: "",
+        desk: "ALL",
+        side: "N/A",
+        market: "ALL",
+        customizations: "",
+        isActive: "true",
+        advMin: "",
+        advMax: "",
+        notionalMin: "",
+        notionalMax: "",
+        messageTemplate: "Here is a dummy message template!",
+        priority: "High"
+    };
+
+export const alertConfigurationState = atom({
+    key: 'alertConfigurationState',
+    default: defaultAlertConfiguration
+});
+
 
 
 

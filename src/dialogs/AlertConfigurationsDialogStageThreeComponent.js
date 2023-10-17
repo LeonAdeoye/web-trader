@@ -1,9 +1,12 @@
 import {Card, CardContent, List, ListItem, ListItemButton, ListItemText, TextField} from "@mui/material";
 import React, {useRef, useState} from "react";
 import {AlertTypeDetailsCardComponent} from "./AlertTypeDetailsCardComponent";
+import {useRecoilState} from "recoil";
+import {alertConfigurationState} from "../atoms/component-state";
 
-export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfiguration, alertConfigurationsService}) =>
+export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfigurationsService}) =>
 {
+    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     const [isAlertTypeVisible, setIsAlertTypeVisible] = useState(false);
     const [selectedAlertType, setSelectedAlertType] = useState('');
     const [selectedAlert, setSelectedAlert] = useState({});
@@ -27,16 +30,7 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
                         <ListItem key={index} disablePadding ref={listItemRef}>
                             <ListItemButton onClick={() => handleAlertTypeSelection(alertConfig)}>
                                 <ListItemText className="customListItemText" primary={alertConfig.type} secondary={alertConfig.expression}
-                                  sx={{
-                                        '.MuiListItemText-primary':
-                                        {
-                                            fontSize: '0.9rem',  fontWeight: 'bold'
-                                        },
-                                        '.MuiListItemText-secondary':
-                                        {
-                                            fontSize: '0.75rem'
-                                        }
-                                    }}/>
+                                  sx={{'.MuiListItemText-primary': {fontSize: '0.9rem',  fontWeight: 'bold'}, '.MuiListItemText-secondary': {fontSize: '0.75rem'}}}/>
                             </ListItemButton>
                         </ListItem>))}
                     </List>

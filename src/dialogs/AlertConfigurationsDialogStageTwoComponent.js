@@ -9,9 +9,13 @@ import {
     TextField
 } from "@mui/material";
 import React from "react";
+import {useRecoilState} from "recoil";
+import {alertConfigurationState} from "../atoms/component-state";
 
-export const AlertConfigurationsDialogStageTwoComponent = ({handleInputChange, alertConfiguration}) =>
+export const AlertConfigurationsDialogStageTwoComponent = ({handleInputChange}) =>
 {
+    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
+
     const handleAndChange = (key, value) =>
     {
         if(value)

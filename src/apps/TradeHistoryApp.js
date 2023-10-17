@@ -10,6 +10,7 @@ import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 import {numberFormatter} from "../utilities";
 import {titleBarContextShareColourState} from "../atoms/component-state";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 const TradeHistoryApp = () =>
 {
@@ -225,28 +226,31 @@ const TradeHistoryApp = () =>
     ]), []);
 
     return (
-        <div className="trade-history-app">
-            <TabContext value={selectedTab}>
-                <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
-                    <Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040',  color: "white"}}}/>
-                    <Tab className="client-trade-history-tab" label={stockTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#404040', color: "white"}}}/>
-                </TabList>
+        <>
+            <TitleBarComponent title="Trade History" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <div className="trade-history-app" style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <TabContext value={selectedTab}>
+                    <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
+                        <Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>
+                        <Tab className="client-trade-history-tab" label={stockTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
+                    </TabList>
 
-                {selectedTab === "1" && (
-                <TabPanel value="1" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client"
-                                                dataId="client_trade_history" columnDefs={clientColumnDefs}
-                                                windowId={windowId}/>
-                </TabPanel>)}
+                    {selectedTab === "1" && (
+                    <TabPanel value="1" className="client-trade-history">
+                        <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client"
+                                                    dataId="client_trade_history" columnDefs={clientColumnDefs}
+                                                    windowId={windowId}/>
+                    </TabPanel>)}
 
-                {selectedTab === "2" && (
-                <TabPanel value="2" className="client-trade-history">
-                    <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode"
-                                                dataId="stock_trade_history" columnDefs={stockColumnDefs}
-                                                windowId={windowId}/>
-                </TabPanel>)}
-            </TabContext>
-        </div>
+                    {selectedTab === "2" && (
+                    <TabPanel value="2" className="client-trade-history">
+                        <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode"
+                                                    dataId="stock_trade_history" columnDefs={stockColumnDefs}
+                                                    windowId={windowId}/>
+                    </TabPanel>)}
+                </TabContext>
+            </div>
+        </>
     );
 };
 
