@@ -47,7 +47,8 @@ const defaultAlertConfiguration =
         notionalMin: "",
         notionalMax: "",
         messageTemplate: "Here is a dummy message template!",
-        priority: "High"
+        priority: "High",
+        emailAddress: ""
     };
 
 export const alertConfigurationState = atom({
