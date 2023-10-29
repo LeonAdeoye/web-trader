@@ -11,6 +11,7 @@ import ConfigurationDialog from "../dialogs/ConfigurationDialog";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {configDialogDisplayState} from "../atoms/dialog-state";
 import {useRecoilState} from "recoil";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const ConfigsApp = () =>
 {
@@ -141,36 +142,41 @@ export const ConfigsApp = () =>
     const updateConfigDialogHandler = () => setConfigDialogOpenFlag(true);
 
     return(
-        <div className="app-parent-with-action-button">
-            <div>
-                <GenericGridComponent
-                    rowHeight={22}
-                    gridTheme="ag-theme-alpine"
-                    rowIdArray={['id']}
-                    columnDefs={columnDefs}
-                    gridData={gridData}
-                />
+        <>
+            <TitleBarComponent title="Configurations" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <div className="configs-app" style={{width: '100%', height: 'calc(100vh - 72px)', float: 'left', padding: '0px', margin:'35px 0px 0px 0px'}}>
+                <div className="app-parent-with-action-button">
+                    <div>
+                        <GenericGridComponent
+                            rowHeight={22}
+                            gridTheme="ag-theme-alpine"
+                            rowIdArray={['id']}
+                            columnDefs={columnDefs}
+                            gridData={gridData}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+                        <ThemeProvider theme={appTheme}>
+                            <Tooltip title={<Typography fontSize={12}>Update selected configuration.</Typography>}>
+                                <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
+                                    <Button className="action-button" variant="contained" color="primary"
+                                            onClick={updateConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Update Configuration</Button>
+                                </span>
+                            </Tooltip>
+                            <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
+                                <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
+                                    <Button className="action-button" variant="contained" color="primary"
+                                        onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
+                                </span>
+                            </Tooltip>
+                            <Tooltip title={<Typography fontSize={12}>Add new configuration.</Typography>}>
+                                <Button className="action-button right-most" variant="contained" color="primary"
+                                        onClick={addConfigDialogHandler}>Add Configuration</Button>
+                            </Tooltip>
+                        </ThemeProvider>
+                    </div> {/* If a row is already selected then an UPDATE handler will be used after submission otherwise a SAVE handler will be used. */}
+                    <ConfigurationDialog onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
+                </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-                <ThemeProvider theme={appTheme}>
-                    <Tooltip title={<Typography fontSize={12}>Update selected configuration.</Typography>}>
-                        <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
-                            <Button className="action-button" variant="contained" color="primary"
-                                    onClick={updateConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Update Configuration</Button>
-                        </span>
-                    </Tooltip>
-                    <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
-                        <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
-                            <Button className="action-button" variant="contained" color="primary"
-                                onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
-                        </span>
-                    </Tooltip>
-                    <Tooltip title={<Typography fontSize={12}>Add new configuration.</Typography>}>
-                        <Button className="action-button right-most" variant="contained" color="primary"
-                                onClick={addConfigDialogHandler}>Add Configuration</Button>
-                    </Tooltip>
-                </ThemeProvider>
-            </div> {/* If a row is already selected then an UPDATE handler will be used after submission otherwise a SAVE handler will be used. */}
-            <ConfigurationDialog onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
-        </div>);
+        </>);
 };

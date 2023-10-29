@@ -218,7 +218,7 @@ const HoldingsApp = () =>
     return (
         <>
             <TitleBarComponent title="Holdings" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-            <div className="holdings-app" style={{width: '100%', height: 'calc(100vh - 45px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+            <div className="holdings-app" style={{width: '100%', height: 'calc(100vh - 10px)', float: 'left', padding: '0px', margin:'50px 0px 0px 0px'}}>
                 <TabContext value={selectedTab}>
 
                     <TabList className="holdings-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>

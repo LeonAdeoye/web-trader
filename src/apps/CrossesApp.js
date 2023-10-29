@@ -6,6 +6,7 @@ import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
 import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 
 const CrossesApp = () =>
@@ -126,12 +127,16 @@ const CrossesApp = () =>
         }
     }, [exchangeRatesLoaded, stockCode, client]);
 
-    return (
-        <div className="crosses-app">
-            {stockRows}
-        </div>
+    return(
+        <>
+            <TitleBarComponent title="Crosses" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div className="crosses-app" style={{width: '100%', height: 'calc(100vh - 72px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <div className="crosses-app">
+                    {stockRows}
+                </div>
+            </div>
+        </>
     );
-
 };
 
 export default CrossesApp;

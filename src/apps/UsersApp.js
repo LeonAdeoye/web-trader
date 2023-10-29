@@ -3,6 +3,7 @@ import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useMemo, useRef} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {DataService} from "../services/DataService";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const UsersApp = () =>
 {
@@ -29,5 +30,10 @@ export const UsersApp = () =>
         {headerName: "Location", field: "location", sortable: true, minWidth: 150, maxWidth: 150, width: 150},
         {headerName: "Is Active", field: "active", minWidth: 120, maxWidth: 120, width: 120}]), []);
 
-    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["userId"]} columnDefs={columnDefs} gridData={gridData}/>);
+    return (<>
+                <TitleBarComponent title="Users" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+                <div className="users-app" style={{width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["userId"]} columnDefs={columnDefs} gridData={gridData}/>
+                </div>
+            </>);
 };
