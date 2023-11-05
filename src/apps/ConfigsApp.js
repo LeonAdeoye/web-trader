@@ -17,13 +17,14 @@ export const ConfigsApp = () =>
 {
     const [loggedInUser, setLoggedInUser] = useState('');
     const [gridData, setGridData] = useState([]);
+
     const configurationService = useRef(new ConfigurationService()).current;
     const loggerService = useRef(new LoggerService(ConfigsApp.name)).current;
+
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-    // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("configs"), []);
 
+    const windowId = useMemo(() => window.command.getWindowId("configs"), []);
     const columnDefs = useMemo(() => ([
         { headerName: "Id", field: 'id', hide: true },
         { headerName: "Owner", field: 'owner', sortable: true, minWidth: 100, width: 130 },
@@ -158,13 +159,13 @@ export const ConfigsApp = () =>
                     <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
                         <ThemeProvider theme={appTheme}>
                             <Tooltip title={<Typography fontSize={12}>Update selected configuration.</Typography>}>
-                                <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
+                                <span>
                                     <Button className="action-button" variant="contained" color="primary"
                                             onClick={updateConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Update Configuration</Button>
                                 </span>
                             </Tooltip>
                             <Tooltip title={<Typography fontSize={12}>Delete selected configuration.</Typography>}>
-                                <span>  {/* span is used to disable tooltip when button is disabled */} {/* If a row is NOT selected then disable the button */}
+                                <span>
                                     <Button className="action-button" variant="contained" color="primary"
                                         onClick={deleteConfigDialogHandler} disabled={selectedGenericGridRow === undefined}>Delete Configuration</Button>
                                 </span>
@@ -174,7 +175,7 @@ export const ConfigsApp = () =>
                                         onClick={addConfigDialogHandler}>Add Configuration</Button>
                             </Tooltip>
                         </ThemeProvider>
-                    </div> {/* If a row is already selected then an UPDATE handler will be used after submission otherwise a SAVE handler will be used. */}
+                    </div>
                     <ConfigurationDialog onCloseHandler={selectedGenericGridRow === undefined ? saveConfiguration : updateConfiguration}/>
                 </div>
             </div>
