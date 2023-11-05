@@ -1,11 +1,21 @@
 import {Autocomplete, MenuItem, TextField} from "@mui/material";
-import React, {useEffect} from "react";
+import React from "react";
 import {useRecoilState} from "recoil";
 import {alertConfigurationState} from "../atoms/component-state";
+import {useEffect, useRef} from "react";
+import {ClientService} from "../services/ClientService";
 
-export const AlertConfigurationsDialogStageOneComponent = ({clients, handleInputChange}) =>
+export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) =>
 {
-    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
+    const clientService = useRef(new ClientService()).current;
+    const [alertConfiguration] = useRecoilState(alertConfigurationState);
+
+    useEffect(() =>
+    {
+        const loadClientAsync = async () => await clientService.loadClients();
+        loadClientAsync();
+    }, []);
+
     return (
         <div className={"alert-config-stage-one"}>
             <TextField className="alert-configurations-name" size='small' label='Enter the name of the new alert...' value={alertConfiguration.alertName}
@@ -13,8 +23,8 @@ export const AlertConfigurationsDialogStageOneComponent = ({clients, handleInput
             <br/>
             <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />}
                           value={alertConfiguration.clientName} className="alert-configurations-client" size='small' required
-                          getOptionLabel={(option) => String(option)} options={clients.map(client => client.clientName)}
-                          onChange={(_, newValue) => handleInputChange('clientName', newValue)}/>
+                          getOptionLabel={(option) => String(option)} options={clientService.getClients()} isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
+                          onChange={(_, newValue) => handleInputChange('clientName', newValue.clientName)}/>
             <TextField className="alert-configurations-desk"  size='small' label='Select the desk' select value={alertConfiguration.desk}
                        onChange={(event) => handleInputChange('desk', event.target.value)}>
                 <MenuItem value='ALL'>All Desks</MenuItem>

@@ -34,6 +34,11 @@ const BlastConfigurationDialog = ({ onCloseHandler , clientService }) =>
         setBlastConfiguration(prevData => ({ ...prevData, [name]: value }));
     }, []);
 
+    const handleClientChange = useCallback(({clientName}) =>
+    {
+        handleInputChange("clientName", clientName);
+    }, []);
+
     const handleMarketsChange = (event) =>
     {
         const selectedMarkets = event.target.value;
@@ -53,7 +58,10 @@ const BlastConfigurationDialog = ({ onCloseHandler , clientService }) =>
         });
     };
 
-    const handleCancel = () => setBlastConfigDialogOpenFlag(false);
+    const handleCancel = useCallback(() =>
+    {
+        setBlastConfigDialogOpenFlag(false);
+    }, []);
 
     const convertToFilters = (rows) =>
     {
@@ -157,9 +165,9 @@ const BlastConfigurationDialog = ({ onCloseHandler , clientService }) =>
                 <Grid container spacing={3}>
                     <Grid item xs={6}>
                         <TextField className="blast-name" size='small' label='Enter the blast name' value={blastConfiguration.blastName} onChange={(e) => handleInputChange('blastName', e.target.value)} fullWidth margin='normal' style={{marginTop: '35px', marginBottom: '5px'}} required/>
-                        <Autocomplete className="blast-client" size='small' renderInput={(params) => <TextField {...params} label='Select the client' />} style={{marginTop: '5px', marginBottom: '5px'}}
-                                      getOptionLabel={(option) => String(option)} options={clientService.getClients().map(client => client.clientName)}
-                                      value={blastConfiguration.clientName} onChange={(_, newValue) => handleInputChange('clientName', newValue)} required />
+                        <Autocomplete className="blast-client" size="small" renderInput={(params) => <TextField {...params} label="Select the client" />}
+                            style={{ marginTop: '5px', marginBottom: '5px' }} getOptionLabel={(option) => option.clientName} options={clientService.getClients()} value={blastConfiguration.client}
+                            onChange={(_, newValue) => handleClientChange(newValue)} isOptionEqualToValue={(option, value) => option.clientId === value.clientId}  required/>
                         <TextField className="blast-contents" size='small' label='Select the contents' select value={blastConfiguration.contents} onChange={handleContentsChange} fullWidth SelectProps={{multiple: true}} style={{marginTop: '5px', marginBottom: '5px'}}>
                             <MenuItem value='NEWS'>News</MenuItem>
                             <MenuItem value='FLOWS'>Flows</MenuItem>

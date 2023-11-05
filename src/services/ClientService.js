@@ -23,10 +23,11 @@ export class ClientService
                 if(data.length > 0)
                 {
                     this.#clients = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} clients: ${JSON.stringify(this.#clients)}`);
+                    this.#loggerService.logInfo(`Client service loaded ${this.#clients.length} clients: ${JSON.stringify(this.#clients)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero clients.`);
+
             })
             .catch(err => this.#loggerService.logError(err));
     }
@@ -102,6 +103,7 @@ export class ClientService
 
     getClients = () =>
     {
+        console.log(JSON.stringify(this.#clients)); // TODO: this seems to be always [] even after adding a client
         return this.#clients;
     }
 }

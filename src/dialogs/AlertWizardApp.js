@@ -20,7 +20,6 @@ export const AlertWizardApp = () =>
     const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
     const loggerService = useRef(new LoggerService(AlertWizardApp.name)).current;
-    const clientService = useRef(new ClientService()).current;
     const windowId = useMemo(() => window.command.getWindowId("alert-wizard"), []);
 
     const handleCancel = () =>
@@ -46,21 +45,15 @@ export const AlertWizardApp = () =>
         });
     };
 
-    useEffect(() =>
-    {
-        const loadClientAsync = async () => await clientService.loadClients();
-        loadClientAsync().then(() => loggerService.logInfo("Clients loaded successfully: " + JSON.stringify(clientService.getClients()))).catch((error) => loggerService.logError("Error loading clients.", error));
-    }, [clientService]);
-
     const handleInputChange = useCallback((name, value) =>
     {
-
+        alert("name: " + name + ", value: " + value);
     }, []);
 
     return(<>
             <TitleBarComponent title="Alert Configurations Wizard" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 10px'}}>
-                {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent clients={clientService.getClients()} handleInputChange={handleInputChange}/> : ""}
+                {currentStage === 1 ? <AlertConfigurationsDialogStageOneComponent handleInputChange={handleInputChange}/> : ""}
                 {currentStage === 2 ? <AlertConfigurationsDialogStageTwoComponent handleInputChange={handleInputChange}/> : ""}
                 {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfigurationsService={alertConfigurationsService}/> : ""}
                 {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange}/> : ""}
