@@ -20,11 +20,13 @@ export const BlastsApp = () =>
     const blastService = useRef(new BlastService()).current;
     const clientService = useRef(new ClientService()).current;
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
+
     const [, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
     const [, setBlastConfigurationDialogOpenFlag ] = useRecoilState(blastConfigurationDialogDisplayState);
     const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+
     const [blasts, setBlasts] = useState([]);
-    const ownerId = "leon";
+    const [ownerId, setOwnerId] = useState('');
     const windowId = useMemo(() => window.command.getWindowId("client-blasts"), []);
 
     const columnDefs = useMemo(() => ([
@@ -144,6 +146,14 @@ export const BlastsApp = () =>
 
     useEffect(() =>
     {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+
+        loadOwner();
+
+    }, []);
+
+    useEffect(() =>
+    {
         const loadData = async () =>
         {
             await clientService.loadClients();
@@ -151,8 +161,10 @@ export const BlastsApp = () =>
             setBlasts(blastService.getBlasts());
         };
 
-        loadData();
-    }, []);
+        if(ownerId)
+            loadData();
+
+    }, [ownerId]);
 
 
     return (

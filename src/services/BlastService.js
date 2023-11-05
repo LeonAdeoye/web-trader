@@ -15,7 +15,10 @@ export class BlastService
     loadBlasts = async (ownerId) =>
     {
         if(isEmptyString(ownerId))
+        {
+            this.#loggerService.logInfo("Cannot load blasts for empty ownerId.");
             return;
+        }
 
         await fetch(`http://localhost:20009/blast?ownerId=${ownerId}`)
             .then(response => response.json())
@@ -56,6 +59,18 @@ export class BlastService
 
     deleteBlastConfiguration = async (ownerId, blastId) =>
     {
+        if(isEmptyString(ownerId))
+        {
+            this.#loggerService.logInfo("Cannot delete blast configuration for empty ownerId.");
+            return;
+        }
+
+        if(isEmptyString(blastId))
+        {
+            this.#loggerService.logInfo("Cannot delete blast configuration for empty blastId.");
+            return;
+        }
+
         fetch(`http://localhost:20009/blast?ownerId=${ownerId}&blastId=${blastId}`, {method: "DELETE"})
             .then(() =>
             {

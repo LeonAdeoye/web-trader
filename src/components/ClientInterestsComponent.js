@@ -12,10 +12,11 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
 {
     const [selectedClient] = useRecoilState(selectedClientState);
     const [clientInterestsChanged, setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
-    const [interests, setInterests] = useState([]);
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
     const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-    const ownerId = useRef("leon").current;
+
+    const [interests, setInterests] = useState([]);
+    const [ownerId, setOwnerId] = useState('');
 
     const columnDefs = useMemo(() => ([
         {headerName: "Stock Code", field: "stockCode", sortable: true, minWidth: 115, width: 115, filter: true},
@@ -24,6 +25,14 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
         {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
+
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+
+        loadOwner();
+
+    }, []);
 
     useEffect(() =>
     {

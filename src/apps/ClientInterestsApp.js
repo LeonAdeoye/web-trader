@@ -27,10 +27,9 @@ export const ClientInterestsApp = () =>
     const clientService = useRef(new ClientService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
 
-    const ownerId = useRef("leon").current;
+    const [ownerId, setOwnerId] = useState('');
     const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
     const [listOfClients, setListOfClients] = useState([]);
-
 
     const closeHandler = async ({stockCode, side, notes}) =>
     {
@@ -38,22 +37,34 @@ export const ClientInterestsApp = () =>
         setClientInterestsChanged(true);
     }
 
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+
+        loadOwner();
+
+    }, []);
+
     useEffect( () =>
     {
-        instrumentService.loadInstruments()
-            .then(() => clientInterestService.loadClientInterests(ownerId)
-                .then(() => clientService.loadClients()
-                    .then(() =>
-                    {
-                        const loadedClients = clientService.getClients();
-                        if(loadedClients.length > 0)
+        if(ownerId)
+        {
+            instrumentService.loadInstruments()
+                .then(() => clientInterestService.loadClientInterests(ownerId)
+                    .then(() => clientService.loadClients()
+                        .then(() =>
                         {
-                            setListOfClients(loadedClients);
-                            setSelectedClient(loadedClients[0].clientId);
-                            setClientInterestsChanged(true);
-                        }
-                    })));
-    }, []);
+                            const loadedClients = clientService.getClients();
+                            if(loadedClients.length > 0)
+                            {
+                                setListOfClients(loadedClients);
+                                setSelectedClient(loadedClients[0].clientId);
+                                setClientInterestsChanged(true);
+                            }
+                        })));
+        }
+
+    }, [ownerId]);
 
     useEffect(() =>
     {
@@ -69,7 +80,6 @@ export const ClientInterestsApp = () =>
             }
         });
     }, []);
-
 
     return (<>
         <TitleBarComponent title="Client Interests" windowId={windowId} addButtonProps={{

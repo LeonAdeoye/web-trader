@@ -14,13 +14,15 @@ export const AlertConfigurationsApp = () =>
 {
     const [, setAlertConfigurationsDialogDisplay] = useRecoilState(alertConfigurationsDialogDisplayState);
     const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
-    const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
+
     const [alertConfigurations, setAlertConfigurations] = useState([]);
+    const [ownerId, setOwnerId] = useState('');
+
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
     const loggerService = useRef(new LoggerService(AlertConfigurationsApp.name)).current;
     const clientService = useRef(new ClientService()).current;
-    const ownerId = "leon";
 
+    const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
     const columnDefs = useMemo(() =>
     ([
         {headerName: "Id", field: "alertConfigurationId", hide: true, sortable: false, minWidth: 130, width: 130},
@@ -116,19 +118,28 @@ export const AlertConfigurationsApp = () =>
 
     useEffect(() =>
     {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner();
+    }, []);
+
+    useEffect(() =>
+    {
         const loadData = async () =>
         {
             await clientService.loadClients();
             await alertConfigurationsService.loadAlertConfigurations();
         };
 
-        loadData().then(() =>
+        if(ownerId)
         {
-            setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
-                {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", clientId: null, isActive: false},
-                {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", clientId: null, isActive: true}])
-        });
-    }, []);
+            loadData().then(() =>
+            {
+                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
+                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", clientId: null, isActive: false},
+                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", clientId: null, isActive: true}])
+            });
+        }
+    }, [ownerId]);
 
     const launchWizardApp = () =>
     {
