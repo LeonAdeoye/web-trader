@@ -12,7 +12,7 @@ const LoginDialog = () =>
     {
         window.configurations.setLoggedInUserId(userId);
         setLoginDialogDisplay(false);
-    }, []);
+    }, [userId]);
 
     return (
         <Dialog aria-labelledby='dialog-title' open={loginDialogDisplay}>
