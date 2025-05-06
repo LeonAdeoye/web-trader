@@ -5,6 +5,9 @@ import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
+import TitleBarComponent from "../components/TitleBarComponent";
+import BlastConfigurationDialog from "../dialogs/BlastConfigurationDialog";
+import BlastPlayDialog from "../dialogs/BlastPlayDialog";
 
 export const OrdersApp = () =>
 {
@@ -137,7 +140,13 @@ export const OrdersApp = () =>
         {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 120, filter: false},
     ]), []);
 
-    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]}
-                                  columnDefs={columnDefs} gridData={filterOrdersUsingContext}/>);
+    return (<>
+        <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+        <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+            <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext}/>);
+            </div>
+        </div>
+    </>)
 
 }

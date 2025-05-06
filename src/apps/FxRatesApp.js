@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const FxRatesApp = () =>
 {
@@ -54,9 +55,16 @@ export const FxRatesApp = () =>
         {headerName: "Ask", field: "ask", sortable: false, minWidth: 100, width: 100},
         {headerName: "Mid", field: "mid", sortable: false, minWidth: 100, width: 100}]), []);
 
-    return (<GenericGridComponent rowHeight={25}
-                                  gridTheme={"ag-theme-alpine"}
-                                  rowIdArray={["currency"]}
-                                  columnDefs={columnDefs}
-                                  gridData={fxData}/>);
+    return (<>
+                <TitleBarComponent title="Fx Rates" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+                <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                    <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                        <GenericGridComponent rowHeight={25}
+                                              gridTheme={"ag-theme-alpine"}
+                                              rowIdArray={["currency"]}
+                                              columnDefs={columnDefs}
+                                              gridData={fxData}/>
+                    </div>
+                </div>
+            </>);
 };
