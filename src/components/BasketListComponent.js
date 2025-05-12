@@ -61,25 +61,27 @@ export const BasketListComponent = () =>
         }
     ]), []);
 
-    const onGridReady = (params) =>
-    {
-        setGridApi(params.api);
-    };
+    const onGridReady = (params) => setGridApi(params.api);
 
     const onFilterChanged = () =>
     {
-        gridApi.setQuickFilter(searchTerm);
+        if (!gridApi) return;
+
+        gridApi.setQuickFilter(searchTerm || '');
+
+        if (basketList.length > 0) {
+            const firstRow = gridApi.getDisplayedRowAtIndex(0);
+            if (firstRow) {
+                gridApi.deselectAll();
+                firstRow.setSelected(true);
+                setSelectedBasket(firstRow.data.basketId);
+            }
+        }
     };
 
-    const handleRowClick = (event) =>
-    {
-        setSelectedBasket(event.data.basketId);
-    };
+    const handleRowClick = (event) => setSelectedBasket(event.data.basketId);
 
-    const handleSearchChange = (event) =>
-    {
-        setSearchTerm(event.target.value);
-    }
+    const handleSearchChange = (event) => setSearchTerm(event.target.value);
 
     useEffect(() =>
     {
