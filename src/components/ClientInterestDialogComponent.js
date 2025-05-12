@@ -55,8 +55,8 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                                 size='small'
                                 renderInput={(params) => <TextField {...params} label='Select the stock code' />}
                                 style={{ width: '203px', marginTop: '15px'}}
-                                value={clientInterest.stockCode}
-                                options={instrumentService.getInstruments().map(instrument => instrument.stockCode)}
+                                value={clientInterest.stockCode || null}
+                                options={(instrumentService.getInstruments() || []).map(instrument => instrument.stockCode)}
                                 onChange={(_, newValue) => handleInputChange("stockCode", newValue)}
                                 required
                                 isOptionEqualToValue={(option, value) => option === value} />
