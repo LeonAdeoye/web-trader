@@ -15,15 +15,9 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
     const [clientInterestDialogOpenFlag, setClientInterestDialogOpenFlag] = useRecoilState(clientInterestDialogDisplayState)
     const [clientInterest, setClientInterest] = useState(defaultClientInterest);
 
-    const canClear = () =>
-    {
-        return clientInterest.stockCode !== '' || clientInterest.notes !== '';
-    }
+    const canClear = () => clientInterest.stockCode !== '' || clientInterest.notes !== '';
 
-    const canSubmit = () =>
-    {
-        return clientInterest.stockCode !== '' && clientInterest.side !== '';
-    }
+    const canSubmit = () => clientInterest.stockCode !== '' && clientInterest.side !== '';
 
     const handleInputChange = useCallback((name, value) =>
     {
@@ -36,20 +30,11 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
         handleInputChange('side',  value);
     }
 
-    const getTitle = () =>
-    {
-        return "Create Client Interest";
-    }
+    const getTitle = () => "Create Client Interest";
 
-    const handleClear = () =>
-    {
-        setClientInterest(defaultClientInterest);
-    }
+    const handleClear = () => setClientInterest(defaultClientInterest);
 
-    const handleCancel = () =>
-    {
-        setClientInterestDialogOpenFlag(false);
-    }
+    const handleCancel = () => setClientInterestDialogOpenFlag(false);
 
     const handleSubmit = () =>
     {

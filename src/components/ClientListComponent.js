@@ -36,8 +36,18 @@ export const ClientListComponent = ({listOfClients}) =>
 
     const onFilterChanged = () =>
     {
-        if(gridApi)
-            gridApi.setQuickFilter(searchTerm);
+        if (!gridApi) return;
+
+        gridApi.setQuickFilter(searchTerm || '');
+
+        if (listOfClients.length > 0) {
+            const firstRow = gridApi.getDisplayedRowAtIndex(0);
+            if (firstRow) {
+                gridApi.deselectAll();
+                firstRow.setSelected(true);
+                setSelectedClient(firstRow.data.clientId);
+            }
+        }
     };
 
     const handleRowClick = ({data}) =>
