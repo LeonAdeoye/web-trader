@@ -68,7 +68,6 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
                 setClientInterestsChanged(true);
                 break;
             case "clone":
-                // TODO cloning is not working.
                 let interest = clientInterestService.getClientInterests().find(interest => interest["clientInterestId"] === data.clientInterestId);
                 setSelectedGenericGridRow({...interest, clientInterestId: null});
                 setClientInterestDialogOpen(true);

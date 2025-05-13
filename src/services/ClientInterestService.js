@@ -54,7 +54,8 @@ export class ClientInterestService
 
     deleteClientInterest = async (ownerId, clientInterestId) =>
     {
-        fetch(`http://localhost:20009/interest?ownerId=${ownerId}&clientInterestId=${clientInterestId}`, {method: "DELETE"})
+        this.#loggerService.logInfo(`Deleting client interest with client interest Id: ${clientInterestId}.`);
+        await fetch(`http://localhost:20009/interest?ownerId=${ownerId}&clientInterestId=${clientInterestId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#clientInterests)
