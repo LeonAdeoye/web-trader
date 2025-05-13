@@ -45,12 +45,16 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
         handleCancel();
     }
 
-    useEffect( () => {
-        if(clientInterestDialogOpenFlag && selectedGenericGridRow)
+    useEffect( () =>
+    {
+        if(selectedGenericGridRow)
         {
             const clientInterest = selectedGenericGridRow;
             setClientInterest(clientInterest);
         }
+        else
+            setClientInterest(defaultClientInterest);
+
     }, [clientInterestDialogOpenFlag, selectedGenericGridRow]);
 
     return (
