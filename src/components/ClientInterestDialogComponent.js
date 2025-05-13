@@ -1,7 +1,8 @@
 import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography } from "@mui/material";
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 
 const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 {
@@ -14,6 +15,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 
     const [clientInterestDialogOpenFlag, setClientInterestDialogOpenFlag] = useRecoilState(clientInterestDialogDisplayState)
     const [clientInterest, setClientInterest] = useState(defaultClientInterest);
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
     const canClear = () => clientInterest.stockCode !== '' || clientInterest.notes !== '';
 
@@ -43,6 +45,14 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
         handleCancel();
     }
 
+    useEffect( () => {
+        if(clientInterestDialogOpenFlag && selectedGenericGridRow)
+        {
+            const clientInterest = selectedGenericGridRow;
+            setClientInterest(clientInterest);
+        }
+    }, [clientInterestDialogOpenFlag, selectedGenericGridRow]);
+
     return (
         <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={clientInterestDialogOpenFlag} onClose={handleCancel} PaperProps={{ style: { width: '383px' } }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
@@ -71,8 +81,8 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                                 onChange={handleSideChange}
                                 fullWidth
                                 style={{ width: '120px', marginTop: '15px'}}>
-                                <MenuItem value='Buy'>Buy</MenuItem>
-                                <MenuItem value='Sell'>Sell</MenuItem>
+                                <MenuItem value='BUY'>Buy</MenuItem>
+                                <MenuItem value='SELL'>Sell</MenuItem>
                             </TextField>
                         </Grid>
                     </Grid>
