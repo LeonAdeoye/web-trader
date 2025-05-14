@@ -90,7 +90,7 @@ export const ClientInterestsApp = () =>
         <Grid container direction="column"
               style={{margin: '45px 0px 0px 0px', height: 'calc(100vh - 65px)', overflow: 'hidden'}}>
             <Grid container direction="row" style={{flexGrow: 1, overflow: 'hidden', height: '100%'}}>
-                <Resizable defaultSize={{width: '17%', height: '100%'}}>
+                <Resizable defaultSize={{width: '250px', height: '100%'}}>
                     <ClientListComponent listOfClients={listOfClients}/>
                 </Resizable>
                 <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
