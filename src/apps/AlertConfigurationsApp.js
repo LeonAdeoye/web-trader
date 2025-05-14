@@ -97,7 +97,7 @@ export const AlertConfigurationsApp = () =>
         {
             case "update":
                 setSelectedGenericGridRow(alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId));
-                setAlertConfigurationsDialogDisplay(true);
+                launchWizardApp();
                 break;
             case "delete":
                 await deleteAlertConfiguration(windowId, alertConfigurationId)
@@ -105,11 +105,11 @@ export const AlertConfigurationsApp = () =>
             case "clone":
                 let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId);
                 setSelectedGenericGridRow({...alertConfig, alertConfigurationId: null});
-                setAlertConfigurationsDialogDisplay(true);
+                launchWizardApp();
                 break;
             case "add":
                 setSelectedGenericGridRow(null);
-                setAlertConfigurationsDialogDisplay(true);
+                launchWizardApp();
                 break;
             default:
                 loggerService.logError(`Unknown action: ${action} for alertConfigurationId: ${alertConfigurationId}`);
