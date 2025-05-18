@@ -8,7 +8,7 @@ import {ClientService} from "../services/ClientService";
 export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) =>
 {
     const clientService = useRef(new ClientService()).current;
-    const [alertConfiguration] = useRecoilState(alertConfigurationState);
+    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
 
     useEffect(() =>
     {

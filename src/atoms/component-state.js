@@ -46,6 +46,8 @@ const defaultAlertConfiguration =
         advMax: "",
         notionalMin: "",
         notionalMax: "",
+        notionalAndADV: false,
+        notionalOrADV: false,
         messageTemplate: "Here is a dummy message template!",
         priority: "High",
         emailAddress: ""

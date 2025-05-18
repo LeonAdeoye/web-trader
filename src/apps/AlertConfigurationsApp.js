@@ -143,7 +143,7 @@ export const AlertConfigurationsApp = () =>
 
     const launchWizardApp = () =>
     {
-        //TODO move to config
+        // TODO move to config
         window.launchPad.openApp({url: 'http://localhost:3000/alert-wizard', title: "Alert Configurations Wizard", modalFlag: true});
     }
 

@@ -7,7 +7,6 @@ import {AlertConfigurationsDialogStageFiveComponent} from "./AlertConfigurations
 import React, {useCallback, useRef, useState, useMemo, useEffect} from "react";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {LoggerService} from "../services/LoggerService";
-import {ClientService} from "../services/ClientService";
 import TitleBarComponent from "../components/TitleBarComponent";
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
@@ -28,6 +27,7 @@ export const AlertWizardApp = () =>
 
     const handleSubmit = () =>
     {
+        loggerService.logInfo(`Alert configuration: ${alertConfiguration}`);
     };
 
     const handleNext = () =>
@@ -45,10 +45,18 @@ export const AlertWizardApp = () =>
         });
     };
 
-    const handleInputChange = useCallback((name, value) =>
-    {
-        alert("name: " + name + ", value: " + value);
+    const handleInputChange = useCallback((name, value) => {
+        loggerService.logInfo(`Alert configuration input changed: ${name} = ${value}`);
+        setAlertConfiguration(previous => ({
+            ...previous,
+            [name]: value
+        }));
     }, []);
+
+    useEffect(() =>
+    {
+        console.log("Alert Wizard App mounted: " + JSON.stringify(alertConfiguration));
+    }, [alertConfiguration]);
 
     return(<>
             <TitleBarComponent title="Alert Configurations Wizard" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>

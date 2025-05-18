@@ -14,21 +14,7 @@ import {alertConfigurationState} from "../atoms/component-state";
 
 export const AlertConfigurationsDialogStageTwoComponent = ({handleInputChange}) =>
 {
-    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
-
-    const handleAndChange = (key, value) =>
-    {
-        if(value)
-            alertConfiguration.notionalOrADV = !value;
-        handleInputChange(key, value)
-    }
-
-    const handleOrChange = (key, value) =>
-    {
-        if(value)
-            alertConfiguration.notionalAndADV = !value;
-        handleInputChange(key, value)
-    }
+    const [alertConfiguration] = useRecoilState(alertConfigurationState);
 
     return (<div className={"alert-config-stage-two"}>
                 <TextField className="alert-configurations-adv-min" size='small' value={alertConfiguration.advMin}
@@ -41,11 +27,11 @@ export const AlertConfigurationsDialogStageTwoComponent = ({handleInputChange}) 
                         <FormControlLabel
                             value={alertConfiguration.notionalOrADV}
                             control={<Switch/>} label="OR" labelPlacement="start"
-                            onChange={(e) => handleOrChange('notionalOrADV', e.target.value)}/>
+                            onChange={(e) => handleInputChange('notionalOrADV', e.target.checked)}/>
                         <FormControlLabel
                             value={alertConfiguration.notionalAndADV}
                             control={<Switch/>} label="AND" labelPlacement="start"
-                            onChange={(e) => handleOrChange('notionalAndADV', e.target.value)}/>
+                            onChange={(e) => handleInputChange('notionalAndADV', e.target.checked)}/>
                     </FormGroup>
                 </FormControl>
                 <br/>
