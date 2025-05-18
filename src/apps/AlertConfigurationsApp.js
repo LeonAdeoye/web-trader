@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo, useState, useRef} from "react";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {useRecoilState} from "recoil";
-import {alertConfigurationsDialogDisplayState} from "../atoms/dialog-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
@@ -12,8 +11,7 @@ import CheckboxRenderer from "../components/CheckboxRenderer";
 
 export const AlertConfigurationsApp = () =>
 {
-    const [, setAlertConfigurationsDialogDisplay] = useRecoilState(alertConfigurationsDialogDisplayState);
-    const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+    const [selectedGenericGridRow, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
 
     const [alertConfigurations, setAlertConfigurations] = useState([]);
     const [ownerId, setOwnerId] = useState('');
@@ -93,6 +91,7 @@ export const AlertConfigurationsApp = () =>
 
     const handleAction = async (action, alertConfigurationId) =>
     {
+        console.log("handleAction: " + action + " alertConfigurationId: " + JSON.stringify(alertConfigurationId));
         switch(action)
         {
             case "update":
@@ -134,9 +133,9 @@ export const AlertConfigurationsApp = () =>
         {
             loadData().then(() =>
             {
-                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
-                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", clientId: null, isActive: false},
-                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", clientId: null, isActive: true}])
+                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", desk: "LT", side: "ShortSell", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
+                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", desk: "HT", side: "Sell", clientId: null, isActive: false},
+                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", desk: "PT", side: "Buy", clientId: null, isActive: true}])
             });
         }
     }, [ownerId]);

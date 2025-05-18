@@ -23,11 +23,14 @@ export const AlertWizardApp = () =>
 
     const handleCancel = () =>
     {
+        loggerService.logInfo(`Cancelled alert configuration.`);
+        window.command.close(windowId);
     };
 
     const handleSubmit = () =>
     {
-        loggerService.logInfo(`Alert configuration: ${alertConfiguration}`);
+        loggerService.logInfo(`Updated alert configuration: ${JSON.stringify(alertConfiguration)}.`);
+        window.command.close(windowId);
     };
 
     const handleNext = () =>

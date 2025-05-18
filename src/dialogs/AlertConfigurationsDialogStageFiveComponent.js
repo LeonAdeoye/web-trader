@@ -9,10 +9,10 @@ export const AlertConfigurationsDialogStageFiveComponent = ({handleInputChange})
 
     const handleEmailAddressChange = (value) =>
     {
-        if(value.endsWith('@citi.com'))
+        if(value.endsWith('@gmail.com'))
             handleInputChange('emailAddress', value);
         else
-            alert('Email address must end with @citi.com');
+            alert('Email address must end with @gmail.com');
     }
 
     return (<TextField className="alert-configurations-email-address" size='small' label='Enter the email address...' value={alertConfiguration.emailAddress}

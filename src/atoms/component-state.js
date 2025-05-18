@@ -34,7 +34,7 @@ const defaultAlertConfiguration =
     {
         alertConfigurationId: "",
         alertName: "",
-        type: "",
+        alertType: "",
         frequency: "",
         clientId: "",
         desk: "ALL",

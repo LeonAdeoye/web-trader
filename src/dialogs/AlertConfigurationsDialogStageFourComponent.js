@@ -5,7 +5,7 @@ import {alertConfigurationState} from "../atoms/component-state";
 
 export const AlertConfigurationsDialogStageFourComponent = ({handleInputChange}) =>
 {
-    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
+    const [alertConfiguration] = useRecoilState(alertConfigurationState);
 
     return (<div className={"alert-config-stage-four"}>
                 <TextField className="alert-configurations-message-template" size='small' multiline rows='12' value={alertConfiguration.messageTemplate}

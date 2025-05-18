@@ -6,17 +6,18 @@ import {alertConfigurationState} from "../atoms/component-state";
 
 export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange, alertConfigurationsService}) =>
 {
-    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     const [isAlertTypeVisible, setIsAlertTypeVisible] = useState(false);
     const [selectedAlertType, setSelectedAlertType] = useState('');
     const [selectedAlert, setSelectedAlert] = useState({});
     const listItemRef = useRef(null);
+    const [alertConfiguration] = useRecoilState(alertConfigurationState);
 
     const handleAlertTypeSelection = (alertConfig) =>
     {
         setSelectedAlert(alertConfig);
         setSelectedAlertType(alertConfig.type);
         setIsAlertTypeVisible(false);
+        handleInputChange("alertType", alertConfig.type);
     };
 
     return (

@@ -12,6 +12,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) 
 
     useEffect(() =>
     {
+        console.log(">>>>" + JSON.stringify(alertConfiguration));
         const loadClientAsync = async () => await clientService.loadClients();
         loadClientAsync();
     }, []);
@@ -38,7 +39,7 @@ export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) 
                        onChange={(event) => handleInputChange('side', event.target.value)}>
                 <MenuItem value='N/A'>Not Applicable</MenuItem>
                 <MenuItem value='Sell'>Sell</MenuItem>
-                <MenuItem value='shortSell'>Short Sell</MenuItem>
+                <MenuItem value='ShortSell'>Short Sell</MenuItem>
                 <MenuItem value='Buy'>Buy</MenuItem>
             </TextField>
             <br/>
