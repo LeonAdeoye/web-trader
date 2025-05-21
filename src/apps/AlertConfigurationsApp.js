@@ -4,7 +4,7 @@ import {useRecoilState} from "recoil";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
-import {selectedGenericGridRowState} from "../atoms/component-state";
+import {alertConfigurationState, selectedGenericGridRowState} from "../atoms/component-state";
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import CheckboxRenderer from "../components/CheckboxRenderer";
@@ -12,6 +12,7 @@ import CheckboxRenderer from "../components/CheckboxRenderer";
 export const AlertConfigurationsApp = () =>
 {
     const [selectedGenericGridRow, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
 
     const [alertConfigurations, setAlertConfigurations] = useState([]);
     const [ownerId, setOwnerId] = useState('');
@@ -103,6 +104,7 @@ export const AlertConfigurationsApp = () =>
                 break;
             case "clone":
                 let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId);
+                setAlertConfiguration({...alertConfig, alertConfigurationId: null})
                 setSelectedGenericGridRow({...alertConfig, alertConfigurationId: null});
                 launchWizardApp();
                 break;

@@ -59,7 +59,7 @@ export const AlertWizardApp = () =>
     useEffect(() =>
     {
         console.log("Alert Wizard App mounted: " + JSON.stringify(alertConfiguration));
-    }, [alertConfiguration]);
+    }, []);
 
     return(<>
             <TitleBarComponent title="Alert Configurations Wizard" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>

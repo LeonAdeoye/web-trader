@@ -12,7 +12,6 @@ export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) 
 
     useEffect(() =>
     {
-        console.log(">>>>" + JSON.stringify(alertConfiguration));
         const loadClientAsync = async () => await clientService.loadClients();
         loadClientAsync();
     }, []);
@@ -23,8 +22,9 @@ export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) 
                        onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'/>
             <br/>
             <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />}
-                          value={alertConfiguration.clientName} className="alert-configurations-client" size='small' required
-                          getOptionLabel={(option) => String(option)} options={clientService.getClients()} isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
+                          value={alertConfiguration.clientName || null} className="alert-configurations-client" size='small' required
+                          getOptionLabel={(option) => String(option)} options={(clientService.getClients() || []).map(client => client.clientName)}
+                          isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
                           onChange={(_, newValue) => handleInputChange('clientName', newValue.clientName)}/>
             <TextField className="alert-configurations-desk"  size='small' label='Select the desk' select value={alertConfiguration.desk}
                        onChange={(event) => handleInputChange('desk', event.target.value)}>
