@@ -19,15 +19,16 @@ export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) 
     return (
         <div className={"alert-config-stage-one"}>
             <TextField className="alert-configurations-name" size='small' label='Enter the name of the new alert...' value={alertConfiguration.alertName}
-                       onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'/>
+                   onChange={(e) => handleInputChange('alertName', e.target.value)} margin='normal'/>
             <br/>
             <Autocomplete renderInput={(params) => <TextField {...params} label='Select the client' />}
-                          value={alertConfiguration.clientName || null} className="alert-configurations-client" size='small' required
-                          getOptionLabel={(option) => String(option)} options={(clientService.getClients() || []).map(client => client.clientName)}
-                          isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
-                          onChange={(_, newValue) => handleInputChange('clientName', newValue.clientName)}/>
+                  value={alertConfiguration.clientName || null} className="alert-configurations-client" size='small' required
+                  getOptionLabel={(option) => String(option)}
+                  options={(clientService.getClients() || []).map(client => client.clientName)}
+                  isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
+                  onChange={(_, newValue) => handleInputChange('clientName', newValue.clientName)}/>
             <TextField className="alert-configurations-desk"  size='small' label='Select the desk' select value={alertConfiguration.desk}
-                       onChange={(event) => handleInputChange('desk', event.target.value)}>
+                   onChange={(event) => handleInputChange('desk', event.target.value)}>
                 <MenuItem value='ALL'>All Desks</MenuItem>
                 <MenuItem value='LT'>Low Touch</MenuItem>
                 <MenuItem value='PT'>Program Trading</MenuItem>

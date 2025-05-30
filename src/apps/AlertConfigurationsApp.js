@@ -8,6 +8,8 @@ import {alertConfigurationState, selectedGenericGridRowState} from "../atoms/com
 import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import CheckboxRenderer from "../components/CheckboxRenderer";
+import cronstrue from 'cronstrue';
+
 
 export const AlertConfigurationsApp = () =>
 {
@@ -27,10 +29,10 @@ export const AlertConfigurationsApp = () =>
         {headerName: "Id", field: "alertConfigurationId", hide: true, sortable: false, minWidth: 130, width: 130},
         {headerName: "Type", field: "type", sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 100, width: 100},
-        {headerName: "Client", field: "client", sortable: true, minWidth: 100, width: 200, filter: true},
+        {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 100, width: 210, valueGetter: (params) => cronstrue.toString(params.data.frequency, {throwExceptionOnParseError: false}) || "N/A", filter: true},
+        {headerName: "Client", field: "clientId", sortable: true, minWidth: 100, width: 200, filter: true, valueGetter: (params) => clientService.getClientName(params.data.clientId) },
         {headerName: "Desk", field: "desk", sortable: true, minWidth: 110, width: 110, filter: true},
-        {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 130, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
         {headerName: "Customizations", field: "client", sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Is Active", field: "isActive", sortable: false, minWidth: 90, width: 90, filter: false, cellRenderer: CheckboxRenderer},
@@ -135,9 +137,9 @@ export const AlertConfigurationsApp = () =>
         {
             loadData().then(() =>
             {
-                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", desk: "LT", side: "ShortSell", time: "10:00", priority: "High", clientId: "Client 1", isActive: true},
-                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", time: "10:00", priority: "High", desk: "HT", side: "Sell", clientId: null, isActive: false},
-                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", time: "09:00", priority: "High", desk: "PT", side: "Buy", clientId: null, isActive: true}])
+                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", desk: "LT", side: "ShortSell", frequency: "0 10 * * 1-5", priority: "High", clientId: "651baff39b4d394648e577d2", isActive: true, exchanges: "HK, SG, AU, IN, KR"},
+                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", frequency: "0 8 * * 2", priority: "High", desk: "HT", side: "Sell", clientId: "651bafeb9b4d394648e577d1", isActive: false, exchanges: "HK"},
+                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", frequency: "* * * * *", priority: "High", desk: "PT", side: "Buy", clientId: "651bb04f9b4d394648e577d7", isActive: true, exchanges: "HK, KR"}])
             });
         }
     }, [ownerId]);

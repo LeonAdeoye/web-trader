@@ -101,6 +101,11 @@ export class ClientService
         return this.#clients.find(client => client.clientName === clientName).clientId;
     }
 
+    getClientName = (clientId) =>
+    {
+        return this.#clients.find(client => client.clientId === clientId).clientName;
+    }
+
     getClients = () =>
     {
         console.log(JSON.stringify(this.#clients)); // TODO: this seems to be always [] even after adding a client
