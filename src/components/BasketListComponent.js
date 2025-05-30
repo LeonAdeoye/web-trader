@@ -6,14 +6,14 @@ import { AgGridReact } from 'ag-grid-react';
 import TextField from '@mui/material/TextField';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import BasketListSummaryRenderer from "./BasketListSummaryRenderer";
 import {numberFormatter} from "../utilities";
 
 export const BasketListComponent = () =>
 {
     const [, setSelectedBasket] = useRecoilState(selectedBasketState);
-    const dataService = useRef(new DataService()).current;
+    const dataService = useRef(new TradeDataService()).current;
     const [gridApi, setGridApi] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [basketList, setBasketList] = useState([]);
@@ -96,7 +96,7 @@ export const BasketListComponent = () =>
 
     useEffect(() =>
     {
-        setBasketList(dataService.getData(DataService.BASKETS));
+        setBasketList(dataService.getData(TradeDataService.BASKETS));
     }, []);
 
     return (

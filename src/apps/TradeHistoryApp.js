@@ -5,7 +5,7 @@ import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
 import TradeHistoryGridsComponent from "../components/TradeHistoryGridsComponent";
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
 import {numberFormatter} from "../utilities";
@@ -22,7 +22,7 @@ const TradeHistoryApp = () =>
     const [stockTradeHistory, setStockTradeHistory] = useState({stock: "0001.HK", buyTrades: [], sellTrades: []});
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
     const [stockTradeHistoryTabLabel, setStockTradeHistoryTabLabel] = useState("Stock Trade History");
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
@@ -66,8 +66,8 @@ const TradeHistoryApp = () =>
 
     useEffect(() =>
     {
-        setStockTradeHistory(dataService.getData(DataService.TRADE_HISTORY, stockCode, null, filterDays));
-        setClientTradeHistory(dataService.getData(DataService.TRADE_HISTORY, null, client, filterDays));
+        setStockTradeHistory(tradeDataService.getData(TradeDataService.TRADE_HISTORY, stockCode, null, filterDays));
+        setClientTradeHistory(tradeDataService.getData(TradeDataService.TRADE_HISTORY, null, client, filterDays));
     }, [stockCode, client, filterDays]);
 
     const stockColumnDefs = useMemo(() => ( [

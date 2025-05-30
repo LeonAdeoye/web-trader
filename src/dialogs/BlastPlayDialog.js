@@ -5,12 +5,12 @@ import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip, Typo
 import { AgGridReact } from "ag-grid-react";
 import {numberFormatter} from "../utilities";
 import {selectedGenericGridRowState} from "../atoms/component-state";
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import {FDC3Service} from "../services/FDC3Service";
 
 const BlastPlayDialog = () =>
 {
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [blastPlayDialogOpenFlag, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const flowsGridApiRef = useRef(null);
@@ -168,7 +168,7 @@ const BlastPlayDialog = () =>
                     <AgGridReact
                         domLayout='autoHeight'
                         columnDefs={columnDefs}
-                        rowData={dataService.getData(DataService.FLOWS)}
+                        rowData={tradeDataService.getData(TradeDataService.FLOWS)}
                         onGridReady={({ api }) => {
                             flowsGridApiRef.current = api;
                             api.deselectAll();
@@ -183,7 +183,7 @@ const BlastPlayDialog = () =>
                     <AgGridReact
                         domLayout='autoHeight'
                         columnDefs={newsColumnDefs}
-                        rowData={dataService.getData(DataService.NEWS)}
+                        rowData={tradeDataService.getData(TradeDataService.NEWS)}
                         onGridReady={({ api }) => {
                             newsGridApiRef.current = api;
                             api.deselectAll();
@@ -198,7 +198,7 @@ const BlastPlayDialog = () =>
                     <AgGridReact
                         domLayout='autoHeight'
                         columnDefs={columnDefs}
-                        rowData={dataService.getData(DataService.IOIs)}
+                        rowData={tradeDataService.getData(TradeDataService.IOIs)}
                         onGridReady={({ api }) => {
                             ioisGridApiRef.current = api;
                             api.deselectAll();

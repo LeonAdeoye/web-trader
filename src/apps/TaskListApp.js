@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, List, ListItem, ListItemText, ListItemIcon, Typography, Accordion, AccordionSummary, AccordionDetails, Tooltip, Button } from '@mui/material';
 import { Send, VisibilityOff, SwapHorizontalCircle, NewReleases, CircleNotifications, Podcasts } from '@mui/icons-material';
-import { DataService } from '../services/DataService';
+import { TradeDataService } from '../services/TradeDataService';
 import '../styles/css/main.css';
 import { LoggerService } from '../services/LoggerService';
 import {Sparklines, SparklinesBars} from "react-sparklines";
@@ -16,7 +16,7 @@ const TaskListApp = () =>
     const [searchValue, setSearchValue] = useState('');
     const [searchType, setSearchType] = useState('All');
     const [tasks, setTasks] = useState([]);
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const loggerService = useRef(new LoggerService(TaskListApp.name)).current;
     const [worker, setWorker] = useState(null);
     const [expandedAccordion, setExpandedAccordion] = useState(null);
@@ -61,7 +61,7 @@ const TaskListApp = () =>
 
     useEffect(() =>
     {
-        setTasks(dataService.getData(DataService.TASKS, stockCode, client).filter(filterTaskDetail).filter(filterTaskTypes));
+        setTasks(tradeDataService.getData(TradeDataService.TASKS, stockCode, client).filter(filterTaskDetail).filter(filterTaskTypes));
         setExpandedAccordion(null);
     }, [searchValue, searchType]);
 

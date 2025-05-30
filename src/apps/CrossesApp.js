@@ -1,6 +1,6 @@
 import React, {useMemo, useState, useCallback, useRef, useEffect} from 'react';
 import '../styles/css/main.css';
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
 import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
@@ -11,7 +11,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 
 const CrossesApp = () =>
 {
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [stockRows, setStockRows] = useState([]);
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
@@ -96,7 +96,7 @@ const CrossesApp = () =>
         if(!exchangeRatesLoaded)
             return;
 
-        const result = dataService.getData(DataService.CROSSES, stockCode, client);
+        const result = tradeDataService.getData(TradeDataService.CROSSES, stockCode, client);
 
         if(result.length === 0)
         {

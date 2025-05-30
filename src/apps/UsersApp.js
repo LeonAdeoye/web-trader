@@ -2,13 +2,13 @@ import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useMemo, useRef} from "react";
 import {ConfigurationService} from "../services/ConfigurationService";
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import TitleBarComponent from "../components/TitleBarComponent";
 
 export const UsersApp = () =>
 {
     const configurationService = useRef(new ConfigurationService()).current;
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [gridData, setGridData] = useState([]);
     // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("users"), []);
@@ -18,9 +18,9 @@ export const UsersApp = () =>
         configurationService.loadConfigurations("system").then(() =>
         {
             const url = configurationService.getConfigValue("system", "user-service-get-users-url") ?? "http://localhost:20003/users";
-            dataService.get(url).then(data => setGridData(data));
+            tradeDataService.get(url).then(data => setGridData(data));
         });
-    }, [dataService, configurationService]);
+    }, [tradeDataService, configurationService]);
 
     const columnDefs = useMemo(() => ([
         {headerName: "User Id", field: "userId", sortable: true, minWidth: 100, width: 130},

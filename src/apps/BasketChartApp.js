@@ -1,14 +1,14 @@
 import '../styles/css/main.css';
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {AgChartsReact} from 'ag-charts-react';
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
 export const BasketChartApp = () =>
 {
-    const dataService = useRef(new DataService()).current;
+    const dataService = useRef(new TradeDataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("basket-chart"), []);
     const [basketId, setBasketId] = useState(null);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
@@ -121,11 +121,11 @@ export const BasketChartApp = () =>
                     ...prevOptions,
                     series: [{
                         ...prevOptions.series[0],
-                        data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Buy')
+                        data: dataService.getData(TradeDataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Buy')
                     },
                         {
                             ...prevOptions.series[1],
-                            data: dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Sell')
+                            data: dataService.getData(TradeDataService.BASKETS).filter(basket => basket.basketId === basketId)[0].constituents.filter(constituent => constituent.side === 'Sell')
                         }]
                 }
             });

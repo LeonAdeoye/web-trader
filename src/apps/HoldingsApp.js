@@ -4,7 +4,7 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import {numberFormatter} from "../utilities";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import SparklineRenderer from '../components/SparklineRenderer';
@@ -15,7 +15,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 
 const HoldingsApp = () =>
 {
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [selectedTab, setSelectedTab] = useState("1");
     const [stockCode, setStockCode] = useState("0001.HK");
     const [client, setClient] = useState("Schroders");
@@ -68,8 +68,8 @@ const HoldingsApp = () =>
 
     useEffect(() =>
     {
-        setStockHoldings(dataService.getData(DataService.HOLDINGS, stockCode, null).holdings);
-        setClientHoldings(dataService.getData(DataService.HOLDINGS, null, client).holdings);
+        setStockHoldings(tradeDataService.getData(TradeDataService.HOLDINGS, stockCode, null).holdings);
+        setClientHoldings(tradeDataService.getData(TradeDataService.HOLDINGS, null, client).holdings);
     }, [stockCode, client])
 
     useEffect(() =>

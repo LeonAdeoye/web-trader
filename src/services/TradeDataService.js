@@ -1,7 +1,7 @@
 import {LoggerService} from "./LoggerService";
 import {tasks, tradeHistory, holdings, crosses, baskets, clients, iois, flows, news} from "./MockData";
 
-export class DataService
+export class TradeDataService
 {
     static CROSSES = "crosses";
     static HOLDINGS = "holdings";
@@ -136,23 +136,23 @@ export class DataService
     {
         switch (dataType)
         {
-            case DataService.CROSSES:
+            case TradeDataService.CROSSES:
                 return this.#filterCrosses(crosses, stock, client);
-            case DataService.TRADE_HISTORY:
+            case TradeDataService.TRADE_HISTORY:
                 return this.#filterTradeHistory(tradeHistory, stock, client, days);
-            case DataService.HOLDINGS:
+            case TradeDataService.HOLDINGS:
                 return this.#filterHoldings(holdings, stock, client);
-            case DataService.TASKS:
+            case TradeDataService.TASKS:
                 return this.#filterTasks(tasks, stock, client);
-            case DataService.BASKETS:
+            case TradeDataService.BASKETS:
                 return baskets;
-            case DataService.CLIENTS:
+            case TradeDataService.CLIENTS:
                 return clients;
-            case DataService.IOIs:
+            case TradeDataService.IOIs:
                 return iois;
-            case DataService.FLOWS:
+            case TradeDataService.FLOWS:
                 return flows;
-            case DataService.NEWS:
+            case TradeDataService.NEWS:
                 return news;
             default:
                 return [];

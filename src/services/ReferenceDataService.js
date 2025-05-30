@@ -1,6 +1,6 @@
 import {LoggerService} from "./LoggerService";
 
-export class InstrumentService
+export class ReferenceDataService
 {
     #instruments;
     #loggerService;

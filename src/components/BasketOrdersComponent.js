@@ -4,13 +4,13 @@ import {useEffect, useState, useMemo, useRef} from "react";
 import '../styles/css/main.css';
 import {selectedBasketState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
-import {DataService} from "../services/DataService";
+import {TradeDataService} from "../services/TradeDataService";
 import {GenericGridComponent} from "./GenericGridComponent";
 
 export const BasketOrdersComponent = ({loggerService}) =>
 {
     const [selectedBasket] = useRecoilState(selectedBasketState);
-    const dataService = useRef(new DataService()).current;
+    const tradeDataService = useRef(new TradeDataService()).current;
     const [orders, setOrders] = useState([]);
 
     const columnDefs = useMemo(() => ([
@@ -37,7 +37,7 @@ export const BasketOrdersComponent = ({loggerService}) =>
     useEffect(() =>
     {
         if(selectedBasket)
-            setOrders(dataService.getData(DataService.BASKETS).filter(basket => basket.basketId === selectedBasket)[0].constituents);
+            setOrders(tradeDataService.getData(TradeDataService.BASKETS).filter(basket => basket.basketId === selectedBasket)[0].constituents);
     }, [selectedBasket]);
 
     return (
