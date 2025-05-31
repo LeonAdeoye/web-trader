@@ -1,9 +1,9 @@
 import {useRecoilState} from "recoil";
 import {alertConfigurationState} from "../atoms/component-state";
-import {ToggleButton, ToggleButtonGroup, MenuItem, Select, TextField, Typography, Tooltip} from "@mui/material";
+import {MenuItem, Select, TextField} from "@mui/material";
 import React, {useState} from "react";
 import '../styles/css/main.css';
-import { FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import { FormControl, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 
 
 export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) =>
@@ -17,7 +17,6 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
     };
     const [alertConfiguration] = useRecoilState(alertConfigurationState);
     const [selectedDays, setSelectedDays] = useState(Object.keys(daysMap));
-    const handleChange = (event, newDays) => setSelectedDays(newDays);
     const [startTime, setStartTime] = useState('08:00');
     const [endTime, setEndTime] = useState('16:00');
     const [frequency, setFrequency] = useState('everyMinute');
@@ -47,7 +46,6 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
             default:
                 minuteField = "*";
         }
-        alert(`${minuteField} * * * ${daysCron || "*"}`)
         return `${minuteField} * * * ${daysCron || "*"}`;
     };
 
@@ -63,14 +61,14 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
         handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
     }
 
-    const handleDayChange = (event) => {
+    const handleDayChange = (event) =>
+    {
         const { value, checked } = event.target;
         setSelectedDays((prev) =>
             checked ? [...prev, value] : prev.filter((day) => day !== value)
         );
         handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
     };
-
 
     const handleFrequencyChange = (value) =>
     {
@@ -97,7 +95,8 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
             <div>
                 <FormControl component="fieldset">
                     <FormGroup>
-                        {Object.keys(daysMap).map((day) => (
+                        {Object.keys(daysMap).map((day) =>
+                        (
                             <FormControlLabel
                                 key={day}
                                 control={
