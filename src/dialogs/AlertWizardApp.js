@@ -4,6 +4,7 @@ import {AlertConfigurationsDialogStageTwoComponent} from "./AlertConfigurationsD
 import {AlertConfigurationsDialogStageThreeComponent} from "./AlertConfigurationsDialogStageThreeComponent";
 import {AlertConfigurationsDialogStageFourComponent} from "./AlertConfigurationsDialogStageFourComponent";
 import {AlertConfigurationsDialogStageFiveComponent} from "./AlertConfigurationsDialogStageFiveComponent";
+import {AlertConfigurationsDialogStageSixComponent} from "./AlertConfigurationsDialogStageSixComponent";
 import React, {useCallback, useRef, useState, useMemo, useEffect} from "react";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {LoggerService} from "../services/LoggerService";
@@ -12,9 +13,10 @@ import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {alertConfigurationState} from "../atoms/component-state";
 
+
 export const AlertWizardApp = () =>
 {
-    const maxStage = 5;
+    const maxStage = 6;
     const [currentStage, setCurrentStage] = useState(1);
     const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
@@ -69,6 +71,7 @@ export const AlertWizardApp = () =>
                 {currentStage === 3 ? <AlertConfigurationsDialogStageThreeComponent handleInputChange={handleInputChange} alertConfigurationsService={alertConfigurationsService}/> : ""}
                 {currentStage === 4 ? <AlertConfigurationsDialogStageFourComponent handleInputChange={handleInputChange}/> : ""}
                 {currentStage === 5 ? <AlertConfigurationsDialogStageFiveComponent handleInputChange={handleInputChange}/> : ""}
+                {currentStage === 6 ? <AlertConfigurationsDialogStageSixComponent handleInputChange={handleInputChange}/> : ""}
                 <Tooltip title={<Typography fontSize={12}>Cancel and close configuration dialog window.</Typography>}>
                     <span>
                         <Button className="dialog-action-button" color="primary" variant='contained' onClick={handleCancel}>Cancel</Button>
