@@ -1,19 +1,13 @@
 import {useRecoilState} from "recoil";
 import {alertConfigurationState} from "../atoms/component-state";
-import {ToggleButton, ToggleButtonGroup, MenuItem, Select, TextField} from "@mui/material";
+import {ToggleButton, ToggleButtonGroup, MenuItem, Select, TextField, Typography, Tooltip} from "@mui/material";
 import React, {useState} from "react";
-
 import '../styles/css/main.css';
+import { FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 
 
 export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) =>
 {
-    const [alertConfiguration] = useRecoilState(alertConfigurationState);
-
-    const [selectedDays, setSelectedDays] = useState([]);
-
-    const handleChange = (event, newDays) => setSelectedDays(newDays);
-
     const daysMap = {
         Monday: 1,
         Tuesday: 2,
@@ -21,11 +15,12 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
         Thursday: 4,
         Friday: 5
     };
-
+    const [alertConfiguration] = useRecoilState(alertConfigurationState);
+    const [selectedDays, setSelectedDays] = useState(Object.keys(daysMap));
+    const handleChange = (event, newDays) => setSelectedDays(newDays);
     const [startTime, setStartTime] = useState('08:00');
     const [endTime, setEndTime] = useState('16:00');
     const [frequency, setFrequency] = useState('everyMinute');
-    const handleFrequencyChange = () => handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
 
     const generateCronExpression = (frequency, selectedDays) => {
         const daysCron = selectedDays.map(day => daysMap[day]).join(",");
@@ -56,14 +51,41 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
         return `${minuteField} * * * ${daysCron || "*"}`;
     };
 
+    const handleStartTimeChange = (value) =>
+    {
+        setStartTime(value);
+        handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
+    }
+
+    const handleEndTimeChange = (value) =>
+    {
+        setEndTime(value);
+        handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
+    }
+
+    const handleDayChange = (event) => {
+        const { value, checked } = event.target;
+        setSelectedDays((prev) =>
+            checked ? [...prev, value] : prev.filter((day) => day !== value)
+        );
+        handleInputChange('frequency', {'cronExpression': generateCronExpression(frequency, selectedDays), 'startTime': startTime, 'endTime': endTime });
+    };
+
+
+    const handleFrequencyChange = (value) =>
+    {
+        setFrequency(value);
+        handleInputChange('frequency', {'cronExpression': generateCronExpression(value, selectedDays), 'startTime': startTime, 'endTime': endTime });
+    }
+
     return (
         <div className="app-parent-with-action-button">
             <div>
-                <TextField label="Start Time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} style={{ margin: "4px" }}/>
-                <TextField label="End Time" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} style={{ margin: "4px" }}/>
+                <TextField label="Start Time" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} style={{ margin: "4px" }}/>
+                <TextField label="End Time" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} style={{ margin: "4px" }}/>
             </div>
 
-            <Select value={frequency} onChange={(e) => setFrequency(e.target.value)} className="dropdown" style={{ margin: "4px", width: "274px"}}>
+            <Select value={frequency} onChange={(e) => handleFrequencyChange(e.target.value)} className="dropdown" style={{ margin: "4px", width: "274px"}}>
                 <MenuItem value="everyMinute">Every Minute</MenuItem>
                 <MenuItem value="every5Minutes">Every 5 Minutes</MenuItem>
                 <MenuItem value="every10Minutes">Every 10 Minutes</MenuItem>
@@ -73,20 +95,25 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
             </Select>
 
             <div>
-                <ToggleButtonGroup value={selectedDays} onChange={handleChange}>
-                    {Object.keys(daysMap).map((day) => (
-                        <ToggleButton className="dialog-action-button" key={day} value={day}
-                        style={{
-                            border: "1px solid #D3D3D3",
-                            borderRadius: "8px",
-                            marginLeft: "4px",
-                            marginTop: "2px",
-                        }} onClick={() => handleFrequencyChange()}>
-                            {day}
-                        </ToggleButton>
-                    ))}
-                </ToggleButtonGroup>
+                <FormControl component="fieldset">
+                    <FormGroup>
+                        {Object.keys(daysMap).map((day) => (
+                            <FormControlLabel
+                                key={day}
+                                control={
+                                    <Checkbox
+                                        value={day}
+                                        checked={selectedDays.includes(day)}
+                                        onChange={handleDayChange}
+                                    />
+                                }
+                                label={day}
+                            />
+                        ))}
+                    </FormGroup>
+                </FormControl>
             </div>
         </div>
     );
 }
+
