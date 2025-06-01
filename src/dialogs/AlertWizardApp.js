@@ -51,7 +51,6 @@ export const AlertWizardApp = () =>
     };
 
     const handleInputChange = useCallback((name, value) => {
-        loggerService.logInfo(`Alert configuration input changed: ${name} = ${value}`);
         setAlertConfiguration(previous => ({
             ...previous,
             [name]: value

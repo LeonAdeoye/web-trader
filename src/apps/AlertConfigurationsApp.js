@@ -92,20 +92,20 @@ export const AlertConfigurationsApp = () =>
         }
     }
 
-    const handleAction = async (action, alertConfigurationId) =>
+    const handleAction = async (action, alertConfiguration) =>
     {
-        console.log("handleAction: " + action + " alertConfigurationId: " + JSON.stringify(alertConfigurationId));
+        console.log("Handle " + action + " action on alert configuration: " + JSON.stringify(alertConfiguration));
         switch(action)
         {
             case "update":
-                setSelectedGenericGridRow(alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId));
+                setSelectedGenericGridRow(alertConfigurations.find(config => config.alertConfigurationId === alertConfiguration.alertConfigurationId));
                 launchWizardApp();
                 break;
             case "delete":
-                await deleteAlertConfiguration(windowId, alertConfigurationId)
+                await deleteAlertConfiguration(alertConfiguration.alertConfigurationId)
                 break;
             case "clone":
-                let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfigurationId);
+                let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfiguration.alertConfigurationId);
                 setAlertConfiguration({...alertConfig, alertConfigurationId: null})
                 setSelectedGenericGridRow({...alertConfig, alertConfigurationId: null});
                 launchWizardApp();
@@ -115,7 +115,7 @@ export const AlertConfigurationsApp = () =>
                 launchWizardApp();
                 break;
             default:
-                loggerService.logError(`Unknown action: ${action} for alertConfigurationId: ${alertConfigurationId}`);
+                loggerService.logError(`Unknown action: ${action} for alertConfigurationId: ${alertConfiguration.alertConfigurationId}`);
         }
     };
 
