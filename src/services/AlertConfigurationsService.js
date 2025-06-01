@@ -25,7 +25,7 @@ export class AlertConfigurationsService
         if(isEmptyString(ownerId))
             return;
 
-        await fetch(`http://localhost:20011/alertConfigurations?ownerId=${ownerId}`)
+        await fetch(`http://localhost:20012/alertConfigurations?ownerId=${ownerId}`)
             .then(response => response.json())
             .then(data =>
             {
@@ -42,7 +42,7 @@ export class AlertConfigurationsService
 
     loadAlertTypes = async () =>
     {
-        await fetch(`http://localhost:20011/alertConfigurations/alertTypes`)
+        await fetch(`http://localhost:20012/alertConfigurations/alertTypes`)
             .then(response => response.json())
             .then(data =>
             {
@@ -60,7 +60,7 @@ export class AlertConfigurationsService
     addNewAlertConfiguration = async (newAlertConfigurationsConfiguration) =>
     {
         this.#loggerService.logInfo(`Saving alertConfigurations configuration: ${JSON.stringify(newAlertConfigurationsConfiguration)}.`);
-        return await fetch("http://localhost:20011/alertConfigurations", {
+        return await fetch("http://localhost:20012/alertConfigurations", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(newAlertConfigurationsConfiguration)})
@@ -81,7 +81,7 @@ export class AlertConfigurationsService
 
     deleteAlertConfiguration = async (ownerId, alertConfigurationsId) =>
     {
-        fetch(`http://localhost:20011/alertConfigurations?ownerId=${ownerId}&alertConfigurationsId=${alertConfigurationsId}`, {method: "DELETE"})
+        fetch(`http://localhost:20012/alertConfigurations?ownerId=${ownerId}&alertConfigurationsId=${alertConfigurationsId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#alertConfigurations)
@@ -100,7 +100,7 @@ export class AlertConfigurationsService
     updateAlertConfiguration = async (updatedAlertConfigurationsConfiguration) =>
     {
         this.#loggerService.logInfo(`Updating alertConfigurations configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}`);
-        return await fetch("http://localhost:20011/alertConfigurations", {
+        return await fetch("http://localhost:20012/alertConfigurations", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedAlertConfigurationsConfiguration)})

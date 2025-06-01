@@ -73,7 +73,7 @@ export const AlertConfigurationsApp = () =>
         }
     }
 
-    const deleteAlertConfiguration = async (alertConfigurationId) =>
+    const deleteAlertConfiguration = async (ownerId, alertConfigurationId) =>
     {
         try
         {
