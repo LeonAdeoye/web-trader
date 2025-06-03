@@ -9,6 +9,7 @@ import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import CheckboxRenderer from "../components/CheckboxRenderer";
 import cronstrue from 'cronstrue';
+import SideRenderer from "../components/SideRenderer";
 
 
 export const AlertConfigurationsApp = () =>
@@ -26,15 +27,18 @@ export const AlertConfigurationsApp = () =>
     const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
     const columnDefs = useMemo(() =>
     ([
-        {headerName: "Id", field: "alertConfigurationId", hide: true, sortable: false, minWidth: 130, width: 130},
-        {headerName: "Type", field: "type", sortable: true, minWidth: 150, width: 150, filter: true},
-        {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 100, width: 210, valueGetter: (params) => cronstrue.toString(params.data.frequency, {throwExceptionOnParseError: false}) || "N/A", filter: true},
-        {headerName: "Client", field: "clientId", sortable: true, minWidth: 100, width: 200, filter: true, valueGetter: (params) => clientService.getClientName(params.data.clientId) },
-        {headerName: "Desk", field: "desk", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 110, width: 110},
+        {headerName: "Alert Type", field: "alertType", sortable: true, minWidth: 200, width: 200, filter: true},
+        {headerName: "Alert Name", field: "alertName", sortable: true, minWidth: 200, width: 200, filter: true},
+        {headerName: "Priority", field: "priority", sortable: true, minWidth: 90, width: 90, filter: true},
+        {headerName: "Start Time", field: "startTime", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => new Date(params.data.startTime).toLocaleTimeString()},
+        {headerName: "End Time", field: "endTime", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => new Date(params.data.endTime).toLocaleTimeString()},
+        {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 220, width: 240, valueGetter: (params) => cronstrue.toString(params.data.frequency, {throwExceptionOnParseError: false}) || "N/A", filter: true},
+        {headerName: "Client", field: "clientId", sortable: true, minWidth: 100, width: 200, filter: true, valueGetter: (params) => clientService.getClientName("651baff39b4d394648e577d2") },
+        {headerName: "Desk", field: "deskId", sortable: true, minWidth: 110, width: 110, filter: true},
         {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 130, filter: true},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true},
-        {headerName: "Customizations", field: "client", sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true, cellRenderer: SideRenderer},
+        {headerName: "Customizations", field: "customizations", sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Is Active", field: "isActive", sortable: false, minWidth: 90, width: 90, filter: false, cellRenderer: CheckboxRenderer},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
@@ -61,7 +65,7 @@ export const AlertConfigurationsApp = () =>
             alertConfigurationsService.updateAlertConfiguration(alertConfigurationToUpdate)
                 .then(() => setAlertConfigurations(previousAlertConfigurations =>
                 {
-                    const index = previousAlertConfigurations.findIndex(currentAlertConfiguration => currentAlertConfiguration.alertConfigurationId === alertConfigurationToUpdate.alertConfigurationId);
+                    const index = previousAlertConfigurations.findIndex(currentAlertConfiguration => currentAlertConfiguration.id === alertConfigurationToUpdate.id);
                     previousAlertConfigurations[index] = alertConfigurationToUpdate;
                     setSelectedGenericGridRow(alertConfigurationToUpdate);
                     return [...previousAlertConfigurations];
@@ -73,15 +77,15 @@ export const AlertConfigurationsApp = () =>
         }
     }
 
-    const deleteAlertConfiguration = async (ownerId, alertConfigurationId) =>
+    const deleteAlertConfiguration = async (ownerId, id) =>
     {
         try
         {
-            loggerService.logInfo(`Deleting existing alert configuration with owner Id: ${ownerId} alertConfigurationId: ${alertConfigurationId}.`);
-            alertConfigurationsService.deleteAlertConfiguration(ownerId, alertConfigurationId)
+            loggerService.logInfo(`Deleting existing alert configuration with owner Id: ${ownerId} id: ${id}.`);
+            alertConfigurationsService.deleteAlertConfiguration(ownerId, id)
                 .then(() => setAlertConfigurations(previousAlertConfigurations =>
                 {
-                    const index = previousAlertConfigurations.findIndex(alertConfiguration => alertConfiguration.alertConfigurationId === alertConfigurationId);
+                    const index = previousAlertConfigurations.findIndex(alertConfiguration => alertConfiguration.id === id);
                     previousAlertConfigurations.splice(index, 1);
                     return [...previousAlertConfigurations];
                 }));
@@ -98,16 +102,16 @@ export const AlertConfigurationsApp = () =>
         switch(action)
         {
             case "update":
-                setSelectedGenericGridRow(alertConfigurations.find(config => config.alertConfigurationId === alertConfiguration.alertConfigurationId));
+                setSelectedGenericGridRow(alertConfigurations.find(config => config.id === alertConfiguration.id));
                 launchWizardApp();
                 break;
             case "delete":
-                await deleteAlertConfiguration(alertConfiguration.alertConfigurationId)
+                await deleteAlertConfiguration(alertConfiguration.id)
                 break;
             case "clone":
-                let alertConfig = alertConfigurations.find(config => config.alertConfigurationId === alertConfiguration.alertConfigurationId);
-                setAlertConfiguration({...alertConfig, alertConfigurationId: null})
-                setSelectedGenericGridRow({...alertConfig, alertConfigurationId: null});
+                let alertConfig = alertConfigurations.find(config => config.id === alertConfiguration.id);
+                setAlertConfiguration({...alertConfig, id: null})
+                setSelectedGenericGridRow({...alertConfig, id: null});
                 launchWizardApp();
                 break;
             case "add":
@@ -115,7 +119,7 @@ export const AlertConfigurationsApp = () =>
                 launchWizardApp();
                 break;
             default:
-                loggerService.logError(`Unknown action: ${action} for alertConfigurationId: ${alertConfiguration.alertConfigurationId}`);
+                loggerService.logError(`Unknown action: ${action} for alert configurationId: ${alertConfiguration.id}`);
         }
     };
 
@@ -127,20 +131,31 @@ export const AlertConfigurationsApp = () =>
 
     useEffect(() =>
     {
-        const loadData = async () =>
-        {
-            await clientService.loadClients();
-            await alertConfigurationsService.loadAlertConfigurations();
-        };
-
         if(ownerId)
         {
-            loadData().then(() =>
+            const loadData = async () =>
             {
-                setAlertConfigurations([{alertConfigurationId:1, alertName: "JP Morgan Order Rejects", type: "Order Rejections", desk: "LT", side: "ShortSell", frequency: "0 10 * * 1-5", priority: "High", clientId: "651baff39b4d394648e577d2", isActive: true, exchanges: "HK, SG, AU, IN, KR"},
-                    {alertConfigurationId:2, alertName: "Client Amendment Rejects", type:  "Amendment Rejections", frequency: "0 8 * * 2", priority: "High", desk: "HT", side: "Sell", clientId: "651bafeb9b4d394648e577d1", isActive: false, exchanges: "HK"},
-                    {alertConfigurationId:3, alertName: "Client Order Rejects", type:  "Order Rejections", frequency: "* * * * *", priority: "High", desk: "PT", side: "Buy", clientId: "651bb04f9b4d394648e577d7", isActive: true, exchanges: "HK, KR"}])
-            });
+                await clientService.loadClients();
+                await alertConfigurationsService.loadAlertConfigurations(ownerId);
+            };
+
+            // ALERT CONFIGURATION SAMPLE POSTMAN JSON BODY:
+            // {
+            //     "alertName": "JP Morgan Order Rejects",
+            //     "ownerId": "ladeoye",
+            //     "side": "BUY",
+            //     "deskId": "123e4567-e89b-12d3-a456-426614174000",
+            //     "alertType": "ORDER_REJECTIONS",
+            //     "startTime": "2025-06-03T08:00:00",
+            //     "endTime": "2025-06-03T14:00:00",
+            //     "frequency": "0 10 * * 1-5",
+            //     "isActive": true,
+            //     "exchanges": ["HKSE"],
+            //     "priority": "HIGH",
+            //     "clientId": "123e4567-e89b-12d3-a456-426614174000",
+            //     "customizations": "Custom alert settings"
+            // }
+            loadData().then(() => setAlertConfigurations(alertConfigurationsService.getAlertConfigurations()));
         }
     }, [ownerId]);
 
@@ -157,7 +172,7 @@ export const AlertConfigurationsApp = () =>
                 tooltipText: "Add new alert configuration..."
             }} showChannel={false} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["alertConfigurationId"]}
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]}
                                       columnDefs={columnDefs} gridData={alertConfigurations} handleAction={handleAction}/>
             </div>
         </>);

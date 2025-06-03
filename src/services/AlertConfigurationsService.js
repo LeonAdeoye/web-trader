@@ -10,13 +10,7 @@ export class AlertConfigurationsService
     constructor()
     {
         this.#alertConfigurations = [];
-        this.#alertTypes =
-        [
-            {type: "Order Not Complete", classification: "Order", explanation: "Live order quantity more than cumulative quantity after reference time.", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > referenceTime", messageTemplate: "After reference time: #{referenceTime} the order: #{orderId} for #{instrumentCode} with size: #{quantity} at price: #{price} is NOT complete. There are #{remainingQuantity} remaining."},
-            {type: "Algo Expired With Executions Outstanding", classification: "Order", explanation: "Order with order quantity more than cumulative quantity after Algo expiry", expression: "OrderState === 'LIVE' && orderQuantity > cumulativeQuantity && currentTime > algoEndTime", messageTemplate: "After Algo end time: #{algoEndTime} the order: #{orderId} for #{instrumentCode} with size: #{quantity} at price: #{price} is NOT complete. There are #{remainingQuantity} remaining."},
-            {type: "Order Rejections", classification: "Order", explanation: "Order rejection before ", expression: "OrderState === 'REJ' && orderQuantity > 0 & cumulativeQuantity === 0", messageTemplate: "The order: #{orderId} for #{instrumentCode} with size: #{quantity} at price: #{price} is rejected."},
-            {type: "Amendment Rejections", classification: "Order", explanation: "Amendment rejection before after order accepted", expression: "OrderState === 'REJ' && cumulativeQuantity > 0", messageTemplate: "The amendment of the order: #{orderId} for #{instrumentCode} with size: #{quantity} at price: #{price} is rejected."}
-        ];
+        this.#alertTypes = [];
         this.#loggerService = new LoggerService(this.constructor.name);
     };
 
@@ -25,24 +19,24 @@ export class AlertConfigurationsService
         if(isEmptyString(ownerId))
             return;
 
-        await fetch(`http://localhost:20012/alertConfigurations?ownerId=${ownerId}`)
+        await fetch(`http://localhost:20012/alert/configuration?ownerId=${ownerId}`)
             .then(response => response.json())
             .then(data =>
             {
                 if(data.length > 0)
                 {
                     this.#alertConfigurations = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} alertConfigurations for owner: ${ownerId}`);
+                    this.#loggerService.logInfo(`Loaded ${data.length} alert configurations for owner: ${ownerId}`);
                 }
                 else
-                    this.#loggerService.logInfo(`Loaded zero alertConfigurations for owner: ${ownerId}`);
+                    this.#loggerService.logInfo(`Loaded zero alert configurations for owner: ${ownerId}`);
             })
             .catch(err => this.#loggerService.logError(err));
     };
 
     loadAlertTypes = async () =>
     {
-        await fetch(`http://localhost:20012/alertConfigurations/alertTypes`)
+        await fetch(`http://localhost:20012/alert/type`)
             .then(response => response.json())
             .then(data =>
             {
@@ -59,8 +53,8 @@ export class AlertConfigurationsService
 
     addNewAlertConfiguration = async (newAlertConfigurationsConfiguration) =>
     {
-        this.#loggerService.logInfo(`Saving alertConfigurations configuration: ${JSON.stringify(newAlertConfigurationsConfiguration)}.`);
-        return await fetch("http://localhost:20012/alertConfigurations", {
+        this.#loggerService.logInfo(`Saving alert configuration: ${JSON.stringify(newAlertConfigurationsConfiguration)}.`);
+        return await fetch("http://localhost:20012/alert/configuration", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(newAlertConfigurationsConfiguration)})
@@ -68,7 +62,7 @@ export class AlertConfigurationsService
             .then((alertConfigurationsResponse) =>
             {
                 this.#alertConfigurations.push(alertConfigurationsResponse);
-                this.#loggerService.logInfo(`Successfully saved alertConfigurations configuration: ${JSON.stringify(alertConfigurationsResponse)}.`);
+                this.#loggerService.logInfo(`Successfully saved alert configuration: ${JSON.stringify(alertConfigurationsResponse)}.`);
                 return alertConfigurationsResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -81,7 +75,7 @@ export class AlertConfigurationsService
 
     deleteAlertConfiguration = async (ownerId, alertConfigurationsId) =>
     {
-        fetch(`http://localhost:20012/alertConfigurations?ownerId=${ownerId}&alertConfigurationsId=${alertConfigurationsId}`, {method: "DELETE"})
+        fetch(`http://localhost:20012/alert/configuration/${alertConfigurationsId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#alertConfigurations)
@@ -89,7 +83,7 @@ export class AlertConfigurationsService
                     if(current.alertConfigurationsId === alertConfigurationsId)
                     {
                         this.#alertConfigurations.splice(this.#alertConfigurations.indexOf(current), 1);
-                        this.#loggerService.logInfo(`Successfully deleted alertConfigurations configuration with ownerId: ${ownerId} and alertConfigurations Id: ${alertConfigurationsId}`);
+                        this.#loggerService.logInfo(`Successfully deleted alert configuration with ownerId: ${ownerId} and Id: ${alertConfigurationsId}`);
                         break;
                     }
                 }
@@ -99,8 +93,8 @@ export class AlertConfigurationsService
 
     updateAlertConfiguration = async (updatedAlertConfigurationsConfiguration) =>
     {
-        this.#loggerService.logInfo(`Updating alertConfigurations configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}`);
-        return await fetch("http://localhost:20012/alertConfigurations", {
+        this.#loggerService.logInfo(`Updating alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}`);
+        return await fetch("http://localhost:20012/alert/configuration", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updatedAlertConfigurationsConfiguration)})
@@ -116,7 +110,7 @@ export class AlertConfigurationsService
                     }
                 }
 
-                this.#loggerService.logInfo(`Successfully updated alertConfigurations configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}.`);
+                this.#loggerService.logInfo(`Successfully updated alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     };
