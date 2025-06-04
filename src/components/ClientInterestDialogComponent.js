@@ -4,6 +4,7 @@ import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {SideWidget} from "../widgets/SideWidget";
+import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
 
 const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 {
@@ -65,16 +66,18 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                 <Grid container spacing={1} direction="column">
                     <Grid item container spacing={1}>
                         <Grid item>
-                            <Autocomplete
-                                className="client-interest-symbol"
-                                size='small'
-                                renderInput={(params) => <TextField {...params} label='Select the stock code' />}
-                                style={{ width: '203px', marginTop: '15px'}}
-                                value={clientInterest.instrumentCode || null}
-                                options={(instrumentService.getInstruments() || []).map(instrument => instrument.instrumentCode)}
-                                onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
-                                required
-                                isOptionEqualToValue={(option, value) => option === value} />
+                            {/*TODO - fix instrument dropdown list.*/}
+                            <ClientAutoCompleteWidget instrumentService={instrumentService} handleInputChange={handleInputChange} instrumentCode={clientInterest.instrumentCode} className={"client-interest-symbol"} />
+                            {/*<Autocomplete*/}
+                            {/*    className="client-interest-symbol"*/}
+                            {/*    size='small'*/}
+                            {/*    renderInput={(params) => <TextField {...params} label='Select the stock code' />}*/}
+                            {/*    style={{ width: '203px', marginTop: '15px'}}*/}
+                            {/*    value={clientInterest.instrumentCode || null}*/}
+                            {/*    options={(instrumentService.getInstruments() || []).map(instrument => instrument.instrumentCode)}*/}
+                            {/*    onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}*/}
+                            {/*    required*/}
+                            {/*    isOptionEqualToValue={(option, value) => option === value} />*/}
                         </Grid>
                         <Grid item>
                             <SideWidget handleSideChange={handleSideChange} sideValue={clientInterest.side} className={"client-interest-side"}/>
