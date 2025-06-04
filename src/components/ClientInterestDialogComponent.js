@@ -3,13 +3,14 @@ import React, {useCallback, useEffect, useState} from "react";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
+import {SideWidget} from "../widgets/SideWidget";
 
 const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 {
     const defaultClientInterest =
     {
         notes: '',
-        stockCode: '',
+        instrumentCode: '',
         side: 'Buy'
     };
 
@@ -17,9 +18,9 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
     const [clientInterest, setClientInterest] = useState(defaultClientInterest);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
-    const canClear = () => clientInterest.stockCode !== '' || clientInterest.notes !== '';
+    const canClear = () => clientInterest.instrumentCode !== '' || clientInterest.notes !== '';
 
-    const canSubmit = () => clientInterest.stockCode !== '' && clientInterest.side !== '';
+    const canSubmit = () => clientInterest.instrumentCode !== '' && clientInterest.side !== '';
 
     const handleInputChange = useCallback((name, value) =>
     {
@@ -69,25 +70,14 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                                 size='small'
                                 renderInput={(params) => <TextField {...params} label='Select the stock code' />}
                                 style={{ width: '203px', marginTop: '15px'}}
-                                value={clientInterest.stockCode || null}
-                                options={(instrumentService.getInstruments() || []).map(instrument => instrument.stockCode)}
-                                onChange={(_, newValue) => handleInputChange("stockCode", newValue)}
+                                value={clientInterest.instrumentCode || null}
+                                options={(instrumentService.getInstruments() || []).map(instrument => instrument.instrumentCode)}
+                                onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
                                 required
                                 isOptionEqualToValue={(option, value) => option === value} />
                         </Grid>
                         <Grid item>
-                            <TextField
-                                className="client-interest-side"
-                                size='small'
-                                label='Select side'
-                                select
-                                value={clientInterest.side}
-                                onChange={handleSideChange}
-                                fullWidth
-                                style={{ width: '120px', marginTop: '15px'}}>
-                                <MenuItem value='BUY'>Buy</MenuItem>
-                                <MenuItem value='SELL'>Sell</MenuItem>
-                            </TextField>
+                            <SideWidget handleSideChange={handleSideChange} sideValue={clientInterest.side} className={"client-interest-side"}/>
                         </Grid>
                     </Grid>
 

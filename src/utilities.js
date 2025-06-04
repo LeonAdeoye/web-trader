@@ -58,11 +58,11 @@ export const orderSideStyling = (orderSide) =>
 {
     const side = orderSide.toLowerCase();
     if (side === 'buy')
-        return { color: '#346bb4', fontWeight: 'bold' };
+        return { color: '#346bb4', fontWeight: 'bold', fontSize: '13px' };
     else if (side === 'sell')
-        return { color: '#528c74', fontWeight: 'bold' };
+        return { color: '#528c74', fontWeight: 'bold', fontSize: '13px'};
     else if (side === 'short sell')
-        return { color: 'red', fontWeight: 'bold' };
+        return { color: 'red', fontWeight: 'bold', fontSize: '13px' };
     else
         return {};
 }

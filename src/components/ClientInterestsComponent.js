@@ -19,8 +19,8 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
     const [ownerId, setOwnerId] = useState('');
 
     const columnDefs = useMemo(() => ([
-        {headerName: "Stock Code", field: "stockCode", sortable: true, minWidth: 115, width: 115, filter: true},
-        {headerName: "Stock Description.", field: "stockDescription", hide: false, sortable: true, minWidth: 170, width: 170, filter: true},
+        {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 115, width: 115, filter: true},
+        {headerName: "Instrument Description", field: "instrumentDescription", hide: false, sortable: true, minWidth: 290, width: 290, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
@@ -44,10 +44,10 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
         const clientInterests = clientInterestService.getClientInterests().filter(client => client.clientId === selectedClient);
         const updatedRows = clientInterests.map(row =>
         {
-            const instrument = instrumentService.getInstruments().find(instrument => instrument.stockCode === row.stockCode);
+            const instrument = instrumentService.getInstruments().find(instrument => instrument.instrumentCode === row.instrumentCode);
             return {
                 ...row,
-                stockDescription: instrument.stockDescription
+                instrumentDescription: instrument.instrumentDescription
             };
         });
         setInterests(updatedRows);
