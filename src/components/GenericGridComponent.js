@@ -1,8 +1,12 @@
 import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
-import {useCallback, useMemo, useRef} from "react";
+import {useCallback, useMemo, useRef, useState} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
-import {selectedContextShareState, selectedGenericGridRowState} from "../atoms/component-state";
+import {
+    genericGridLastColumnClickedState,
+    selectedContextShareState,
+    selectedGenericGridRowState
+} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
 export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction}) =>
@@ -18,24 +22,21 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
         return getRowIdValue(rowIdArray, row.data);
     }, []);
 
-    const onSelectionChanged = useCallback(() =>
-    {
-        const selectedRows = gridApiRef.current.api.getSelectedRows();
-        if(selectedRows.length === 1)
-            setSelectedGenericGridRow(selectedRows[0]);
-    }, []);
+    const onCellClicked = useCallback ((params) => {
+        const { colDef, data } = params;
 
-    const onCellClicked = useCallback((params) =>
-    {
-        const {colDef, data} = params;
-
-        if (colDef.field === 'instrumentCode')
+        if (colDef.field === 'instrumentCode') {
             setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode }]);
-        else if (colDef.field === 'clientId')
+        } else if (colDef.field === 'clientId') {
             setSelectedContextShare([{ contextShareKey: 'clientId', contextShareValue: data.clientId }]);
-        else
-            setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode },
-                { contextShareKey: 'clientId', contextShareValue: data.clientId }]);
+        } else {
+            setSelectedContextShare([
+                { contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode },
+                { contextShareKey: 'clientId', contextShareValue: data.clientId }
+            ]);
+        }
+        if(colDef.field !== 'actions')
+            setSelectedGenericGridRow(data);
     }, []);
 
     const updateRows = useCallback((row) =>
@@ -58,7 +59,6 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}
-                onSelectionChanged={onSelectionChanged}
                 onCellClicked={onCellClicked}
                 animateRows={true}
                 getRowId={getRowId}

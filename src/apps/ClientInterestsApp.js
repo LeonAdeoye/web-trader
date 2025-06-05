@@ -31,10 +31,10 @@ export const ClientInterestsApp = () =>
     const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
     const [listOfClients, setListOfClients] = useState([]);
 
-    const closeHandler = async ({stockCode, side, notes}) =>
+    const closeHandler = async ({instrumentCode, side, notes}) =>
     {
         setClientInterestsChanged(false);
-        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), stockCode, notes, clientId:selectedClient});
+        await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), instrumentCode, notes, clientId:selectedClient});
         setClientInterestsChanged(true);
     }
 

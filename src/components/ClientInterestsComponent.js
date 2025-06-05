@@ -10,11 +10,10 @@ import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 
 export const ClientInterestsComponent = ({instrumentService, clientInterestService, loggerService}) =>
 {
-    const [selectedClient] = useRecoilState(selectedClientState);
+    const [selectedClient, setSelectedClient] = useRecoilState(selectedClientState);
     const [clientInterestsChanged, setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
     const [, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-
     const [interests, setInterests] = useState([]);
     const [ownerId, setOwnerId] = useState('');
 
@@ -56,7 +55,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
 
     const handleAction = async (action, data) =>
     {
-        setClientInterestsChanged(false);
+
         switch(action)
         {
             case "update":
@@ -64,6 +63,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
                 setClientInterestDialogOpen(true);
                 break;
             case "delete":
+                setClientInterestsChanged(false);
                 await clientInterestService.deleteClientInterest(ownerId, data.clientInterestId);
                 setClientInterestsChanged(true);
                 break;
@@ -74,6 +74,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
                 break;
             case "add":
                 setSelectedGenericGridRow(null);
+                setSelectedClient(null);
                 setClientInterestDialogOpen(true);
                 break;
             default:
