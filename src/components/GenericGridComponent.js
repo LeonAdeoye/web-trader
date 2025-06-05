@@ -29,13 +29,13 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
     {
         const {colDef, data} = params;
 
-        if (colDef.field === 'stockCode')
-            setSelectedContextShare([{ contextShareKey: 'stockCode', contextShareValue: data.stockCode }]);
-        else if (colDef.field === 'client')
-            setSelectedContextShare([{ contextShareKey: 'client', contextShareValue: data.client }]);
+        if (colDef.field === 'instrumentCode')
+            setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode }]);
+        else if (colDef.field === 'clientId')
+            setSelectedContextShare([{ contextShareKey: 'clientId', contextShareValue: data.clientId }]);
         else
-            setSelectedContextShare([{ contextShareKey: 'stockCode', contextShareValue: data.stockCode },
-                { contextShareKey: 'client', contextShareValue: data.client }]);
+            setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode },
+                { contextShareKey: 'clientId', contextShareValue: data.clientId }]);
     }, []);
 
     const updateRows = useCallback((row) =>
