@@ -8,8 +8,9 @@ export const ClientAutoCompleteWidget = ({instrumentService, handleInputChange, 
         <Autocomplete
             className={className}
             size='small'
-            renderInput={(params) => <TextField {...params} label='Select instrument code' />}
+            renderInput={(params) => <TextField {...params} label='Select instrument'/>}
             style={{ width: '203px', marginTop: '15px'}}
+            label={'Select instrument'}
             value={instrumentCode || null}
             options={(instrumentService.getInstruments() || []).map(instrument => instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
