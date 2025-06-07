@@ -4,7 +4,7 @@ import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {SideWidget} from "../widgets/SideWidget";
-import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
+import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 
 const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 {
@@ -68,7 +68,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                 <Grid container spacing={1} direction="column">
                     <Grid item container spacing={1}>
                         <Grid item>
-                            <ClientAutoCompleteWidget instrumentService={instrumentService} handleInputChange={handleInputChange} instrumentCode={clientInterest.instrumentCode} className={"client-interest-symbol"} />
+                            <InstrumentAutoCompleteWidget instrumentService={instrumentService} handleInputChange={handleInputChange} instrumentCode={clientInterest.instrumentCode} className={"client-interest-symbol"} />
                         </Grid>
                         <Grid item>
                             <SideWidget handleSideChange={handleSideChange} sideValue={clientInterest.side} className={"client-interest-side"}/>

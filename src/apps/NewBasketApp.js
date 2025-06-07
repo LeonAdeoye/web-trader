@@ -2,9 +2,9 @@ import React, {useMemo, useRef} from "react";
 import {LoggerService} from "../services/LoggerService";
 import TitleBarComponent from "../components/TitleBarComponent";
 
-const NewOrderApp = () =>
+export const NewBasketApp = () =>
 {
-    const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
+    const loggerService = useRef(new LoggerService(NewBasketApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("newBasket"), []);
 
     return (

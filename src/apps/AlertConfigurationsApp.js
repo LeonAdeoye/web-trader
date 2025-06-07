@@ -34,7 +34,7 @@ export const AlertConfigurationsApp = () =>
         {headerName: "Start Time", field: "startTime", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => new Date(params.data.startTime).toLocaleTimeString()},
         {headerName: "End Time", field: "endTime", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => new Date(params.data.endTime).toLocaleTimeString()},
         {headerName: "Frequency", field: "frequency", sortable: true, minWidth: 220, width: 240, valueGetter: (params) => cronstrue.toString(params.data.frequency, {throwExceptionOnParseError: false}) || "N/A", filter: true},
-        {headerName: "Client", field: "clientId", sortable: true, minWidth: 100, width: 200, filter: true, valueGetter: (params) => clientService.getClientName("651baff39b4d394648e577d2") },
+        {headerName: "Client", field: "clientId", sortable: true, minWidth: 100, width: 200, filter: true, valueGetter: (params) => clientService.getClientName("f066ba8b-4a89-4f48-ab4a-f80a1a9be4de") },
         {headerName: "Desk", field: "deskId", sortable: true, minWidth: 110, width: 110, filter: true},
         {headerName: "Exchanges", field: "exchanges", sortable: true, minWidth: 110, width: 130, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 90, width: 90, filter: true, cellRenderer: SideRenderer},

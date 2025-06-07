@@ -13,10 +13,14 @@ export const SideWidget = ({handleSideChange, sideValue, className}) =>
             value={sideValue}
             onChange={handleSideChange}
             fullWidth
-            style={{ width: '120px', marginTop: '15px'}}>
-            <MenuItem value='BUY'>Buy</MenuItem>
-            <MenuItem value='SELL'>Sell</MenuItem>
-            <MenuItem value='SHORT_SELL'>Short Sell</MenuItem>
+            style={{ width: '120px', marginTop: '15px'}}
+            InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+            SelectProps={{
+                style: { fontSize: '0.75rem' }
+            }}>
+            <MenuItem value='BUY' style={{ fontSize: '0.75rem' }}>Buy</MenuItem>
+            <MenuItem value='SELL' style={{ fontSize: '0.75rem' }}>Sell</MenuItem>
+            <MenuItem value='SHORT_SELL' style={{ fontSize: '0.75rem' }}>Short Sell</MenuItem>
         </TextField>
     );
 }

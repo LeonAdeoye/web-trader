@@ -13,7 +13,7 @@ export class ExchangeRateService
 
     loadExchangeRates = async () =>
     {
-        await fetch('https://openexchangerates.org/api/latest.json?app_id=62fe3c007da5482c8568c27cce515fbf')
+        await fetch('https://openexchangerates.org/api/latest.json?app_id=0d1601b10ca0490b960214675c968c6f')
             .then(response => response.json())
             .then(jsonResponse =>
             {

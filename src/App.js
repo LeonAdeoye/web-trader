@@ -23,6 +23,9 @@ import {ClientInterestsApp} from "./apps/ClientInterestsApp";
 import {BlastsApp} from "./apps/BlastsApp";
 import {AlertConfigurationsApp} from "./apps/AlertConfigurationsApp";
 import {AlertWizardApp} from "./dialogs/AlertWizardApp";
+import {NewOrderApp} from "./apps/NewOrderApp";
+import {NewBasketApp} from "./apps/NewBasketApp";
+import {ChildOrdersApp} from "./apps/ChildOrdersApp";
 
 
 const App = ({}) =>
@@ -44,6 +47,9 @@ const App = ({}) =>
             { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
             { name: 'Holdings', path: '/holdings', component: HoldingsApp },
             { name: 'Tasks', path: '/tasks', component: TaskListApp },
+            { name: 'New Order', path: '/new-order', component: NewOrderApp },
+            { name: 'New Basket', path: '/new-basket', component: NewBasketApp },
+            { name: 'Child Orders', path: '/child-orders', component: ChildOrdersApp},
             { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
             { name: 'Configs', path: '/configs', component: ConfigsApp},
             { name: 'Baskets', path: '/baskets', component: BasketsApp},

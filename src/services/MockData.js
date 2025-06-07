@@ -1,7 +1,7 @@
 
 export const crosses = [
     {
-        stockCode: "0001.HK",
+        instrumentCode: "0001.HK",
         stockDescription: "CK Hutchison Holdings",
         currency: "HKD",
         buyOrders: [
@@ -9,7 +9,7 @@ export const crosses = [
                 desk: "Block HK",
                 trader: "John Doe",
                 quantity: 30000,
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 notionalValue: 1500000,
                 instruction: "Limit",
                 price: 50,
@@ -20,7 +20,7 @@ export const crosses = [
                 desk: "LowTouch TK",
                 trader: "Jane Smith",
                 quantity: 20000,
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 notionalValue: 960000,
                 instruction: "Market",
                 price: 48,
@@ -31,7 +31,7 @@ export const crosses = [
                 desk: "HighTouch SG",
                 trader: "Michael Johnson",
                 quantity: 10050,
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 notionalValue: 552750,
                 instruction: "Market",
                 price: 55,
@@ -42,7 +42,7 @@ export const crosses = [
                 desk: "Block HK",
                 trader: "Emily Brown",
                 quantity: 1200,
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 notionalValue: 63600,
                 instruction: "Limit",
                 price: 53,
@@ -54,7 +54,7 @@ export const crosses = [
             {
                 desk: "Equity Derivatives HK",
                 trader: "David Chen",
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 quantity: 80000,
                 notionalValue: 4480000,
                 instruction: "Market",
@@ -65,7 +65,7 @@ export const crosses = [
             {
                 desk: "HighTouch HK",
                 trader: "Sophia Liu",
-                stockCode: "0001.HK",
+                instrumentCode: "0001.HK",
                 quantity: 7000,
                 notionalValue: 406000,
                 instruction: "Limit",
@@ -76,14 +76,14 @@ export const crosses = [
         ]
     },
     {
-        stockCode: "0388.HK",
+        instrumentCode: "0388.HK",
         stockDescription: "Hong Kong Exchanges and Clearing",
         currency: "HKD",
         buyOrders: [
             {
                 desk: "LowTouch",
                 trader: "Jessica Wong",
-                stockCode: "0388.HK",
+                instrumentCode: "0388.HK",
                 quantity: 150,
                 notionalValue: 45000,
                 instruction: "Limit",
@@ -96,7 +96,7 @@ export const crosses = [
             {
                 desk: "Facilitation HK",
                 trader: "David Chen",
-                stockCode: "0388.HK",
+                instrumentCode: "0388.HK",
                 quantity: 80,
                 notionalValue: 24800,
                 instruction: "Market",
@@ -107,7 +107,7 @@ export const crosses = [
             {
                 desk: "HighTouch India",
                 trader: "Sophia Liu",
-                stockCode: "0388.HK",
+                instrumentCode: "0388.HK",
                 quantity: 70,
                 notionalValue: 21350,
                 instruction: "Limit",
@@ -118,14 +118,14 @@ export const crosses = [
         ]
     },
     {
-        stockCode: "0700.HK",
+        instrumentCode: "0700.HK",
         stockDescription: "Tencent Holdings",
         currency: "HKD",
         buyOrders: [
             {
                 desk: "Block",
                 trader: "James Wang",
-                stockCode: "0700.HK",
+                instrumentCode: "0700.HK",
                 quantity: 250,
                 notionalValue: 60000,
                 instruction: "Limit",
@@ -136,7 +136,7 @@ export const crosses = [
             {
                 desk: "LowTouch",
                 trader: "Michelle Chen",
-                stockCode: "0700.HK",
+                instrumentCode: "0700.HK",
                 quantity: 180,
                 notionalValue: 42840,
                 instruction: "Market",
@@ -149,7 +149,7 @@ export const crosses = [
             {
                 desk: "HighTouch TK",
                 trader: "Daniel Liu",
-                stockCode: "0700.HK",
+                instrumentCode: "0700.HK",
                 quantity: 140,
                 notionalValue: 34300,
                 instruction: "Market",
@@ -160,7 +160,7 @@ export const crosses = [
             {
                 desk: "HighTouch HK",
                 trader: "Sophie Wang",
-                stockCode: "0700.HK",
+                instrumentCode: "0700.HK",
                 quantity: 120,
                 notionalValue: 29040,
                 instruction: "Limit",
@@ -171,14 +171,14 @@ export const crosses = [
         ]
     },
     {
-        stockCode: "2318.HK",
+        instrumentCode: "2318.HK",
         stockDescription: "Ping An Insurance Group",
         currency: "HKD",
         buyOrders: [
             {
                 desk: "Facilitation HK",
                 trader: "Andy Zhang",
-                stockCode: "2318.HK",
+                instrumentCode: "2318.HK",
                 quantity: 180,
                 notionalValue: 8694,
                 instruction: "Limit",
@@ -189,7 +189,7 @@ export const crosses = [
             {
                 desk: "Block",
                 trader: "Grace Liu",
-                stockCode: "2318.HK",
+                instrumentCode: "2318.HK",
                 quantity: 150,
                 notionalValue: 7050,
                 instruction: "Market",
@@ -202,7 +202,7 @@ export const crosses = [
             {
                 desk: "HighTouch HK",
                 trader: "Brian Chen",
-                stockCode: "2318.HK",
+                instrumentCode: "2318.HK",
                 quantity: 200,
                 notionalValue: 9700,
                 instruction: "Market",
@@ -215,7 +215,7 @@ export const crosses = [
 ];
 export const holdings = [
     {
-        stockCode: "0001.HK",
+        instrumentCode: "0001.HK",
         stockDescription: "CK Hutchison Holdings",
         currency: "HKD",
         score:[1, 2, 3, 4, 5],

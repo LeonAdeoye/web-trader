@@ -16,11 +16,10 @@ const CrossesApp = () =>
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
     const [worker, setWorker] = useState(null);
-    const [stockCode, setStockCode] = useState(null);
+    const [instrumentCode, setInstrumentCode] = useState(null);
     const [client, setClient] = useState(null);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
 
     useEffect(() =>
@@ -46,9 +45,9 @@ const CrossesApp = () =>
                     setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
                 if(fdc3Message.instruments?.[0]?.id.ticker)
-                    setStockCode(fdc3Message.instruments[0].id.ticker);
+                    setInstrumentCode(fdc3Message.instruments[0].id.ticker);
                 else
-                    setStockCode(null);
+                    setInstrumentCode(null);
 
                 if(fdc3Message.clients?.[0]?.id.name)
                     setClient(fdc3Message.clients[0].id.name);
@@ -96,13 +95,13 @@ const CrossesApp = () =>
         if(!exchangeRatesLoaded)
             return;
 
-        const result = tradeDataService.getData(TradeDataService.CROSSES, stockCode, client);
+        const result = tradeDataService.getData(TradeDataService.CROSSES, instrumentCode, client);
 
         if(result.length === 0)
         {
             setStockRows([<div className="opportunity-row">
                 <div className="stock-info">
-                    <CrossesSummaryComponent stockCode={stockCode || "No Crossable Stocks"} stockCurrency={''} stockDescription={''}
+                    <CrossesSummaryComponent stockCode={instrumentCode || "No Crossable Stocks"} stockCurrency={''} stockDescription={''}
                                              maxCrossableQty={0} maxCrossableNotional={0} />
                     <CrossesDetailComponent windowId={windowId} buyOrders={[]} sellOrders={[]}/>
                 </div>
@@ -125,7 +124,7 @@ const CrossesApp = () =>
                 );
             }));
         }
-    }, [exchangeRatesLoaded, stockCode, client]);
+    }, [exchangeRatesLoaded, instrumentCode, client]);
 
     return(
         <>
