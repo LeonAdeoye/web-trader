@@ -12,7 +12,7 @@ export const ClientAutoCompleteWidget = ({instrumentService, handleInputChange, 
             style={{ width: '203px', marginTop: '15px'}}
             label={'Select instrument'}
             value={instrumentCode || null}
-            options={(instrumentService.getInstruments() || []).map(instrument => instrumentCode)}
+            options={(instrumentService.getInstruments() || []).map(instrument => instrument.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
             required
             isOptionEqualToValue={(option, value) => option === value} />

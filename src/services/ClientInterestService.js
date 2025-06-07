@@ -73,7 +73,7 @@ export class ClientInterestService
 
     updateClientInterest = async (clientInterestToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating clientInterest: ${JSON.stringify(clientInterestToUpdate)}.`);
+        this.#loggerService.logInfo(`Updating client interest: ${JSON.stringify(clientInterestToUpdate)}.`);
         return await fetch(`http://localhost:20009/interest`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -83,7 +83,7 @@ export class ClientInterestService
             {
                 for(const current of this.#clientInterests)
                 {
-                    if(current.blastId === clientInterestResponse.blastId)
+                    if(current.clientInterestId === clientInterestResponse.clientInterestId)
                     {
                         this.#clientInterests[this.#clientInterests.indexOf(current)] = clientInterestResponse;
                         break;

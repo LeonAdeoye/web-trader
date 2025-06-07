@@ -34,7 +34,7 @@ export const ClientInterestsApp = () =>
     const closeHandler = async ({instrumentCode, side, notes, clientInterestId}) =>
     {
         setClientInterestsChanged(false);
-        if(clientInterestId === null)
+        if(clientInterestId === null || clientInterestId === undefined || clientInterestId === '')
             await clientInterestService.addNewClientInterest({ownerId, side:side.toUpperCase(), instrumentCode, notes, clientId:selectedClient});
         else
             await clientInterestService.updateClientInterest({ownerId, side:side.toUpperCase(), instrumentCode, notes, clientInterestId, clientId:selectedClient});

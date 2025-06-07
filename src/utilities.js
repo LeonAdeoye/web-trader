@@ -61,10 +61,19 @@ export const orderSideStyling = (orderSide) =>
         return { color: '#346bb4', fontWeight: 'bold', fontSize: '13px' };
     else if (side === 'sell')
         return { color: '#528c74', fontWeight: 'bold', fontSize: '13px'};
-    else if (side === 'short sell')
+    else if (side === 'short_sell')
         return { color: 'red', fontWeight: 'bold', fontSize: '13px' };
     else
         return {};
 }
+
+export const sideValueConverter = (value) => {
+    const sideMapping = {
+        "BUY": "BUY",
+        "SELL": "SELL",
+        "SHORT_SELL": "SHORT SELL"
+    };
+    return sideMapping[value] || value;
+};
 
 

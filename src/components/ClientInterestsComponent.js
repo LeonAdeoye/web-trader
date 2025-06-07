@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import {orderSideStyling} from "../utilities";
+import {orderSideStyling, sideValueConverter} from "../utilities";
 import {useEffect, useState, useMemo} from "react";
 import '../styles/css/main.css';
 import {clientInterestsChangedState, selectedClientState, selectedGenericGridRowState} from "../atoms/component-state";
@@ -20,7 +20,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
     const columnDefs = useMemo(() => ([
         {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 115, width: 115, filter: true},
         {headerName: "Instrument Description", field: "instrumentDescription", hide: false, sortable: true, minWidth: 290, width: 290, filter: true},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value)},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 95, width: 95, filter: true, cellStyle: params => orderSideStyling(params.value), valueFormatter: params => sideValueConverter(params.value)},
         {headerName: "Notes", field: "notes", sortable: false, minWidth: 300, width: 95, filter: false},
         {headerName: "Actions", field: "actions", sortable: false, minWidth: 140, width: 140, filter: false, cellRenderer: ActionIconsRenderer}
     ]), []);
@@ -74,7 +74,6 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
                 break;
             case "add":
                 setSelectedGenericGridRow(null);
-                setSelectedClient(null);
                 setClientInterestDialogOpen(true);
                 break;
             default:
