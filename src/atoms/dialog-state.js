@@ -17,7 +17,7 @@ export const blastConfigurationDialogDisplayState = atom({
 
 export const clientInterestDialogDisplayState = atom({
     key: 'clientInterestDialogDisplayState',
-    default: false
+    default: {open: false, clear: true}
 });
 
 export const alertDialogDisplayState = atom({

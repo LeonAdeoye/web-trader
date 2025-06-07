@@ -16,9 +16,8 @@ import {LoggerService} from "../services/LoggerService";
 
 export const ClientInterestsApp = () =>
 {
-    const [selectedClient] = useRecoilState(selectedClientState);
     const [, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState);
-    const [, setSelectedClient] = useRecoilState(selectedClientState);
+    const [selectedClient, setSelectedClient] = useRecoilState(selectedClientState);
     const [,setClientInterestsChanged] = useRecoilState(clientInterestsChangedState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
@@ -86,10 +85,8 @@ export const ClientInterestsApp = () =>
     }, []);
 
     return (<>
-        <TitleBarComponent title="Client Interests" windowId={windowId} addButtonProps={{
-            handler: () => setClientInterestDialogOpen(true),
-            tooltipText: "Add new client interest..."
-        }} showChannel={true} showTools={false}/>
+        <TitleBarComponent title="Client Interests" windowId={windowId} showChannel={true} showTools={false}
+           addButtonProps={{ handler: () => setClientInterestDialogOpen({open:true, clear: true}), tooltipText: "Add new client interest...", clearContent: true }} />
         <Grid container direction="column"
               style={{margin: '45px 0px 0px 0px', height: 'calc(100vh - 65px)', overflow: 'hidden'}}>
             <Grid container direction="row" style={{flexGrow: 1, overflow: 'hidden', height: '100%'}}>

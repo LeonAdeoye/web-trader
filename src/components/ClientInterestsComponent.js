@@ -60,7 +60,7 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
         {
             case "update":
                 setSelectedGenericGridRow(clientInterestService.getClientInterests().find(interest => interest["clientInterestId"] === data.clientInterestId));
-                setClientInterestDialogOpen(true);
+                setClientInterestDialogOpen({open:true, clear:false});
                 break;
             case "delete":
                 setClientInterestsChanged(false);
@@ -70,11 +70,11 @@ export const ClientInterestsComponent = ({instrumentService, clientInterestServi
             case "clone":
                 let interest = clientInterestService.getClientInterests().find(interest => interest["clientInterestId"] === data.clientInterestId);
                 setSelectedGenericGridRow({...interest, clientInterestId: null});
-                setClientInterestDialogOpen(true);
+                setClientInterestDialogOpen({open:true, clear:false});
                 break;
             case "add":
                 setSelectedGenericGridRow(null);
-                setClientInterestDialogOpen(true);
+                setClientInterestDialogOpen({open: true, clear:true});
                 break;
             default:
                 loggerService.logError(`Unknown action: ${action}`);

@@ -17,7 +17,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
         clientInterestId: ''
     };
 
-    const [clientInterestDialogOpenFlag, setClientInterestDialogOpenFlag] = useRecoilState(clientInterestDialogDisplayState)
+    const [clientInterestDialogOpen, setClientInterestDialogOpen] = useRecoilState(clientInterestDialogDisplayState)
     const [clientInterest, setClientInterest] = useState(defaultClientInterest);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
@@ -40,7 +40,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 
     const handleClear = () => setClientInterest(defaultClientInterest);
 
-    const handleCancel = () => setClientInterestDialogOpenFlag(false);
+    const handleCancel = () => setClientInterestDialogOpen({open:false, clear: true});
 
     const handleSubmit = () =>
     {
@@ -51,7 +51,7 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
 
     useEffect( () =>
     {
-        if(selectedGenericGridRow)
+        if(selectedGenericGridRow && !clientInterestDialogOpen.clear)
         {
             const clientInterest = selectedGenericGridRow;
             setClientInterest(clientInterest);
@@ -59,10 +59,10 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
         else
             setClientInterest(defaultClientInterest);
 
-    }, [clientInterestDialogOpenFlag, selectedGenericGridRow]);
+    }, [clientInterestDialogOpen, selectedGenericGridRow]);
 
     return (
-        <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={clientInterestDialogOpenFlag} onClose={handleCancel} PaperProps={{ style: { width: '383px' } }}>
+        <Dialog aria-labelledby='dialog-title' maxWidth={false} fullWidth={true} open={clientInterestDialogOpen.open} onClose={handleCancel} PaperProps={{ style: { width: '383px' } }}>
             <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{getTitle()}</DialogTitle>
             <DialogContent>
                 <Grid container spacing={1} direction="column">
