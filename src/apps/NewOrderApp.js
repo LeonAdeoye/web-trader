@@ -1,5 +1,16 @@
 import React, {useState, useCallback, useMemo, useRef, useEffect} from "react";
-import {Button, Grid, Paper, TextField, MenuItem, FormControl, InputLabel, Select} from "@mui/material";
+import {
+    Button,
+    Grid,
+    Paper,
+    TextField,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Select,
+    Checkbox,
+    FormControlLabel
+} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 import {SideWidget} from "../widgets/SideWidget";
@@ -46,7 +57,10 @@ export const NewOrderApp = () => {
         brokerName: '',
         brokerDescription: '',
         handlingInstruction: '',
-        algoType: ''
+        algoType: '',
+        facilConsent: false,
+        facilConsentDetails: '',
+        facilInstructions: ''
     });
 
     useEffect(() => {
@@ -127,7 +141,10 @@ export const NewOrderApp = () => {
             brokerName: '',
             brokerDescription: '',
             handlingInstruction: '',
-            algoType: ''
+            algoType: '',
+            facilConsent: false,
+            facilConsentDetails: '',
+            facilInstructions: ''
         });
     };
 
@@ -135,37 +152,43 @@ export const NewOrderApp = () => {
         // TODO: Implement send logic
     };
 
+    const handleFacilConsent = (event) => {
+        setOrder(prevData => ({
+            ...prevData,
+            facilConsent: event.target.checked
+        }));
+        loggerService.log(`Facilitation consent changed to ${event.target.checked}`);
+    }
+
     return (
         <div>
             <TitleBarComponent title="New Order" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{ padding: '10px', marginTop: '40px' }}>
-                <Paper elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
-                    <Grid container spacing={0.5} justifyContent="flex-end">
-                        <Grid item style={{ marginRight: '1px' }}>
-                            <Button 
-                                className="dialog-action-button submit" 
-                                variant="contained" 
-                                disabled={!canSend()}
-                                onClick={handleSend}
-                                style={{ marginRight: '2px', fontSize: '0.75rem' }}
-                            >
-                                Send
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button 
-                                className="dialog-action-button" 
-                                variant="contained" 
-                                disabled={!canClear()}
-                                onClick={handleClear}
-                                style={{ marginRight: '2px', fontSize: '0.75rem' }}
-                            >
-                                Clear
-                            </Button>
-                        </Grid>
+                <Grid container spacing={0.5} justifyContent="flex-end">
+                    <Grid item style={{ marginRight: '1px' }}>
+                        <Button
+                            className="dialog-action-button submit"
+                            variant="contained"
+                            disabled={!canSend()}
+                            onClick={handleSend}
+                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}
+                        >
+                            Send
+                        </Button>
                     </Grid>
-                </Paper>
-                <Paper elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
+                    <Grid item>
+                        <Button
+                            className="dialog-action-button"
+                            variant="contained"
+                            disabled={!canClear()}
+                            onClick={handleClear}
+                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}
+                        >
+                            Clear
+                        </Button>
+                    </Grid>
+                </Grid>
+                <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                     <Grid container spacing={0.5} alignItems="flex-start">
                         <Grid item style={{ marginRight: '1px' }}>
                             <InstrumentAutoCompleteWidget 
@@ -279,7 +302,7 @@ export const NewOrderApp = () => {
                         </Grid>
                     </Grid>
                 </Paper>
-                <Paper elevation={2} style={{ paddingLeft: '10px', paddingBottom: '10px', marginBottom:'10px' }}>
+                <Paper elevation={4} style={{ paddingLeft: '10px', paddingBottom: '10px', paddingTop: '10px', marginBottom:'10px' }}>
                     <Grid container spacing={0.5}>
                         <Grid item xs={12}>
                             <Grid container spacing={0.5}>
@@ -371,7 +394,7 @@ export const NewOrderApp = () => {
                         </Grid>
                     </Grid>
                 </Paper>
-                <Paper elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
+                <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                     <Grid container spacing={0.5} alignItems="flex-start">
                         <Grid item style={{ marginRight: '1px' }}>
                             <AccountAutoCompleteWidget
@@ -448,7 +471,7 @@ export const NewOrderApp = () => {
                     </Grid>
                 </Paper>
                 {order.destination === 'BROKER' && (
-                    <Paper elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
+                    <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item style={{ marginTop: '0px', marginRight: '1px' }}>
                                 <BrokerAutoCompleteWidget
@@ -487,7 +510,7 @@ export const NewOrderApp = () => {
                     </Paper>
                 )}
                 {order.destination === 'DSA' && (
-                    <Paper elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
+                    <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item>
                                 <FormControl size="small" style={{ width: '120px' }}>
@@ -505,6 +528,33 @@ export const NewOrderApp = () => {
                                         <MenuItem value="MOC" style={{ fontSize: '0.75rem' }}>MC</MenuItem>
                                     </Select>
                                 </FormControl>
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                )}
+                {order.destination === 'FACIL' && (
+                    <Paper elevation={4} style={{ paddingLeft: '10px', marginBottom: '10px', paddingTop: "10px"}}>
+                        <Grid container spacing={0.5} alignItems="flex-start">
+                            <Grid item>
+                                <FormControlLabel control={<Checkbox size="small" color="default" onChange={handleFacilConsent}/>} label={<span style={{ fontSize: '0.75rem' }}>Facil consent received</span>} />
+                                <TextField
+                                    size="small"
+                                    label="Facil consent details"
+                                    value={order.facilConsentDetails}
+                                    onChange={(e) => handleInputChange('facilConsentDetails', e.target.value)}
+                                    InputProps={{ style: { fontSize: '0.75rem' } }}
+                                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                                    style={{ width: '250px', marginBottom: '10px', marginTop: '5px' }}
+                                />
+                                <TextField
+                                    size="small"
+                                    label="Facil instructions"
+                                    value={order.facilInstructions}
+                                    onChange={(e) => handleInputChange('facilInstructions', e.target.value)}
+                                    InputProps={{ style: { fontSize: '0.75rem' } }}
+                                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                                    style={{ width: '250px', marginLeft:'5px', marginBottom: '10px', marginTop: '5px' }}
+                                />
                             </Grid>
                         </Grid>
                     </Paper>
