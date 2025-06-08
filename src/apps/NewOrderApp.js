@@ -21,6 +21,10 @@ export const NewOrderApp = () => {
     const referenceDataService = useRef(new ReferenceDataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("newOrder"), []);
 
+    const [accounts, setAccounts] = useState([]);
+    const [brokers, setBrokers] = useState([]);
+    const [instruments, setInstruments] = useState([]);
+
     const [order, setOrder] = useState({
         instrumentCode: '',
         instrumentDescription: '',
@@ -32,7 +36,7 @@ export const NewOrderApp = () => {
         exchangeAcronym: '',
         side: 'BUY',
         quantity: '',
-        priceType: 'MARKET',
+        priceType: 'LIMIT',
         price: '',
         tif: 'GTC',
         traderInstruction: '',
@@ -61,6 +65,10 @@ export const NewOrderApp = () => {
             await accountService.loadAccounts();
             await brokerService.loadBrokers();
             await referenceDataService.loadInstruments();
+
+            setAccounts(accountService.getAccounts());
+            setBrokers(brokerService.getBrokers());
+            setInstruments(referenceDataService.getInstruments());
         };
         loadData();
     }, [brokerService, accountService, referenceDataService]);
@@ -105,12 +113,11 @@ export const NewOrderApp = () => {
                     newData.handlingInstruction = broker.handlingInstruction;
                 }
             }
-            
             return newData;
         });
     }, [accountService, brokerService, referenceDataService]);
 
-    const canSend = () => order.instrumentCode !== '' && order.side !== '' && order.quantity !== '';
+    const canSend = () => order.instrumentCode !== '' && order.side !== '' && order.quantity !== '' && (order.priceType === 'MARKET' || (order.priceType === 'LIMIT' && order.price !== ''));
     const canClear = () => order.instrumentCode !== '' || order.quantity !== '';
 
     const handleClear = () =>
@@ -126,7 +133,7 @@ export const NewOrderApp = () => {
             exchangeAcronym: '',
             side: 'BUY',
             quantity: '',
-            priceType: 'MARKET',
+            priceType: 'LIMIT',
             price: '',
             tif: 'GTC',
             traderInstruction: '',
@@ -188,7 +195,7 @@ export const NewOrderApp = () => {
                     <Grid container spacing={0.5} alignItems="flex-start">
                         <Grid item style={{ marginRight: '1px' }}>
                             <InstrumentAutoCompleteWidget 
-                                instrumentService={referenceDataService}
+                                instruments={instruments}
                                 handleInputChange={handleInputChange}
                                 instrumentCode={order.instrumentCode}/>
                         </Grid>
@@ -219,7 +226,7 @@ export const NewOrderApp = () => {
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
                                 size="small"
-                                label="Bloomberg Code"
+                                label="BLG Code"
                                 value={order.blgCode}
                                 InputProps={{ 
                                     readOnly: true,
@@ -255,7 +262,7 @@ export const NewOrderApp = () => {
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
                                 size="small"
-                                label="Settlement Type"
+                                label="Settlement"
                                 value={settlementTypeConverter(order.settlementType)}
                                 InputProps={{
                                     readOnly: true,
@@ -294,7 +301,7 @@ export const NewOrderApp = () => {
                     <Grid container spacing={0.5}>
                         <Grid item xs={12}>
                             <Grid container spacing={0.5}>
-                                <Grid item>
+                                <Grid item style={{ marginTop: '-15px'}}>
                                     <SideWidget
                                         handleSideChange={(e) => handleInputChange('side', e.target.value)}
                                         sideValue={order.side}/>
@@ -334,7 +341,7 @@ export const NewOrderApp = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <Grid container spacing={0.5}>
-                                <Grid item style={{ marginRight: '1px' }}>
+                                <Grid item style={{ marginRight: '1px', marginTop: '-10px'}}>
                                     <FormControl size="small" style={{ width: '120px', marginTop: '15px' }}>
                                         <InputLabel style={{ fontSize: '0.75rem' }}>TIF</InputLabel>
                                         <Select
@@ -381,7 +388,7 @@ export const NewOrderApp = () => {
                     <Grid container spacing={0.5} alignItems="flex-start">
                         <Grid item style={{ marginRight: '1px' }}>
                             <AccountAutoCompleteWidget
-                                accountService={accountService}
+                                accounts={accounts}
                                 handleInputChange={handleInputChange}
                                 accountMnemonic={order.accountMnemonic}/>
                         </Grid>
@@ -452,7 +459,7 @@ export const NewOrderApp = () => {
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item style={{ marginTop: '0px', marginRight: '1px' }}>
                                 <BrokerAutoCompleteWidget
-                                    brokerService={brokerService}
+                                    brokers={brokers}
                                     handleInputChange={handleInputChange}
                                     brokerAcronym={order.brokerAcronym}/>
                             </Grid>

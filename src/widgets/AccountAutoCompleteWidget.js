@@ -2,7 +2,7 @@ import React from "react";
 import '../styles/css/main.css';
 import {Autocomplete, TextField} from "@mui/material";
 
-export const AccountAutoCompleteWidget = ({accountService, handleInputChange, accountMnemonic, className}) => {
+export const AccountAutoCompleteWidget = ({accounts, handleInputChange, accountMnemonic, className}) => {
     return (
         <Autocomplete
             className={className}
@@ -26,7 +26,7 @@ export const AccountAutoCompleteWidget = ({accountService, handleInputChange, ac
             style={{ width: '203px' }}
             label={'Select account'}
             value={accountMnemonic || null}
-            options={(accountService.getAccounts() || []).map(account => account.accountMnemonic)}
+            options={(accounts || []).map(account => account.accountMnemonic)}
             onChange={(_, newValue) => handleInputChange("accountMnemonic", newValue)}
             required
             isOptionEqualToValue={(option, value) => option === value}

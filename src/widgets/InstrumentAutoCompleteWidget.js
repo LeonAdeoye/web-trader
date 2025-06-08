@@ -2,7 +2,7 @@ import React from "react";
 import '../styles/css/main.css';
 import {Autocomplete, TextField} from "@mui/material";
 
-export const InstrumentAutoCompleteWidget = ({instrumentService, handleInputChange, instrumentCode, className}) =>
+export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, instrumentCode, className}) =>
 {
     return (
         <Autocomplete
@@ -27,7 +27,7 @@ export const InstrumentAutoCompleteWidget = ({instrumentService, handleInputChan
             style={{ width: '203px' }}
             label={'Select instrument'}
             value={instrumentCode || null}
-            options={(instrumentService.getInstruments() || []).map(inst => inst.instrumentCode)}
+            options={(instruments || []).map(inst => inst.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
             required
             isOptionEqualToValue={(option, value) => option === value}
