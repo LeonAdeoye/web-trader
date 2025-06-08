@@ -30,8 +30,8 @@ export class BrokerService {
         return this.#brokers;
     }
 
-    getBrokerByName = (name) => {
-        return this.#brokers.find(broker => broker.brokerName === name);
+    getBrokerByAcronym = (acronym) => {
+        return this.#brokers.find(broker => broker.brokerAcronym === acronym);
     }
 
     clear = () => {

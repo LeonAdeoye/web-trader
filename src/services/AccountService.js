@@ -27,7 +27,7 @@ export class AccountService {
     }
 
     getAccounts = () => {
-        return this.#accounts.filter(account => account.isActive);
+        return this.#accounts.filter(account => account.active);
     }
 
     getAccountByMnemonic = (mnemonic) => {

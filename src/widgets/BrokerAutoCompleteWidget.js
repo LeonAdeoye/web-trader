@@ -2,7 +2,8 @@ import React from "react";
 import '../styles/css/main.css';
 import {Autocomplete, TextField} from "@mui/material";
 
-export const BrokerAutoCompleteWidget = ({brokerService, handleInputChange, brokerName, className}) => {
+export const BrokerAutoCompleteWidget = ({brokerService, handleInputChange, brokerAcronym, className}) =>
+{
     return (
         <Autocomplete
             className={className}
@@ -25,9 +26,9 @@ export const BrokerAutoCompleteWidget = ({brokerService, handleInputChange, brok
             )}
             style={{ width: '203px' }}
             label={'Select broker'}
-            value={brokerName || null}
-            options={(brokerService.getBrokers() || []).map(broker => broker.brokerName)}
-            onChange={(_, newValue) => handleInputChange("brokerName", newValue)}
+            value={brokerAcronym || null}
+            options={(brokerService.getBrokers() || []).map(broker => broker.brokerAcronym)}
+            onChange={(_, newValue) => handleInputChange("brokerAcronym", newValue)}
             required
             isOptionEqualToValue={(option, value) => option === value}
             ListboxProps={{ style: { fontSize: '0.75rem' } }}

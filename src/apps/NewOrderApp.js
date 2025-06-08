@@ -44,30 +44,34 @@ export const NewOrderApp = () => {
         isFirmAccount: false,
         isRiskAccount: false,
         customFlags: '',
-        brokerName: '',
+        brokerAcronym: '',
         brokerDescription: '',
         handlingInstruction: '',
         algoType: '',
         facilConsent: false,
         facilConsentDetails: '',
-        facilInstructions: ''
+        facilInstructions: '',
+        lotSize: 0
     });
 
-    useEffect(() => {
-        const loadData = async () => {
+    useEffect(() =>
+    {
+        const loadData = async () =>
+        {
             await accountService.loadAccounts();
             await brokerService.loadBrokers();
             await referenceDataService.loadInstruments();
         };
         loadData();
-    }, []);
+    }, [brokerService, accountService, referenceDataService]);
 
     const handleInputChange = useCallback((name, value) => {
         setOrder(prevData => {
             const newData = { ...prevData, [name]: value };
             if (name === 'instrumentCode' && value) {
-                const instrument = referenceDataService.getInstruments().find(i => i.instrumentCode === value);
-                if (instrument) {
+                const instrument = referenceDataService.getInstrumentByCode(value);
+                if (instrument)
+                {
                     newData.instrumentDescription = instrument.instrumentDescription;
                     newData.assetType = instrument.assetType;
                     newData.blgCode = instrument.blgCode;
@@ -75,12 +79,15 @@ export const NewOrderApp = () => {
                     newData.settlementCurrency = instrument.settlementCurrency;
                     newData.settlementType = instrument.settlementType;
                     newData.exchangeAcronym = instrument.exchangeAcronym;
+                    newData.lotSize = instrument.lotSize;
                 }
             }
 
-            if (name === 'accountMnemonic' && value) {
+            if (name === 'accountMnemonic' && value)
+            {
                 const account = accountService.getAccountByMnemonic(value);
-                if (account) {
+                if (account)
+                {
                     newData.accountName = account.accountName;
                     newData.legalEntity = account.legalEntity;
                     newData.isFirmAccount = account.isFirmAccount;
@@ -89,9 +96,11 @@ export const NewOrderApp = () => {
                 }
             }
 
-            if (name === 'brokerName' && value) {
-                const broker = brokerService.getBrokerByName(value);
-                if (broker) {
+            if (name === 'brokerAcronym' && value)
+            {
+                const broker = brokerService.getBrokerByAcronym(value);
+                if (broker)
+                {
                     newData.brokerDescription = broker.brokerDescription;
                     newData.handlingInstruction = broker.handlingInstruction;
                 }
@@ -99,12 +108,13 @@ export const NewOrderApp = () => {
             
             return newData;
         });
-    }, []);
+    }, [accountService, brokerService, referenceDataService]);
 
     const canSend = () => order.instrumentCode !== '' && order.side !== '' && order.quantity !== '';
     const canClear = () => order.instrumentCode !== '' || order.quantity !== '';
 
-    const handleClear = () => {
+    const handleClear = () =>
+    {
         setOrder({
             instrumentCode: '',
             instrumentDescription: '',
@@ -128,17 +138,19 @@ export const NewOrderApp = () => {
             isFirmAccount: false,
             isRiskAccount: false,
             customFlags: '',
-            brokerName: '',
+            brokerAcronym: '',
             brokerDescription: '',
             handlingInstruction: '',
             algoType: '',
             facilConsent: false,
             facilConsentDetails: '',
-            facilInstructions: ''
+            facilInstructions: '',
+            lotSize: 0
         });
     };
     const handleSend = () => { };
-    const handleFacilConsent = (event) => {
+    const handleFacilConsent = (event) =>
+    {
         setOrder(prevData => ({
             ...prevData,
             facilConsent: event.target.checked
@@ -157,8 +169,7 @@ export const NewOrderApp = () => {
                             variant="contained"
                             disabled={!canSend()}
                             onClick={handleSend}
-                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}
-                        >
+                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}>
                             Send
                         </Button>
                     </Grid>
@@ -168,8 +179,7 @@ export const NewOrderApp = () => {
                             variant="contained"
                             disabled={!canClear()}
                             onClick={handleClear}
-                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}
-                        >
+                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}>
                             Clear
                         </Button>
                     </Grid>
@@ -192,8 +202,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '200px' }}
-                            />
+                                style={{ width: '200px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -205,8 +214,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '100px' }}
-                            />
+                                style={{ width: '100px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -218,8 +226,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '100px' }}
-                            />
+                                style={{ width: '100px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -231,8 +238,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '100px' }}
-                            />
+                                style={{ width: '100px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -244,8 +250,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '80px' }}
-                            />
+                                style={{ width: '80px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -257,8 +262,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '95px' }}
-                            />
+                                style={{ width: '95px' }}/>
                         </Grid>
                         <Grid item>
                             <TextField
@@ -270,8 +274,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '80px' }}
-                            />
+                                style={{ width: '80px' }}/>
                         </Grid>
                         <Grid item>
                             <TextField
@@ -283,8 +286,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '80px' }}
-                            />
+                                style={{ width: '80px' }}/>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -304,16 +306,14 @@ export const NewOrderApp = () => {
                                         onChange={(e) => handleInputChange('quantity', e.target.value)}
                                         InputProps={{ style: { fontSize: '0.75rem' } }}
                                         InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                        style={{ width: '120px', marginLeft: '5px', marginTop: '15px' }}
-                                    />
+                                        style={{ width: '120px', marginLeft: '5px', marginTop: '15px' }}/>
                                     <FormControl size="small" style={{ width: '160px', marginLeft: '5px', marginTop: '15px' }}>
                                         <InputLabel style={{ fontSize: '0.75rem' }}>Price Type</InputLabel>
                                         <Select
                                             value={order.priceType}
                                             label="Price Type"
                                             onChange={(e) => handleInputChange('priceType', e.target.value)}
-                                            style={{ fontSize: '0.75rem' }}
-                                        >
+                                            style={{ fontSize: '0.75rem' }}>
                                             <MenuItem value="MARKET" style={{ fontSize: '0.75rem' }}>Market</MenuItem>
                                             <MenuItem value="LIMIT" style={{ fontSize: '0.75rem' }}>Limit</MenuItem>
                                         </Select>
@@ -327,8 +327,7 @@ export const NewOrderApp = () => {
                                             onChange={(e) => handleInputChange('price', e.target.value)}
                                             InputProps={{ style: { fontSize: '0.75rem' } }}
                                             InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                            style={{ width: '120px', marginTop: '15px', marginLeft: '5px'}}
-                                        />
+                                            style={{ width: '120px', marginTop: '15px', marginLeft: '5px'}}/>
                                     )}
                                 </Grid>
                             </Grid>
@@ -342,8 +341,7 @@ export const NewOrderApp = () => {
                                             value={order.tif}
                                             label="TIF"
                                             onChange={(e) => handleInputChange('tif', e.target.value)}
-                                            style={{ fontSize: '0.75rem' }}
-                                        >
+                                            style={{ fontSize: '0.75rem' }}>
                                             <MenuItem value="GTC" style={{ fontSize: '0.75rem' }}>GTC</MenuItem>
                                             <MenuItem value="GTD" style={{ fontSize: '0.75rem' }}>GTD</MenuItem>
                                         </Select>
@@ -373,8 +371,7 @@ export const NewOrderApp = () => {
                                         onChange={(e) => handleInputChange('traderInstruction', e.target.value)}
                                         InputProps={{ style: { fontSize: '0.75rem' } }}
                                         InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                        style={{ width: '250px', marginTop: '15px', marginLeft: '5px' , marginRight: '5px' }}
-                                    />
+                                        style={{ width: '250px', marginTop: '15px', marginLeft: '5px' , marginRight: '5px' }}/>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -386,8 +383,7 @@ export const NewOrderApp = () => {
                             <AccountAutoCompleteWidget
                                 accountService={accountService}
                                 handleInputChange={handleInputChange}
-                                accountMnemonic={order.accountMnemonic}
-                            />
+                                accountMnemonic={order.accountMnemonic}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -399,8 +395,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '200px' }}
-                            />
+                                style={{ width: '200px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -412,8 +407,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '150px' }}
-                            />
+                                style={{ width: '150px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -425,8 +419,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '100px' }}
-                            />
+                                style={{ width: '100px' }}/>
                         </Grid>
                         <Grid item style={{ marginRight: '1px' }}>
                             <TextField
@@ -438,8 +431,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '100px' }}
-                            />
+                                style={{ width: '100px' }}/>
                         </Grid>
                         <Grid item>
                             <TextField
@@ -451,8 +443,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '160px' }}
-                            />
+                                style={{ width: '160px' }}/>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -463,8 +454,7 @@ export const NewOrderApp = () => {
                                 <BrokerAutoCompleteWidget
                                     brokerService={brokerService}
                                     handleInputChange={handleInputChange}
-                                    brokerName={order.brokerName}
-                                />
+                                    brokerAcronym={order.brokerAcronym}/>
                             </Grid>
                             <Grid item style={{ marginRight: '1px' }}>
                                 <TextField
@@ -489,8 +479,7 @@ export const NewOrderApp = () => {
                                         style: { fontSize: '0.75rem' }
                                     }}
                                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                    style={{ width: '200px' }}
-                                />
+                                    style={{ width: '200px' }}/>
                             </Grid>
                         </Grid>
                     </Paper>
@@ -530,8 +519,7 @@ export const NewOrderApp = () => {
                                     onChange={(e) => handleInputChange('facilConsentDetails', e.target.value)}
                                     InputProps={{ style: { fontSize: '0.75rem' } }}
                                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                    style={{ width: '250px', marginBottom: '10px', marginTop: '5px' }}
-                                />
+                                    style={{ width: '250px', marginBottom: '10px', marginTop: '5px' }}/>
                                 <TextField
                                     size="small"
                                     label="Facil instructions"
@@ -539,8 +527,7 @@ export const NewOrderApp = () => {
                                     onChange={(e) => handleInputChange('facilInstructions', e.target.value)}
                                     InputProps={{ style: { fontSize: '0.75rem' } }}
                                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                    style={{ width: '250px', marginLeft:'5px', marginBottom: '10px', marginTop: '5px' }}
-                                />
+                                    style={{ width: '250px', marginLeft:'5px', marginBottom: '10px', marginTop: '5px' }}/>
                             </Grid>
                         </Grid>
                     </Paper>

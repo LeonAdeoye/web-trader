@@ -37,6 +37,11 @@ export class ReferenceDataService
         return this.#instruments;
     }
 
+    getInstrumentByCode = (instrumentCode) =>
+    {
+        return this.#instruments.find(instrument => instrument.instrumentCode === instrumentCode);
+    }
+
     loadExchanges = async () =>
     {
         if(this.#exchanges && this.#exchanges.length > 0)
