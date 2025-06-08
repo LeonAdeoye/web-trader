@@ -24,7 +24,7 @@ export const BrokerAutoCompleteWidget = ({brokers, handleInputChange, brokerAcro
                 />
             )}
             style={{ width: '203px' }}
-            label={'Select broker'}
+            label={'Select Broker'}
             value={brokerAcronym || null}
             options={(brokers || []).map(broker => broker.brokerAcronym)}
             onChange={(_, newValue) => handleInputChange("brokerAcronym", newValue)}

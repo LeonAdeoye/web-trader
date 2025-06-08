@@ -8,7 +8,7 @@ export const SideWidget = ({handleSideChange, sideValue, className}) =>
         <TextField
             className={className}
             size='small'
-            label='Select side'
+            label='Select Side'
             select
             value={sideValue}
             onChange={handleSideChange}

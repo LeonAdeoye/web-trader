@@ -12,18 +12,22 @@ import {BrokerService} from "../services/BrokerService";
 import {ReferenceDataService} from "../services/ReferenceDataService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
+import {ClientService} from "../services/ClientService";
+import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
 
 
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
     const accountService = useRef(new AccountService()).current;
     const brokerService = useRef(new BrokerService()).current;
+    const clientService = useRef(new ClientService()).current;
     const referenceDataService = useRef(new ReferenceDataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("newOrder"), []);
 
     const [accounts, setAccounts] = useState([]);
     const [brokers, setBrokers] = useState([]);
     const [instruments, setInstruments] = useState([]);
+    const [clients, setClients] = useState(clientService.getClients());
 
     const [order, setOrder] = useState({
         instrumentCode: '',
@@ -55,7 +59,9 @@ export const NewOrderApp = () => {
         facilConsent: false,
         facilConsentDetails: '',
         facilInstructions: '',
-        lotSize: 0
+        lotSize: 0,
+        clientCode: '',
+        clientDescription: ''
     });
 
     useEffect(() =>
@@ -65,13 +71,20 @@ export const NewOrderApp = () => {
             await accountService.loadAccounts();
             await brokerService.loadBrokers();
             await referenceDataService.loadInstruments();
+            await clientService.loadClients();
 
             setAccounts(accountService.getAccounts());
             setBrokers(brokerService.getBrokers());
             setInstruments(referenceDataService.getInstruments());
+            setClients(clientService.getClients());
         };
         loadData();
     }, [brokerService, accountService, referenceDataService]);
+
+    const getClientDescription = (clientCode) => {
+        const client = clients.find(client => client.clientCode === clientCode);
+        return client ? client.clientName : "";
+    };
 
     const handleInputChange = useCallback((name, value) => {
         setOrder(prevData => {
@@ -117,8 +130,11 @@ export const NewOrderApp = () => {
         });
     }, [accountService, brokerService, referenceDataService]);
 
-    const canSend = () => order.instrumentCode !== '' && order.side !== '' && order.quantity !== '' && (order.priceType === 'MARKET' || (order.priceType === 'LIMIT' && order.price !== ''));
-    const canClear = () => order.instrumentCode !== '' || order.quantity !== '';
+    const canSend = () => order.clientCode != "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
+        && (order.priceType === 'MARKET' || (order.priceType === 'LIMIT' && order.price !== ''));
+
+    const canClear = () => order.instrumentCode !== '' || order.quantity !== '' || order.price !== '' || order.traderInstruction !== ''
+        || order.accountMnemonic !== '' || order.brokerAcronym !== '' || order.clientCode !== ''
 
     const handleClear = () =>
     {
@@ -152,7 +168,9 @@ export const NewOrderApp = () => {
             facilConsent: false,
             facilConsentDetails: '',
             facilInstructions: '',
-            lotSize: 0
+            lotSize: 0,
+            clientCode: '',
+            clientDescription: ''
         });
     };
     const handleSend = () => { };
@@ -169,28 +187,48 @@ export const NewOrderApp = () => {
         <div>
             <TitleBarComponent title="New Order" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{ padding: '10px', marginTop: '40px' }}>
-                <Grid container spacing={0.5} justifyContent="flex-end">
-                    <Grid item style={{ marginRight: '1px' }}>
-                        <Button
-                            className="dialog-action-button submit"
-                            variant="contained"
-                            disabled={!canSend()}
-                            onClick={handleSend}
-                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}>
-                            Send
-                        </Button>
+                <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
+                    <Grid container spacing={0.5} justifyContent="space-between">
+                        <Grid item xs={6} style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                            <ClientAutoCompleteWidget
+                                clients={clients}
+                                handleInputChange={handleInputChange}
+                                clientCode={order.clientCode}
+                            />
+                            {order.clientCode !== '' && (
+                            <TextField
+                                size="small"
+                                label="Client Description"
+                                value={getClientDescription(order.clientCode)}
+                                InputProps={{
+                                    readOnly: true,
+                                    style: { fontSize: '0.75rem', height: '32px'}
+                                }}
+                                InputLabelProps={{ style: { fontSize: '0.75rem'} }}
+                                style={{ width: '250px', marginLeft: '5px'}}/>)}
+                        </Grid>
+                        <Grid item xs={6} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                                className="dialog-action-button submit"
+                                variant="contained"
+                                disabled={!canSend()}
+                                onClick={handleSend}
+                                style={{ marginRight: '2px', fontSize: '0.75rem' }}
+                            >
+                                Send
+                            </Button>
+                            <Button
+                                className="dialog-action-button"
+                                variant="contained"
+                                disabled={!canClear()}
+                                onClick={handleClear}
+                                style={{ fontSize: '0.75rem', marginLeft: "5px"}}
+                            >
+                                Clear
+                            </Button>
+                        </Grid>
                     </Grid>
-                    <Grid item>
-                        <Button
-                            className="dialog-action-button"
-                            variant="contained"
-                            disabled={!canClear()}
-                            onClick={handleClear}
-                            style={{ marginRight: '2px', marginBottom: '10px', fontSize: '0.75rem' }}>
-                            Clear
-                        </Button>
-                    </Grid>
-                </Grid>
+                </Paper>
                 <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                     <Grid container spacing={0.5} alignItems="flex-start">
                         <Grid item style={{ marginRight: '1px' }}>
@@ -450,7 +488,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '160px' }}/>
+                                style={{ width: '305px' }}/>
                         </Grid>
                     </Grid>
                 </Paper>

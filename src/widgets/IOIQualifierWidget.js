@@ -8,7 +8,7 @@ export const IOIQualifierWidget = ({handleSideChange, qualifierValue, className}
         <TextField
             className={className}
             size='small'
-            label='Select IOI qualifier'
+            label='Select IOI Qualifier'
             select
             value={qualifierValue}
             onChange={handleSideChange}

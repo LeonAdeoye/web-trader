@@ -25,7 +25,7 @@ export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, in
                 />
             )}
             style={{ width: '203px' }}
-            label={'Select instrument'}
+            label={'Select Instrument'}
             value={instrumentCode || null}
             options={(instruments || []).map(inst => inst.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
