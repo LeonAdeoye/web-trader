@@ -408,7 +408,7 @@ export const NewOrderApp = () => {
                                     </FormControl>
                                     <IOIQualifierWidget
                                         handleQualifierChange={(e) => handleInputChange('qualifier', e.target.value)}
-                                        qualifierValue={order.qualifier}/>
+                                        qualifier={order.qualifier}/>
                                     <TextField
                                         size="small"
                                         label="Trader Instruction"

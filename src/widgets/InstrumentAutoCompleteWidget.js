@@ -10,7 +10,7 @@ export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, in
             size='small'
             sx={{
                 '& .MuiInputBase-root': {
-                    height: '32px',
+                    height: '34px',
                     boxSizing: 'border-box',
                     fontSize: '0.75rem',
                     alignItems: 'center',

@@ -2,7 +2,7 @@ import React from "react";
 import '../styles/css/main.css';
 import {MenuItem, TextField} from "@mui/material";
 
-export const IOIQualifierWidget = ({handleSideChange, qualifierValue, className}) =>
+export const IOIQualifierWidget = ({handleQualifierChange, qualifier, className}) =>
 {
     return (
         <TextField
@@ -10,8 +10,8 @@ export const IOIQualifierWidget = ({handleSideChange, qualifierValue, className}
             size='small'
             label='Select IOI Qualifier'
             select
-            value={qualifierValue}
-            onChange={handleSideChange}
+            value={qualifier}
+            onChange={handleQualifierChange}
             fullWidth
             style={{ width: '160px', marginTop: '15px'}}
             InputLabelProps={{ style: { fontSize: '0.75rem' } }}
