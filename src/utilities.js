@@ -76,4 +76,26 @@ export const sideValueConverter = (value) => {
     return sideMapping[value] || value;
 };
 
+export const settlementTypeConverter = (value) => {
+    const settlementTypeMapping = {
+        "T_PLUS_ONE": "T+1",
+        "T_PLUS_TWO": "T+2",
+        "T_PLUS_THREE": "T+3"
+    };
+    return settlementTypeMapping[value] || value;
+};
+
+export const assetTypeConverter = (value) => {
+    const assetTypeMapping = {
+        "STOCK": "Stock",
+        "BOND": "Bond",
+        "FUT": "Future",
+        "OPT": "Option",
+        "ETF": "ETF",
+        "WARRANT": "Warrant",
+        "CRYPTO": "Crypto"
+    };
+    return assetTypeMapping[value] || value;
+};
+
 

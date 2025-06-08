@@ -8,18 +8,26 @@ export const InstrumentAutoCompleteWidget = ({instrumentService, handleInputChan
         <Autocomplete
             className={className}
             size='small'
+            sx={{
+                '& .MuiInputBase-root': {
+                    height: '32px',
+                    boxSizing: 'border-box',
+                    fontSize: '0.75rem',
+                    alignItems: 'center',
+                }
+            }}
             renderInput={(params) => (
                 <TextField 
                     {...params} 
                     label='Select instrument'
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    inputProps={{ ...params.inputProps, style: { fontSize: '0.75rem' } }}
+                    inputProps={{ ...params.inputProps, style: { fontSize: '0.75rem', padding: '6.5px 14px' } }}
                 />
             )}
             style={{ width: '203px' }}
             label={'Select instrument'}
             value={instrumentCode || null}
-            options={(instrumentService.getInstruments() || []).map(instrument => instrument.instrumentCode)}
+            options={(instrumentService.getInstruments() || []).map(inst => inst.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
             required
             isOptionEqualToValue={(option, value) => option === value}

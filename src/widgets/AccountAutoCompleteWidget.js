@@ -7,12 +7,20 @@ export const AccountAutoCompleteWidget = ({accountService, handleInputChange, ac
         <Autocomplete
             className={className}
             size='small'
+            sx={{
+                '& .MuiInputBase-root': {
+                    height: '32px',
+                    boxSizing: 'border-box',
+                    fontSize: '0.75rem',
+                    alignItems: 'center',
+                }
+            }}
             renderInput={(params) => (
                 <TextField 
                     {...params} 
                     label='Select account'
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    inputProps={{ ...params.inputProps, style: { fontSize: '0.75rem' } }}
+                    inputProps={{ ...params.inputProps, style: { fontSize: '0.75rem', padding: '6.5px 14px' } }}
                 />
             )}
             style={{ width: '203px' }}
