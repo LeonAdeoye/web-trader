@@ -13,7 +13,7 @@ export class BrokerService {
         if (this.#brokers.length !== 0)
             return;
 
-        await fetch('http://localhost:20009/brokers')
+        await fetch('http://localhost:20009/broker')
             .then(response => response.json())
             .then(data => {
                 if (data.length > 0) {

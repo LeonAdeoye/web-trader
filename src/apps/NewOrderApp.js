@@ -1,28 +1,18 @@
 import React, {useState, useCallback, useMemo, useRef, useEffect} from "react";
-import {
-    Button,
-    Grid,
-    Paper,
-    TextField,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Select,
-    Checkbox,
-    FormControlLabel
-} from "@mui/material";
+import {Button,Grid,Paper,TextField,MenuItem,FormControl,InputLabel,Select,Checkbox,FormControlLabel} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 import {SideWidget} from "../widgets/SideWidget";
 import {AccountAutoCompleteWidget} from "../widgets/AccountAutoCompleteWidget";
 import {BrokerAutoCompleteWidget} from "../widgets/BrokerAutoCompleteWidget";
+import {IOIQualifierWidget} from "../widgets/IOIQualifierWidget";
 import {LoggerService} from "../services/LoggerService";
 import {AccountService} from "../services/AccountService";
 import {BrokerService} from "../services/BrokerService";
 import {ReferenceDataService} from "../services/ReferenceDataService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
-import {IOIQualifierWidget} from "../widgets/IOIQualifierWidget";
+
 
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
@@ -147,11 +137,7 @@ export const NewOrderApp = () => {
             facilInstructions: ''
         });
     };
-
-    const handleSend = () => {
-        // TODO: Implement send logic
-    };
-
+    const handleSend = () => { };
     const handleFacilConsent = (event) => {
         setOrder(prevData => ({
             ...prevData,

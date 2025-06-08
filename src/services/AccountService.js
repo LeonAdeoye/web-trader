@@ -13,7 +13,7 @@ export class AccountService {
         if (this.#accounts.length !== 0)
             return;
 
-        await fetch('http://localhost:20009/accounts')
+        await fetch('http://localhost:20009/account')
             .then(response => response.json())
             .then(data => {
                 if (data.length > 0) {
