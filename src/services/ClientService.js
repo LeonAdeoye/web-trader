@@ -49,11 +49,6 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    clear = () =>
-    {
-        this.#clients.clear();
-    }
-
     deleteClient = async (clientId) =>
     {
         fetch(`http://localhost:20009/client?clientId=${clientId}`, {method: "DELETE"})
@@ -96,19 +91,11 @@ export class ClientService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    getClientId = (clientName) =>
-    {
-        return this.#clients.find(client => client.clientName === clientName).clientId;
-    }
+    clear = () => this.#clients.clear();
 
-    getClientName = (clientId) =>
-    {
-        return this.#clients.find(client => client.clientId === clientId).clientName;
-    }
+    getClientId = (clientName) => this.#clients.find(client => client.clientName === clientName).clientId;
 
-    getClients = () =>
-    {
-        console.log(JSON.stringify(this.#clients)); // TODO: this seems to be always [] even after adding a client
-        return this.#clients;
-    }
+    getClientName = (clientId) => this.#clients.find(client => client.clientId === clientId).clientName;
+
+    getClients = () => this.#clients;
 }

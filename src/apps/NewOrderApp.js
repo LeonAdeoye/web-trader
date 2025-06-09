@@ -173,7 +173,16 @@ export const NewOrderApp = () => {
             clientDescription: ''
         });
     };
-    const handleSend = () => { };
+
+    const handleCancel = () =>
+    {
+        handleClear();
+        window.command.close(windowId);
+    }
+    const handleSend = () =>
+    {
+
+    }
     const handleFacilConsent = (event) =>
     {
         setOrder(prevData => ({
@@ -213,8 +222,7 @@ export const NewOrderApp = () => {
                                 variant="contained"
                                 disabled={!canSend()}
                                 onClick={handleSend}
-                                style={{ marginRight: '2px', fontSize: '0.75rem' }}
-                            >
+                                style={{ marginRight: '5px', fontSize: '0.75rem' }}>
                                 Send
                             </Button>
                             <Button
@@ -222,9 +230,16 @@ export const NewOrderApp = () => {
                                 variant="contained"
                                 disabled={!canClear()}
                                 onClick={handleClear}
-                                style={{ fontSize: '0.75rem', marginLeft: "5px"}}
-                            >
+                                style={{ fontSize: '0.75rem'}}>
                                 Clear
+                            </Button>
+                            <Button
+                                className="dialog-action-button cancel"
+                                variant="contained"
+                                disabled={false}
+                                onClick={handleCancel}
+                                style={{ marginLeft: '5px', fontSize: '0.75rem'}}>
+                                Cancel
                             </Button>
                         </Grid>
                     </Grid>
@@ -488,7 +503,7 @@ export const NewOrderApp = () => {
                                     style: { fontSize: '0.75rem' }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '305px' }}/>
+                                style={{ width: '300px' }}/>
                         </Grid>
                     </Grid>
                 </Paper>
