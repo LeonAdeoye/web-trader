@@ -21,6 +21,7 @@ export const SideWidget = ({handleSideChange, sideValue, className}) =>
             <MenuItem value='BUY' style={{ fontSize: '0.75rem' }}>Buy</MenuItem>
             <MenuItem value='SELL' style={{ fontSize: '0.75rem' }}>Sell</MenuItem>
             <MenuItem value='SHORT_SELL' style={{ fontSize: '0.75rem' }}>Short Sell</MenuItem>
+            <MenuItem value='SHORT_SELL_EXEMPT' style={{ fontSize: '0.75rem' }}>SS Exempt</MenuItem>
         </TextField>
     );
 }

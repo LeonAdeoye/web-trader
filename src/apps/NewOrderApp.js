@@ -6,15 +6,14 @@ import {SideWidget} from "../widgets/SideWidget";
 import {AccountAutoCompleteWidget} from "../widgets/AccountAutoCompleteWidget";
 import {BrokerAutoCompleteWidget} from "../widgets/BrokerAutoCompleteWidget";
 import {IOIQualifierWidget} from "../widgets/IOIQualifierWidget";
+import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
 import {LoggerService} from "../services/LoggerService";
 import {AccountService} from "../services/AccountService";
 import {BrokerService} from "../services/BrokerService";
 import {ReferenceDataService} from "../services/ReferenceDataService";
+import {ClientService} from "../services/ClientService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
-import {ClientService} from "../services/ClientService";
-import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
-
 
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
@@ -28,6 +27,8 @@ export const NewOrderApp = () => {
     const [brokers, setBrokers] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [clients, setClients] = useState(clientService.getClients());
+    const [ownerId, setOwnerId] = useState('');
+    const [worker, setWorker] = useState(null);
 
     const [order, setOrder] = useState({
         instrumentCode: '',
@@ -40,9 +41,9 @@ export const NewOrderApp = () => {
         exchangeAcronym: '',
         side: 'BUY',
         quantity: '',
-        priceType: 'LIMIT',
+        priceType: '2',
         price: '',
-        tif: 'GTC',
+        tif: '0',
         traderInstruction: '',
         qualifier: 'C:2',
         destination: 'DMA',
@@ -61,8 +62,16 @@ export const NewOrderApp = () => {
         facilInstructions: '',
         lotSize: 0,
         clientCode: '',
-        clientDescription: ''
+        clientDescription: '',
+        ownerId: ownerId,
+        state: ''
     });
+
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner();
+    }, []);
 
     useEffect(() =>
     {
@@ -80,6 +89,13 @@ export const NewOrderApp = () => {
         };
         loadData();
     }, [brokerService, accountService, referenceDataService]);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/send-order.js", import.meta.url));
+        setWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
 
     const getClientDescription = (clientCode) => {
         const client = clients.find(client => client.clientCode === clientCode);
@@ -131,7 +147,7 @@ export const NewOrderApp = () => {
     }, [accountService, brokerService, referenceDataService]);
 
     const canSend = () => order.clientCode != "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
-        && (order.priceType === 'MARKET' || (order.priceType === 'LIMIT' && order.price !== ''));
+        && (order.priceType === '1' || (order.priceType === '2' && order.price !== ''));
 
     const canClear = () => order.instrumentCode !== '' || order.quantity !== '' || order.price !== '' || order.traderInstruction !== ''
         || order.accountMnemonic !== '' || order.brokerAcronym !== '' || order.clientCode !== ''
@@ -149,9 +165,9 @@ export const NewOrderApp = () => {
             exchangeAcronym: '',
             side: 'BUY',
             quantity: '',
-            priceType: 'LIMIT',
+            priceType: '2',
             price: '',
-            tif: 'GTC',
+            tif: '0',
             traderInstruction: '',
             qualifier: 'C:2',
             destination: 'DMA',
@@ -170,7 +186,9 @@ export const NewOrderApp = () => {
             facilInstructions: '',
             lotSize: 0,
             clientCode: '',
-            clientDescription: ''
+            clientDescription: '',
+            ownerId: ownerId,
+            state: ''
         });
     };
 
@@ -181,7 +199,13 @@ export const NewOrderApp = () => {
     }
     const handleSend = () =>
     {
-
+        setOrder(prevData => {
+            prevData.ownerId = ownerId;
+            prevData.state = 'NEW ORDER';
+            return prevData;
+        });
+        worker.postMessage({order});
+        handleClear();
     }
     const handleFacilConsent = (event) =>
     {
@@ -374,11 +398,12 @@ export const NewOrderApp = () => {
                                             label="Price Type"
                                             onChange={(e) => handleInputChange('priceType', e.target.value)}
                                             style={{ fontSize: '0.75rem' }}>
-                                            <MenuItem value="MARKET" style={{ fontSize: '0.75rem' }}>Market</MenuItem>
-                                            <MenuItem value="LIMIT" style={{ fontSize: '0.75rem' }}>Limit</MenuItem>
+                                            <MenuItem value="1" style={{ fontSize: '0.75rem' }}>Market</MenuItem>
+                                            <MenuItem value="2" style={{ fontSize: '0.75rem' }}>Limit</MenuItem>
+                                            <MenuItem value="4" style={{ fontSize: '0.75rem' }}>Stop Limit</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    {order.priceType === 'LIMIT' && (
+                                    {order.priceType === '2' && (
                                         <TextField
                                             size="small"
                                             label="Price"
@@ -402,8 +427,13 @@ export const NewOrderApp = () => {
                                             label="TIF"
                                             onChange={(e) => handleInputChange('tif', e.target.value)}
                                             style={{ fontSize: '0.75rem' }}>
-                                            <MenuItem value="GTC" style={{ fontSize: '0.75rem' }}>GTC</MenuItem>
-                                            <MenuItem value="GTD" style={{ fontSize: '0.75rem' }}>GTD</MenuItem>
+                                            <MenuItem value="0" style={{ fontSize: '0.75rem' }}>DAY</MenuItem>
+                                            <MenuItem value="1" style={{ fontSize: '0.75rem' }}>GTC</MenuItem>
+                                            <MenuItem value="2" style={{ fontSize: '0.75rem' }}>OPG</MenuItem>
+                                            <MenuItem value="3" style={{ fontSize: '0.75rem' }}>IOC</MenuItem>
+                                            <MenuItem value="4" style={{ fontSize: '0.75rem' }}>FOK</MenuItem>
+                                            <MenuItem value="6" style={{ fontSize: '0.75rem' }}>GTD</MenuItem>
+                                            <MenuItem value="7" style={{ fontSize: '0.75rem' }}>ATC</MenuItem>
                                         </Select>
                                     </FormControl>
                                     <FormControl size="small" style={{ width: '120px', marginTop: '15px', marginLeft: '5px' , marginRight: '5px'}}>

@@ -6,8 +6,6 @@ import {useRecoilState} from "recoil";
 import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
-import BlastConfigurationDialog from "../dialogs/BlastConfigurationDialog";
-import BlastPlayDialog from "../dialogs/BlastPlayDialog";
 
 export const OrdersApp = () =>
 {
@@ -110,19 +108,21 @@ export const OrdersApp = () =>
         }
     }, [selectedContextShare]);
 
+    // cellStyle: params => orderStateStyling(params.value)
+
     const columnDefs = useMemo(() => ([
         {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 120, width: 120, filter: true},
-        {headerName: "Client Order Id", field: "clientOrderId", sortable: true, minWidth: 120, width: 120, filter: true},
-        {headerName: "Instruction", field: "instruction", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "Client", field: "clientCode", sortable: true, minWidth: 120, width: 120, filter: true},
+        {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true},
         {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 90, width: 90},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80},
         {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "Client", field: "client", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "State", field: "orderState", sortable: true, minWidth: 100, width: 100, filter: true, cellStyle: params => orderStateStyling(params.value)},
-        {headerName: "Stock Code", field: "stockCode", sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "BLG", field: "blg", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "Stock Desc.", field: "stockDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Client Desc", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
+        {headerName: "State", field: "state", sortable: true, minWidth: 100, width: 100, filter: true},
+        {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "Stock Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
