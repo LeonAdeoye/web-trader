@@ -15,8 +15,6 @@ export const OrdersApp = () =>
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("orders"), []);
 
     useEffect(() =>

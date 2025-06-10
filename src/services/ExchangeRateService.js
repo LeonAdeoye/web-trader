@@ -34,7 +34,6 @@ export class ExchangeRateService
     {
         const fromRate = this.getExchangeRate(fromCurrency);
         const toRate = this.getExchangeRate(toCurrency);
-
         const amountNum = Number(amount);
         if (isNaN(amountNum) || typeof amountNum !== 'number')
         {

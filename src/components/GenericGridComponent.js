@@ -1,12 +1,8 @@
 import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
-import {useCallback, useMemo, useRef, useState} from "react";
+import {useCallback, useMemo, useRef} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
-import {
-    genericGridLastColumnClickedState,
-    selectedContextShareState,
-    selectedGenericGridRowState
-} from "../atoms/component-state";
+import {selectedContextShareState,selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
 export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction}) =>
