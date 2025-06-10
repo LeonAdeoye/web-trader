@@ -12,14 +12,17 @@ import {AccountService} from "../services/AccountService";
 import {BrokerService} from "../services/BrokerService";
 import {ReferenceDataService} from "../services/ReferenceDataService";
 import {ClientService} from "../services/ClientService";
+import {ExchangeRateService} from "../services/ExchangeRateService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
+
 
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
     const accountService = useRef(new AccountService()).current;
     const brokerService = useRef(new BrokerService()).current;
     const clientService = useRef(new ClientService()).current;
+    const exchangeRateService = useRef(new ExchangeRateService()).current;
     const referenceDataService = useRef(new ReferenceDataService()).current;
     const windowId = useMemo(() => window.command.getWindowId("newOrder"), []);
 
@@ -81,6 +84,7 @@ export const NewOrderApp = () => {
             await brokerService.loadBrokers();
             await referenceDataService.loadInstruments();
             await clientService.loadClients();
+            await exchangeRateService.loadExchangeRates();
 
             setAccounts(accountService.getAccounts());
             setBrokers(brokerService.getBrokers());
@@ -88,7 +92,7 @@ export const NewOrderApp = () => {
             setClients(clientService.getClients());
         };
         loadData();
-    }, [brokerService, accountService, referenceDataService]);
+    }, [brokerService, accountService, referenceDataService, clientService, exchangeRateService]);
 
     useEffect(() =>
     {
@@ -197,11 +201,28 @@ export const NewOrderApp = () => {
         handleClear();
         window.command.close(windowId);
     }
+
+
+
     const handleSend = () =>
     {
+        const usdPrice = order.settlementCurrency === 'USD' ? order.price : exchangeRateService.convert(order.price, order.settlementCurrency, 'USD');
+
         setOrder(prevData => {
             prevData.ownerId = ownerId;
             prevData.state = 'NEW ORDER';
+            prevData.arrivalTime = new Date().toLocaleTimeString();
+            prevData.arrivalPrice = prevData.priceType === '2' ? order.price : '0';
+            prevData.pending = prevData.quantity;
+            prevData.executed = '0';
+            prevData.executedNotionalValue = '0';
+            prevData.traderInstruction = prevData.traderInstruction === '' ? 'None' : prevData.traderInstruction;
+            prevData.orderNotionalValue = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : '0';
+            prevData.orderNotionalValueInLocal = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * prevData.price).toFixed(2) : '0';
+            prevData.residualNotionalValue = prevData.orderNotionalValue;
+            prevData.clientDescription = getClientDescription(prevData.clientCode);
+            prevData.averagePrice = '0';
+            prevData.orderId = crypto.randomUUID();
             return prevData;
         });
         worker.postMessage({order});

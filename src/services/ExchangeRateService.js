@@ -24,23 +24,22 @@ export class ExchangeRateService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    // Function to get the exchange rate for a given currency
     getExchangeRate = (currencyCode) =>
     {
         const rate = this.exchangeRates[currencyCode.toUpperCase()];
         return rate !== undefined ? rate : 1.0;
     }
 
-    // Function to convert an amount from one currency to another
     convert = (amount, fromCurrency, toCurrency) =>
     {
         const fromRate = this.getExchangeRate(fromCurrency);
         const toRate = this.getExchangeRate(toCurrency);
 
-        if (isNaN(amount) || typeof amount !== 'number') {
+        const amountNum = Number(amount);
+        if (isNaN(amountNum) || typeof amountNum !== 'number')
+        {
             throw new Error('Invalid amount for conversion.');
         }
-
-        return (amount / fromRate) * toRate;
+        return (amountNum / fromRate) * toRate;
     }
 }

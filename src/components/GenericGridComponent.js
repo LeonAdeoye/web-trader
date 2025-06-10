@@ -27,12 +27,12 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
 
         if (colDef.field === 'instrumentCode') {
             setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode }]);
-        } else if (colDef.field === 'clientId') {
-            setSelectedContextShare([{ contextShareKey: 'clientId', contextShareValue: data.clientId }]);
+        } else if (colDef.field === 'clientCode') {
+            setSelectedContextShare([{ contextShareKey: 'clientCode', contextShareValue: data.clientCode }]);
         } else {
             setSelectedContextShare([
                 { contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode },
-                { contextShareKey: 'clientId', contextShareValue: data.clientId }
+                { contextShareKey: 'clientCode', contextShareValue: data.clientCode }
             ]);
         }
         if(colDef.field !== 'actions')

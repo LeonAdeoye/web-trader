@@ -53,18 +53,18 @@ export class FDC3Service
         };
     }
 
-    static createContextShare = (stockCode, client) =>
+    static createContextShare = (instrumentCode, client) =>
     {
         let fdc3Context = {
             type: "fdc3.context",
         };
 
-        if(stockCode)
+        if(instrumentCode)
         {
             fdc3Context["instruments"] = [{
                 type: "fdc3.instrument",
                 id: {
-                    ticker: stockCode
+                    ticker: instrumentCode
                 }
             }];
         }
@@ -73,7 +73,7 @@ export class FDC3Service
 
         if(client)
         {
-            fdc3Context["clients"] = [{
+            fdc3Context["clientCode"] = [{
                 type: "fdc3.client",
                 id: {
                     name: client
@@ -81,7 +81,7 @@ export class FDC3Service
             }];
         }
         else
-            fdc3Context["clients"] = [];
+            fdc3Context["clientCode"] = [];
 
         return fdc3Context;
     }

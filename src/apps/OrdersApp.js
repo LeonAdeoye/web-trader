@@ -11,8 +11,8 @@ export const OrdersApp = () =>
 {
     const [orders, setOrders] = useState([]);
     const [worker, setWorker] = useState(null);
-    const [stockCode, setStockCode] = useState(null);
-    const [client, setClient] = useState(null);
+    const [instrumentCode, setInstrumentCode] = useState(null);
+    const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
@@ -36,29 +36,29 @@ export const OrdersApp = () =>
                     setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
                 if(fdc3Message.instruments?.[0]?.id.ticker)
-                    setStockCode(fdc3Message.instruments[0].id.ticker);
+                    setInstrumentCode(fdc3Message.instruments[0].id.ticker);
                 else
-                    setStockCode(null);
+                    setInstrumentCode(null);
 
                 if(fdc3Message.clients?.[0]?.id.name)
-                    setClient(fdc3Message.clients[0].id.name);
+                    setClientCode(fdc3Message.clients[0].id.name);
                 else
-                    setClient(null);
+                    setClientCode(null);
             }
         });
     }, []);
 
     const filterOrdersUsingContext = useMemo(() =>
     {
-        if(stockCode && client)
-            return orders.filter((order) => order.stockCode === stockCode && order.client === client);
-        else if(stockCode)
-            return orders.filter((order) => order.stockCode === stockCode);
-        else if(client)
-            return orders.filter((order) => order.client === client);
+        if(instrumentCode && clientCode)
+            return orders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
+        else if(instrumentCode)
+            return orders.filter((order) => order.instrumentCode === instrumentCode);
+        else if(clientCode)
+            return orders.filter((order) => order.clientCode === clientCode);
         else
             return orders;
-    }, [orders, stockCode, client]);
+    }, [orders, instrumentCode, clientCode]);
 
     const handleWorkerMessage = useCallback((event) =>
     {
@@ -95,49 +95,50 @@ export const OrdersApp = () =>
     {
         if(selectedContextShare.length === 1)
         {
-            if(selectedContextShare[0].contextShareKey === 'stockCode')
+            if(selectedContextShare[0].contextShareKey === 'instrumentCode')
                 window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedContextShare[0].contextShareValue, null), null, windowId);
             else
                 window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, selectedContextShare[0].contextShareValue), null, windowId);
         }
         else if(selectedContextShare.length === 2)
         {
-            const stockCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'stockCode').contextShareValue;
-            const client = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'client').contextShareValue;
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+            const instrumentCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'instrumentCode').contextShareValue;
+            const clientCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'clientCode').contextShareValue;
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(instrumentCode, clientCode), null, windowId);
         }
     }, [selectedContextShare]);
 
-    // cellStyle: params => orderStateStyling(params.value)
-
     const columnDefs = useMemo(() => ([
-        {headerName: "Order Id", field: "orderId", sortable: true, minWidth: 120, width: 120, filter: true},
-        {headerName: "Client", field: "clientCode", sortable: true, minWidth: 120, width: 120, filter: true},
+        {headerName: "Parent Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true},
+        {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
+        {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 105, width: 105, filter: true},
+        {headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value)},
+        {headerName: "Stock Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
+        {headerName: "Client Code", field: "clientCode", sortable: true, minWidth: 105, width: 105, filter: true},
+        {headerName: "Client Desc", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
+        {headerName: "State", field: "state", sortable: true, minWidth: 100, width: 100, filter: true, cellStyle: params => orderStateStyling(params.value)},
+        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
+        {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80},
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true},
+        {headerName: "CCY", field: "settlementCurrency", sortable: true, minWidth: 90, width: 90, filter: true},
+        {headerName: "Exec Algo", field: "algoType", sortable: true, minWidth: 100, width: 100, filter: true},
         {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 90, width: 90},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80},
-        {headerName: "Exec Algo", field: "executionAlgo", sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
-        {headerName: "Client Desc", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "State", field: "state", sortable: true, minWidth: 100, width: 100, filter: true},
-        {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "Stock Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
-        {headerName: "Side", field: "side", sortable: true, minWidth: 80, width: 80, filter: true, cellStyle: params => orderSideStyling(params.value)},
-        {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
-        {headerName: "ADV20", field: "adv20", sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},
-        {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
+        {headerName: "ADV20", field: "adv20", hide: false, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},
+        {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
-        {headerName: "Exec Notional", field: "executedNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Order Notional", field: "orderNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Residual Notional", field: "residualNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "IVWAP", field: "ivwap", headerTooltip: 'Interval VWAP', hide: false, sortable: false, minWidth: 100, width: 100, filter: false, valueFormatter: numberFormatter},
+        {headerName: "$Exec Notional", field: "executedNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "$Order Notional", field: "orderNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Order Notional", field: "orderNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in local currency', valueFormatter: numberFormatter},
+        {headerName: "$Resid. Notional", field: "residualNotionalValue", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "IVWAP", field: "ivwap", headerTooltip: 'Interval VWAP', hide: true, sortable: false, minWidth: 100, width: 100, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival", field: "performanceVsArrival", headerTooltip: 'Performance versus arrival in USD', hide: false, sortable: false, minWidth: 100, width: 110, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival (bps)", field: "performanceVsArrivalBPS", headerTooltip: 'Performance versus arrival in bps', hide: false, sortable: false, minWidth: 100, width: 130, filter: false},
-        {headerName: "Perf IVWAP", field: "performanceVsIVWAP", headerTooltip: 'Performance versus interval VWAP in USD', hide: false, sortable: false, minWidth: 100, width: 110, filter: false, valueFormatter: numberFormatter},
-        {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: false, sortable: false, minWidth: 100, width: 120, filter: false},
+        {headerName: "Perf IVWAP", field: "performanceVsIVWAP", headerTooltip: 'Performance versus interval VWAP in USD', hide: true, sortable: false, minWidth: 100, width: 110, filter: false, valueFormatter: numberFormatter},
+        {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: true, sortable: false, minWidth: 100, width: 120, filter: false},
     ]), []);
 
     return (<>
