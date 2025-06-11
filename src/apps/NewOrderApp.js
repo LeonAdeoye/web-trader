@@ -15,6 +15,7 @@ import {ClientService} from "../services/ClientService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
+import StrategyRenderer from "../components/StrategyRenderer";
 
 
 export const NewOrderApp = () => {
@@ -234,7 +235,12 @@ export const NewOrderApp = () => {
             ...prevData,
             facilConsent: event.target.checked
         }));
-        loggerService.log(`Facilitation consent changed to ${event.target.checked}`);
+        loggerService.logInfo(`Facilitation consent changed to ${event.target.checked}`);
+    }
+
+    const handleStrategyChange = (algo) =>
+    {
+        loggerService.logInfo(`Selected algo type: ${algo}`);
     }
 
     return (
@@ -599,21 +605,19 @@ export const NewOrderApp = () => {
                     <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item>
-                                <FormControl size="small" style={{ width: '120px' }}>
+                                <FormControl size="small" style={{ width: '120px', marginBottom: '10px'}}>
                                     <InputLabel style={{ fontSize: '0.75rem' }}>Algo Type</InputLabel>
                                     <Select
                                         value={order.algoType}
                                         label="Algo Type"
-                                        onChange={(e) => handleInputChange('algoType', e.target.value)}
+                                        onChange={(e) => handleStrategyChange(e.target.value)}
                                         style={{ fontSize: '0.75rem' }}>
                                         <MenuItem value="VWAP" style={{ fontSize: '0.75rem' }}>VWAP</MenuItem>
                                         <MenuItem value="TWAP" style={{ fontSize: '0.75rem' }}>TWAP</MenuItem>
                                         <MenuItem value="POV" style={{ fontSize: '0.75rem' }}>POV</MenuItem>
-                                        <MenuItem value="IS" style={{ fontSize: '0.75rem' }}>IS</MenuItem>
-                                        <MenuItem value="PI" style={{ fontSize: '0.75rem' }}>PI</MenuItem>
-                                        <MenuItem value="MOC" style={{ fontSize: '0.75rem' }}>MC</MenuItem>
                                     </Select>
                                 </FormControl>
+                                <StrategyRenderer/>
                             </Grid>
                         </Grid>
                     </Paper>

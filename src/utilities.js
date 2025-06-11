@@ -98,4 +98,54 @@ export const assetTypeConverter = (value) => {
     return assetTypeMapping[value] || value;
 };
 
+export const xmlToJson = (xmlString) =>
+{
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+    function parseElement(element)
+    {
+        const obj = {};
+
+        if (element.attributes.length > 0)
+        {
+            for (let attr of element.attributes)
+            {
+                obj[attr.name] = attr.value;
+            }
+        }
+
+        for (let child of element.childNodes)
+        {
+            if (child.nodeType === 1)
+            {
+                const childData = parseElement(child);
+                if (obj[child.nodeName])
+                {
+                    if (!Array.isArray(obj[child.nodeName]))
+                    {
+                        obj[child.nodeName] = [obj[child.nodeName]];
+                    }
+                    obj[child.nodeName].push(childData);
+                }
+                else
+                {
+                    obj[child.nodeName] = childData;
+                }
+            } else if (child.nodeType === 3)
+            {
+                const text = child.nodeValue.trim();
+                if (text)
+                {
+                    obj["_text"] = text;
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    return parseElement(xmlDoc.documentElement);
+}
+
 
