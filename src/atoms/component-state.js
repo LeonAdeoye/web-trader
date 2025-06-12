@@ -58,6 +58,11 @@ export const alertConfigurationState = atom({
     default: defaultAlertConfiguration
 });
 
+export const algoErrorsState = atom({
+    key: 'algoErrorsState',
+    default: []
+});
+
 
 
 

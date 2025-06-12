@@ -17,8 +17,12 @@ import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
 import StrategyComponent from "../components/StrategyComponent";
 import {extractStrategyName} from "../fixatdl";
+import {useRecoilState} from "recoil";
+import {algoErrorsState} from "../atoms/component-state";
 
-export const NewOrderApp = () => {
+export const NewOrderApp = () =>
+{
+    const strategyRef = useRef();
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
     const accountService = useRef(new AccountService()).current;
     const brokerService = useRef(new BrokerService()).current;
@@ -35,6 +39,7 @@ export const NewOrderApp = () => {
     const [worker, setWorker] = useState(null);
     const [selectedAlgo, setSelectedAlgo] = useState("VWAP");
     const [algoNames, setAlgoNames] = useState([]);
+    const [algoErrors] = useRecoilState(algoErrorsState);
 
     const [order, setOrder] = useState({
         instrumentCode: '',
@@ -211,10 +216,19 @@ export const NewOrderApp = () => {
         window.command.close(windowId);
     }
 
-
-
     const handleSend = () =>
     {
+        if (strategyRef.current) {
+            strategyRef.current.handleValidation();
+        }
+
+        if (algoErrors.length > 0)
+        {
+            alert(`Order cannot be sent due to ALGO startegy validation errors. Please check the console for details: ${algoErrors.join(', ')}`);
+            loggerService.logError("Order cannot be sent due to validation errors:", algoErrors);
+            return;
+        }
+
         const usdPrice = order.settlementCurrency === 'USD' ? order.price : exchangeRateService.convert(order.price, order.settlementCurrency, 'USD');
 
         setOrder(prevData => {
@@ -237,6 +251,7 @@ export const NewOrderApp = () => {
         worker.postMessage({order});
         handleClear();
     }
+
     const handleFacilConsent = (event) =>
     {
         setOrder(prevData => ({
@@ -454,10 +469,10 @@ export const NewOrderApp = () => {
                                             <MenuItem value="4" style={{ fontSize: '0.75rem' }}>Stop Limit</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    {order.priceType === '2' && (
+                                    {(order.priceType === '2' || order.priceType === '4') && (
                                         <TextField
                                             size="small"
-                                            label="Price"
+                                            label= {order.priceType === '2' ? "Limit Price" : "Stop Price"}
                                             type="number"
                                             value={order.price}
                                             onChange={(e) => handleInputChange('price', e.target.value)}
@@ -642,7 +657,7 @@ export const NewOrderApp = () => {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                <StrategyComponent algoName={selectedAlgo} />
+                                <StrategyComponent ref={strategyRef} algoName={selectedAlgo}/>
                             </Grid>
                         </Grid>
                     </Paper>

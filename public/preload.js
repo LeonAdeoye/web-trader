@@ -59,6 +59,6 @@ window.addEventListener('DOMContentLoaded', () =>
 });
 
 contextBridge.exposeInMainWorld("strategyLoader", {
-    getStrategyXML: () => ipcRenderer.invoke("get-strategy-xml") // Async function that fetches XML data from `main.js`
+    getStrategyXML: () => ipcRenderer.invoke("get-strategy-xml")
 });
 

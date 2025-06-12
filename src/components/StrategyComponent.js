@@ -1,14 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef, useImperativeHandle, forwardRef} from "react";
 import { TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, Button, FormControlLabel } from "@mui/material";
 import { parseFIXATDL } from "../fixatdl";
 import { LoggerService } from "../services/LoggerService";
 import '../styles/css/main.css';
+import {useRecoilState} from "recoil";
+import {algoErrorsState} from "../atoms/component-state";
 
-const StrategyComponent = ({ algoName }) => {
+const StrategyComponent = forwardRef((props, ref) =>
+{
+    const { algoName } = props;
     const [jsonData, setJsonData] = useState(null);
     const [formData, setFormData] = useState({});
-    const [errors, setErrors] = useState([]);
     const loggerService = useRef(new LoggerService(StrategyComponent.name)).current;
+    const [setAlgoErrors] = useRecoilState(algoErrorsState);
+
+    const handleValidation = () =>
+    {
+        const validationErrors = [];
+        jsonData.validationRules.forEach(rule =>
+        {
+            rule.conditions.forEach(condition =>
+            {
+                const fieldValue = formData[condition.field];
+                if (condition.operator === "LT" && parseFloat(fieldValue) >= parseFloat(condition.field2))
+                    validationErrors.push(rule.errorMessage);
+                if (condition.operator === "GT" && parseFloat(fieldValue) <= parseFloat(condition.field2))
+                    validationErrors.push(rule.errorMessage);
+                if (condition.operator === "NX" && (!fieldValue || fieldValue === ""))
+                    validationErrors.push(rule.errorMessage);
+                if (condition.operator === "EQ" && fieldValue !== condition.value)
+                    validationErrors.push(rule.errorMessage);
+            });
+        });
+
+        if(validationErrors.length > 0)
+            setAlgoErrors(validationErrors);
+    };
+
+    useImperativeHandle(ref, () => ({
+        handleValidation
+    }));
 
     useEffect(() =>
     {
@@ -43,34 +74,6 @@ const StrategyComponent = ({ algoName }) => {
     {
         const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
         setFormData({ ...formData, [paramName]: value });
-    };
-
-    const handleValidation = () =>
-    {
-        const validationErrors = [];
-        jsonData.validationRules.forEach(rule =>
-        {
-            rule.conditions.forEach(condition =>
-            {
-                const fieldValue = formData[condition.field];
-                if (condition.operator === "LT" && parseFloat(fieldValue) >= parseFloat(condition.field2))
-                    validationErrors.push(rule.errorMessage);
-                if (condition.operator === "GT" && parseFloat(fieldValue) <= parseFloat(condition.field2))
-                    validationErrors.push(rule.errorMessage);
-                if (condition.operator === "NX" && (!fieldValue || fieldValue === ""))
-                    validationErrors.push(rule.errorMessage);
-                if (condition.operator === "EQ" && fieldValue !== condition.value)
-                    validationErrors.push(rule.errorMessage);
-            });
-        });
-        setErrors(validationErrors);
-    };
-
-    const handleSubmit = (event) =>
-    {
-        event.preventDefault();
-        handleValidation();
-        if (errors.length === 0) alert("Form submitted successfully!");
     };
 
     const renderInputControl = (param, control) =>
@@ -128,7 +131,6 @@ const StrategyComponent = ({ algoName }) => {
             case "lay:SingleSpinner_t":
                 return (
                     <FormControl size="small" style={{ width: '160px'}}>
-                        {/*<InputLabel style={{ fontSize: '0.75rem' }}>{label}</InputLabel>*/}
                         <TextField
                         label={label}
                         type="number"
@@ -136,11 +138,11 @@ const StrategyComponent = ({ algoName }) => {
                         required={isRequired}
                         value={formData[paramName] || ""}
                         onChange={(event) => handleChange(event, paramName)}
-                        inputProps={{ step: 1, min: 0 }} // Ensure integer values
+                        inputProps={{ step: 1, min: 0, style: fontStyle}}
                         style={controlStyle}
-                        InputLabelProps={{ shrink: true, style: fontStyle }}
-                        InputProps={{ style: fontStyle }}/>
-                    </FormControl>);
+                        InputLabelProps={{ shrink: true, style: fontStyle  }}/>
+                    </FormControl>
+                );
             default:
                 return (
                     <TextField
@@ -158,7 +160,7 @@ const StrategyComponent = ({ algoName }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "5px", maxWidth: "660px"}}>
+        <form style={{ display: "flex", flexWrap: "wrap", gap: "5px", maxWidth: "660px"}}>
             {jsonData.controls.map(control => {
                 const param = jsonData.parameters.find(p => p.name === control.parameterRef);
                 return (
@@ -167,15 +169,9 @@ const StrategyComponent = ({ algoName }) => {
                     </FormControl>
                 );
             })}
-
-            {errors.length > 0 && (
-                <div style={{ color: "red", fontSize: "12px", marginTop: "10px", width: "100%" }}>
-                    {errors.map((error, index) => <p key={index}>{error}</p>)}
-                </div>
-            )}
         </form>
     );
 
-};
+});
 
 export default StrategyComponent;
