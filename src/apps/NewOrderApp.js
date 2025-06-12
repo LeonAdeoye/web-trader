@@ -15,7 +15,7 @@ import {ClientService} from "../services/ClientService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
-import StrategyRenderer from "../components/StrategyRenderer";
+import StrategyComponent from "../components/StrategyComponent";
 
 
 export const NewOrderApp = () => {
@@ -33,6 +33,7 @@ export const NewOrderApp = () => {
     const [clients, setClients] = useState(clientService.getClients());
     const [ownerId, setOwnerId] = useState('');
     const [worker, setWorker] = useState(null);
+    const [selectedAlgo, setSelectedAlgo] = useState("TWAP");
 
     const [order, setOrder] = useState({
         instrumentCode: '',
@@ -107,6 +108,12 @@ export const NewOrderApp = () => {
         return client ? client.clientName : "";
     };
 
+    const handleStrategyChange = (event) =>
+    {
+        setSelectedAlgo(event.target.value);
+    };
+
+
     const handleInputChange = useCallback((name, value) => {
         setOrder(prevData => {
             const newData = { ...prevData, [name]: value };
@@ -151,7 +158,7 @@ export const NewOrderApp = () => {
         });
     }, [accountService, brokerService, referenceDataService]);
 
-    const canSend = () => order.clientCode != "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
+    const canSend = () => order.clientCode !== "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
         && (order.priceType === '1' || (order.priceType === '2' && order.price !== ''));
 
     const canClear = () => order.instrumentCode !== '' || order.quantity !== '' || order.price !== '' || order.traderInstruction !== ''
@@ -236,11 +243,6 @@ export const NewOrderApp = () => {
             facilConsent: event.target.checked
         }));
         loggerService.logInfo(`Facilitation consent changed to ${event.target.checked}`);
-    }
-
-    const handleStrategyChange = (algo) =>
-    {
-        loggerService.logInfo(`Selected algo type: ${algo}`);
     }
 
     return (
@@ -605,19 +607,18 @@ export const NewOrderApp = () => {
                     <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item>
-                                <FormControl size="small" style={{ width: '120px', marginBottom: '10px'}}>
-                                    <InputLabel style={{ fontSize: '0.75rem' }}>Algo Type</InputLabel>
+                                <FormControl size="small" style={{ width: "120px", marginBottom: "10px" }}>
+                                    <InputLabel style={{ fontSize: "0.75rem" }}>Algo Type</InputLabel>
                                     <Select
-                                        value={order.algoType}
-                                        label="Algo Type"
-                                        onChange={(e) => handleStrategyChange(e.target.value)}
-                                        style={{ fontSize: '0.75rem' }}>
-                                        <MenuItem value="VWAP" style={{ fontSize: '0.75rem' }}>VWAP</MenuItem>
-                                        <MenuItem value="TWAP" style={{ fontSize: '0.75rem' }}>TWAP</MenuItem>
-                                        <MenuItem value="POV" style={{ fontSize: '0.75rem' }}>POV</MenuItem>
+                                        value={selectedAlgo} // Controlled component - reflects selection
+                                        onChange={handleStrategyChange}
+                                        style={{ fontSize: "0.75rem" }}>
+                                        <MenuItem value="VWAP" style={{ fontSize: "0.75rem" }}>VWAP</MenuItem>
+                                        <MenuItem value="TWAP" style={{ fontSize: "0.75rem" }}>TWAP</MenuItem>
+                                        <MenuItem value="POV" style={{ fontSize: "0.75rem" }}>POV</MenuItem>
                                     </Select>
                                 </FormControl>
-                                <StrategyRenderer/>
+                                <StrategyComponent algoName={selectedAlgo} />
                             </Grid>
                         </Grid>
                     </Paper>

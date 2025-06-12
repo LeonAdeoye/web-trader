@@ -1,0 +1,46 @@
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-1/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-1/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-1/Layout"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-1/Core fixatdl-core-1-1.xsd"
+            strategyIdentifierTag="27500"
+            versionIdentifierTag="27501">
+
+    <Strategy name="TWAP" uiRep="TWAP Strategy" wireValue="TWAP" version="1.0" fixMsgType="D">
+
+        <!-- Parameter Definitions -->
+        <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="28501" use="required"/>
+        <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="28502" use="required"/>
+        <Parameter name="Interval" xsi:type="Int_t" fixTag="28503" use="optional" minValue="1"/>
+        <Parameter name="MaxOrderSize" xsi:type="Qty_t" fixTag="28504" use="optional"/>
+        <Parameter name="PriceLimit" xsi:type="Price_t" fixTag="28505" use="optional"/>
+        <Parameter name="AggressionLevel" xsi:type="Char_t" fixTag="28506" use="required">
+            <EnumPair enumID="low" wireValue="L"/>
+            <EnumPair enumID="medium" wireValue="M"/>
+            <EnumPair enumID="high" wireValue="H"/>
+        </Parameter>
+        <Parameter name="EnableDarkPoolExecution" xsi:type="Boolean_t" fixTag="28507" use="optional" trueWireValue="Y" falseWireValue="N"/>
+
+        <!-- Strategy Layout & Control Bindings -->
+        <lay:StrategyLayout>
+            <lay:StrategyPanel collapsible="true">
+                <lay:Control ID="StartTimeCtrl" xsi:type="lay:Clock_t" label="Start Time" parameterRef="StartTime"/>
+                <lay:Control ID="EndTimeCtrl" xsi:type="lay:Clock_t" label="End Time" parameterRef="EndTime"/>
+                <lay:Control ID="IntervalCtrl" xsi:type="lay:SingleSpinner_t" label="Interval (min)" parameterRef="Interval"/>
+                <lay:Control ID="AggressionCtrl" xsi:type="lay:DropDownList_t" label="Aggression Level" parameterRef="AggressionLevel">
+                    <lay:ListItem enumID="low" uiRep="Low"/>
+                    <lay:ListItem enumID="medium" uiRep="Medium"/>
+                    <lay:ListItem enumID="high" uiRep="High"/>
+                </lay:Control>
+            </lay:StrategyPanel>
+        </lay:StrategyLayout>
+
+        <!-- Validation Rules -->
+        <val:StrategyEdit errorMessage="Start Time must precede End Time.">
+            <val:Edit field="StartTime" operator="LT" field2="EndTime"/>
+        </val:StrategyEdit>
+        <val:StrategyEdit errorMessage="Interval must be greater than 1 minute.">
+            <val:Edit field="Interval" operator="GE" value="1"/>
+        </val:StrategyEdit>
+    </Strategy>
+</Strategies>

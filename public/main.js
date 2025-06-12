@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, Menu, clipboard } = require('electron');
 const isDev = require('electron-is-dev')
 const path = require('path');
 const settings = require("electron-settings");
-
+const fs = require("fs");
 require('@electron/remote/main').initialize();
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
@@ -355,5 +355,33 @@ app.on('before-quit', () =>
     childWindowIdMap.clear();
 });
 
+const strategiesFolder = path.join(__dirname, "strategies"); // Adjust based on actual folder path
 
+const readFIXATDLFiles = () => {
+    let xmlFiles = [];
 
+    try
+    {
+        const files = fs.readdirSync(strategiesFolder).filter(file => file.endsWith(".xml"));
+
+        files.forEach(file =>
+        {
+            const filePath = path.join(strategiesFolder, file);
+            const xmlContent = fs.readFileSync(filePath, "utf8");
+            xmlFiles.push(xmlContent);
+        });
+
+    }
+    catch (err)
+    {
+        console.error("Error reading strategies folder:", err);
+    }
+
+    return xmlFiles
+};
+
+// IPC handler to send XML data to the renderer process
+ipcMain.handle("get-strategy-xml", () =>
+{
+    return readFIXATDLFiles();
+});

@@ -16,6 +16,7 @@
 // to avoid leaking any privileged APIs into your web content's code.
 // Instead, use the contextBridge module to accomplish this securely:
 const { contextBridge, ipcRenderer } = require('electron')
+const { fs } = require('fs');
 
 contextBridge.exposeInMainWorld('launchPad', {
     openApp: (url, title, modalFlag) => ipcRenderer.send('openApp', url, title, modalFlag)
@@ -56,3 +57,8 @@ window.addEventListener('DOMContentLoaded', () =>
         replaceText(`${dependency}-version`, process.versions[dependency])
     }
 });
+
+contextBridge.exposeInMainWorld("strategyLoader", {
+    getStrategyXML: () => ipcRenderer.invoke("get-strategy-xml") // Async function that fetches XML data from `main.js`
+});
+

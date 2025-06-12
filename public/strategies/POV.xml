@@ -1,0 +1,37 @@
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-1/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-1/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-1/Layout"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-1/Core fixatdl-core-1-1.xsd"
+            strategyIdentifierTag="27600"
+            versionIdentifierTag="27601">
+
+    <Strategy name="POV" uiRep="POV Strategy" wireValue="POV" version="1.0" fixMsgType="D">
+
+        <!-- Parameter Definitions -->
+        <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="28601" use="required"/>
+        <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="28602" use="required"/>
+        <Parameter name="ParticipationRate" xsi:type="Percentage_t" fixTag="28603" use="required" minValue="1" maxValue="50"/>
+        <Parameter name="MaxOrderSize" xsi:type="Qty_t" fixTag="28604" use="optional"/>
+        <Parameter name="PriceLimit" xsi:type="Price_t" fixTag="28605" use="optional"/>
+        <Parameter name="EnableDarkPoolExecution" xsi:type="Boolean_t" fixTag="28606" use="optional" trueWireValue="Y" falseWireValue="N"/>
+
+        <!-- Strategy Layout & Control Bindings -->
+        <lay:StrategyLayout>
+            <lay:StrategyPanel collapsible="true">
+                <lay:Control ID="StartTimeCtrl" xsi:type="lay:Clock_t" label="Start Time" parameterRef="StartTime"/>
+                <lay:Control ID="EndTimeCtrl" xsi:type="lay:Clock_t" label="End Time" parameterRef="EndTime"/>
+                <lay:Control ID="ParticipationRateCtrl" xsi:type="lay:SingleSpinner_t" label="Participation Rate (%)" parameterRef="ParticipationRate"/>
+            </lay:StrategyPanel>
+        </lay:StrategyLayout>
+
+        <!-- Validation Rules -->
+        <val:StrategyEdit errorMessage="Start Time must precede End Time.">
+            <val:Edit field="StartTime" operator="LT" field2="EndTime"/>
+        </val:StrategyEdit>
+        <val:StrategyEdit errorMessage="Participation Rate must be between 1% and 50%.">
+            <val:Edit field="ParticipationRate" operator="GE" value="1"/>
+            <val:Edit field="ParticipationRate" operator="LE" value="50"/>
+        </val:StrategyEdit>
+    </Strategy>
+</Strategies>
