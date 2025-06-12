@@ -8,7 +8,8 @@
             versionIdentifierTag="27001">
 
     <Strategy name="VWAP" uiRep="VWAP Strategy" wireValue="VWAP" version="1.0" fixMsgType="D">
-        <!-- Parameter Definitions -->
+
+        <!-- Parameter Definitions (NO Labels in Parameters) -->
         <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="28001" use="required"/>
         <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="28002" use="required"/>
         <Parameter name="ParticipationRate" xsi:type="Percentage_t" fixTag="28003" use="optional" minValue="0.01" maxValue="0.50"/>
@@ -21,17 +22,20 @@
         </Parameter>
         <Parameter name="EnableDarkPoolExecution" xsi:type="Boolean_t" fixTag="28007" use="optional" trueWireValue="Y" falseWireValue="N"/>
 
-        <!-- Strategy Layout & Control Bindings (excluding grid alignment) -->
+        <!-- Strategy Layout & Control Bindings (Labels Added) -->
         <lay:StrategyLayout>
             <lay:StrategyPanel collapsible="true">
                 <lay:Control ID="StartTimeCtrl" xsi:type="lay:Clock_t" label="Start Time" parameterRef="StartTime"/>
                 <lay:Control ID="EndTimeCtrl" xsi:type="lay:Clock_t" label="End Time" parameterRef="EndTime"/>
-                <lay:Control ID="ParticipationCtrl" xsi:type="lay:SingleSpinner_t" label="Participation Rate" parameterRef="ParticipationRate"/>
+                <lay:Control ID="ParticipationCtrl" xsi:type="lay:SingleSpinner_t" label="Participation Rate (%)" parameterRef="ParticipationRate"/>
+                <lay:Control ID="MaxOrderSizeCtrl" xsi:type="lay:SingleSpinner_t" label="Max Order Size" parameterRef="MaxOrderSize"/>
+                <lay:Control ID="PriceLimitCtrl" xsi:type="lay:SingleSpinner_t" label="Price Limit" parameterRef="PriceLimit"/>
                 <lay:Control ID="AggressionCtrl" xsi:type="lay:DropDownList_t" label="Aggression Level" parameterRef="AggressionLevel">
                     <lay:ListItem enumID="low" uiRep="Low"/>
                     <lay:ListItem enumID="medium" uiRep="Medium"/>
                     <lay:ListItem enumID="high" uiRep="High"/>
                 </lay:Control>
+                <lay:Control ID="EnableDarkPoolExecutionCtrl" xsi:type="lay:CheckBox_t" label="Enable Dark Pool Execution" parameterRef="EnableDarkPoolExecution"/>
             </lay:StrategyPanel>
         </lay:StrategyLayout>
 

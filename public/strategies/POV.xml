@@ -8,7 +8,7 @@
 
     <Strategy name="POV" uiRep="POV Strategy" wireValue="POV" version="1.0" fixMsgType="D">
 
-        <!-- Parameter Definitions -->
+        <!-- Parameter Definitions (NO Labels in Parameters) -->
         <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="28601" use="required"/>
         <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="28602" use="required"/>
         <Parameter name="ParticipationRate" xsi:type="Percentage_t" fixTag="28603" use="required" minValue="1" maxValue="50"/>
@@ -16,12 +16,15 @@
         <Parameter name="PriceLimit" xsi:type="Price_t" fixTag="28605" use="optional"/>
         <Parameter name="EnableDarkPoolExecution" xsi:type="Boolean_t" fixTag="28606" use="optional" trueWireValue="Y" falseWireValue="N"/>
 
-        <!-- Strategy Layout & Control Bindings -->
+        <!-- Strategy Layout & Control Bindings (Labels Added) -->
         <lay:StrategyLayout>
             <lay:StrategyPanel collapsible="true">
                 <lay:Control ID="StartTimeCtrl" xsi:type="lay:Clock_t" label="Start Time" parameterRef="StartTime"/>
                 <lay:Control ID="EndTimeCtrl" xsi:type="lay:Clock_t" label="End Time" parameterRef="EndTime"/>
                 <lay:Control ID="ParticipationRateCtrl" xsi:type="lay:SingleSpinner_t" label="Participation Rate (%)" parameterRef="ParticipationRate"/>
+                <lay:Control ID="MaxOrderSizeCtrl" xsi:type="lay:SingleSpinner_t" label="Max Order Size" parameterRef="MaxOrderSize"/>
+                <lay:Control ID="PriceLimitCtrl" xsi:type="lay:SingleSpinner_t" label="Price Limit" parameterRef="PriceLimit"/>
+                <lay:Control ID="EnableDarkPoolExecutionCtrl" xsi:type="lay:CheckBox_t" label="Enable Dark Pool Execution" parameterRef="EnableDarkPoolExecution"/>
             </lay:StrategyPanel>
         </lay:StrategyLayout>
 

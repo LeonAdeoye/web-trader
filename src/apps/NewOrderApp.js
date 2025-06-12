@@ -17,7 +17,6 @@ import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
 import StrategyComponent from "../components/StrategyComponent";
 
-
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
     const accountService = useRef(new AccountService()).current;
@@ -608,9 +607,9 @@ export const NewOrderApp = () => {
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item>
                                 <FormControl size="small" style={{ width: "120px", marginBottom: "10px" }}>
-                                    <InputLabel style={{ fontSize: "0.75rem" }}>Algo Type</InputLabel>
+                                    <InputLabel style={{ fontSize: "0.75rem" }}>Algo Strategy Type</InputLabel>
                                     <Select
-                                        value={selectedAlgo} // Controlled component - reflects selection
+                                        value={selectedAlgo}
                                         onChange={handleStrategyChange}
                                         style={{ fontSize: "0.75rem" }}>
                                         <MenuItem value="VWAP" style={{ fontSize: "0.75rem" }}>VWAP</MenuItem>

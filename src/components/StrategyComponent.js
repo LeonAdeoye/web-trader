@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, Button } from "@mui/material";
+import { TextField, Select, MenuItem, FormControl, InputLabel, Checkbox, Button, FormControlLabel } from "@mui/material";
 import { parseFIXATDL } from "../fixatdl";
 import { LoggerService } from "../services/LoggerService";
 import '../styles/css/main.css';
@@ -64,124 +64,97 @@ const StrategyComponent = ({ algoName }) => {
         if (errors.length === 0) alert("Form submitted successfully!");
     };
 
-    const renderInputControl = (param) =>
+    const renderInputControl = (param, control) =>
     {
-        const controlStyle = { width: "120px" }; // Fixed width for controls
-        const fontStyle = { fontSize: "12px" }; // Smaller font size for labels and input text
+        const controlStyle = { width: "120px" };
+        const fontStyle = { fontSize: "12px" };
+        const label = control.label;
+        const paramName = control.parameterRef;
+        const isRequired = param?.use === "required";
 
-        switch (param.type)
+        switch (control.type)
         {
-            case "Boolean_t":
+            case "lay:CheckBox_t":
                 return (
-                    <Checkbox
-                        checked={formData[param.name] || false}
-                        label={param.name}
-                        size="small"
-                        required={param.use === "required"}
-                        onChange={(event) => handleChange(event, param.name)}
-                        sx={{ width: "10px" }}/>);
-            case "DropDownList_t":
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={formData[paramName] || false}
+                                size="small"
+                                required={isRequired}
+                                onChange={(event) => handleChange(event, paramName)}
+                                sx={{ marginLeft: "10px", width: "10px", height: "15px" }}/>
+                        }
+                        label={label} // Use extracted label
+                        sx={{ "& .MuiTypography-root": { fontSize: "11px"} }}/>);
+            case "lay:DropDownList_t":
                 return (
-                    <Select
-                        value={formData[param.name] || ""}
-                        required={param.use === "required"}
-                        onChange={(event) => handleChange(event, param.name)}
-                        sx={{ height: "5px", fontSize: "12px", width: "120px" }}>
-                        {param.enumPairs.map(enumOption => (
-                            <MenuItem key={enumOption.enumID} value={enumOption.wireValue} sx={{ fontSize: "12px" }}>
-                                {enumOption.enumID}
-                            </MenuItem>
-                        ))}
-                    </Select>);
-            case "Clock_t":
-            case "UTCTimestamp_t":
+
+                    <FormControl size="small" style={{ width: '160px'}}>
+                        <InputLabel style={{ fontSize: '0.75rem' }}>{label}</InputLabel>
+                        <Select
+                            value={formData[paramName] || ""}
+                            required={param.use === "required"}
+                            onChange={(event) => handleChange(event, paramName)}
+                            sx={{ height: "35px", fontSize: "12px", width: "160px" }}>
+                            {param.enumPairs.map(enumOption => (
+                                <MenuItem key={enumOption.enumID} value={enumOption.wireValue} sx={{ fontSize: "12px" }}>
+                                    {enumOption.enumID}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>);
+            case "lay:Clock_t":
                 return (
                     <TextField
-                        label={param.name}
+                        label={label}
                         type="time"
                         size="small"
-                        required={param.use === "required"}
-                        value={ new Date(formData[param.name] || "").toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }
+                        required={isRequired}
+                        value={ new Date(formData[paramName] || "").toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }
                         style={controlStyle}
-                        onChange={(event) => handleChange(event, param.name)}
+                        onChange={(event) => handleChange(event, paramName)}
                         InputLabelProps={{ shrink: true, style: fontStyle }}
                         InputProps={{ style: fontStyle }}/>);
-            case "Int_t":
+            case "lay:SingleSpinner_t":
                 return (
                     <TextField
-                        label={param.name}
+                        label={label}
                         type="number"
                         size="small"
-                        required={param.use === "required"}
-                        value={formData[param.name] || ""}
-                        onChange={(event) => handleChange(event, param.name)}
+                        required={isRequired}
+                        value={formData[paramName] || ""}
+                        onChange={(event) => handleChange(event, paramName)}
                         inputProps={{ step: 1, min: 0 }} // Ensure integer values
-                        style={controlStyle}
-                        InputLabelProps={{ shrink: true, style: fontStyle }}
-                        InputProps={{ style: fontStyle }}/>);
-
-            case "Qty_t":
-                return (
-                    <TextField
-                        label={param.name}
-                        type="number"
-                        size="small"
-                        required={param.use === "required"}
-                        value={formData[param.name] || ""}
-                        onChange={(event) => handleChange(event, param.name)}
-                        inputProps={{ step: 1, min: 1 }} // Enforce valid quantity
-                        style={controlStyle}
-                        InputLabelProps={{ shrink: true, style: fontStyle }}
-                        InputProps={{ style: fontStyle }}/>);
-            case "Price_t":
-                return (
-                    <TextField
-                        label={param.name}
-                        type="number"
-                        size="small"
-                        required={param.use === "required"}
-                        value={formData[param.name] || ""}
-                        onChange={(event) => handleChange(event, param.name)}
-                        inputProps={{ step: "0.01", min: 0 }} // Ensures valid price formatting
-                        style={controlStyle}
-                        InputLabelProps={{ shrink: true, style: fontStyle }}
-                        InputProps={{ style: fontStyle }}/>);
-
-            case "Char_t":
-                return (
-                    <TextField
-                        label={param.name}
-                        type="text"
-                        size="small"
-                        required={param.use === "required"}
-                        value={formData[param.name] || ""}
-                        onChange={(event) => handleChange(event, param.name)}
-                        inputProps={{ maxLength: 1 }} // Restricts to single char input
                         style={controlStyle}
                         InputLabelProps={{ shrink: true, style: fontStyle }}
                         InputProps={{ style: fontStyle }}/>);
             default:
                 return (
                     <TextField
+                        label={label}
                         type="text"
-                        variant="outlined"
-                        required={param.use === "required"}
-                        value={formData[param.name] || ""}
-                        onChange={(event) => handleChange(event, param.name)}
-                        sx={{ height: "5px", fontSize: "12px", width: "120px" }}/>);
+                        size="small"
+                        required={isRequired}
+                        value={formData[paramName] || ""}
+                        onChange={(event) => handleChange(event, paramName)}
+                        inputProps={{ maxLength: 1 }}
+                        style={controlStyle}
+                        InputLabelProps={{ shrink: true, style: fontStyle }}
+                        InputProps={{ style: fontStyle }}/>);
         }
     };
 
     return (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-            {/*<h2 style={{ fontSize: "13px", marginBottom: "5px", width: "100%" }}>{jsonData.strategyName}</h2>*/}
-
-            {jsonData.parameters.map(param => (
-                <FormControl key={param.name} sx={{ width: "120px"}}>
-                    {/*<InputLabel sx={{ fontSize: "12px" }}>{param.name}</InputLabel>*/}
-                    {renderInputControl(param)}
-                </FormControl>
-            ))}
+            {jsonData.controls.map(control => {
+                const param = jsonData.parameters.find(p => p.name === control.parameterRef);
+                return (
+                    <FormControl key={control.id} sx={{ width: "120px" }}>
+                        {renderInputControl(param, control)}
+                    </FormControl>
+                );
+            })}
 
             {errors.length > 0 && (
                 <div style={{ color: "red", fontSize: "12px", marginTop: "10px", width: "100%" }}>
@@ -190,6 +163,7 @@ const StrategyComponent = ({ algoName }) => {
             )}
         </form>
     );
+
 };
 
 export default StrategyComponent;
