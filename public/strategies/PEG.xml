@@ -1,0 +1,50 @@
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-1/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-1/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-1/Layout"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-1/Core fixatdl-core-1-1.xsd"
+            strategyIdentifierTag="27800"
+            versionIdentifierTag="27801">
+
+    <Strategy name="PEG" uiRep="Pegged Order Strategy" wireValue="PEG" version="1.0" fixMsgType="D">
+
+        <!-- Parameter Definitions -->
+        <Parameter name="PegType" xsi:type="Char_t" fixTag="28801" use="required">
+            <EnumPair enumID="Primary" wireValue="P"/>
+            <EnumPair enumID="Midpoint" wireValue="M"/>
+            <EnumPair enumID="Market" wireValue="K"/>
+        </Parameter>
+        <Parameter name="PegOffset" xsi:type="PriceOffset_t" fixTag="28802" use="optional"/>
+        <Parameter name="ExecutionVenue" xsi:type="Char_t" fixTag="28803" use="optional">
+            <EnumPair enumID="Lit" wireValue="L"/>
+            <EnumPair enumID="Dark" wireValue="D"/>
+            <EnumPair enumID="Smart" wireValue="S"/>
+        </Parameter>
+
+        <!-- Strategy Layout -->
+        <lay:StrategyLayout>
+            <lay:StrategyPanel collapsible="true">
+                <lay:Control ID="PegTypeCtrl" xsi:type="lay:DropDownList_t" label="Peg Type" parameterRef="PegType">
+                    <lay:ListItem enumID="Primary" uiRep="Primary"/>
+                    <lay:ListItem enumID="Midpoint" uiRep="Midpoint"/>
+                    <lay:ListItem enumID="Market" uiRep="Market"/>
+                </lay:Control>
+                <lay:Control ID="PegOffsetCtrl" xsi:type="lay:SingleSpinner_t" label="Peg Offset" parameterRef="PegOffset"/>
+                <lay:Control ID="VenueCtrl" xsi:type="lay:DropDownList_t" label="Execution Venue" parameterRef="ExecutionVenue">
+                    <lay:ListItem enumID="Lit" uiRep="Lit"/>
+                    <lay:ListItem enumID="Dark" uiRep="Dark"/>
+                    <lay:ListItem enumID="Smart" uiRep="Smart"/>
+                </lay:Control>
+            </lay:StrategyPanel>
+        </lay:StrategyLayout>
+
+        <!-- Validation Rules -->
+        <val:StrategyEdit errorMessage="Peg Type must be selected.">
+            <val:Edit field="PegType" operator="NX"/>
+        </val:StrategyEdit>
+        <val:StrategyEdit errorMessage="Peg Offset cannot be negative.">
+            <val:Edit field="PegOffset" operator="GE" value="0"/>
+        </val:StrategyEdit>
+
+    </Strategy>
+</Strategies>

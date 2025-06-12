@@ -1,0 +1,48 @@
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-1/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-1/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-1/Layout"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-1/Core fixatdl-core-1-1.xsd"
+            strategyIdentifierTag="27700"
+            versionIdentifierTag="27701">
+
+    <Strategy name="ICEBERG" uiRep="Iceberg Strategy" wireValue="ICEBERG" version="1.0" fixMsgType="D">
+
+        <!-- Parameter Definitions -->
+        <Parameter name="DisplayQuantity" xsi:type="Qty_t" fixTag="28701" use="required"/>
+        <Parameter name="OrderType" xsi:type="Char_t" fixTag="28702" use="required">
+            <EnumPair enumID="Limit" wireValue="L"/>
+            <EnumPair enumID="Market" wireValue="M"/>
+        </Parameter>
+        <Parameter name="Urgency" xsi:type="Char_t" fixTag="28703" use="optional">
+            <EnumPair enumID="Low" wireValue="L"/>
+            <EnumPair enumID="Medium" wireValue="M"/>
+            <EnumPair enumID="High" wireValue="H"/>
+        </Parameter>
+
+        <!-- Strategy Layout -->
+        <lay:StrategyLayout>
+            <lay:StrategyPanel collapsible="true">
+                <lay:Control ID="DisplayQtyCtrl" xsi:type="lay:SingleSpinner_t" label="Display Quantity" parameterRef="DisplayQuantity"/>
+                <lay:Control ID="OrderTypeCtrl" xsi:type="lay:DropDownList_t" label="Order Type" parameterRef="OrderType">
+                    <lay:ListItem enumID="Limit" uiRep="Limit"/>
+                    <lay:ListItem enumID="Market" uiRep="Market"/>
+                </lay:Control>
+                <lay:Control ID="UrgencyCtrl" xsi:type="lay:DropDownList_t" label="Urgency Level" parameterRef="Urgency">
+                    <lay:ListItem enumID="Low" uiRep="Low"/>
+                    <lay:ListItem enumID="Medium" uiRep="Medium"/>
+                    <lay:ListItem enumID="High" uiRep="High"/>
+                </lay:Control>
+            </lay:StrategyPanel>
+        </lay:StrategyLayout>
+
+        <!-- Validation Rules -->
+        <val:StrategyEdit errorMessage="Display Quantity must be greater than 0.">
+            <val:Edit field="DisplayQuantity" operator="GT" value="0"/>
+        </val:StrategyEdit>
+        <val:StrategyEdit errorMessage="Order Type must be selected.">
+            <val:Edit field="OrderType" operator="NX"/>
+        </val:StrategyEdit>
+
+    </Strategy>
+</Strategies>

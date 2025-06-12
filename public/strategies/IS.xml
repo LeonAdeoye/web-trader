@@ -1,0 +1,42 @@
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-1/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-1/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-1/Layout"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-1/Core fixatdl-core-1-1.xsd"
+            strategyIdentifierTag="27900"
+            versionIdentifierTag="27901">
+
+  <Strategy name="IS" uiRep="Implementation Shortfall Strategy" wireValue="IS" version="1.0" fixMsgType="D">
+
+    <!-- Parameter Definitions -->
+    <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="28901" use="required"/>
+    <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="28902" use="required"/>
+    <Parameter name="ExecutionStyle" xsi:type="Char_t" fixTag="28903" use="required">
+      <EnumPair enumID="Passive" wireValue="P"/>
+      <EnumPair enumID="Aggressive" wireValue="A"/>
+    </Parameter>
+    <Parameter name="PriceLimit" xsi:type="Price_t" fixTag="28904" use="optional"/>
+
+    <!-- Strategy Layout -->
+    <lay:StrategyLayout>
+      <lay:StrategyPanel collapsible="true">
+        <lay:Control ID="StartTimeCtrl" xsi:type="lay:Clock_t" label="Start Time" parameterRef="StartTime"/>
+        <lay:Control ID="EndTimeCtrl" xsi:type="lay:Clock_t" label="End Time" parameterRef="EndTime"/>
+        <lay:Control ID="ExecutionStyleCtrl" xsi:type="lay:DropDownList_t" label="Execution Style" parameterRef="ExecutionStyle">
+          <lay:ListItem enumID="Passive" uiRep="Passive"/>
+          <lay:ListItem enumID="Aggressive" uiRep="Aggressive"/>
+        </lay:Control>
+        <lay:Control ID="PriceLimitCtrl" xsi:type="lay:SingleSpinner_t" label="Price Limit" parameterRef="PriceLimit"/>
+      </lay:StrategyPanel>
+    </lay:StrategyLayout>
+
+    <!-- Validation Rules -->
+    <val:StrategyEdit errorMessage="Start Time must precede End Time.">
+      <val:Edit field="StartTime" operator="LT" field2="EndTime"/>
+    </val:StrategyEdit>
+    <val:StrategyEdit errorMessage="Execution Style must be selected.">
+      <val:Edit field="ExecutionStyle" operator="NX"/>
+    </val:StrategyEdit>
+
+  </Strategy>
+</Strategies>

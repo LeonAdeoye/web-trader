@@ -47,3 +47,11 @@ export const parseFIXATDL = (xmlString) => {
 
     return { strategyName, parameters, validationRules, controls };
 };
+
+export const extractStrategyName = (xmlString) => {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+    const strategy = xmlDoc.getElementsByTagName("Strategy")[0];
+    return strategy?.getAttribute("name") || null; // Returns the strategy name or null if missing
+};
+

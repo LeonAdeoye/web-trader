@@ -16,6 +16,7 @@ import {ExchangeRateService} from "../services/ExchangeRateService";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
 import StrategyComponent from "../components/StrategyComponent";
+import {extractStrategyName} from "../fixatdl";
 
 export const NewOrderApp = () => {
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
@@ -32,7 +33,8 @@ export const NewOrderApp = () => {
     const [clients, setClients] = useState(clientService.getClients());
     const [ownerId, setOwnerId] = useState('');
     const [worker, setWorker] = useState(null);
-    const [selectedAlgo, setSelectedAlgo] = useState("TWAP");
+    const [selectedAlgo, setSelectedAlgo] = useState("VWAP");
+    const [algoNames, setAlgoNames] = useState([]);
 
     const [order, setOrder] = useState({
         instrumentCode: '',
@@ -243,6 +245,27 @@ export const NewOrderApp = () => {
         }));
         loggerService.logInfo(`Facilitation consent changed to ${event.target.checked}`);
     }
+
+    const getAlgoNames = async () =>
+    {
+        try
+        {
+            const xmlFiles = await window.strategyLoader.getStrategyXML();
+            const algoNames = xmlFiles.map(xml => extractStrategyName(xml)).filter(name => name !== null);
+            return algoNames;
+        }
+        catch (err)
+        {
+            LoggerService.logError("Error fetching algorithm names:", err);
+            return [];
+        }
+    };
+
+    useEffect(() =>
+    {
+        const fetchAlgoNames = async () => setAlgoNames(await getAlgoNames());
+        fetchAlgoNames();
+    }, []);
 
     return (
         <div>
@@ -612,9 +635,11 @@ export const NewOrderApp = () => {
                                         value={selectedAlgo}
                                         onChange={handleStrategyChange}
                                         style={{ fontSize: "0.75rem" }}>
-                                        <MenuItem value="VWAP" style={{ fontSize: "0.75rem" }}>VWAP</MenuItem>
-                                        <MenuItem value="TWAP" style={{ fontSize: "0.75rem" }}>TWAP</MenuItem>
-                                        <MenuItem value="POV" style={{ fontSize: "0.75rem" }}>POV</MenuItem>
+                                        {algoNames.map((algoName) => (
+                                            <MenuItem key={algoName} value={algoName} style={{ fontSize: "0.75rem" }}>
+                                                {algoName}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                                 <StrategyComponent algoName={selectedAlgo} />

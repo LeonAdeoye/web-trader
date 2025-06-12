@@ -12,20 +12,29 @@ const StrategyComponent = ({ algoName }) => {
 
     useEffect(() =>
     {
-        window.strategyLoader.getStrategyXML().then(xmlFiles =>
+        const loadStrategyXML = async () =>
         {
-            const selectedXml = xmlFiles.find(xml => xml.includes(`name="${algoName}"`));
-            if (selectedXml)
+            try
             {
-                const parsedJson = parseFIXATDL(selectedXml);
-                setJsonData(parsedJson);
-                loggerService.logInfo(`Loaded FIX ATDL strategy for ${algoName}:`, parsedJson);
-            }
-            else
-                loggerService.logError(`Algorithm ${algoName} not found in XML files.`);
+                const xmlFiles = await window.strategyLoader.getStrategyXML();
+                const selectedXml = xmlFiles.find(xml => xml.includes(`name="${algoName}"`));
 
-        })
-        .catch(err => loggerService.logError(`Error loading FIX ATDL XML files: ${err}`));
+                if (selectedXml)
+                {
+                    const parsedJson = parseFIXATDL(selectedXml);
+                    setJsonData(parsedJson);
+                    loggerService.logInfo(`Loaded FIX ATDL strategy for ${algoName}:`, parsedJson);
+                }
+                else
+                    loggerService.logError(`Algorithm ${algoName} not found in XML files.`);
+            }
+            catch (err)
+            {
+                loggerService.logError(`Error loading FIX ATDL XML files: ${err}`);
+            }
+        };
+
+        loadStrategyXML();
     }, [algoName]);
 
     if (!jsonData) return <p>Loading FIX ATDL strategy for {algoName}...</p>;
@@ -66,7 +75,7 @@ const StrategyComponent = ({ algoName }) => {
 
     const renderInputControl = (param, control) =>
     {
-        const controlStyle = { width: "120px" };
+        const controlStyle = { width: "160px" };
         const fontStyle = { fontSize: "12px" };
         const label = control.label;
         const paramName = control.parameterRef;
@@ -118,7 +127,9 @@ const StrategyComponent = ({ algoName }) => {
                         InputProps={{ style: fontStyle }}/>);
             case "lay:SingleSpinner_t":
                 return (
-                    <TextField
+                    <FormControl size="small" style={{ width: '160px'}}>
+                        {/*<InputLabel style={{ fontSize: '0.75rem' }}>{label}</InputLabel>*/}
+                        <TextField
                         label={label}
                         type="number"
                         size="small"
@@ -128,7 +139,8 @@ const StrategyComponent = ({ algoName }) => {
                         inputProps={{ step: 1, min: 0 }} // Ensure integer values
                         style={controlStyle}
                         InputLabelProps={{ shrink: true, style: fontStyle }}
-                        InputProps={{ style: fontStyle }}/>);
+                        InputProps={{ style: fontStyle }}/>
+                    </FormControl>);
             default:
                 return (
                     <TextField
@@ -146,11 +158,11 @@ const StrategyComponent = ({ algoName }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "5px", maxWidth: "660px"}}>
             {jsonData.controls.map(control => {
                 const param = jsonData.parameters.find(p => p.name === control.parameterRef);
                 return (
-                    <FormControl key={control.id} sx={{ width: "120px" }}>
+                    <FormControl key={control.id} sx={{ width: "160px", marginBottom: "5px"}}>
                         {renderInputControl(param, control)}
                     </FormControl>
                 );
