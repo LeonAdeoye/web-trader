@@ -46,13 +46,13 @@ const createMainWindow = () =>
                 nodeIntegration: true,
                 webSecurity: false,
                 enableRemoteModule: true,
-                preload: path.join(__dirname, '../../../public/preload.js')
+                preload: path.join(__dirname, '../../public/preload.js')
             }
     });
 
     mainWindow.removeMenu();
 
-    mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../../../build/index.html')}`)
+    mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../../build/index.html')}`)
         .catch((err) => console.error("Error loading URL in main window:", err));
 
     loadWindowDimensions(mainWindow)
@@ -86,10 +86,10 @@ const createOpenAppHandler = (mainWindow) =>
             frame: false,
             width: 800,
             height: 600,
-            icon: path.join(__dirname, `../../../assets/${title}.png`),
+            icon: path.join(__dirname, `../../assets/${title}.png`),
             webPreferences: {
                 nodeIntegration: true,
-                preload: path.join(__dirname, '../../../public/preload.js')
+                preload: path.join(__dirname, '../../public/preload.js')
             }
         });
 

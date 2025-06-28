@@ -25,7 +25,7 @@ const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
                 ]},
             { type: 'separator' },
             { label: 'Context Sharing Channel', submenu: [
-                    { label: 'Set channel to red', icon: path.join(__dirname, '../../../assets', 'red.png'), click: () =>
+                    { label: 'Set channel to red', icon: path.join(__dirname, '../../assets', 'red.png'), click: () =>
                         {
                             removeWindowFromChannel(window.getTitle());
                             addWindowToChannel('red', window.getTitle());
@@ -33,7 +33,7 @@ const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
                         }
                     },
                     { type: 'separator' },
-                    { label: 'Set channel to blue', icon: path.join(__dirname, '../../../assets', 'blue.png'), click: () =>
+                    { label: 'Set channel to blue', icon: path.join(__dirname, '../../assets', 'blue.png'), click: () =>
                         {
                             removeWindowFromChannel(window.getTitle());
                             addWindowToChannel('blue', window.getTitle());
@@ -41,7 +41,7 @@ const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
                         }
                     },
                     { type: 'separator' },
-                    { label: 'Set channel to green', icon: path.join(__dirname, '../../../assets', 'green.png'), click: () =>
+                    { label: 'Set channel to green', icon: path.join(__dirname, '../../assets', 'green.png'), click: () =>
                         {
                             removeWindowFromChannel(window.getTitle());
                             addWindowToChannel('green', window.getTitle());
@@ -49,7 +49,7 @@ const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
                         }
                     },
                     { type: 'separator' },
-                    { label: 'Set channel to yellow', icon: path.join(__dirname, '../../../assets', 'yellow.png'), click: () =>
+                    { label: 'Set channel to yellow', icon: path.join(__dirname, '../../assets', 'yellow.png'), click: () =>
                         {
                             removeWindowFromChannel(window.getTitle());
                             addWindowToChannel('yellow', window.getTitle());

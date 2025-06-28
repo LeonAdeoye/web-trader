@@ -1,9 +1,9 @@
-const { setupMessageHandlers, removeAllListeners } = require('../src/main/modules/messageHandler');
-const { initializeChannels } = require('../src/main/modules/channelManager');
-const { readFIXATDLFiles } = require('../src/main/modules/fixatdlManager');
-const { clearChildWindowIdMap } = require('../src/main/modules/childWindowManager');
-const { addContextMenu } = require('../src/main/modules/contextMenuManager');
-const { createMainWindow, createOpenAppHandler, getChildWindowTitleMap, clearChildWindowTitleMap, saveChildWindowDimensions} = require("../src/main/modules/windowManager");
+const { setupMessageHandlers, removeAllListeners } = require('../src/main/messageHandler');
+const { initializeChannels } = require('../src/main/channelManager');
+const { readFIXATDLFiles } = require('../src/main/fixatdlManager');
+const { clearChildWindowIdMap } = require('../src/main/childWindowManager');
+const { addContextMenu } = require('../src/main/contextMenuManager');
+const { createMainWindow, createOpenAppHandler, getChildWindowTitleMap, clearChildWindowTitleMap, saveChildWindowDimensions} = require("../src/main/windowManager");
 const { app, BrowserWindow, ipcMain } = require('electron');
 
 require('@electron/remote/main').initialize();

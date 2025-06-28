@@ -8,11 +8,11 @@ const getAllFIXATDLContent = () => {
 };
 
 const readFIXATDLFiles = async () => {
-    const strategiesFolder = path.join(__dirname, "../../strategies");
+    const strategiesFolder = path.join(__dirname, "../strategies");
     try
     {
         const files = fs.readdirSync(strategiesFolder).filter(file => file.endsWith(".xml"));
-        console.log(`Found ${files.length} ATDL XML files in the strategies folder: ${path.join(__dirname, "../../strategies")}`);
+        console.log(`Found ${files.length} ATDL XML files in the strategies folder: ${path.join(__dirname, "../strategies")}`);
 
         files.forEach(file =>
         {
