@@ -1,4 +1,3 @@
-import './App.css';
 import {GridTickerApp} from "./apps/GridTickerApp";
 import {PriceChartApp} from "./apps/PriceChartApp";
 import {StockTickerApp} from "./apps/StockTickerApp";
