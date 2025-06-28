@@ -39,10 +39,7 @@ export const ConfigsApp = () =>
 
     useEffect(() =>
     {
-        window.configurations.getLoggedInUserId()
-            .then(loggedInUser => setLoggedInUser(loggedInUser))
-            .catch((error) => loggerService.logError(error));
-
+        const loadOwner = async () =>  setLoggedInUser(await window.configurations.getLoggedInUserId());
     }, [])
 
     useEffect(() =>
