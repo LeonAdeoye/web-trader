@@ -1,4 +1,5 @@
-export const parseFIXATDL = (xmlString) => {
+export const parseFIXATDL = (xmlString) =>
+{
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "text/xml");
 
@@ -17,16 +18,6 @@ export const parseFIXATDL = (xmlString) => {
             wireValue: enumPair.getAttribute("wireValue")
         }))
     }));
-
-    // const validationRules = [...strategy.getElementsByTagName("StrategyEdit")].map(editRule => ({
-    //     errorMessage: editRule.getAttribute("errorMessage"),
-    //     conditions: [...editRule.getElementsByTagName("Edit")].map(edit => ({
-    //         field: edit.getAttribute("field"),
-    //         operator: edit.getAttribute("operator"),
-    //         value: edit.getAttribute("value") || null,
-    //         field2: edit.getAttribute("field2") || null
-    //     }))
-    // }));
 
     const validationRules = [
         ...strategy.getElementsByTagNameNS("http://www.fixprotocol.org/FIXatdl-1-1/Validation", "StrategyEdit")
@@ -60,7 +51,8 @@ export const parseFIXATDL = (xmlString) => {
     return { strategyName, parameters, validationRules, controls };
 };
 
-export const extractStrategyName = (xmlString) => {
+export const extractStrategyName = (xmlString) =>
+{
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "text/xml");
     const strategy = xmlDoc.getElementsByTagName("Strategy")[0];
