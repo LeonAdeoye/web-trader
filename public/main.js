@@ -2,7 +2,7 @@ const { setupMessageHandlers, removeAllListeners } = require('../src/main/messag
 const { initializeChannels } = require('../src/main/channelManager');
 const { readFIXATDLFiles } = require('../src/main/fixatdlManager');
 const { clearChildWindowIdMap } = require('../src/main/childWindowManager');
-const { addContextMenu } = require('../src/main/contextMenuManager');
+const { addContextMenus } = require('../src/main/contextMenuManager');
 const { createMainWindow, createOpenAppHandler, getChildWindowTitleMap, clearChildWindowTitleMap, saveChildWindowDimensions} = require("../src/main/windowManager");
 const { app, BrowserWindow, ipcMain } = require('electron');
 
@@ -18,7 +18,7 @@ app.whenReady().then(async () =>
     mainWindow = createMainWindow();
     const openAppHandler = createOpenAppHandler(mainWindow);
     ipcMain.on('openApp', openAppHandler);
-    addContextMenu(mainWindow, getChildWindowTitleMap(), mainWindow);
+    addContextMenus(mainWindow, getChildWindowTitleMap(), mainWindow);
 });
 
 app.on('window-all-closed', () =>

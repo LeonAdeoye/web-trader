@@ -4,7 +4,7 @@ const { saveWindowDimensions, loadWindowDimensions } = require('./settingsManage
 const { BrowserWindow, ipcMain } = require("electron");
 const { setChildWindowIdMap } = require("./childWindowManager");
 const { removeWindowFromChannel } = require('./channelManager');
-const { addContextMenu } = require('./contextMenuManager');
+const { addContextMenus } = require('./contextMenuManager');
 
 const childWindowTitleMap = new Map();
 const getChildWindowTitleMap = () => childWindowTitleMap;
@@ -118,7 +118,7 @@ const createOpenAppHandler = (mainWindow) =>
                 .catch(err => console.log(`Error saving child window state: ${err}`));
         });
 
-        addContextMenu(childWindow, childWindowTitleMap, mainWindow);
+        addContextMenus(childWindow, childWindowTitleMap, mainWindow);
         loadWindowDimensions(childWindow).then(() => console.log("Child window config complete"));
     };
 };

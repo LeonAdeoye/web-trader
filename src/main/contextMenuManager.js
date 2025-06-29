@@ -3,10 +3,10 @@ const { addWindowToChannel, removeWindowFromChannel } = require('./channelManage
 const { saveWindowDimensions } = require('./settingsManager');
 const {app, Menu} = require('electron');
 
-const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
+const addContextMenus = (window, childWindowTitleMap, mainWindow) =>
 {
     if (!window || !window.webContents) {
-        console.error("Invalid window object passed to addContextMenu");
+        console.error("Invalid window object passed to addContextMenus");
         return;
     }
 
@@ -88,5 +88,5 @@ const addContextMenu = (window, childWindowTitleMap, mainWindow) =>
 }
 
 module.exports = {
-    addContextMenu
+    addContextMenus
 }
