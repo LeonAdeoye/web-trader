@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography } from "@mui/material";
+import {Button,Dialog,DialogActions,DialogContent,DialogTitle,Grid,TextField,Tooltip,Typography} from "@mui/material";
 import React, {useCallback, useEffect, useState} from "react";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
@@ -6,7 +6,7 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {SideWidget} from "../widgets/SideWidget";
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 
-const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
+const ClientInterestDialog = ({ closeHandler , instrumentService }) =>
 {
     const defaultClientInterest =
     {
@@ -68,7 +68,8 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
                 <Grid container spacing={1} direction="column">
                     <Grid item container spacing={1}>
                         <Grid item>
-                            <InstrumentAutoCompleteWidget instrumentService={instrumentService} handleInputChange={handleInputChange} instrumentCode={clientInterest.instrumentCode} className={"client-interest-symbol"} />
+                            <InstrumentAutoCompleteWidget instrumentService={instrumentService} handleInputChange={handleInputChange}
+                                  instrumentCode={clientInterest.instrumentCode} className={"client-interest-symbol"} marginTop={'15px'}/>
                         </Grid>
                         <Grid item>
                             <SideWidget handleSideChange={handleSideChange} sideValue={clientInterest.side} className={"client-interest-side"}/>
@@ -109,4 +110,4 @@ const ClientInterestDialogComponent = ({ closeHandler , instrumentService }) =>
     );
 }
 
-export default ClientInterestDialogComponent;
+export default ClientInterestDialog;

@@ -5,7 +5,7 @@ import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
 import {Resizable} from "re-resizable";
 import React, {useEffect, useRef, useMemo, useState} from "react";
 import {useRecoilState} from "recoil";
-import ClientInterestDialogComponent from "../components/ClientInterestDialogComponent";
+import ClientInterestDialog from "../dialogs/ClientInterestDialog";
 import {ReferenceDataService} from "../services/ReferenceDataService";
 import {ClientInterestService} from "../services/ClientInterestService";
 import {clientInterestsChangedState, selectedClientState, titleBarContextShareColourState} from "../atoms/component-state";
@@ -96,7 +96,7 @@ export const ClientInterestsApp = () =>
                 <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
                 <Grid item style={{flexGrow: 1, overflow: 'hidden'}}>
                     <ClientInterestsComponent instrumentService={referenceDataService} clientInterestService={clientInterestService} loggerService={loggerService}/>
-                    <ClientInterestDialogComponent closeHandler={closeHandler} instrumentService={referenceDataService} clientInterestService={clientInterestService}/>
+                    <ClientInterestDialog closeHandler={closeHandler} instrumentService={referenceDataService} clientInterestService={clientInterestService}/>
                 </Grid>
             </Grid>
         </Grid>
