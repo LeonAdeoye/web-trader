@@ -1,5 +1,17 @@
 import React, {useState, useCallback, useMemo, useRef, useEffect} from "react";
-import {Button,Grid,Paper,TextField,MenuItem,FormControl,InputLabel,Select,Checkbox,FormControlLabel} from "@mui/material";
+import {
+    Button,
+    Grid,
+    Paper,
+    TextField,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Select,
+    Checkbox,
+    FormControlLabel,
+    Tooltip
+} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 import {SideWidget} from "../widgets/SideWidget";
@@ -160,15 +172,17 @@ export const NewOrderApp = () =>
                     newData.handlingInstruction = broker.handlingInstruction;
                 }
             }
+            if(name === 'priceType' && value === '1')
+                newData.price = '';
             return newData;
         });
     }, [accountService, brokerService, referenceDataService]);
 
-    const canSend = () => order.clientCode !== "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
-        && (order.priceType === '1' || (order.priceType === '2' && order.price !== ''));
+    const canCreateOrder = () => order.clientCode !== "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
+        && (order.priceType === '1' || (order.priceType !== '1' && order.price !== ''));
 
-    const canClear = () => order.instrumentCode !== '' || order.quantity !== '' || order.price !== '' || order.traderInstruction !== ''
-        || order.accountMnemonic !== '' || order.brokerAcronym !== '' || order.clientCode !== ''
+    const canClear = () => order.instrumentCode !== '' || order.quantity !== '' || order.priceType !== '2'  || order.price !== '' || order.traderInstruction !== ''
+        || order.accountMnemonic !== '' || order.brokerAcronym !== '' || order.clientCode !== '' || order.destination !== 'DMA';
 
     const handleClear = () =>
     {
@@ -216,7 +230,7 @@ export const NewOrderApp = () =>
         window.command.close(windowId);
     }
 
-    const handleSend = () =>
+    const handleCreateOrder = () =>
     {
         if (strategyRef.current) {
             strategyRef.current.handleValidation();
@@ -224,7 +238,7 @@ export const NewOrderApp = () =>
 
         if (algoErrors.length > 0)
         {
-            alert(`Order cannot be sent due to ALGO startegy validation errors. Please check the console for details: ${algoErrors.join(', ')}`);
+            alert(`Order cannot be sent due to ALGO strategy validation errors. Please check the console for details: ${algoErrors.join(', ')}`);
             loggerService.logError("Order cannot be sent due to validation errors:", algoErrors);
             return;
         }
@@ -307,30 +321,36 @@ export const NewOrderApp = () =>
                                 style={{ width: '250px', marginLeft: '5px'}}/>)}
                         </Grid>
                         <Grid item xs={6} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                                className="dialog-action-button submit"
-                                variant="contained"
-                                disabled={!canSend()}
-                                onClick={handleSend}
-                                style={{ marginRight: '5px', fontSize: '0.75rem' }}>
-                                Send
-                            </Button>
-                            <Button
-                                className="dialog-action-button"
-                                variant="contained"
-                                disabled={!canClear()}
-                                onClick={handleClear}
-                                style={{ fontSize: '0.75rem'}}>
-                                Clear
-                            </Button>
-                            <Button
-                                className="dialog-action-button cancel"
-                                variant="contained"
-                                disabled={false}
-                                onClick={handleCancel}
-                                style={{ marginLeft: '5px', fontSize: '0.75rem'}}>
-                                Cancel
-                            </Button>
+                            <Tooltip title={"Creates a new order and closes the app."}>
+                                <Button
+                                    className="dialog-action-button submit"
+                                    variant="contained"
+                                    disabled={!canCreateOrder()}
+                                    onClick={handleCreateOrder}
+                                    style={{ marginRight: '5px', fontSize: '0.75rem' }}>
+                                    Create Order
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title={"Clears all the control values but does not close the app."}>
+                                <Button
+                                    className="dialog-action-button"
+                                    variant="contained"
+                                    disabled={!canClear()}
+                                    onClick={handleClear}
+                                    style={{ fontSize: '0.75rem'}}>
+                                    Clear
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title={"Cancels the current order and closes this app."}>
+                                <Button
+                                    className="dialog-action-button cancel"
+                                    variant="contained"
+                                    disabled={false}
+                                    onClick={handleCancel}
+                                    style={{ marginLeft: '5px', fontSize: '0.75rem'}}>
+                                    Cancel
+                                </Button>
+                            </Tooltip>
                         </Grid>
                     </Grid>
                 </Paper>
