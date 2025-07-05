@@ -43,15 +43,21 @@ export const orderStateStyling = (orderState) =>
 {
     const styleMapping = {
         'FILLED': { backgroundColor: '#528c74', color: 'white' },
-        'FULLY FILLED': { backgroundColor: '#528c74', color: 'white' },
-        'PARTIAL FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
-        'PARTIALLY FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
-        'NEW ORDER': { backgroundColor: '#4F81BD', color: 'white' },
-        'ACKED': { backgroundColor: 'lightblue', color: 'white' },
+        'FULLY_FILLED': { backgroundColor: '#528c74', color: 'white' },
+        'PARTIAL_FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
+        'PARTIALLY_FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
+        'NEW_ORDER': { backgroundColor: '#4F81BD', color: 'white' },
+        'PENDING_NEW': { backgroundColor: 'lightblue', color: 'white' },
     };
     const value = orderState.trim();
     const style = styleMapping[value] || {};
     return style;
+}
+
+export const replaceUnderscoresWithSpace = (str) =>
+{
+    if (typeof str !== 'string') return str;
+    return str.replace(/_/g, ' ');
 }
 
 export const orderSideStyling = (orderSide) =>

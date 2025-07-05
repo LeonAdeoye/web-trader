@@ -247,7 +247,7 @@ export const NewOrderApp = () =>
 
         setOrder(prevData => {
             prevData.ownerId = ownerId;
-            prevData.state = 'NEW ORDER';
+            prevData.state = 'NEW_ORDER';
             prevData.arrivalTime = new Date().toLocaleTimeString();
             prevData.arrivalPrice = prevData.priceType === '2' ? order.price : '0';
             prevData.pending = prevData.quantity;

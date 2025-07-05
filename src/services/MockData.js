@@ -686,7 +686,7 @@ export const baskets = [
                 "clientOrderId": 42,
                 "instruction": "MOO",
                 "client": "Deutsche Bank",
-                "orderState": "NEW ORDER",
+                "orderState": "NEW_ORDER",
                 "stockCode": "0002.HK",
                 "stockDescription": "CLP Holdings"
             },
@@ -802,7 +802,7 @@ export const baskets = [
                 "clientOrderId": 215,
                 "instruction": "MOO",
                 "client": "Bank of America Merrill Lynch",
-                "orderState": "NEW ORDER",
+                "orderState": "NEW_ORDER",
                 "stockCode": "0017.HK",
                 "stockDescription": "New World Development"
             },
@@ -831,7 +831,7 @@ export const baskets = [
                 "clientOrderId": 216,
                 "instruction": "LOB",
                 "client": "Nomura",
-                "orderState": "PARTIAL FILL",
+                "orderState": "PARTIAL_FILL",
                 "stockCode": "0019.HK",
                 "stockDescription": "Swire Pacific"
             }
@@ -956,7 +956,7 @@ export const baskets = [
                 "clientOrderId": 103,
                 "instruction": "MOO",
                 "client": "J.P. Morgan",
-                "orderState": "PARTIAL FILL",
+                "orderState": "PARTIAL_FILL",
                 "stockCode": "9984.T",
                 "stockDescription": "SoftBank Group"
             },
@@ -985,7 +985,7 @@ export const baskets = [
                 "clientOrderId": 104,
                 "instruction": "LOB",
                 "client": "Barclays",
-                "orderState": "NEW ORDER",
+                "orderState": "NEW_ORDER",
                 "stockCode": "7974.T",
                 "stockDescription": "Nintendo Co., Ltd."
             },
@@ -1014,7 +1014,7 @@ export const baskets = [
                 "clientOrderId": 105,
                 "instruction": "MOO",
                 "client": "Credit Suisse",
-                "orderState": "PARTIAL FILL",
+                "orderState": "PARTIAL_FILL",
                 "stockCode": "7267.T",
                 "stockDescription": "Honda Motor Co., Ltd."
             },
@@ -1130,7 +1130,7 @@ export const baskets = [
                 "clientOrderId": 109,
                 "instruction": "MOO",
                 "client": "Citigroup",
-                "orderState": "PARTIAL FILL",
+                "orderState": "PARTIAL_FILL",
                 "stockCode": "4543.T",
                 "stockDescription": "Terumo Corporation"
             }
@@ -1285,7 +1285,7 @@ export const baskets = [
                 "clientOrderId": 204,
                 "instruction": "LOB",
                 "client": "Goldman Sachs",
-                "orderState": "NEW ORDER",
+                "orderState": "NEW_ORDER",
                 "stockCode": "O39.SI",
                 "stockDescription": "OCBC Bank"
             },
@@ -1401,7 +1401,7 @@ export const baskets = [
                 "clientOrderId": 208,
                 "instruction": "LOB",
                 "client": "Deutsche Bank",
-                "orderState": "PARTIAL FILL",
+                "orderState": "PARTIAL_FILL",
                 "stockCode": "C07.SI",
                 "stockDescription": "Jardine Cycle & Carriage"
             },
@@ -1430,7 +1430,7 @@ export const baskets = [
                 "clientOrderId": 209,
                 "instruction": "MOO",
                 "client": "J.P. Morgan",
-                "orderState": "NEW ORDER",
+                "orderState": "NEW_ORDER",
                 "stockCode": "H78.SI",
                 "stockDescription": "Hongkong Land"
             },

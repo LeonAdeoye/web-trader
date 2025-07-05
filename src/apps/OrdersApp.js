@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo} from "react";
-import {numberFormatter, orderSideStyling, orderStateStyling} from "../utilities";
+import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
@@ -115,7 +115,7 @@ export const OrdersApp = () =>
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Client Code", field: "clientCode", sortable: true, minWidth: 105, width: 105, filter: true},
         {headerName: "Client Desc", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "State", field: "state", sortable: true, minWidth: 100, width: 100, filter: true, cellStyle: params => orderStateStyling(params.value)},
+        {headerName: "State", field: "state", sortable: true, minWidth: 120, width: 120, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
         {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
         {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80},
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true},

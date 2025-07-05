@@ -15,7 +15,7 @@ const main = async () => {
             const { order } = event.data;
 
             switch (order.state) {
-                case "NEW ORDER":
+                case "NEW_ORDER":
                     try
                     {
                         await client.publish(topicName, order);
