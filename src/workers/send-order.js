@@ -4,7 +4,7 @@ const main = async () => {
     try
     {
         const clientName = "send-order";
-        const topicName = "orders";
+        const topicName = "orders.inbound";
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
