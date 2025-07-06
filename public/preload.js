@@ -1,20 +1,3 @@
-// Because the require function is a polyfill with limited functionality,
-// you will not be able to use CommonJS modules to separate your preload script into multiple files.
-// If you need to split your preload code, use a bundler such as webpack.
-
-// Electron's main process is a Node.js environment that has full operating system access.
-// On top of Electron modules, you can also access Node.js built-ins, as well as any packages installed via npm.
-// On the other hand, renderer processes run web pages and do not run Node.js by default for security reasons.
-// To bridge Electron's different process types together, we will need to use a special script called a preload.
-// A BrowserWindow's preload script runs in a context that has access to both the HTML DOM and a limited subset of Node.js and Electron APIs.
-// From Electron 20 onwards, preload scripts are sand-boxed by default and no longer have access to a full Node.js environment.
-// Practically, this means that you have a poly-filled require function that only has access to a limited set of APIs.
-
-// Although preload scripts share a window global with the renderer they're attached to,
-// you cannot directly attach any variables from the preload script to window because of the contextIsolation default.
-// Context Isolation means that preload scripts are isolated from the renderer's main world
-// to avoid leaking any privileged APIs into your web content's code.
-// Instead, use the contextBridge module to accomplish this securely:
 const { contextBridge, ipcRenderer } = require('electron')
 const { fs } = require('fs');
 
@@ -29,7 +12,8 @@ contextBridge.exposeInMainWorld('command', {
     openChannels: () => ipcRenderer.send('open-channels'),
     setChannel: (windowTitle, channel) => ipcRenderer.send('open-channels', windowTitle, channel),
     openTools: () => ipcRenderer.send('open-tools'),
-    getWindowId: (windowTitle) => ipcRenderer.sendSync('get-window-id', windowTitle)
+    getWindowId: (windowTitle) => ipcRenderer.sendSync('get-child-window-id', windowTitle),
+    getMainWindowId: (windowTitle) => ipcRenderer.sendSync('get-main-window-id', windowTitle)
 
 });
 

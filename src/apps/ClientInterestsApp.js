@@ -27,7 +27,7 @@ export const ClientInterestsApp = () =>
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
 
     const [ownerId, setOwnerId] = useState('');
-    const windowId = useMemo(() => window.command.getWindowId("client-interest"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Client Interests"), []);
     const [listOfClients, setListOfClients] = useState([]);
 
     const closeHandler = async ({instrumentCode, side, notes, clientInterestId}) =>

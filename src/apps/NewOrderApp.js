@@ -41,7 +41,7 @@ export const NewOrderApp = () =>
     const clientService = useRef(new ClientService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const referenceDataService = useRef(new ReferenceDataService()).current;
-    const windowId = useMemo(() => window.command.getWindowId("newOrder"), []);
+    const windowId = useMemo(() => window.command.getWindowId("New Order"), []);
 
     const [accounts, setAccounts] = useState([]);
     const [brokers, setBrokers] = useState([]);

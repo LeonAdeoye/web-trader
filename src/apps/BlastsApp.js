@@ -27,7 +27,7 @@ export const BlastsApp = () =>
 
     const [blasts, setBlasts] = useState([]);
     const [ownerId, setOwnerId] = useState('');
-    const windowId = useMemo(() => window.command.getWindowId("client-blasts"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Client Blasts"), []);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Blast Id", field: "blastId", sortable: true, minWidth: 85, width: 85, filter: true, hide:true},

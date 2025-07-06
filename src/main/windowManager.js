@@ -5,7 +5,6 @@ const { BrowserWindow, ipcMain } = require("electron");
 const { setChildWindowIdMap } = require("./childWindowManager");
 const { removeWindowFromChannel } = require('./channelManager');
 const { addContextMenus } = require('./contextMenuManager');
-
 const childWindowTitleMap = new Map();
 const getChildWindowTitleMap = () => childWindowTitleMap;
 const clearChildWindowTitleMap = () => childWindowTitleMap.clear();
@@ -61,16 +60,20 @@ const createMainWindow = () =>
     loadWindowDimensions(mainWindow)
         .then(() => console.log("Main window dimensions loaded from settings file."));
 
-    mainWindow.on('close', () => saveWindowDimensions(mainWindow));
-
-    const handleGetWindowIdMessage = (event, windowTitle) =>
+    const handleGetMainWindowIdMessage = (event, windowTitle) =>
     {
-        const windowId = windowTitle + "-" + event.processId + "-" + event.sender.id;
+        const windowId = mainWindow.id
         setChildWindowIdMap(windowId, mainWindow);
         event.returnValue = windowId;
     }
 
-    ipcMain.on('get-window-id', (event, windowTitle) => handleGetWindowIdMessage(event, windowTitle));
+    ipcMain.on('get-main-window-id', (event, windowTitle) => handleGetMainWindowIdMessage(event, windowTitle));
+
+    mainWindow.on('close', async () =>
+    {
+        ipcMain.removeListener('get-main-window-id', handleGetMainWindowIdMessage);
+        await saveWindowDimensions(mainWindow);
+    });
 
     return mainWindow;
 }
@@ -96,22 +99,14 @@ const createOpenAppHandler = (mainWindow) =>
             }
         });
 
+        const childWindowId = childWindow.id;
         childWindow.removeMenu();
         childWindow.webContents.openDevTools(); // TODO: Remove in production
-        childWindow.loadURL(url).then(() => console.log(`Child window created with Id: ${childWindow.id} and title: "${BrowserWindow.fromId(childWindow.id).getTitle()}"`));
+        childWindow.loadURL(url).then(() => console.log(`Child window created with Id: ${childWindow.id} and title: "${BrowserWindow.fromId(childWindowId).getTitle()}"`));
         childWindowTitleMap.set(tit, childWindow);
-
-        const handleGetWindowIdMessage = (event, windowTitle) => {
-            const windowId = `${windowTitle}-${event.processId}-${event.sender.id}`;
-            setChildWindowIdMap(windowId, childWindow);
-            event.returnValue = windowId;
-        };
-
-        ipcMain.on('get-window-id', handleGetWindowIdMessage);
 
         childWindow.on('close', () =>
         {
-            ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
             removeWindowFromChannel(tit);
             saveWindowDimensions(childWindow)
                 .then(() => childWindowTitleMap.delete(tit))

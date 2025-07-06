@@ -5,7 +5,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 export const NewBasketApp = () =>
 {
     const loggerService = useRef(new LoggerService(NewBasketApp.name)).current;
-    const windowId = useMemo(() => window.command.getWindowId("newBasket"), []);
+    const windowId = useMemo(() => window.command.getWindowId("New Basket"), []);
 
     return (
         <div>

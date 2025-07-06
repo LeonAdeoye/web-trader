@@ -22,7 +22,7 @@ const TaskListApp = () =>
     const [expandedAccordion, setExpandedAccordion] = useState(null);
     const [stockCode, setStockCode] = useState(null);
     const [client, setClient] = useState(null)
-    const windowId = useMemo(() => window.command.getWindowId("task"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Task"), []);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     useEffect(() =>

@@ -24,7 +24,7 @@ export const ConfigsApp = () =>
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
 
-    const windowId = useMemo(() => window.command.getWindowId("configs"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Configs"), []);
     const columnDefs = useMemo(() => ([
         { headerName: "Id", field: 'id', hide: true },
         { headerName: "Owner", field: 'owner', sortable: true, minWidth: 100, width: 130 },

@@ -5,7 +5,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 export const ChildOrdersApp = () =>
 {
     const loggerService = useRef(new LoggerService(ChildOrdersApp.name)).current;
-    const windowId = useMemo(() => window.command.getWindowId("childOrders"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Child Orders"), []);
 
     return (
         <div>

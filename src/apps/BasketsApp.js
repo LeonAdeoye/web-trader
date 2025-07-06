@@ -13,7 +13,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 export const BasketsApp = () =>
 {
     const loggerService = useRef(new LoggerService(BasketsApp.name)).current;
-    const windowId = useMemo(() => window.command.getWindowId("baskets"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Baskets"), []);
     const [selectedBasketId] = useRecoilState(selectedBasketState);
 
     useEffect(() =>

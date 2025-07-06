@@ -21,7 +21,7 @@ export const AlertWizardApp = () =>
     const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
     const loggerService = useRef(new LoggerService(AlertWizardApp.name)).current;
-    const windowId = useMemo(() => window.command.getWindowId("alert-wizard"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Alert Wizard"), []);
 
     const handleCancel = () =>
     {

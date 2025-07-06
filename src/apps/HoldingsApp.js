@@ -25,7 +25,7 @@ const HoldingsApp = () =>
     const [clientHoldingsTabLabel, setClientHoldingsTabLabel] = useState("Client Holdings");
     const [stockHoldingsTabLabel, setStockHoldingsTabLabel] = useState("Stock Holdings");
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-    const windowId = useMemo(() => window.command.getWindowId("holdings"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Holdings"), []);
 
     useEffect(() =>
     {

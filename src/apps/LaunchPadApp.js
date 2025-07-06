@@ -12,7 +12,7 @@ const LaunchPadApp = () =>
     const [apps, setApps] = useState([]);
     const loggerService = useRef(new LoggerService(LaunchPadApp.name)).current;
     const configurationService = useRef(new ConfigurationService()).current;
-    const windowId = useMemo(() => window.command.getWindowId("launch-pad"), []);
+    const windowId = useMemo(() => window.command.getMainWindowId("Launch Pad"), []);
 
     useEffect(() =>
     {

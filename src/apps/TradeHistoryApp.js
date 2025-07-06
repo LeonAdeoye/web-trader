@@ -26,7 +26,7 @@ const TradeHistoryApp = () =>
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("trade-history"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Trade History"), []);
 
     useEffect(() =>
     {

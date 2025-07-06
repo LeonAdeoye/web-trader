@@ -9,7 +9,7 @@ import {titleBarContextShareColourState} from "../atoms/component-state";
 export const BasketChartApp = () =>
 {
     const dataService = useRef(new TradeDataService()).current;
-    const windowId = useMemo(() => window.command.getWindowId("basket-chart"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Basket Chart"), []);
     const [basketId, setBasketId] = useState(null);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [options, setOptions] = useState({

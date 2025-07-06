@@ -20,7 +20,7 @@ const CrossesApp = () =>
     const [client, setClient] = useState(null);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
-    const windowId = useMemo(() => window.command.getWindowId("crosses"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Crosses"), []);
 
     useEffect(() =>
     {

@@ -24,7 +24,7 @@ export const AlertConfigurationsApp = () =>
     const loggerService = useRef(new LoggerService(AlertConfigurationsApp.name)).current;
     const clientService = useRef(new ClientService()).current;
 
-    const windowId = useMemo(() => window.command.getWindowId("alert configurations"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Alert Configurations"), []);
     const columnDefs = useMemo(() =>
     ([
         {headerName: "Id", field: "id", hide: true, sortable: false, minWidth: 110, width: 110},

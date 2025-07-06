@@ -1,22 +1,25 @@
 const selectedOrder = {}
 const selectedOrdersMap = new Map();
 
-const setSelectedOrder = (orderId, orderStatus) =>
+const setSelectedOrder = (order) =>
 {
-    selectedOrder["orderId"] = orderId;
-    selectedOrder["orderStatus"] = orderStatus;
-}
+    selectedOrder.orderId = order.orderId;
+    selectedOrder.orderState = order.orderState;
+    selectedOrdersMap.set(order.orderId, order);
+};
+
 
 const setSelectedOrders = (orders) =>
 {
     if (Array.isArray(orders) && orders.length > 0)
     {
+        selectedOrder.orderId = orders[0].orderId;
+        selectedOrder.orderState = orders[0].orderState;
         selectedOrdersMap.clear();
         orders.forEach(order => {
             selectedOrdersMap.set(order.orderId, order);
         });
     }
-    setSelectedOrder(orders[0].orderId, orders[0].orderStatus);
 }
 
 const getSelectedOrder = () =>
@@ -26,16 +29,17 @@ const getSelectedOrder = () =>
 
 const getSelectedOrders = () =>
 {
-    return Array.from(selectedOrdersMap.values()).map(order => ({
+    return Array.from(selectedOrdersMap.values()).map(order =>
+    ({
         orderId: order.orderId,
-        orderStatus: order.orderStatus
+        orderState: order.orderState
     }));
 }
 
 const clearSelectedOrder = () =>
 {
-    selectedOrder["orderId"] = "";
-    selectedOrder["orderStatus"] = "";
+    selectedOrder.orderId = "";
+    selectedOrder.orderState = "";
 }
 
 const clearSelectedOrders = () =>

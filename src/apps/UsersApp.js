@@ -11,7 +11,7 @@ export const UsersApp = () =>
     const tradeDataService = useRef(new TradeDataService()).current;
     const [gridData, setGridData] = useState([]);
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("users"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Users"), []);
 
     useEffect(() =>
     {

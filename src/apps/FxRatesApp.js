@@ -8,7 +8,7 @@ export const FxRatesApp = () =>
     const [fxData, setFxData] = useState([]);
     const [worker, setWorker] = useState(null);
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("fx-rates"), []);
+    const windowId = useMemo(() => window.command.getWindowId("FX Rates"), []);
 
     useEffect(() =>
     {

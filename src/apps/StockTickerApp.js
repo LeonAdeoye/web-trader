@@ -58,7 +58,7 @@ export const StockTickerApp = ({client}) =>
     const [stockCode, setStockCode] = useState(null);
 
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("stock-ticker"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Stock Ticker"), []);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Keep a reference to the subscription ID.

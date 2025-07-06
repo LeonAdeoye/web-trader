@@ -19,7 +19,7 @@ export const AlertsApp = () =>
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     // Used for context sharing between child windows.
-    const windowId = useMemo(() => window.command.getWindowId("alerts"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Alerts"), []);
 
     useEffect(() =>
     {

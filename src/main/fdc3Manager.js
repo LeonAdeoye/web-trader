@@ -4,10 +4,11 @@ const { getChannelWindowMap } = require('./channelManager');
 const { getChildWindowTitleMap, getChildWindowByTitle } = require('./windowManager');
 const { setSelectedOrder, setSelectedOrders} = require('./orderSelectionManager');
 const {addContextMenus} = require("./contextMenuManager");
+const { BrowserWindow } = require("electron");
 
-const handleFDC3Message = (fdc3Message, destination, source) => {
+const handleFDC3Message = (fdc3Message, destination, source) =>
+{
     console.log("Received FDC3 message from child window:", source, "with context:", fdc3Message);
-
     switch (fdc3Message.type)
     {
         case "fdc3.context":
@@ -44,7 +45,7 @@ const handleFDC3Message = (fdc3Message, destination, source) => {
                 setSelectedOrder(fdc3Message.orders[0]);
             else if(fdc3Message.orders && fdc3Message.orders.length > 1)
                 setSelectedOrders(fdc3Message.orders);
-            addContextMenus(getChildWindowByTitle(source), getChildWindowTitleMap(), null);
+            addContextMenus(BrowserWindow.fromId(source), getChildWindowTitleMap(), null);
             break;
         case "fdc3.clipboard":
             clipboard.writeText(fdc3Message.payload);
