@@ -9,6 +9,7 @@ const { addContextMenus } = require('./contextMenuManager');
 const childWindowTitleMap = new Map();
 const getChildWindowTitleMap = () => childWindowTitleMap;
 const clearChildWindowTitleMap = () => childWindowTitleMap.clear();
+const getChildWindowByTitle = (title) => childWindowTitleMap.get(title);
 
 const saveChildWindowDimensions = async () =>
 {
@@ -49,6 +50,8 @@ const createMainWindow = () =>
                 preload: path.join(__dirname, '../../public/preload.js')
             }
     });
+
+    console.log(`Main window created with Id: ${mainWindow.id} and title: "${BrowserWindow.fromId(mainWindow.id).getTitle()}"`);
 
     mainWindow.removeMenu();
 
@@ -95,7 +98,7 @@ const createOpenAppHandler = (mainWindow) =>
 
         childWindow.removeMenu();
         childWindow.webContents.openDevTools(); // TODO: Remove in production
-        childWindow.loadURL(url).then(() => console.log("Child window created with title:", childWindow.getTitle()));
+        childWindow.loadURL(url).then(() => console.log(`Child window created with Id: ${childWindow.id} and title: "${BrowserWindow.fromId(childWindow.id).getTitle()}"`));
         childWindowTitleMap.set(tit, childWindow);
 
         const handleGetWindowIdMessage = (event, windowTitle) => {
@@ -106,11 +109,8 @@ const createOpenAppHandler = (mainWindow) =>
 
         ipcMain.on('get-window-id', handleGetWindowIdMessage);
 
-        //const tit = childWindow.getTitle();
-
         childWindow.on('close', () =>
         {
-            // const tit = childWindow.getTitle();
             ipcMain.removeListener('get-window-id', handleGetWindowIdMessage);
             removeWindowFromChannel(tit);
             saveWindowDimensions(childWindow)
@@ -128,5 +128,6 @@ module.exports = {
     createOpenAppHandler,
     getChildWindowTitleMap,
     clearChildWindowTitleMap,
-    saveChildWindowDimensions
+    saveChildWindowDimensions,
+    getChildWindowByTitle
 }

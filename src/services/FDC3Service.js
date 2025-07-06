@@ -1,5 +1,20 @@
 export class FDC3Service
 {
+    static createOrderMenuContext = (selectedOrders) =>
+    {
+        let fdc3Context = {
+            type: "fdc3.orderContextMenu",
+            orders: []
+        };
+
+        if(selectedOrders && selectedOrders.length > 0)
+        {
+            fdc3Context["orders"].push(...selectedOrders);
+        }
+
+        return fdc3Context;
+    }
+
     static createChartContext = (ticker, durationInHours) =>
     {
         let currentDate = new Date();

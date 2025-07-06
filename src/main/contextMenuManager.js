@@ -1,29 +1,79 @@
 const path = require('path');
 const { addWindowToChannel, removeWindowFromChannel } = require('./channelManager');
 const { saveWindowDimensions } = require('./settingsManager');
-const {app, Menu} = require('electron');
+const { getSelectedOrders } = require('./orderSelectionManager');
+const {app, Menu, BrowserWindow} = require('electron');
+
+const getOrdersAppContextMenuOptions = (title, window) =>
+{
+    const dynamicContextMenuItems = [];
+
+    const selectedOrders = getSelectedOrders();
+
+    const uniqueStates = [...new Set(selectedOrders.map(order => order.orderStatus))];
+
+    if (uniqueStates.length === 1)
+    {
+        const state = uniqueStates[0];
+        const orderIds = selectedOrders.map(order => order.orderId);
+        console.log("Selected orders with state: " + state + " and order Ids: " + orderIds + "for context menu generation");
+
+        switch (state)
+        {
+            case 'PENDING_NEW':
+                dynamicContextMenuItems.push(
+                { label: 'Accept', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'accept', orderId: orderId}, window.getTitle(), 'main'))},
+                { label: 'Reject', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'reject', orderId: orderId}, window.getTitle(), 'main'))},
+                { type: 'separator' });
+                break;
+
+            case 'ACCEPTED_BY_OMS':
+            case 'ACCEPTED_BY_DESK':
+                dynamicContextMenuItems.push(
+                { label: 'Cancel', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main'))},
+                { label: 'Slice', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'slice', orderId: orderId}, window.getTitle(), 'main'))},
+                { label: 'Send All', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'sendAll', orderId: orderId}, window.getTitle(), 'main'))},
+                { type: 'separator' });
+                break;
+            default:
+                console.log("No specific actions available for the current order state: " + state);
+        }
+    }
+
+    return dynamicContextMenuItems;
+};
 
 const addContextMenus = (window, childWindowTitleMap, mainWindow) =>
 {
+    const win = BrowserWindow.fromId(2);
+
     if (!window || !window.webContents) {
         console.error("Invalid window object passed to addContextMenus");
         return;
     }
 
+    const isMainWindow = window === mainWindow;
+
     const contextMenuTemplate =
         [
-            { label: 'Impersonate', click: () => console.log('Impersonate clicked') },
-            { type: 'separator' },
-            { label: 'Workspaces', submenu: [
-                    { label: 'Low-touch Trading', click: () => console.log('Low-touch Trading clicked') },
-                    { type: 'separator' },
-                    { label: 'High-touch Trading', click: () => console.log('High-touch Trading clicked') },
-                    { type: 'separator' },
-                    { label: 'Program Trading', click: () => console.log('Program Trading clicked') },
-                    { type: 'separator' },
-                    { label: 'Create Workspace', click: () => console.log('New Workspace clicked') }
-                ]},
-            { type: 'separator' },
+            ...(window.getTitle().startsWith('Orders') ? getOrdersAppContextMenuOptions() : []),
+            ...(isMainWindow ? [
+                { label: 'Impersonate', click: () => console.log('Impersonate clicked') },
+                { type: 'separator' },
+                {
+                    label: 'Workspaces',
+                    submenu: [
+                        { label: 'Low-touch Trading', click: () => console.log('Low-touch Trading clicked') },
+                        { type: 'separator' },
+                        { label: 'High-touch Trading', click: () => console.log('High-touch Trading clicked') },
+                        { type: 'separator' },
+                        { label: 'Program Trading', click: () => console.log('Program Trading clicked') },
+                        { type: 'separator' },
+                        { label: 'Create Workspace', click: () => console.log('New Workspace clicked') },
+                    ]
+                },
+                { type: 'separator' }
+            ] : []),
             { label: 'Context Sharing Channel', submenu: [
                     { label: 'Set channel to red', icon: path.join(__dirname, '../../assets', 'red.png'), click: () =>
                         {

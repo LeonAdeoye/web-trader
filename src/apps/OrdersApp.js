@@ -1,11 +1,12 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
-import {useEffect, useState, useCallback, useMemo} from "react";
+import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
-import {selectedContextShareState, titleBarContextShareColourState} from "../atoms/component-state";
+import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
+import {LoggerService} from "../services/LoggerService";
 
 export const OrdersApp = () =>
 {
@@ -15,7 +16,9 @@ export const OrdersApp = () =>
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-    const windowId = useMemo(() => window.command.getWindowId("orders"), []);
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
+    const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
 
     useEffect(() =>
     {
@@ -23,6 +26,13 @@ export const OrdersApp = () =>
         setWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
+
+    useEffect(() =>
+    {
+        if(selectedGenericGridRow)
+            window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext([{orderId: selectedGenericGridRow.orderId, orderState: selectedGenericGridRow.state}]), null, windowId);
+
+    }, [selectedGenericGridRow]);
 
     useEffect(() =>
     {
@@ -42,6 +52,20 @@ export const OrdersApp = () =>
                     setClientCode(fdc3Message.clients[0].id.name);
                 else
                     setClientCode(null);
+            }
+
+            if (fdc3Message.type === 'order-action')
+            {
+                const { action, orderId } = fdc3Message;
+
+                if (action === 'accept')
+                {
+                    loggerService.logInfo(`Order accepted for order Id: ${orderId}`);
+                }
+                else if (action === 'reject')
+                {
+                    loggerService.logInfo(`Order rejected for order Id: ${orderId}`);
+                }
             }
         });
     }, []);
