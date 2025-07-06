@@ -25,7 +25,6 @@ const getOrdersAppContextMenuOptions = (window) =>
                 { label: '❌ Reject', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'reject', orderId: orderId}, window.getTitle(), 'main'))},
                 { type: 'separator' });
                 break;
-
             case 'ACCEPTED_BY_OMS':
             case 'ACCEPTED_BY_DESK':
                 dynamicContextMenuItems.push(
