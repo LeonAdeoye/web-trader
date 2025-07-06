@@ -108,20 +108,20 @@ export const OrdersApp = () =>
 
     const columnDefs = useMemo(() => ([
         {headerName: "Parent Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true},
-        {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter},
+        {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter, sortingOrder: ['desc', 'asc']},
         {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 105, width: 105, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value)},
-        {headerName: "Stock Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
+        {headerName: "Instrument Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
         {headerName: "State", field: "state", sortable: true, minWidth: 120, width: 120, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
-        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true},
-        {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80},
-        {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true},
-        {headerName: "CCY", field: "settlementCurrency", sortable: true, minWidth: 90, width: 90, filter: true},
-        {headerName: "Exec Algo", field: "algoType", sortable: true, minWidth: 100, width: 100, filter: true},
-        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 90, width: 90},
-        {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80},
+        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Bloomberg code of the order' },
+        {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Current owner fo the order'},
+        {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true, headerTooltip: 'Trader instruction for the order' },
+        {headerName: "CCY", field: "settlementCurrency", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Settlement currency of the order' },
+        {headerName: "Exec Algo", field: "algoType", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Execution algorithm used for the order' },
+        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 90, width: 90, headerTooltip: 'Arrival time of the order'},
+        {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Arrival price of the order', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "ADV20", field: "adv20", hide: false, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},
         {headerName: "Exec Trg", field: "executionTrigger", hide: true, sortable: true, minWidth: 130, width: 130, filter: true},
@@ -142,7 +142,7 @@ export const OrdersApp = () =>
         <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext}/>);
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
             </div>
         </div>
     </>)

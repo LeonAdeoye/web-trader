@@ -5,7 +5,7 @@ import {createRowId, getRowIdValue} from "../utilities";
 import {selectedContextShareState,selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
-export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction}) =>
+export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction, sortModel}) =>
 {
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
@@ -17,6 +17,17 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
     {
         return getRowIdValue(rowIdArray, row.data);
     }, []);
+
+
+    const onGridReady = (params) =>
+    {
+        // sortModel should be an object: { colId: 'arrivalTime', sort: 'desc' }
+        if(sortModel != undefined || sortModel != null)
+            params.columnApi.applyColumnState({
+                state: [sortModel],
+                applyOrder: true,
+            });
+    };
 
     const onCellClicked = useCallback ((params) => {
         const { colDef, data } = params;
@@ -50,6 +61,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
         <div className={gridTheme} style={gridDimensions}>
             <AgGridReact
                 ref={gridApiRef}
+                onGridReady={onGridReady}
                 columnDefs={columnDefs}
                 rowData={gridData}
                 defaultColDef={defaultColDef}
