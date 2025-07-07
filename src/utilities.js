@@ -47,7 +47,9 @@ export const orderStateStyling = (orderState) =>
         'PARTIAL_FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
         'PARTIALLY_FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
         'NEW_ORDER': { backgroundColor: '#4F81BD', color: 'white' },
-        'PENDING_NEW': { backgroundColor: 'lightblue', color: 'white' },
+        'PENDING_NEW': { backgroundColor: '#106cdc', color: 'white' },
+        'ACCEPTED_BY_DESK': { backgroundColor: '#178000', color: 'white' },
+        'ACCEPTED_BY_OMS': { backgroundColor: '#51c541', color: 'white' },
     };
     const value = orderState.trim();
     const style = styleMapping[value] || {};

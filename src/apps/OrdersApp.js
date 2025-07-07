@@ -7,7 +7,6 @@ import {selectedContextShareState, selectedGenericGridRowState, titleBarContextS
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
-import {setSelectedOrders} from "../main/orderSelectionManager";
 
 export const OrdersApp = () =>
 {
@@ -31,7 +30,7 @@ export const OrdersApp = () =>
 
     useEffect(() =>
     {
-        const webWorker = new Worker(new URL("../workers/send-order.js", import.meta.url));
+        const webWorker = new Worker(new URL("../workers/manage-order.js", import.meta.url));
         setOutboundWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
@@ -142,7 +141,7 @@ export const OrdersApp = () =>
             const clientCode = selectedContextShare.find((contextShare) => contextShare.contextShareKey === 'clientCode').contextShareValue;
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(instrumentCode, clientCode), null, windowId);
         }
-    }, [selectedContextShare]);
+    }, [selectedContextShare, windowId]);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Parent Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true},
