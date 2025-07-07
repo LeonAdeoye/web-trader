@@ -42,7 +42,6 @@ export const createArrayFromScore = (score) =>
 export const orderStateStyling = (orderState) =>
 {
     const styleMapping = {
-        'FILLED': { backgroundColor: '#528c74', color: 'white' },
         'FULLY_FILLED': { backgroundColor: '#528c74', color: 'white' },
         'PARTIAL_FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
         'PARTIALLY_FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
@@ -50,6 +49,9 @@ export const orderStateStyling = (orderState) =>
         'PENDING_NEW': { backgroundColor: '#106cdc', color: 'white' },
         'ACCEPTED_BY_DESK': { backgroundColor: '#178000', color: 'white' },
         'ACCEPTED_BY_OMS': { backgroundColor: '#51c541', color: 'white' },
+        'REJECTED_BY_OMS': { backgroundColor: '#7c1515', color: 'white' },
+        'REJECTED_BY_DESK': { backgroundColor: '#ea3535', color: 'white' },
+        'REJECTED_BY_EXCH': { backgroundColor: '#723131', color: 'white' },
     };
     const value = orderState.trim();
     const style = styleMapping[value] || {};
