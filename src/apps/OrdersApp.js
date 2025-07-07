@@ -43,38 +43,46 @@ export const OrdersApp = () =>
 
     }, [selectedGenericGridRow, windowId]);
 
-    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+    useEffect(() =>
     {
-        if(fdc3Message.type === "fdc3.context")
+        const handler = ((fdc3Message, _, __) =>
         {
-            if(fdc3Message.contextShareColour)
-                setTitleBarContextShareColour(fdc3Message.contextShareColour);
-
-            if(fdc3Message.instruments?.[0]?.id.ticker)
-                setInstrumentCode(fdc3Message.instruments[0].id.ticker);
-            else
-                setInstrumentCode(null);
-
-            if(fdc3Message.clients?.[0]?.id.name)
-                setClientCode(fdc3Message.clients[0].id.name);
-            else
-                setClientCode(null);
-        }
-
-        if (fdc3Message.type === 'order-action')
-        {
-            const { action, orderId } = fdc3Message;
-
-            if(orderId !== selectedGenericGridRow.orderId)
-                return;
-
-            if (action === 'DESK_ACCEPT' || action === 'DESK_REJECT')
+            if(fdc3Message.type === "fdc3.context")
             {
-                loggerService.logInfo(`Order ${action} for order Id: ${orderId}`);
-                outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: action});
+                if(fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
+                if(fdc3Message.instruments?.[0]?.id.ticker)
+                    setInstrumentCode(fdc3Message.instruments[0].id.ticker);
+                else
+                    setInstrumentCode(null);
+
+                if(fdc3Message.clients?.[0]?.id.name)
+                    setClientCode(fdc3Message.clients[0].id.name);
+                else
+                    setClientCode(null);
             }
-        }
-    });
+
+            if (fdc3Message.type === 'order-action')
+            {
+                const { action, orderId } = fdc3Message;
+
+                if(orderId !== selectedGenericGridRow.orderId)
+                    return;
+
+                if (action === 'DESK_APPROVE' || action === 'DESK_REJECT')
+                {
+                    loggerService.logInfo(`Order ${action} for order Id: ${orderId}`);
+                    outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: action});
+                }
+            }
+        });
+
+        window.messenger.handleMessageFromMain(handler);
+
+        return () => window.messenger.removeHandlerForMessageFromMain(handler);
+
+    }, [selectedGenericGridRow]);
 
     const filterOrdersUsingContext = useMemo(() =>
     {
