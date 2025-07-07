@@ -14,45 +14,10 @@ const SliceDialog = () =>
         setSliceDialogOpenFlag(false);
     };
 
-    const isAnyRowSelected = (gridApiRef) =>
-    {
-        let result = false;
-        try
-        {
-            result = gridApiRef?.current?.getSelectedNodes()?.length > 0 || false;
-        }
-        catch (e)
-        {
-            result = false;
-        }
-        finally
-        {
-            return result;
-        }
-    }
-
-    const calculateDialogHeight = useCallback(() =>
-    {
-        if(selectedGenericGridRow?.contents.length > 0)
-        {
-            switch (selectedGenericGridRow.contents.length)
-            {
-                case 1:
-                    return 340;
-                case 2:
-                    return 550;
-                case 3:
-                    return 755;
-                default:
-                    return 500;
-            }
-        }
-    }, [selectedGenericGridRow]);
-
     const dialogStyles =
     {
         width: '800px',
-        height: `${calculateDialogHeight()}px`,
+        height: `400px`,
         resize: 'both',
         overflow: 'auto',
         maxHeight: '100%',
@@ -62,9 +27,8 @@ const SliceDialog = () =>
 
     return(
         <Dialog aria-labelledby='dialog-title' open={sliceDialogOpenFlag} onClose={handleCancel} PaperProps={{ style: dialogStyles }}>
-            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Prepare blast for clipboard copy</DialogTitle>
+            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>Slice Parent Order</DialogTitle>
             <DialogContent>
-                Hello World!
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
                 <Tooltip title={<Typography fontSize={12}>Cancel and close.</Typography>}>

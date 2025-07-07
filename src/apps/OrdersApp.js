@@ -4,9 +4,11 @@ import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
+import {sliceDialogDisplayState} from "../atoms/dialog-state";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
+import SliceDialog from "../dialogs/SliceDialog";
 
 export const OrdersApp = () =>
 {
@@ -17,6 +19,7 @@ export const OrdersApp = () =>
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const [sliceDialogOpenFlag, setSliceDialogOpenFlag ] = useRecoilState(sliceDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
@@ -74,6 +77,9 @@ export const OrdersApp = () =>
                     loggerService.logInfo(`Order ${action} for order Id: ${orderId}`);
                     outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: action});
                 }
+
+                if(action === 'slice')
+                    setSliceDialogOpenFlag(true);
             }
         });
 
@@ -182,6 +188,7 @@ export const OrdersApp = () =>
                 <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
             </div>
         </div>
+        <SliceDialog/>
     </>)
 
 }
