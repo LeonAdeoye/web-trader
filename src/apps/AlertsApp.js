@@ -28,27 +28,24 @@ export const AlertsApp = () =>
         return () => webWorker.terminate();
     }, []);
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        if(fdc3Message.type === "fdc3.context")
         {
-            if(fdc3Message.type === "fdc3.context")
-            {
-                if(fdc3Message.contextShareColour)
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+            if(fdc3Message.contextShareColour)
+                setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
-                if(fdc3Message.instruments?.[0]?.id.ticker)
-                    setStockCode(fdc3Message.instruments[0].id.ticker);
-                else
-                    setStockCode(null);
+            if(fdc3Message.instruments?.[0]?.id.ticker)
+                setStockCode(fdc3Message.instruments[0].id.ticker);
+            else
+                setStockCode(null);
 
-                if(fdc3Message.clients?.[0]?.id.name)
-                    setClient(fdc3Message.clients[0].id.name);
-                else
-                    setClient(null);
-            }
-        });
-    }, []);
+            if(fdc3Message.clients?.[0]?.id.name)
+                setClient(fdc3Message.clients[0].id.name);
+            else
+                setClient(null);
+        }
+    });
 
     const handleWorkerMessage = useCallback((event) =>
     {

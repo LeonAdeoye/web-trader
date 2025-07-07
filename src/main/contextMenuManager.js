@@ -18,21 +18,20 @@ const getOrdersAppContextMenuOptions = (window) =>
 
         switch (state)
         {
-            case 'PENDING_NEW':
+            case 'ACCEPTED_BY_OMS':
                 dynamicContextMenuItems.push(
-                { label: '✅ Accept', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'accept', orderId: orderId}, window.getTitle(), 'main'))},
+                { label: '✅ Accept', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_APPROVE', orderId: orderId}, window.getTitle(), 'main'))},
                 { type: 'separator' },
-                { label: '❌ Reject', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'reject', orderId: orderId}, window.getTitle(), 'main'))},
+                { label: '❌ Reject', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_REJECT', orderId: orderId}, window.getTitle(), 'main'))},
                 { type: 'separator' });
                 break;
-            case 'ACCEPTED_BY_OMS':
             case 'ACCEPTED_BY_DESK':
                 dynamicContextMenuItems.push(
-                { label: '❌ Cancel', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' },
                 { label: '✂ Slice', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'slice', orderId: orderId}, window.getTitle(), 'main'))},
                 { type: 'separator' },
                 { label: '📤 Send All', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'sendAll', orderId: orderId}, window.getTitle(), 'main'))},
+                { type: 'separator' },
+                { label: '❌ Cancel', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main'))},
                 { type: 'separator' });
                 break;
             default:

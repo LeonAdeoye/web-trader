@@ -100,14 +100,11 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
         return () => web_worker.terminate();
     }, []);
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, destination, _) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, destination, _) =>
-        {
-            let newSymbol = fdc3Message.instruments?.[0]?.id.ticker;
-            setNewlySelectedSymbol(newSymbol);
-        });
-    }, []);
+        let newSymbol = fdc3Message.instruments?.[0]?.id.ticker;
+        setNewlySelectedSymbol(newSymbol);
+    });
 
     useEffect(() =>
     {

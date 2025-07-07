@@ -94,22 +94,19 @@ export const BasketChartApp = () =>
         ]
     });
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        if(fdc3Message.type === "fdc3.chart")
         {
-            if(fdc3Message.type === "fdc3.chart")
-            {
-                if(fdc3Message.contextShareColour)
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+            if(fdc3Message.contextShareColour)
+                setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
-                if(fdc3Message.products?.[0]?.id.ticker)
-                    setBasketId(fdc3Message.products[0].id.ticker);
-                else
-                    setBasketId(null);
-            }
-        });
-    }, []);
+            if(fdc3Message.products?.[0]?.id.ticker)
+                setBasketId(fdc3Message.products[0].id.ticker);
+            else
+                setBasketId(null);
+        }
+    });
 
     useEffect(() =>
     {

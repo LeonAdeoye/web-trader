@@ -40,14 +40,11 @@ const TaskListApp = () =>
         setTasks((prevData) => [...prevData, newTask]);
     }, []);
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
-        {
-            if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
-                setTitleBarContextShareColour(fdc3Message.contextShareColour);
-        });
-    }, []);
+        if(fdc3Message.type === "fdc3.context" && fdc3Message.contextShareColour)
+            setTitleBarContextShareColour(fdc3Message.contextShareColour);
+    });
 
     useEffect(() =>
     {

@@ -260,6 +260,7 @@ export const NewOrderApp = () =>
             prevData.clientDescription = getClientDescription(prevData.clientCode);
             prevData.averagePrice = '0';
             prevData.orderId = crypto.randomUUID();
+            prevData.actionEvent = 'SUBMIT_TO_OMS';
             return prevData;
         });
         worker.postMessage({order});

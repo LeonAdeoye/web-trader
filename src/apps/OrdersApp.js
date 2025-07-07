@@ -7,11 +7,13 @@ import {selectedContextShareState, selectedGenericGridRowState, titleBarContextS
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
+import {setSelectedOrders} from "../main/orderSelectionManager";
 
 export const OrdersApp = () =>
 {
     const [orders, setOrders] = useState([]);
-    const [worker, setWorker] = useState(null);
+    const [inboundWorker, setInboundWorker] = useState(null);
+    const [outboundWorker, setOutboundWorker] = useState(null);
     const [instrumentCode, setInstrumentCode] = useState(null);
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
@@ -23,7 +25,14 @@ export const OrdersApp = () =>
     useEffect(() =>
     {
         const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
-        setWorker(webWorker);
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/send-order.js", import.meta.url));
+        setOutboundWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
 
@@ -34,41 +43,38 @@ export const OrdersApp = () =>
 
     }, [selectedGenericGridRow, windowId]);
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        if(fdc3Message.type === "fdc3.context")
         {
-            if(fdc3Message.type === "fdc3.context")
+            if(fdc3Message.contextShareColour)
+                setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
+            if(fdc3Message.instruments?.[0]?.id.ticker)
+                setInstrumentCode(fdc3Message.instruments[0].id.ticker);
+            else
+                setInstrumentCode(null);
+
+            if(fdc3Message.clients?.[0]?.id.name)
+                setClientCode(fdc3Message.clients[0].id.name);
+            else
+                setClientCode(null);
+        }
+
+        if (fdc3Message.type === 'order-action')
+        {
+            const { action, orderId } = fdc3Message;
+
+            if(orderId !== selectedGenericGridRow.orderId)
+                return;
+
+            if (action === 'DESK_ACCEPT' || action === 'DESK_REJECT')
             {
-                if(fdc3Message.contextShareColour)
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
-
-                if(fdc3Message.instruments?.[0]?.id.ticker)
-                    setInstrumentCode(fdc3Message.instruments[0].id.ticker);
-                else
-                    setInstrumentCode(null);
-
-                if(fdc3Message.clients?.[0]?.id.name)
-                    setClientCode(fdc3Message.clients[0].id.name);
-                else
-                    setClientCode(null);
+                loggerService.logInfo(`Order ${action} for order Id: ${orderId}`);
+                outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: action});
             }
-
-            if (fdc3Message.type === 'order-action')
-            {
-                const { action, orderId } = fdc3Message;
-
-                if (action === 'accept')
-                {
-                    loggerService.logInfo(`Order accepted for order Id: ${orderId}`);
-                }
-                else if (action === 'reject')
-                {
-                    loggerService.logInfo(`Order rejected for order Id: ${orderId}`);
-                }
-            }
-        });
-    }, []);
+        }
+    });
 
     const filterOrdersUsingContext = useMemo(() =>
     {
@@ -103,15 +109,15 @@ export const OrdersApp = () =>
 
     useEffect(() =>
     {
-        if (worker)
-            worker.onmessage = handleWorkerMessage;
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
 
         return () =>
         {
-            if (worker)
-                worker.onmessage = null;
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
         };
-    }, [worker]);
+    }, [inboundWorker]);
 
     useEffect(() =>
     {
@@ -138,7 +144,7 @@ export const OrdersApp = () =>
         {headerName: "Instrument Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
-        {headerName: "State", field: "state", sortable: true, minWidth: 120, width: 120, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
+        {headerName: "State", field: "state", sortable: true, minWidth: 135, width: 135, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
         {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Bloomberg code of the order' },
         {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Current owner fo the order'},
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true, headerTooltip: 'Trader instruction for the order' },

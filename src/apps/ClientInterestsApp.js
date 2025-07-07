@@ -69,20 +69,17 @@ export const ClientInterestsApp = () =>
 
     }, [ownerId]);
 
-    useEffect(() =>
+    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
-        window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
+        if(fdc3Message.type === "fdc3.context")
         {
-            if(fdc3Message.type === "fdc3.context")
-            {
-                if(fdc3Message.contextShareColour)
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+            if(fdc3Message.contextShareColour)
+                setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
-                if(fdc3Message.clients?.[0]?.id.name)
-                    setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
-            }
-        });
-    }, []);
+            if(fdc3Message.clients?.[0]?.id.name)
+                setSelectedClient(clientService.getClientId(fdc3Message.clients[0].id.name));
+        }
+    });
 
     return (<>
         <TitleBarComponent title="Client Interests" windowId={windowId} showChannel={true} showTools={false}
