@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {AgGridReact} from "ag-grid-react";
-import {useCallback, useMemo, useRef} from "react";
+import {useCallback, useEffect, useMemo, useRef} from "react";
 import {createRowId, getRowIdValue} from "../utilities";
 import {selectedContextShareState,selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
@@ -29,21 +29,31 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
             });
     };
 
-    const onCellClicked = useCallback ((params) => {
-        const { colDef, data } = params;
+    const onCellMouseDown = useCallback((params) =>
+    {
+        const { colDef, data, event } = params;
 
-        if (colDef.field === 'instrumentCode') {
+        if (event.button !== 0 && event.button !== 2) return;
+
+        if (colDef.field === 'instrumentCode')
+        {
             setSelectedContextShare([{ contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode }]);
-        } else if (colDef.field === 'clientCode') {
+        }
+        else if (colDef.field === 'clientCode')
+        {
             setSelectedContextShare([{ contextShareKey: 'clientCode', contextShareValue: data.clientCode }]);
-        } else {
+        }
+        else
+        {
             setSelectedContextShare([
                 { contextShareKey: 'instrumentCode', contextShareValue: data.instrumentCode },
                 { contextShareKey: 'clientCode', contextShareValue: data.clientCode }
             ]);
         }
-        if(colDef.field !== 'actions')
+
+        if (colDef.field !== 'actions') {
             setSelectedGenericGridRow(data);
+        }
     }, []);
 
     const updateRows = useCallback((row) =>
@@ -67,7 +77,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
                 defaultColDef={defaultColDef}
                 enableCellChangeFlash={true}
                 rowSelection={'single'}
-                onCellClicked={onCellClicked}
+                onCellMouseDown={onCellMouseDown}
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}

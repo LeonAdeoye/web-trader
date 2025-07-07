@@ -38,7 +38,7 @@ export const OrdersApp = () =>
     useEffect(() =>
     {
         if(selectedGenericGridRow)
-            window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext([{orderId: selectedGenericGridRow.orderId, orderState: selectedGenericGridRow.state}]), null, windowId);
+            window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext({orderId: selectedGenericGridRow.orderId, orderState: selectedGenericGridRow.state}), null, windowId);
 
     }, [selectedGenericGridRow, windowId]);
 

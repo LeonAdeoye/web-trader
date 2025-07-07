@@ -1,44 +1,38 @@
 const path = require('path');
 const { addWindowToChannel, removeWindowFromChannel } = require('./channelManager');
 const { saveWindowDimensions } = require('./settingsManager');
-const { getSelectedOrders } = require('./orderSelectionManager');
+const { getSelectedOrder } = require('./orderSelectionManager');
 const {app, Menu} = require('electron');
 
 const getOrdersAppContextMenuOptions = (window) =>
 {
     const dynamicContextMenuItems = [];
-    const selectedOrders = getSelectedOrders();
-    console.log("Selected orders for context menu generation: ", JSON.stringify(selectedOrders));
-    const uniqueStates = [...new Set(selectedOrders.map(order => order.orderState))];
+    const selectedOrder = getSelectedOrder();
+    const state = selectedOrder.orderState;
+    const orderId = selectedOrder.orderId;
 
-    if (uniqueStates.length === 1)
+    switch (state)
     {
-        const state = uniqueStates[0];
-        const orderIds = selectedOrders.map(order => order.orderId);
-
-        switch (state)
-        {
-            case 'ACCEPTED_BY_OMS':
-                dynamicContextMenuItems.push(
-                { label: '✅ Accept', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_APPROVE', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' },
-                { label: '❌ Reject', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_REJECT', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' });
-                break;
-            case 'ACCEPTED_BY_DESK':
-                dynamicContextMenuItems.push(
-                { label: '✂ Slice', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'slice', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' },
-                { label: '📤 Send All', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'sendAll', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' },
-                { label: '❌ Cancel', click: () => orderIds.forEach(orderId => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main'))},
-                { type: 'separator' });
-                break;
-            default:
-                console.log("No specific actions available for the current order state: " + state);
-        }
+        case 'ACCEPTED_BY_OMS':
+            dynamicContextMenuItems.push(
+            { label: '✅ Accept', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_APPROVE', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' },
+            { label: '❌ Reject', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_REJECT', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' });
+            break;
+        case 'ACCEPTED_BY_DESK':
+            dynamicContextMenuItems.push(
+            { label: '✂ Slice', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'slice', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' },
+            { label: '📤 Send All', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'sendAll', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' },
+            { label: '❌ Cancel', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' });
+            break;
+        default:
+            console.log("No specific actions available for the current order state: " + state);
     }
-
+    console.log("Dynamic context menu options: " + JSON.stringify(dynamicContextMenuItems) + " for order: " + orderId + " with state: " + state);
     return dynamicContextMenuItems;
 };
 

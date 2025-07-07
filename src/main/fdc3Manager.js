@@ -41,10 +41,7 @@ const handleFDC3Message = (fdc3Message, destination, source) =>
             break;
 
         case "fdc3.orderContextMenu":
-            if(fdc3Message.orders && fdc3Message.orders.length === 1)
-                setSelectedOrder(fdc3Message.orders[0]);
-            else if(fdc3Message.orders && fdc3Message.orders.length > 1)
-                setSelectedOrders(fdc3Message.orders);
+            setSelectedOrder(fdc3Message.order);
             addContextMenus(BrowserWindow.fromId(source), getChildWindowTitleMap(), null);
             break;
         case "fdc3.clipboard":

@@ -1,16 +1,13 @@
 export class FDC3Service
 {
-    static createOrderMenuContext = (selectedOrders) =>
+    static createOrderMenuContext = (selectedOrder) =>
     {
         let fdc3Context = {
             type: "fdc3.orderContextMenu",
-            orders: []
+            order: {}
         };
 
-        if(selectedOrders && selectedOrders.length > 0)
-        {
-            fdc3Context["orders"].push(...selectedOrders);
-        }
+        fdc3Context["order"] = selectedOrder;
 
         return fdc3Context;
     }
