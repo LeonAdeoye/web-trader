@@ -53,7 +53,7 @@ export const NewOrderApp = () =>
     const [algoNames, setAlgoNames] = useState([]);
     const [algoErrors] = useRecoilState(algoErrorsState);
 
-    const [order, setOrder] = useState({
+    const blankOrder = useMemo(() => ({
         instrumentCode: '',
         instrumentDescription: '',
         assetType: '',
@@ -67,6 +67,8 @@ export const NewOrderApp = () =>
         priceType: '2',
         price: '',
         tif: '0',
+        orderId: '',
+        parentOrderId: '',
         traderInstruction: '',
         qualifier: 'C:2',
         destination: 'DMA',
@@ -85,10 +87,12 @@ export const NewOrderApp = () =>
         facilInstructions: '',
         lotSize: 0,
         clientCode: '',
-        clientDescription: '',
-        ownerId: ownerId,
-        state: ''
-    });
+        clientDescription:'',
+        ownerId:'',
+        state:''
+    }), []);
+
+    const [order, setOrder] = useState(blankOrder);
 
     useEffect(() =>
     {
@@ -130,7 +134,6 @@ export const NewOrderApp = () =>
     {
         setSelectedAlgo(event.target.value);
     };
-
 
     const handleInputChange = useCallback((name, value) => {
         setOrder(prevData => {
@@ -186,42 +189,7 @@ export const NewOrderApp = () =>
 
     const handleClear = () =>
     {
-        setOrder({
-            instrumentCode: '',
-            instrumentDescription: '',
-            assetType: '',
-            blgCode: '',
-            ric: '',
-            settlementCurrency: '',
-            settlementType: '',
-            exchangeAcronym: '',
-            side: 'BUY',
-            quantity: '',
-            priceType: '2',
-            price: '',
-            tif: '0',
-            traderInstruction: '',
-            qualifier: 'C:2',
-            destination: 'DMA',
-            accountMnemonic: '',
-            accountName: '',
-            legalEntity: '',
-            isFirmAccount: false,
-            isRiskAccount: false,
-            customFlags: '',
-            brokerAcronym: '',
-            brokerDescription: '',
-            handlingInstruction: '',
-            algoType: '',
-            facilConsent: false,
-            facilConsentDetails: '',
-            facilInstructions: '',
-            lotSize: 0,
-            clientCode: '',
-            clientDescription: '',
-            ownerId: ownerId,
-            state: ''
-        });
+        setOrder(blankOrder);
     };
 
     const handleCancel = () =>
@@ -245,6 +213,8 @@ export const NewOrderApp = () =>
 
         const usdPrice = order.settlementCurrency === 'USD' ? order.price : exchangeRateService.convert(order.price, order.settlementCurrency, 'USD');
 
+        const parentOrderId = crypto.randomUUID();
+
         setOrder(prevData => {
             prevData.ownerId = ownerId;
             prevData.state = 'NEW_ORDER';
@@ -252,14 +222,16 @@ export const NewOrderApp = () =>
             prevData.arrivalPrice = prevData.priceType === '2' ? order.price : '0';
             prevData.pending = prevData.quantity;
             prevData.executed = '0';
-            prevData.executedNotionalValue = '0';
+            prevData.executedNotionalValueInUSD = '0';
             prevData.traderInstruction = prevData.traderInstruction === '' ? 'None' : prevData.traderInstruction;
-            prevData.orderNotionalValue = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : '0';
+            prevData.orderNotionalValueInUSD = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : '0';
             prevData.orderNotionalValueInLocal = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * prevData.price).toFixed(2) : '0';
-            prevData.residualNotionalValue = prevData.orderNotionalValue;
+            prevData.residualNotionalValueInLocal = prevData.orderNotionalValueInLocal;
+            prevData.residualNotionalValueInUSD = prevData.orderNotionalValueInUSD;
             prevData.clientDescription = getClientDescription(prevData.clientCode);
             prevData.averagePrice = '0';
-            prevData.orderId = crypto.randomUUID();
+            prevData.parentOrderId = parentOrderId;
+            prevData.orderId = parentOrderId;
             prevData.actionEvent = 'SUBMIT_TO_OMS';
             return prevData;
         });

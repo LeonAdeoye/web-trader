@@ -4,7 +4,7 @@ import {sliceDialogDisplayState} from "../atoms/dialog-state";
 import {Button,Dialog,DialogContent,DialogTitle,Grid,Paper,Tooltip,Typography,TextField,MenuItem,} from "@mui/material";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
-import {numberFormatter} from "../utilities";
+import {numberFormatter, orderSideStyling} from "../utilities";
 import {DestinationWidget } from "../widgets/DestinationWidget";
 
 const SliceDialog = () =>
@@ -15,6 +15,8 @@ const SliceDialog = () =>
     const [inputValue, setInputValue] = useState('');
     const [childOrders, setChildOrders] = useState([]);
     const [childDestination, setChildDestination] = useState('');
+    const [parentOrder, setParentOrder] = useState({});
+    const [remainingQty , setRemainingQty] = useState(0);
 
     const handleCancel = () =>
     {
@@ -24,8 +26,10 @@ const SliceDialog = () =>
 
     useEffect(() =>
     {
-        console.log("selectedGenericGridRow changed: ", JSON.stringify(selectedGenericGridRow));
-    }, []);
+        console.log("Parent order to be sliced: ", JSON.stringify(selectedGenericGridRow));
+        setParentOrder(selectedGenericGridRow);
+        setRemainingQty(selectedGenericGridRow?.pending);
+    }, [selectedGenericGridRow]);
 
     const handleClear = useCallback(() =>
     {
@@ -33,7 +37,12 @@ const SliceDialog = () =>
         setInputValue('');
         setChildOrders([]);
         setChildDestination('');
-    }, []);
+        setParentOrder(prev => ({
+            ...prev,
+            pending: selectedGenericGridRow.pending,
+            residualNotionalValueInLocal: selectedGenericGridRow.residualNotionalValueInLocal
+        }));
+    }, [selectedGenericGridRow]);
 
     const handleSend = () =>
     {
@@ -49,14 +58,15 @@ const SliceDialog = () =>
 
     const handleSlice = useCallback(() =>
     {
-        const price = selectedGenericGridRow.price;
-        const remainingQty = selectedGenericGridRow.quantity;
+        const price = parentOrder.price;
+        setRemainingQty(parentOrder.pending);
+        const originalQty = parentOrder.quantity;
 
         let sliceQty = 0;
         if (sliceOption.endsWith('%'))
         {
             const percent = parseFloat(sliceOption) || parseFloat(inputValue);
-            sliceQty = Math.floor((percent / 100) * remainingQty);
+            sliceQty = Math.floor((percent / 100) * originalQty);
         }
         else
             sliceQty = parseInt(inputValue);
@@ -65,21 +75,36 @@ const SliceDialog = () =>
 
         const newChild = {
             orderId: crypto.randomUUID(),
+            parentOrderId: parentOrder.orderId,
             slicedQuantity: sliceQty,
+            price: price,
             slicedNotionalValue: sliceQty * price,
-            percentageOfParentOrder: ((sliceQty / remainingQty) * 100).toFixed(2),
-            destination: childDestination
+            percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
+            destination: childDestination,
+            ownerId: parentOrder.ownerId,
+            state: 'NEW_ORDER',
+            traderInstruction: parentOrder.traderInstruction,
+            actionEvent: 'SUBMIT_TO_OMS'
         };
 
+        const updatedQty = remainingQty - sliceQty;
+        setRemainingQty(updatedQty);
+        const updatedNotional = updatedQty * price;
+        setParentOrder(prev => ({
+            ...prev,
+            pending: updatedQty,
+            residualNotionalValueInLocal: updatedNotional
+        }));
+
         setChildOrders(prev => [...prev, newChild]);
-    }, [selectedGenericGridRow, inputValue, sliceOption, childDestination]);
+    }, [parentOrder, inputValue, sliceOption, childDestination]);
 
     const sliceOptions = ["5%", "10%", "20%", "25%", "30%", "50%", "75%", "100%", "Variable Percent", "Variable Quantity"];
     const showInputField = sliceOption === "Variable Percent" || sliceOption === "Variable Quantity";
 
     const dialogStyles =
     {
-        width: '1130px',
+        width: '1205px',
         height: `430px`,
         resize: 'both',
         overflow: 'auto',
@@ -92,11 +117,12 @@ const SliceDialog = () =>
     [
         { headerName: "Parent Order Id", field: "orderId", sortable: true, minWidth: 215, width: 215, filter: true },
         { headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 105, width: 105, filter: true },
+        { headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value)},
         { headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true },
         { headerName: "Price", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Local price of the instrument', valueFormatter: numberFormatter },
         { headerName: "Quantity", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Total original order quantity', valueFormatter: numberFormatter },
-        { headerName: "Remaining Qty", field: "quantity", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Remaining quantity available to be sliced', valueFormatter: numberFormatter },
-        { headerName: "Remaining Notional", field: "orderNotionalValueInLocal", sortable: true, minWidth: 150, width: 150, filter: true, headerTooltip: 'Remaining notional value in local currency', valueFormatter: numberFormatter },
+        { headerName: "Remaining Qty", field: "pending", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Remaining quantity available to be sliced', valueFormatter: numberFormatter },
+        { headerName: "Residual Notional", field: "residualNotionalValueInLocal", sortable: true, minWidth: 150, width: 150, filter: true, headerTooltip: 'Remaining notional value in local currency', valueFormatter: numberFormatter },
         { headerName: "Destination", field: "destination", sortable: true, minWidth: 150, width: 150, filter: true, headerTooltip: 'Destination for the child order' },
     ], []);
 
@@ -104,6 +130,7 @@ const SliceDialog = () =>
     [
         { headerName: "Child Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true, headerTooltip: 'Generated GUID for the sliced child order' },
         { headerName: "Sliced Qty", field: "slicedQuantity", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Quantity of the sliced child order', valueFormatter: numberFormatter },
+        { headerName: "Price", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Local price of the instrument', valueFormatter: numberFormatter },
         { headerName: "Sliced Notional", field: "slicedNotionalValue", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Notional value of the child order in local currency', valueFormatter: numberFormatter },
         { headerName: "% of Parent", field: "percentageOfParentOrder", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Percentage this child order represents of the parent order quantity', valueFormatter: numberFormatter },
         { headerName: "Destination", field: "destination", sortable: true, minWidth: 150, width: 150, filter: true, headerTooltip: 'Destination for the child order' },
@@ -151,7 +178,7 @@ const SliceDialog = () =>
                                 <Tooltip title={<Typography fontSize={12}>Send all slices to selected destination.</Typography>}>
                                     <span>
                                         <Button color="primary" variant="contained" className="dialog-action-button submit" size="small"
-                                            disabled={childDestination === '' || (showInputField && (inputValue === '' || inputValue < 0)) || sliceOption === ''}
+                                            disabled={childDestination === '' || (showInputField && (inputValue === '' || inputValue < 0)) || sliceOption === '' || remainingQty === 0}
                                             onClick={handleSlice} style={{marginRight: '0px', fontSize: '0.75rem'}}>Slice</Button>
                                     </span>
                                 </Tooltip>
@@ -159,26 +186,10 @@ const SliceDialog = () =>
                         </Grid>
                     </Paper>
                     <Paper elevation={4} style={{ padding: '5px', marginBottom: '5px', height: '60px' }}>
-                        <GenericGridComponent
-                            gridTheme="ag-theme-alpine"
-                            rowHeight={22}
-                            domLayout="autoHeight"
-                            rowIdArray={["orderId"]}
-                            columnDefs={parentColumnDefs}
-                            gridData={[selectedGenericGridRow]}
-                            style={{ fontSize: '0.75rem' }}
-                        />
+                        <GenericGridComponent gridTheme="ag-theme-alpine" rowHeight={22} domLayout="autoHeight" rowIdArray={["orderId"]} columnDefs={parentColumnDefs} gridData={[parentOrder]} style={{ fontSize: '0.75rem' }}/>
                     </Paper>
                     <Paper elevation={4} style={{ padding: '5px', height: '210px'}}>
-                        <GenericGridComponent
-                            gridTheme="ag-theme-alpine"
-                            rowHeight={22}
-                            domLayout="autoHeight"
-                            rowIdArray={["orderId"]}
-                            columnDefs={childColumnDefs}
-                            gridData={childOrders.slice(0, 10)}
-                            sortModel={{ colId: 'quantity', sort: 'desc' }}
-                            style={{ fontSize: '0.75rem' }}/>
+                        <GenericGridComponent gridTheme="ag-theme-alpine" rowHeight={22} domLayout="autoHeight" rowIdArray={["orderId"]} columnDefs={childColumnDefs} gridData={childOrders.slice(0, 10)} sortModel={{ colId: 'quantity', sort: 'desc' }} style={{ fontSize: '0.75rem' }}/>
                     </Paper>
                 </div>
             </DialogContent>
