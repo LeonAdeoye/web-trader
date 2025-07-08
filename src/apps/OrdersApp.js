@@ -19,7 +19,7 @@ export const OrdersApp = () =>
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-    const [sliceDialogOpenFlag, setSliceDialogOpenFlag ] = useRecoilState(sliceDialogDisplayState);
+    const [, setSliceDialogOpenFlag ] = useRecoilState(sliceDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
@@ -157,6 +157,7 @@ export const OrdersApp = () =>
         {headerName: "Instrument Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
         {headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true},
+        {headerName: "Destination", field: "destination", sortable: true, minWidth: 160, width: 160, filter: true},
         {headerName: "State", field: "state", sortable: true, minWidth: 135, width: 135, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
         {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Bloomberg code of the order' },
         {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Current owner fo the order'},
