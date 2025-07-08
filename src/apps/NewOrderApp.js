@@ -1,17 +1,5 @@
 import React, {useState, useCallback, useMemo, useRef, useEffect} from "react";
-import {
-    Button,
-    Grid,
-    Paper,
-    TextField,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Select,
-    Checkbox,
-    FormControlLabel,
-    Tooltip
-} from "@mui/material";
+import {Button,Grid,Paper,TextField,MenuItem,FormControl,InputLabel,Select,Checkbox,FormControlLabel,Tooltip} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 import {SideWidget} from "../widgets/SideWidget";
