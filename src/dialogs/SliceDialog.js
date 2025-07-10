@@ -15,7 +15,8 @@ const SliceDialog = () =>
     const [inputValue, setInputValue] = useState('');
     const [childOrders, setChildOrders] = useState([]);
     const [childDestination, setChildDestination] = useState('');
-    const [parentOrder, setParentOrder] = useState({});
+    const [originalParentOrder, setOriginalParentOrder] = useState(null);
+    const [parentOrder, setParentOrder] = useState(null);
     const [remainingQty , setRemainingQty] = useState(0);
 
     const handleCancel = () =>
@@ -26,10 +27,13 @@ const SliceDialog = () =>
 
     useEffect(() =>
     {
-        console.log("Parent order to be sliced: ", JSON.stringify(selectedGenericGridRow));
-        setParentOrder(selectedGenericGridRow);
-        setRemainingQty(selectedGenericGridRow?.pending);
-    }, [selectedGenericGridRow]);
+        if(selectedGenericGridRow && !originalParentOrder)
+        {
+            setOriginalParentOrder(selectedGenericGridRow);
+            setParentOrder(selectedGenericGridRow);
+            setRemainingQty(selectedGenericGridRow.pending);
+        }
+    }, [selectedGenericGridRow, originalParentOrder]);
 
     const handleClear = useCallback(() =>
     {
@@ -37,12 +41,13 @@ const SliceDialog = () =>
         setInputValue('');
         setChildOrders([]);
         setChildDestination('');
+        setRemainingQty(originalParentOrder.pending);
         setParentOrder(prev => ({
             ...prev,
-            pending: selectedGenericGridRow.pending,
-            residualNotionalValueInLocal: selectedGenericGridRow.residualNotionalValueInLocal
+            pending: originalParentOrder.pending,
+            residualNotionalValueInLocal: originalParentOrder.residualNotionalValueInLocal
         }));
-    }, [selectedGenericGridRow]);
+    }, [originalParentOrder]);
 
     const handleSend = () =>
     {
@@ -56,6 +61,21 @@ const SliceDialog = () =>
             setChildDestination(value);
     }
 
+    const disableSlicing = () =>
+    {
+        return childDestination === '' || (showInputField && (inputValue === '' || inputValue < 0)) || sliceOption === '' || remainingQty === 0;
+    }
+
+    const disableSending = () =>
+    {
+        return childOrders.length === 0;
+    }
+
+    const disableClear = () =>
+    {
+        return childDestination === '' && childOrders.length === 0 && ((showInputField && (!inputValue || inputValue <= 0)) || !showInputField) && sliceOption === '';
+    }
+
     const handleSlice = useCallback(() =>
     {
         const price = parentOrder.price;
@@ -65,7 +85,12 @@ const SliceDialog = () =>
         let sliceQty = 0;
         if (sliceOption.endsWith('%'))
         {
-            const percent = parseFloat(sliceOption) || parseFloat(inputValue);
+            const percent = parseFloat(sliceOption);
+            sliceQty = Math.floor((percent / 100) * originalQty);
+        }
+        else if(sliceOption === "Variable Percent")
+        {
+            const percent = parseFloat(inputValue);
             sliceQty = Math.floor((percent / 100) * originalQty);
         }
         else
@@ -165,20 +190,20 @@ const SliceDialog = () =>
                                 <Tooltip title={<Typography fontSize={12}>Clear all child order slices.</Typography>}>
                                     <span>
                                         <Button color="primary" variant="contained" className="dialog-action-button submit" size="small" onClick={handleClear}
-                                            disabled={childDestination === '' && childOrders.length === 0 && ((showInputField && (!inputValue || inputValue <= 0)) || !showInputField) && sliceOption === '' }
+                                            disabled={disableClear()}
                                             style={{ marginRight: '5px', fontSize: '0.75rem'}}>Clear</Button>
                                     </span>
                                 </Tooltip>
                                 <Tooltip title={<Typography fontSize={12}>Send all slices to selected destination.</Typography>}>
                                     <span>
-                                        <Button color="primary" variant='contained' size="small" disabled={childOrders.length === 0}
+                                        <Button color="primary" variant='contained' size="small" disabled={disableSending()}
                                              style={{ marginRight: '5px', fontSize: '0.75rem'}} className="dialog-action-button submit"onClick={handleSend}>Send</Button>
                                     </span>
                                 </Tooltip>
                                 <Tooltip title={<Typography fontSize={12}>Send all slices to selected destination.</Typography>}>
                                     <span>
                                         <Button color="primary" variant="contained" className="dialog-action-button submit" size="small"
-                                            disabled={childDestination === '' || (showInputField && (inputValue === '' || inputValue < 0)) || sliceOption === '' || remainingQty === 0}
+                                            disabled={disableSlicing()}
                                             onClick={handleSlice} style={{marginRight: '0px', fontSize: '0.75rem'}}>Slice</Button>
                                     </span>
                                 </Tooltip>
