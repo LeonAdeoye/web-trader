@@ -24,7 +24,7 @@ const getOrdersAppContextMenuOptions = (window) =>
             dynamicContextMenuItems.push(
             { label: '✂ Slice', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'slice', orderId: orderId}, window.getTitle(), 'main')},
             { type: 'separator' },
-            { label: '📤 Send All', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'sendAll', orderId: orderId}, window.getTitle(), 'main')},
+            { label: '📤 Send All', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'SUBMIT_TO_EXCH', orderId: orderId}, window.getTitle(), 'main')},
             { type: 'separator' },
             { label: '❌ Cancel', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main')},
             { type: 'separator' });

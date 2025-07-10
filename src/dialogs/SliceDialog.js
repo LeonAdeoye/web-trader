@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback, useEffect} from 'react';
+import React, {useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import {useRecoilState} from "recoil";
 import {sliceDialogDisplayState} from "../atoms/dialog-state";
 import {Button,Dialog,DialogContent,DialogTitle,Grid,Paper,Tooltip,Typography,TextField,MenuItem,} from "@mui/material";
@@ -6,8 +6,9 @@ import {selectedGenericGridRowState} from "../atoms/component-state";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {numberFormatter, orderSideStyling} from "../utilities";
 import {DestinationWidget } from "../widgets/DestinationWidget";
+import {ExchangeRateService} from "../services/ExchangeRateService";
 
-const SliceDialog = () =>
+const SliceDialog = ({handleSendSlice}) =>
 {
     const [sliceDialogOpenFlag, setSliceDialogOpenFlag] = useRecoilState(sliceDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -18,6 +19,7 @@ const SliceDialog = () =>
     const [originalParentOrder, setOriginalParentOrder] = useState(null);
     const [parentOrder, setParentOrder] = useState(null);
     const [remainingQty , setRemainingQty] = useState(0);
+    const exchangeRateService = useRef(new ExchangeRateService()).current;
 
     const handleCancel = () =>
     {
@@ -52,6 +54,7 @@ const SliceDialog = () =>
     const handleSend = () =>
     {
         setSliceDialogOpenFlag(false);
+        if(handleSendSlice) handleSendSlice(childOrders);
         handleClear();
     };
 
@@ -98,18 +101,33 @@ const SliceDialog = () =>
 
         if (sliceQty <= 0 || sliceQty > remainingQty) return;
 
-        const newChild = {
+        const usdPrice = originalParentOrder.settlementCurrency === 'USD' ? originalParentOrder.price : exchangeRateService.convert(originalParentOrder.price, originalParentOrder.settlementCurrency, 'USD');
+
+        const newChild =
+        {
             orderId: crypto.randomUUID(),
-            parentOrderId: parentOrder.orderId,
+            parentOrderId: originalParentOrder.orderId,
             slicedQuantity: sliceQty,
             price: price,
             slicedNotionalValue: sliceQty * price,
             percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
             destination: childDestination,
-            ownerId: parentOrder.ownerId,
+            ownerId: originalParentOrder.ownerId,
             state: 'NEW_ORDER',
-            traderInstruction: parentOrder.traderInstruction,
-            actionEvent: 'SUBMIT_TO_OMS'
+            traderInstruction: originalParentOrder.traderInstruction,
+            actionEvent: 'SUBMIT_TO_OMS',
+            side: originalParentOrder.side,
+            instrumentCode: originalParentOrder.instrumentCode,
+            arrivalTime: new Date().toLocaleTimeString(),
+            arrivalPrice: originalParentOrder.priceType === '2' ? originalParentOrder.price : '0',
+            pending: sliceQty,
+            executed: '0',
+            executedNotionalValueInUSD: '0',
+            orderNotionalValueInUSD: (originalParentOrder.priceType === '2' && originalParentOrder.price !== '') ? (sliceQty * usdPrice).toFixed(2) : '0',
+            orderNotionalValueInLocal: (originalParentOrder.priceType === '2' && originalParentOrder.price !== '') ? (sliceQty * originalParentOrder.price).toFixed(2) : '0',
+            residualNotionalValueInLocal: originalParentOrder.orderNotionalValueInLocal,
+            residualNotionalValueInUSD: originalParentOrder.orderNotionalValueInUSD,
+            averagePrice: '0'
         };
 
         const updatedQty = remainingQty - sliceQty;
@@ -158,7 +176,8 @@ const SliceDialog = () =>
         { headerName: "Price", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Local price of the instrument', valueFormatter: numberFormatter },
         { headerName: "Sliced Notional", field: "slicedNotionalValue", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Notional value of the child order in local currency', valueFormatter: numberFormatter },
         { headerName: "% of Parent", field: "percentageOfParentOrder", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Percentage this child order represents of the parent order quantity', valueFormatter: numberFormatter },
-        { headerName: "Sliced Qty", field: "slicedQuantity", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Quantity of the sliced child order', valueFormatter: numberFormatter }
+        { headerName: "Sliced Qty", field: "slicedQuantity", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Quantity of the sliced child order', valueFormatter: numberFormatter },
+        { headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value), headerTooltip: 'Side of the child order' },
     ], []);
 
     return (

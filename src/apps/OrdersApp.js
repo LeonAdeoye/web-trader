@@ -80,6 +80,12 @@ export const OrdersApp = () =>
 
                 if(action === 'slice')
                     setSliceDialogOpenFlag(true);
+
+                if(action === 'SUBMIT_TO_EXCH')
+                {
+                    loggerService.logInfo(`Sending 100% of order for order Id: ${orderId}`);
+                    outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: "SUBMIT_TO_OMS"});
+                }
             }
         });
 
@@ -91,6 +97,7 @@ export const OrdersApp = () =>
 
     const filterOrdersUsingContext = useMemo(() =>
     {
+        // TODO remove child orders
         if(instrumentCode && clientCode)
             return orders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
         else if(instrumentCode)
@@ -119,6 +126,16 @@ export const OrdersApp = () =>
         });
 
     }, []);
+
+    const handleSendSlice = (childOrders) =>
+    {
+        childOrders.forEach((childOrder) =>
+        {
+            loggerService.logInfo(`Sending child order with Id: ${childOrder.orderId} to OMS`)
+            outboundWorker.postMessage({...childOrder, actionEvent: "SUBMIT_TO_EXCH"});
+        });
+
+    }
 
     useEffect(() =>
     {
@@ -190,7 +207,7 @@ export const OrdersApp = () =>
                 <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
             </div>
         </div>
-        <SliceDialog/>
+        <SliceDialog handleSendSlice={handleSendSlice}/>
     </>)
 
 }

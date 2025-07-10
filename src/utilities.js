@@ -47,6 +47,7 @@ export const orderStateStyling = (orderState) =>
         'PARTIALLY_FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
         'NEW_ORDER': { backgroundColor: '#4F81BD', color: 'white' },
         'PENDING_NEW': { backgroundColor: '#106cdc', color: 'white' },
+        'PENDING_EXCH': { backgroundColor: '#114481', color: 'white' },
         'ACCEPTED_BY_DESK': { backgroundColor: '#178000', color: 'white' },
         'ACCEPTED_BY_OMS': { backgroundColor: '#51c541', color: 'white' },
         'REJECTED_BY_OMS': { backgroundColor: '#7c1515', color: 'white' },
@@ -66,7 +67,7 @@ export const replaceUnderscoresWithSpace = (str) =>
 
 export const orderSideStyling = (orderSide) =>
 {
-    const side = orderSide.toLowerCase();
+    const side = orderSide?.toLowerCase();
     if (side === 'buy')
         return { color: '#346bb4', fontWeight: 'bold', fontSize: '13px' };
     else if (side === 'sell')
