@@ -87,10 +87,14 @@ export const OrdersApp = () =>
 
                 if(action === 'SUBMIT_TO_EXCH')
                 {
-                    loggerService.logInfo(`Sending 100% of order for order Id: ${orderId}`);
-                    const usdPrice = selectedGenericGridRow.settlementCurrency === 'USD' ? selectedGenericGridRow.price : exchangeRateService.convert(selectedGenericGridRow.price, selectedGenericGridRow.settlementCurrency, 'USD');
-                    const childOrder = orderService.createChildOrder(selectedGenericGridRow, selectedGenericGridRow.quantity, selectedGenericGridRow.quantity, selectedGenericGridRow.price, usdPrice, selectedGenericGridRow.destination);
-                    outboundWorker.postMessage({...childOrder, actionEvent: "SUBMIT_TO_EXCH"});
+                    const usdPrice = selectedGenericGridRow.settlementCurrency === 'USD' ? selectedGenericGridRow.price
+                        : exchangeRateService.convert(selectedGenericGridRow.price, selectedGenericGridRow.settlementCurrency, 'USD');
+
+                    const childOrder = orderService.createChildOrder(selectedGenericGridRow, selectedGenericGridRow.quantity,
+                        selectedGenericGridRow.quantity, selectedGenericGridRow.price, usdPrice, selectedGenericGridRow.destination);
+
+                    loggerService.logInfo(`Sending 100% of order for order Id: ${selectedGenericGridRow.orderId}`);
+                    outboundWorker.postMessage(childOrder);
                 }
             }
         });
@@ -117,6 +121,9 @@ export const OrdersApp = () =>
     {
         const newOrder = event.data.order;
 
+        if(orderService.isChildOrder(newOrder))
+            return;
+
         setOrders((prevData) =>
         {
             const index = prevData.findIndex((element) => element.orderId === newOrder.orderId);
@@ -137,7 +144,7 @@ export const OrdersApp = () =>
         childOrders.forEach((childOrder) =>
         {
             loggerService.logInfo(`Sending child order with Id: ${childOrder.orderId} to OMS`)
-            outboundWorker.postMessage({...childOrder, actionEvent: "SUBMIT_TO_EXCH"});
+            outboundWorker.postMessage(childOrder);
         });
     }
 
@@ -185,7 +192,7 @@ export const OrdersApp = () =>
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true, headerTooltip: 'Trader instruction for the order' },
         {headerName: "CCY", field: "settlementCurrency", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Settlement currency of the order' },
         {headerName: "Exec Algo", field: "algoType", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Execution algorithm used for the order' },
-        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 90, width: 90, headerTooltip: 'Arrival time of the order'},
+        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 110, width: 110, headerTooltip: 'Arrival time of the order'},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Arrival price of the order', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "ADV20", field: "adv20", hide: false, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Average daily volume over the last 20 days'},

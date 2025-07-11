@@ -48,15 +48,14 @@ export class OrderService
         return {
             orderId: crypto.randomUUID(),
             parentOrderId: parentOrder.orderId,
-            slicedQuantity: sliceQty,
+            quantity: sliceQty,
             price: price,
-            slicedNotionalValue: sliceQty * price,
             percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
             destination: childDestination,
             ownerId: parentOrder.ownerId,
-            state: 'NEW_ORDER',
+            state: 'ACCEPTED_BY_DESK',
             traderInstruction: parentOrder.traderInstruction,
-            actionEvent: 'SUBMIT_TO_OMS',
+            actionEvent: 'SUBMIT_TO_EXCH',
             side: parentOrder.side,
             instrumentCode: parentOrder.instrumentCode,
             arrivalTime: new Date().toLocaleTimeString(),
@@ -64,12 +63,17 @@ export class OrderService
             pending: sliceQty,
             executed: '0',
             executedNotionalValueInUSD: '0',
-            orderNotionalValueInUSD: (parentOrder.priceType === '2' && parentOrder.price !== '') ? (sliceQty * usdPrice).toFixed(2) : '0',
-            orderNotionalValueInLocal: (parentOrder.priceType === '2' && parentOrder.price !== '') ? (sliceQty * parentOrder.price).toFixed(2) : '0',
+            orderNotionalValueInUSD: (parentOrder.priceType === '2' && price !== '') ? (sliceQty * usdPrice).toFixed(2) : '0',
+            orderNotionalValueInLocal: (parentOrder.priceType === '2' && price !== '') ? (sliceQty * price).toFixed(2) : '0',
             residualNotionalValueInLocal: parentOrder.orderNotionalValueInLocal,
             residualNotionalValueInUSD: parentOrder.orderNotionalValueInUSD,
             averagePrice: '0'
         };
+    }
+
+    isChildOrder = (order) =>
+    {
+        return order.parentOrderId !== order.orderId;
     }
 
     buildFixMessage = (pairs, delimiter = '\x01') =>

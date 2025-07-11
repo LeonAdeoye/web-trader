@@ -59,6 +59,7 @@ export const NewOrderApp = () =>
         tif: '0',
         orderId: '',
         parentOrderId: '',
+        percentageOfParentOrder: 0.00,
         traderInstruction: '',
         qualifier: 'C:2',
         destination: 'DMA',

@@ -158,10 +158,10 @@ const SliceDialog = ({handleSendSlice}) =>
     [
         { headerName: "Child Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true, headerTooltip: 'Generated GUID for the sliced child order' },
         { headerName: "Destination", field: "destination", sortable: true, minWidth: 150, width: 150, filter: true, headerTooltip: 'Destination for the child order' },
-        { headerName: "Price", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Local price of the instrument', valueFormatter: numberFormatter },
-        { headerName: "Sliced Notional", field: "slicedNotionalValue", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Notional value of the child order in local currency', valueFormatter: numberFormatter },
-        { headerName: "% of Parent", field: "percentageOfParentOrder", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Percentage this child order represents of the parent order quantity', valueFormatter: numberFormatter },
-        { headerName: "Sliced Qty", field: "slicedQuantity", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Quantity of the sliced child order', valueFormatter: numberFormatter },
+        { headerName: "Price", field: "price", sortable: false, minWidth: 100, width: 100, filter: true, headerTooltip: 'Local price of the instrument', valueFormatter: numberFormatter },
+        { headerName: "Sliced Notional", field: "orderNotionalValueInLocal", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Notional value of the child order in local currency', valueFormatter: numberFormatter },
+        { headerName: "% of Parent", field: "percentageOfParentOrder", sortable: true, minWidth: 120, width: 120, filter: false, headerTooltip: 'Percentage this child order represents of the parent order quantity', valueFormatter: numberFormatter},
+        { headerName: "Sliced Qty", field: "quantity", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Quantity of the sliced child order', valueFormatter: numberFormatter },
         { headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value), headerTooltip: 'Side of the child order' },
     ], []);
 

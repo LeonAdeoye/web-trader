@@ -13,7 +13,6 @@ const main = async () => {
         onmessage = async function (event)
         {
             const order = event.data;
-
             switch (order.state) {
                 case "NEW_ORDER":
                 case "ACCEPTED_BY_OMS":
