@@ -47,6 +47,8 @@ export const NewOrderApp = () =>
         assetType: '',
         blgCode: '',
         ric: '',
+        arrivalTime: '',
+        tradeDate : '',
         settlementCurrency: '',
         settlementType: '',
         exchangeAcronym: '',
@@ -207,6 +209,7 @@ export const NewOrderApp = () =>
             prevData.ownerId = ownerId;
             prevData.state = 'NEW_ORDER';
             prevData.arrivalTime = new Date().toLocaleTimeString();
+            prevData.tradeDate = new Date().toLocaleDateString();
             prevData.arrivalPrice = prevData.priceType === '2' ? order.price : '0';
             prevData.pending = prevData.quantity;
             prevData.executed = '0';
