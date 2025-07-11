@@ -13,11 +13,14 @@ export class ExchangeRateService
 
     loadExchangeRates = async () =>
     {
+        if(this.#exchangeRates && Object.keys(this.#exchangeRates).length > 0)
+            return;
+
         await fetch('https://openexchangerates.org/api/latest.json?app_id=0d1601b10ca0490b960214675c968c6f')
             .then(response => response.json())
             .then(jsonResponse =>
             {
-                this.exchangeRates = jsonResponse.rates;
+                this.#exchangeRates = jsonResponse.rates;
                 this.#loggerService.logInfo("Exchange rates loaded.");
                 console.log("1 USD to GBP: " + this.getExchangeRate('GBP'));
             })
@@ -26,7 +29,7 @@ export class ExchangeRateService
 
     getExchangeRate = (currencyCode) =>
     {
-        const rate = this.exchangeRates[currencyCode.toUpperCase()];
+        const rate = this.#exchangeRates[currencyCode.toUpperCase()];
         return rate !== undefined ? rate : 1.0;
     }
 

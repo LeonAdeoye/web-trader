@@ -79,6 +79,15 @@ const SliceDialog = ({handleSendSlice}) =>
         return childDestination === '' && childOrders.length === 0 && ((showInputField && (!inputValue || inputValue <= 0)) || !showInputField) && sliceOption === '';
     }
 
+    useEffect(() =>
+    {
+        const loadData = async () =>
+        {
+            await exchangeRateService.loadExchangeRates();
+        };
+        loadData().then(() => console.log("Exchange rates loaded in SliceDialog"));
+    }, [exchangeRateService]);
+
     const handleSlice = useCallback(() =>
     {
         const price = parentOrder.price;
