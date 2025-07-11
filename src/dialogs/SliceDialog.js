@@ -7,6 +7,7 @@ import {GenericGridComponent} from "../components/GenericGridComponent";
 import {numberFormatter, orderSideStyling} from "../utilities";
 import {DestinationWidget } from "../widgets/DestinationWidget";
 import {ExchangeRateService} from "../services/ExchangeRateService";
+import {OrderService} from "../services/OrderService";
 
 const SliceDialog = ({handleSendSlice}) =>
 {
@@ -20,6 +21,7 @@ const SliceDialog = ({handleSendSlice}) =>
     const [parentOrder, setParentOrder] = useState(null);
     const [remainingQty , setRemainingQty] = useState(0);
     const exchangeRateService = useRef(new ExchangeRateService()).current;
+    const orderService = useRef(new OrderService()).current;
 
     const handleCancel = () =>
     {
@@ -111,33 +113,7 @@ const SliceDialog = ({handleSendSlice}) =>
         if (sliceQty <= 0 || sliceQty > remainingQty) return;
 
         const usdPrice = originalParentOrder.settlementCurrency === 'USD' ? originalParentOrder.price : exchangeRateService.convert(originalParentOrder.price, originalParentOrder.settlementCurrency, 'USD');
-
-        const newChild =
-        {
-            orderId: crypto.randomUUID(),
-            parentOrderId: originalParentOrder.orderId,
-            slicedQuantity: sliceQty,
-            price: price,
-            slicedNotionalValue: sliceQty * price,
-            percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
-            destination: childDestination,
-            ownerId: originalParentOrder.ownerId,
-            state: 'NEW_ORDER',
-            traderInstruction: originalParentOrder.traderInstruction,
-            actionEvent: 'SUBMIT_TO_OMS',
-            side: originalParentOrder.side,
-            instrumentCode: originalParentOrder.instrumentCode,
-            arrivalTime: new Date().toLocaleTimeString(),
-            arrivalPrice: originalParentOrder.priceType === '2' ? originalParentOrder.price : '0',
-            pending: sliceQty,
-            executed: '0',
-            executedNotionalValueInUSD: '0',
-            orderNotionalValueInUSD: (originalParentOrder.priceType === '2' && originalParentOrder.price !== '') ? (sliceQty * usdPrice).toFixed(2) : '0',
-            orderNotionalValueInLocal: (originalParentOrder.priceType === '2' && originalParentOrder.price !== '') ? (sliceQty * originalParentOrder.price).toFixed(2) : '0',
-            residualNotionalValueInLocal: originalParentOrder.orderNotionalValueInLocal,
-            residualNotionalValueInUSD: originalParentOrder.orderNotionalValueInUSD,
-            averagePrice: '0'
-        };
+        const childOrder = orderService.createChildOrder(originalParentOrder, sliceQty, originalQty, price, usdPrice, childDestination);
 
         const updatedQty = remainingQty - sliceQty;
         setRemainingQty(updatedQty);
@@ -148,7 +124,7 @@ const SliceDialog = ({handleSendSlice}) =>
             residualNotionalValueInLocal: updatedNotional
         }));
 
-        setChildOrders(prev => [...prev, newChild]);
+        setChildOrders(prev => [...prev, childOrder]);
     }, [parentOrder, inputValue, sliceOption, childDestination]);
 
     const sliceOptions = ["5%", "10%", "20%", "25%", "30%", "50%", "75%", "100%", "Variable Percent", "Variable Quantity"];

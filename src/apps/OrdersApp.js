@@ -9,6 +9,8 @@ import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import SliceDialog from "../dialogs/SliceDialog";
+import {ExchangeRateService} from "../services/ExchangeRateService";
+import {OrderService} from "../services/OrderService";
 
 export const OrdersApp = () =>
 {
@@ -23,6 +25,8 @@ export const OrdersApp = () =>
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
+    const orderService = useRef(new OrderService()).current;
+    const exchangeRateService = useRef(new ExchangeRateService()).current;
 
     useEffect(() =>
     {
@@ -84,7 +88,9 @@ export const OrdersApp = () =>
                 if(action === 'SUBMIT_TO_EXCH')
                 {
                     loggerService.logInfo(`Sending 100% of order for order Id: ${orderId}`);
-                    outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: "SUBMIT_TO_OMS"});
+                    const usdPrice = selectedGenericGridRow.settlementCurrency === 'USD' ? selectedGenericGridRow.price : exchangeRateService.convert(selectedGenericGridRow.price, selectedGenericGridRow.settlementCurrency, 'USD');
+                    const childOrder = orderService.createChildOrder(selectedGenericGridRow, selectedGenericGridRow.quantity, selectedGenericGridRow.quantity, selectedGenericGridRow.price, usdPrice, selectedGenericGridRow.destination);
+                    outboundWorker.postMessage({...childOrder, actionEvent: "SUBMIT_TO_EXCH"});
                 }
             }
         });
@@ -97,7 +103,6 @@ export const OrdersApp = () =>
 
     const filterOrdersUsingContext = useMemo(() =>
     {
-        // TODO remove child orders
         if(instrumentCode && clientCode)
             return orders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
         else if(instrumentCode)
@@ -134,7 +139,6 @@ export const OrdersApp = () =>
             loggerService.logInfo(`Sending child order with Id: ${childOrder.orderId} to OMS`)
             outboundWorker.postMessage({...childOrder, actionEvent: "SUBMIT_TO_EXCH"});
         });
-
     }
 
     useEffect(() =>

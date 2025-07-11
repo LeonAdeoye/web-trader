@@ -43,6 +43,35 @@ export class OrderService
         }
     }
 
+    createChildOrder = (parentOrder, sliceQty, originalQty, price, usdPrice, childDestination) =>
+    {
+        return {
+            orderId: crypto.randomUUID(),
+            parentOrderId: parentOrder.orderId,
+            slicedQuantity: sliceQty,
+            price: price,
+            slicedNotionalValue: sliceQty * price,
+            percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
+            destination: childDestination,
+            ownerId: parentOrder.ownerId,
+            state: 'NEW_ORDER',
+            traderInstruction: parentOrder.traderInstruction,
+            actionEvent: 'SUBMIT_TO_OMS',
+            side: parentOrder.side,
+            instrumentCode: parentOrder.instrumentCode,
+            arrivalTime: new Date().toLocaleTimeString(),
+            arrivalPrice: parentOrder.priceType === '2' ? parentOrder.price : '0',
+            pending: sliceQty,
+            executed: '0',
+            executedNotionalValueInUSD: '0',
+            orderNotionalValueInUSD: (parentOrder.priceType === '2' && parentOrder.price !== '') ? (sliceQty * usdPrice).toFixed(2) : '0',
+            orderNotionalValueInLocal: (parentOrder.priceType === '2' && parentOrder.price !== '') ? (sliceQty * parentOrder.price).toFixed(2) : '0',
+            residualNotionalValueInLocal: parentOrder.orderNotionalValueInLocal,
+            residualNotionalValueInUSD: parentOrder.orderNotionalValueInUSD,
+            averagePrice: '0'
+        };
+    }
+
     buildFixMessage = (pairs, delimiter = '\x01') =>
     {
         const body = pairs.map(([tag, value]) => `${tag}=${value}`).join(delimiter);
