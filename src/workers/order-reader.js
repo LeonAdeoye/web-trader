@@ -11,11 +11,9 @@ const main = async () =>
 
         await client.connect(url);
 
-        const inboundCmd = new Command("sow_and_subscribe").topic("orders.inbound");
-        const outboundCmd = new Command("sow_and_subscribe").topic("orders.outbound");
+        const inboundCmd = new Command("sow_and_subscribe").topic("orders.gui.inbound");
 
         await client.execute(inboundCmd, onAmpsOrderMessage);
-        await client.execute(outboundCmd, onAmpsOrderMessage);
 
         console.log("Connected to AMPS and subscribed to both inbound and outbound topics.");
     }
