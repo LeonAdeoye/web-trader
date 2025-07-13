@@ -50,6 +50,7 @@ export class OrderService
             parentOrderId: parentOrder.orderId,
             quantity: sliceQty,
             price: price,
+            clientCode: parentOrder.clientCode,
             priceType: parentOrder.priceType,
             percentageOfParentOrder: ((sliceQty / originalQty) * 100).toFixed(2),
             destination: childDestination,
@@ -69,13 +70,21 @@ export class OrderService
             orderNotionalValueInLocal: (parentOrder.priceType === '2' && price !== '') ? (sliceQty * price).toFixed(2) : '0',
             residualNotionalValueInLocal: parentOrder.orderNotionalValueInLocal,
             residualNotionalValueInUSD: parentOrder.orderNotionalValueInUSD,
-            averagePrice: '0'
+            averagePrice: '0',
+            originalSource: "WEB_TRADER",
+            currentSource: "WEB_TRADER",
+            targetSource: "ORDER_MANAGEMENT_SERVICE"
         };
     }
 
     isChildOrder = (order) =>
     {
         return order.parentOrderId !== order.orderId;
+    }
+
+    isParentOrder = (order) =>
+    {
+        return order.parentOrderId === order.orderId;
     }
 
     buildFixMessage = (pairs, delimiter = '\x01') =>

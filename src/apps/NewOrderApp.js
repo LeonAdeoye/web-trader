@@ -41,7 +41,8 @@ export const NewOrderApp = () =>
     const [algoNames, setAlgoNames] = useState([]);
     const [algoErrors] = useRecoilState(algoErrorsState);
 
-    const blankOrder = useMemo(() => ({
+    const blankOrder = useMemo(() =>
+    ({
         instrumentCode: '',
         instrumentDescription: '',
         assetType: '',
@@ -53,13 +54,20 @@ export const NewOrderApp = () =>
         settlementType: '',
         exchangeAcronym: '',
         side: 'BUY',
-        quantity: '',
+        quantity: 0,
+        executed: 0,
+        pending: 0,
         priceType: '2',
         price: '',
         tif: '0',
         orderId: '',
         parentOrderId: '',
         percentageOfParentOrder: 0.00,
+        orderNotionalValueInUSD: 0.00,
+        orderNotionalValueInLocal: 0.00,
+        residualNotionalValueInLocal: 0.00,
+        residualNotionalValueInUSD: 0.00,
+        arrivalPrice: 0.00,
         traderInstruction: '',
         qualifier: 'C:2',
         destination: 'DMA',
@@ -80,7 +88,10 @@ export const NewOrderApp = () =>
         clientCode: '',
         clientDescription:'',
         ownerId:'',
-        state:''
+        state:'NEW_ORDER',
+        originalSource: "WEB_TRADER",
+        currentSource: "WEB_TRADER",
+        targetSource: "ORDER_MANAGEMENT_SERVICE"
     }), []);
 
     const [order, setOrder] = useState(blankOrder);
@@ -116,7 +127,8 @@ export const NewOrderApp = () =>
         return () => webWorker.terminate();
     }, []);
 
-    const getClientDescription = (clientCode) => {
+    const getClientDescription = (clientCode) =>
+    {
         const client = clients.find(client => client.clientCode === clientCode);
         return client ? client.clientName : "";
     };
@@ -126,10 +138,13 @@ export const NewOrderApp = () =>
         setSelectedAlgo(event.target.value);
     };
 
-    const handleInputChange = useCallback((name, value) => {
-        setOrder(prevData => {
+    const handleInputChange = useCallback((name, value) =>
+    {
+        setOrder(prevData =>
+        {
             const newData = { ...prevData, [name]: value };
-            if (name === 'instrumentCode' && value) {
+            if (name === 'instrumentCode' && value)
+            {
                 const instrument = referenceDataService.getInstrumentByCode(value);
                 if (instrument)
                 {
@@ -206,22 +221,22 @@ export const NewOrderApp = () =>
 
         const parentOrderId = crypto.randomUUID();
 
-        setOrder(prevData => {
+        setOrder(prevData =>
+        {
             prevData.ownerId = ownerId;
-            prevData.state = 'NEW_ORDER';
             prevData.arrivalTime = new Date().toLocaleTimeString();
             prevData.tradeDate = new Date().toLocaleDateString();
-            prevData.arrivalPrice = prevData.priceType === '2' ? order.price : '0';
+            prevData.arrivalPrice = prevData.priceType === '2' ? order.price : 0.00;
             prevData.pending = prevData.quantity;
-            prevData.executed = '0';
-            prevData.executedNotionalValueInUSD = '0';
+            prevData.executed = 0;
+            prevData.executedNotionalValueInUSD = 0;
             prevData.traderInstruction = prevData.traderInstruction === '' ? 'None' : prevData.traderInstruction;
-            prevData.orderNotionalValueInUSD = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : '0';
-            prevData.orderNotionalValueInLocal = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * prevData.price).toFixed(2) : '0';
+            prevData.orderNotionalValueInUSD = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : 0.00;
+            prevData.orderNotionalValueInLocal = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * prevData.price).toFixed(2) : 0.00;
             prevData.residualNotionalValueInLocal = prevData.orderNotionalValueInLocal;
             prevData.residualNotionalValueInUSD = prevData.orderNotionalValueInUSD;
             prevData.clientDescription = getClientDescription(prevData.clientCode);
-            prevData.averagePrice = '0';
+            prevData.averagePrice = 0.00;
             prevData.parentOrderId = parentOrderId;
             prevData.orderId = parentOrderId;
             prevData.actionEvent = 'SUBMIT_TO_OMS';
