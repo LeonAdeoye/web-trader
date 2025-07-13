@@ -42,14 +42,14 @@ export const createArrayFromScore = (score) =>
 export const orderStateStyling = (orderState) =>
 {
     const styleMapping = {
-        'FULLY_FILLED': { backgroundColor: '#528c74', color: 'white' },
-        'PARTIAL_FILL': { backgroundColor: '#94D0B7FF', color: 'white' },
-        'PARTIALLY_FILLED': { backgroundColor: '#94D0B7FF', color: 'white' },
+        'FULLY_FILLED': { backgroundColor: '#47603e', color: 'white' },
+        'PARTIALLY_FILLED': { backgroundColor: '#178000', color: 'white' },
         'NEW_ORDER': { backgroundColor: '#4F81BD', color: 'white' },
         'PENDING_NEW': { backgroundColor: '#106cdc', color: 'white' },
         'PENDING_EXCH': { backgroundColor: '#114481', color: 'white' },
-        'ACCEPTED_BY_DESK': { backgroundColor: '#178000', color: 'white' },
-        'ACCEPTED_BY_OMS': { backgroundColor: '#51c541', color: 'white' },
+        'ACCEPTED_BY_DESK': { backgroundColor: '#858561', color: 'white' },
+        'ACCEPTED_BY_OMS': { backgroundColor: '#adad34', color: 'white' },
+        'ACCEPTED_BY_EXCH': { backgroundColor: '#d38926', color: 'white' },
         'REJECTED_BY_OMS': { backgroundColor: '#7c1515', color: 'white' },
         'REJECTED_BY_DESK': { backgroundColor: '#ea3535', color: 'white' },
         'REJECTED_BY_EXCH': { backgroundColor: '#723131', color: 'white' },

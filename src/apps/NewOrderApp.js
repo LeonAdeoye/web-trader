@@ -57,6 +57,7 @@ export const NewOrderApp = () =>
         quantity: 0,
         executed: 0,
         pending: 0,
+        cumulative: 0,
         priceType: '2',
         price: '',
         tif: '0',
@@ -67,6 +68,8 @@ export const NewOrderApp = () =>
         orderNotionalValueInLocal: 0.00,
         residualNotionalValueInLocal: 0.00,
         residualNotionalValueInUSD: 0.00,
+        executedNotionalValueInUSD: 0.00,
+        executedNotionalValueInLocal: 0.00,
         arrivalPrice: 0.00,
         traderInstruction: '',
         qualifier: 'C:2',
@@ -206,9 +209,8 @@ export const NewOrderApp = () =>
 
     const handleCreateOrder = () =>
     {
-        if (strategyRef.current) {
+        if (strategyRef.current)
             strategyRef.current.handleValidation();
-        }
 
         if (algoErrors.length > 0)
         {
@@ -230,6 +232,7 @@ export const NewOrderApp = () =>
             prevData.pending = prevData.quantity;
             prevData.executed = 0;
             prevData.executedNotionalValueInUSD = 0;
+            prevData.executedNotionalValueInLocal = 0;
             prevData.traderInstruction = prevData.traderInstruction === '' ? 'None' : prevData.traderInstruction;
             prevData.orderNotionalValueInUSD = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * usdPrice).toFixed(2) : 0.00;
             prevData.orderNotionalValueInLocal = (prevData.priceType === '2' && prevData.price !== '') ? (prevData.quantity * prevData.price).toFixed(2) : 0.00;

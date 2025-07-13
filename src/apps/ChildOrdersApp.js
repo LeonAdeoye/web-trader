@@ -9,7 +9,6 @@ import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
-import {ClientService} from "../services/ClientService";
 
 export const ChildOrdersApp = () =>
 {
@@ -25,8 +24,15 @@ export const ChildOrdersApp = () =>
     const loggerService = useRef(new LoggerService(ChildOrdersApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
-    const clientService = useRef(new ClientService()).current;
-    const [clients, setClients] = useState(clientService.getClients());
+
+    useEffect(() =>
+    {
+        const loadData = async () =>
+        {
+            await exchangeRateService.loadExchangeRates();
+        };
+        loadData().then(() => loggerService.logInfo("Reference loaded in SliceDialog"));
+    }, [exchangeRateService]);
 
     useEffect(() =>
     {
@@ -116,22 +122,27 @@ export const ChildOrdersApp = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const newOrder = event.data.order;
 
-        if(orderService.isParentOrder(newOrder))
+        const incomingOrder = event.data.order;
+
+        if(orderService.isParentOrder(incomingOrder))
             return;
 
         setOrders((prevData) =>
         {
-            const index = prevData.findIndex((element) => element.orderId === newOrder.orderId);
+            incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
+            incomingOrder.residualNotionalValueInUSD = exchangeRateService.convert(incomingOrder.residualNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
+            incomingOrder.orderNotionalValueInUSD = exchangeRateService.convert(incomingOrder.orderNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
+
+            const index = prevData.findIndex((element) => element.orderId === incomingOrder.orderId);
             if (index !== -1)
             {
                 const updatedData = [...prevData];
-                updatedData[index] = newOrder;
+                updatedData[index] = incomingOrder;
                 return updatedData;
             }
             else
-                return [...prevData, newOrder];
+                return [...prevData, incomingOrder];
         });
 
     }, []);
@@ -150,16 +161,6 @@ export const ChildOrdersApp = () =>
 
     useEffect(() =>
     {
-        const loadData = async () =>
-        {
-            await exchangeRateService.loadExchangeRates();
-            await clientService.loadClients();
-        };
-        loadData().then(() => loggerService.logInfo("Reference loaded in SliceDialog"));
-    }, [exchangeRateService, clientService]);
-
-    useEffect(() =>
-    {
         if(selectedContextShare.length === 1)
         {
             if(selectedContextShare[0].contextShareKey === 'instrumentCode')
@@ -175,38 +176,33 @@ export const ChildOrdersApp = () =>
         }
     }, [selectedContextShare, windowId]);
 
-    const getClientDescription = useCallback((clientCode) =>
-    {
-        const client = clients.find(client => client.clientCode === clientCode);
-        return client ? client.clientName : "";
-    }, [clients]);
-
     const columnDefs = useMemo(() => ([
         {headerName: "Child Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true},
         {headerName: "Parent Order Id", field: "parentOrderId", sortable: true, minWidth: 225, width: 225, filter: true},
-        {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter, sortingOrder: ['desc', 'asc']},
         {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 105, width: 105, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value)},
         {headerName: "Instrument Desc.", field: "instrumentDescription", hide: true, sortable: true, minWidth: 150, width: 150, filter: true},
         {headerName: "Px", field: "price", sortable: false, minWidth: 75, width: 75, filter: true, headerTooltip: 'Original order price', valueFormatter: numberFormatter},
-        {headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true, valueFormatter: (params) => getClientDescription(params.clientCode), headerTooltip: 'Client description' },
+        {headerName: "Client", field: "clientDescription", sortable: true, minWidth: 160, width: 160, filter: true, headerTooltip: 'Client description' },
         {headerName: "Destination", field: "destination", sortable: true, minWidth: 160, width: 160, filter: true},
         {headerName: "State", field: "state", sortable: true, minWidth: 135, width: 135, filter: true, cellStyle: params => orderStateStyling(params.value), valueFormatter: (params) => replaceUnderscoresWithSpace(params.value) },
-        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Bloomberg code of the order' },
+        {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
+        {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
+        {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter, sortingOrder: ['desc', 'asc']},
+        {headerName: "$Exec Notional", field: "executedNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Exec Notional", field: "executedNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in settlement currency', valueFormatter: numberFormatter},
+        {headerName: "$Resid. Notional", field: "residualNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Resid. Notional", field: "residualNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in settlement currency', valueFormatter: numberFormatter},
+        {headerName: "$Order Notional", field: "orderNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
+        {headerName: "Order Notional", field: "orderNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in settlement currency', valueFormatter: numberFormatter},
         {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Current owner fo the order'},
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true, headerTooltip: 'Trader instruction for the order' },
         {headerName: "CCY", field: "settlementCurrency", sortable: true, hide: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Settlement currency of the order' },
-        {headerName: "Exec Algo", field: "algoType", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Execution algorithm used for the order' },
-        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 110, width: 110, headerTooltip: 'Arrival time of the order'},
+        {headerName: "Arrived", field: "arrivalTime", hide:true, sortable: true, minWidth: 110, width: 110, headerTooltip: 'Arrival time of the order'},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, hide: true, minWidth: 80, width: 80, headerTooltip: 'Arrival price of the order', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
-        {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
-        {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
-        {headerName: "$Exec Notional", field: "executedNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "$Order Notional", field: "orderNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Order Notional", field: "orderNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Original order notional value in local currency', valueFormatter: numberFormatter},
-        {headerName: "$Resid. Notional", field: "residualNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in USD', valueFormatter: numberFormatter},
-        {headerName: "Resid. Notional", field: "residualNotionalValueInLocal", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Residual notional value in local currency', valueFormatter: numberFormatter},
+        {headerName: "Exec Algo", field: "algoType", hide: true, sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Execution algorithm used for the order' },
+        {headerName: "BLG", field: "blgCode", hide: true, sortable: true, minWidth: 85, width: 85, filter: true, headerTooltip: 'Bloomberg code of the order' },
         {headerName: "IVWAP", field: "ivwap", headerTooltip: 'Interval VWAP', hide: true, sortable: false, minWidth: 100, width: 100, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival", field: "performanceVsArrival", headerTooltip: 'Performance versus arrival in USD', hide: true, sortable: false, minWidth: 100, width: 110, filter: false, valueFormatter: numberFormatter},
         {headerName: "Perf Arrival (bps)", field: "performanceVsArrivalBPS", headerTooltip: 'Performance versus arrival in bps', hide: true, sortable: false, minWidth: 100, width: 130, filter: false},
