@@ -57,7 +57,7 @@ export const NewOrderApp = () =>
         quantity: 0,
         executed: 0,
         pending: 0,
-        cumulative: 0,
+        cumulativeExecuted: 0,
         priceType: '2',
         price: '',
         tif: '0',
