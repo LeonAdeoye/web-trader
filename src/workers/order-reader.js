@@ -11,7 +11,7 @@ const main = async () =>
 
         await client.connect(url);
 
-        const inboundCmd = new Command("sow_and_subscribe").topic("orders.gui.inbound");
+        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui");
 
         await client.execute(inboundCmd, onAmpsOrderMessage);
 

@@ -9,7 +9,7 @@ const main = async () =>
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        const inboundCmd = new Command("sow_and_subscribe").topic("orders.gui.inbound");
+        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui");
         await client.execute(inboundCmd, onAmpsOrderMessage);
 
         console.log("Connected to AMPS and subscribed to both inbound and outbound topics.");

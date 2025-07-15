@@ -66,7 +66,6 @@ export class OrderService
             arrivalPrice: parentOrder.priceType === '2' ? parentOrder.price : '0',
             pending: sliceQty,
             executed: 0,
-            cumulativeExecuted: 0,
             tradeDate: new Date().toLocaleDateString(),
             executedNotionalValueInUSD: '0',
             executedNotionalValueInLocal: '0',
@@ -77,7 +76,9 @@ export class OrderService
             averagePrice: '0',
             originalSource: "WEB_TRADER",
             currentSource: "WEB_TRADER",
-            targetSource: "ORDER_MANAGEMENT_SERVICE"
+            targetSource: "ORDER_MANAGEMENT_SERVICE",
+            executedTime: '',
+            messageType: 'CHILD_ORDER',
         };
     }
 
