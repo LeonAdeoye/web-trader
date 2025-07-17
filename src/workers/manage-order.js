@@ -19,6 +19,7 @@ const main = async () => {
                 case "ACCEPTED_BY_DESK":
                 case "ACCEPTED_BY_EXCH":
                 case "PARTIALLY_FILLED":
+                case "FULLY_FILLED":
                     try
                     {
                         await client.publish(topicName, order);

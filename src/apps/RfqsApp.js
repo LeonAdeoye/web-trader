@@ -4,15 +4,13 @@ import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
-import {sliceDialogDisplayState} from "../atoms/dialog-state";
 import {FDC3Service} from "../services/FDC3Service";
-import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
-import SliceDialog from "../dialogs/SliceDialog";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
+import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
 
-export const OrdersApp = () =>
+export const RfqsApp = () =>
 {
     const [orders, setOrders] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
@@ -21,10 +19,9 @@ export const OrdersApp = () =>
     const [clientCode, setClientCode] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-    const [, setSliceDialogOpenFlag ] = useRecoilState(sliceDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
-    const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
+    const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
 
@@ -77,42 +74,7 @@ export const OrdersApp = () =>
                 else
                     setClientCode(null);
             }
-
-            if (fdc3Message.type === 'order-action')
-            {
-                const { action, orderId } = fdc3Message;
-
-                if(orderId !== selectedGenericGridRow.orderId)
-                    return;
-
-                if (action === 'DESK_APPROVE' || action === 'DESK_REJECT')
-                {
-                    loggerService.logInfo(`Order ${action} for order Id: ${orderId}`);
-                    outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: action});
-                }
-
-                if(action === 'slice')
-                    setSliceDialogOpenFlag(true);
-
-                if(action === 'SUBMIT_TO_EXCH')
-                {
-                    const usdPrice = selectedGenericGridRow.settlementCurrency === 'USD' ? selectedGenericGridRow.price
-                        : exchangeRateService.convert(selectedGenericGridRow.price, selectedGenericGridRow.settlementCurrency, 'USD');
-
-                    const childOrder = orderService.createChildOrder(selectedGenericGridRow, selectedGenericGridRow.quantity,
-                        selectedGenericGridRow.quantity, selectedGenericGridRow.price, usdPrice, selectedGenericGridRow.destination);
-
-                    loggerService.logInfo(`Sending 100% of order for order Id: ${selectedGenericGridRow.orderId}`);
-                    outboundWorker.postMessage(childOrder);
-                }
-
-                if(action == 'DESK_DONE')
-                {
-                    loggerService.logInfo(`Order marked as done for the day for order Id: ${selectedGenericGridRow.orderId}`);
-                    outboundWorker.postMessage({...selectedGenericGridRow, actionEvent: 'DESK_DONE'});
-                }
-            }
-        });
+         });
 
         window.messenger.handleMessageFromMain(handler);
 
@@ -120,12 +82,12 @@ export const OrdersApp = () =>
 
     }, [selectedGenericGridRow]);
 
-    const getNotionalInUSD = useCallback((notionalValueInLocal, settlementCurrency) =>
+    const getValueInUSD = useCallback((value, settlementCurrency) =>
     {
         if(settlementCurrency === 'USD')
-            return notionalValueInLocal;
+            return value;
         else
-            return exchangeRateService.convert(notionalValueInLocal, settlementCurrency, 'USD');
+            return exchangeRateService.convert(value, settlementCurrency, 'USD');
 
     }, [exchangeRateService]);
 
@@ -145,14 +107,9 @@ export const OrdersApp = () =>
     {
         const incomingOrder = event.data.order;
 
-        if(orderService.isChildOrder(incomingOrder))
-            return;
-
         setOrders((prevData) =>
         {
-            incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
-            incomingOrder.residualNotionalValueInUSD = exchangeRateService.convert(incomingOrder.residualNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
-            incomingOrder.orderNotionalValueInUSD = exchangeRateService.convert(incomingOrder.orderNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
+            //incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
 
             const index = prevData.findIndex((element) => element.orderId === incomingOrder.orderId);
             if (index !== -1)
@@ -241,13 +198,12 @@ export const OrdersApp = () =>
     ]), []);
 
     return (<>
-        <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false} snippetPrompt={"Enter client's RFQ."} validateSnippetPrompt={(value) => console.log("Snippet value: " + value)}/>
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
                 <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
             </div>
         </div>
-        <SliceDialog handleSendSlice={handleSendSlice}/>
     </>)
 
 }

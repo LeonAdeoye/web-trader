@@ -29,6 +29,12 @@ const getOrdersAppContextMenuOptions = (window) =>
             { label: '❌ Cancel', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'cancel', orderId: orderId}, window.getTitle(), 'main')},
             { type: 'separator' });
             break;
+        case 'FULLY_FILLED':
+        case 'PARTIALLY_FILLED':
+            dynamicContextMenuItems.push(
+            { label: '🥳 Done for day', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'order-action', action: 'DESK_DONE', orderId: orderId}, window.getTitle(), 'main')},
+            { type: 'separator' });
+            break
         default:
             console.log("No specific actions available for the current order state: " + state);
     }

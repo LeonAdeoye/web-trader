@@ -25,6 +25,7 @@ import {AlertWizardApp} from "./dialogs/AlertWizardApp";
 import {NewOrderApp} from "./apps/NewOrderApp";
 import {NewBasketApp} from "./apps/NewBasketApp";
 import {ChildOrdersApp} from "./apps/ChildOrdersApp";
+import {RfqsApp} from "./apps/RfqsApp";
 
 
 const App = ({}) =>
@@ -56,7 +57,8 @@ const App = ({}) =>
             { name: 'Client Interests', path: '/client-interests', component: ClientInterestsApp},
             { name: 'Blasts', path: '/blasts', component: BlastsApp},
             { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
-            { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp}
+            { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
+            { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
         ];
 
     useEffect( () =>

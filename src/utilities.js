@@ -53,6 +53,7 @@ export const orderStateStyling = (orderState) =>
         'REJECTED_BY_OMS': { backgroundColor: '#7c1515', color: 'white' },
         'REJECTED_BY_DESK': { backgroundColor: '#ea3535', color: 'white' },
         'REJECTED_BY_EXCH': { backgroundColor: '#723131', color: 'white' },
+        'DONE_FOR_DAY': { backgroundColor: '#404040', color: 'white' },
     };
     const value = orderState.trim();
     const style = styleMapping[value] || {};
