@@ -2,12 +2,10 @@ import {LoggerService} from "./LoggerService";
 
 export class OrderService
 {
-    #orders;
     #loggerService;
 
     constructor()
     {
-        this.#orders = [];
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
@@ -66,6 +64,7 @@ export class OrderService
             arrivalPrice: parentOrder.priceType === '2' ? parentOrder.price : '0',
             pending: sliceQty,
             executed: 0,
+            sliced: 0,
             tradeDate: new Date().toLocaleDateString(),
             executedNotionalValueInUSD: '0',
             executedNotionalValueInLocal: '0',

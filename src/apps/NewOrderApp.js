@@ -57,6 +57,7 @@ export const NewOrderApp = () =>
         quantity: 0,
         executed: 0,
         pending: 0,
+        sliced: 0,
         priceType: '2',
         price: '',
         tif: '0',
@@ -232,6 +233,7 @@ export const NewOrderApp = () =>
             prevData.arrivalPrice = prevData.priceType === '2' ? order.price : 0.00;
             prevData.pending = prevData.quantity;
             prevData.executed = 0;
+            prevData.sliced = 0;
             prevData.executedNotionalValueInUSD = 0;
             prevData.executedNotionalValueInLocal = 0;
             prevData.traderInstruction = prevData.traderInstruction === '' ? 'None' : prevData.traderInstruction;

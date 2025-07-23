@@ -12,6 +12,7 @@ import SliceDialog from "../dialogs/SliceDialog";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
 
+
 export const OrdersApp = () =>
 {
     const [orders, setOrders] = useState([]);
@@ -25,8 +26,8 @@ export const OrdersApp = () =>
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
-    const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
+    const orderService = useRef(new OrderService()).current;
 
     useEffect(() =>
     {
@@ -96,6 +97,28 @@ export const OrdersApp = () =>
 
                 if(action === 'SUBMIT_TO_EXCH')
                 {
+                    const index = orders.findIndex((element) => element.orderId === orderId);
+                    if (index === -1) return;
+
+                    const currentOrder = orders[index];
+                    const currentSliced = currentOrder.sliced || 0;
+                    const totalAfterSlice = currentSliced + currentOrder.quantity;
+
+                    if (totalAfterSlice > currentOrder.quantity)
+                    {
+                        const message = `Order with order Id: ${currentOrder.orderId} cannot be sliced because the slice quantity: ${totalAfterSlice} exceeds the original order quantity of ${currentOrder.quantity}`;
+                        loggerService.logInfo(message);
+                        alert(message);
+                        return;
+                    }
+
+                    setOrders((prevData) =>
+                    {
+                        const updatedData = [...prevData];
+                        updatedData[index] = { ...currentOrder, sliced: totalAfterSlice };
+                        return updatedData;
+                    });
+
                     const usdPrice = selectedGenericGridRow.settlementCurrency === 'USD' ? selectedGenericGridRow.price
                         : exchangeRateService.convert(selectedGenericGridRow.price, selectedGenericGridRow.settlementCurrency, 'USD');
 
@@ -119,15 +142,6 @@ export const OrdersApp = () =>
         return () => window.messenger.removeHandlerForMessageFromMain(handler);
 
     }, [selectedGenericGridRow]);
-
-    const getNotionalInUSD = useCallback((notionalValueInLocal, settlementCurrency) =>
-    {
-        if(settlementCurrency === 'USD')
-            return notionalValueInLocal;
-        else
-            return exchangeRateService.convert(notionalValueInLocal, settlementCurrency, 'USD');
-
-    }, [exchangeRateService]);
 
     const filterOrdersUsingContext = useMemo(() =>
     {
@@ -222,6 +236,7 @@ export const OrdersApp = () =>
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Arrival price of the order', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter, sortingOrder: ['desc', 'asc']},
+        {headerName: "Sliced", field: "sliced", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Sliced quantity', valueFormatter: numberFormatter},
         {headerName: "Pending", field: "pending", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Pending quantity', valueFormatter: numberFormatter},
         {headerName: "Executed", field: "executed", sortable: true, minWidth: 90, width: 90, filter: false, headerTooltip: 'Executed quantity', valueFormatter: numberFormatter},
         {headerName: "$Exec Notional", field: "executedNotionalValueInUSD", sortable: true, minWidth: 110, width: 110, filter: false, headerTooltip: 'Executed notional value in USD', valueFormatter: numberFormatter},
@@ -241,13 +256,13 @@ export const OrdersApp = () =>
     ]), []);
 
     return (<>
-        <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-        <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-            <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
+            <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
+                </div>
             </div>
-        </div>
-        <SliceDialog handleSendSlice={handleSendSlice}/>
-    </>)
+            <SliceDialog handleSendSlice={handleSendSlice}/>
+        </>)
 
 }
