@@ -1,29 +1,29 @@
-import React, { useState, useMemo, useEffect, useRef} from 'react';
+import React, {useState, useMemo, useEffect, useRef, useCallback} from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import '../styles/css/main.css';
 import {Tab} from "@mui/material";
 import TradeHistoryGridsComponent from "../components/TradeHistoryGridsComponent";
-import {TradeDataService} from "../services/TradeDataService";
 import {useRecoilState} from "recoil";
 import {filterDaysState} from "../atoms/filter-state";
-import {numberFormatter} from "../utilities";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
+import {LoggerService} from "../services/LoggerService";
+import {getDateMinusDays, numberFormatter} from "../utilities";
 
 const TradeHistoryApp = () =>
 {
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
-    const [stockCode, setStockCode] = useState("0001.HK");
-    const [client, setClient] = useState("Goldman Sachs");
-    const [clientTradeHistory, setClientTradeHistory] = useState({client: "Goldman Sachs", buyTrades: [], sellTrades: []});
-    const [stockTradeHistory, setStockTradeHistory] = useState({stock: "0001.HK", buyTrades: [], sellTrades: []});
+    const [instrumentCode, setInstrumentCode] = useState("0001.HK");
+    const [clientCode, setClientCode] = useState("GS");
+    const [clientTradeHistory, setClientTradeHistory] = useState({instrumentCode: "0001.HK", buyTrades: [], sellTrades: []});
+    const [instrumentTradeHistory, setInstrumentTradeHistory] = useState({clientCode: "GS", buyTrades: [], sellTrades: []});
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
-    const [stockTradeHistoryTabLabel, setStockTradeHistoryTabLabel] = useState("Stock Trade History");
-    const tradeDataService = useRef(new TradeDataService()).current;
+    const [instrumentTradeHistoryTabLabel, setInstrumentTradeHistoryTabLabel] = useState("Instrument Trade History");
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const loggerService = useRef(new LoggerService(TradeHistoryApp.name)).current;
 
     const windowId = useMemo(() => window.command.getWindowId("Trade History"), []);
 
@@ -35,191 +35,177 @@ const TradeHistoryApp = () =>
                 setTitleBarContextShareColour(fdc3Message.contextShareColour);
 
             if(fdc3Message.instruments?.[0]?.id.ticker)
-                setStockCode(fdc3Message.instruments[0].id.ticker);
+                setInstrumentCode(fdc3Message.instruments[0].id.ticker);
            else
-                setStockCode(null);
+                setInstrumentCode(null);
 
             if(fdc3Message.clients?.[0]?.id.name)
-                setClient(fdc3Message.clients[0].id.name);
+                setClientCode(fdc3Message.clients[0].id.name);
             else
-                setClient(null);
+                setClientCode(null);
         }
     });
 
     useEffect(() =>
     {
-        if(stockCode)
-            setStockTradeHistoryTabLabel("Stock Trade History (" + stockCode + ")");
+        if(instrumentCode)
+            setInstrumentTradeHistoryTabLabel("Instrument Trade History (" + instrumentCode + ")");
         else
-            setStockTradeHistoryTabLabel("Stock Trade History");
+            setInstrumentTradeHistoryTabLabel("Instrument Trade History");
 
-        if(client)
-            setClientTradeHistoryTabLabel("Client Trade History (" + client + ")");
+        if(clientCode)
+            setClientTradeHistoryTabLabel("Client Trade History (" + clientCode + ")");
         else
             setClientTradeHistoryTabLabel("Client Trade History");
 
-    }, [stockCode, client])
+    }, [instrumentCode, clientCode])
 
-    useEffect(() =>
+    const fetchTradeHistory = useCallback(async () =>
     {
-        setStockTradeHistory(tradeDataService.getData(TradeDataService.TRADE_HISTORY, stockCode, null, filterDays));
-        setClientTradeHistory(tradeDataService.getData(TradeDataService.TRADE_HISTORY, null, client, filterDays));
-    }, [stockCode, client, filterDays]);
-
-    const stockColumnDefs = useMemo(() => ( [
+        try
         {
-            headerName: 'Trd. Date',
-            field: 'date', // Replace with your data field for date
-            width: 85, // Adjust width as needed
+            const startDate = getDateMinusDays(filterDays);
+            const endDate = new Date().toISOString().split('T')[0];
+            const url = `http://localhost:20013/orders/history?startTradeDate=${startDate}&endTradeDate=${endDate}`;
+            const response = await fetch(url);
+
+            if (!response.ok)
+                throw new Error("Network response was not ok");
+
+            const data = await response.json();
+
+            setInstrumentTradeHistory({instrumentCode: "0001.HK", buyTrades: data.filter(order => order.side = "BUY"), sellTrades: data.filter(order => order.side != "BUY")});
+            setClientTradeHistory({clientCode: "GS", buyTrades: data.filter(order => order.side == "BUY"), sellTrades: data.filter(order => order.side != "BUY")});
+        }
+        catch (error)
+        {
+            loggerService.logError("Failed to fetch trade history: " + error);
+        }
+    }, [filterDays]);
+
+    const instrumentColumnDefs = useMemo(() =>
+        ([
+        {
+            headerName: 'Trade Date',
+            field: 'tradeDate',
+            width: 85,
             headerTooltip: 'Trade Date',
             sortable: true,
             filter: true,
         },
         {
             headerName: 'Client',
-            field: 'client', // Replace with your data field for stock code
-            width: 150, // Adjust width as needed
-            headerTooltip: 'Client name',
+            field: 'clientDescription',
+            width: 150,
+            headerTooltip: 'Client description',
             sortable: true,
             filter: true,
         },
         {
             headerName: 'Avg. Px',
-            field: 'averagePrice', // Replace with your data field for average price
-            width: 85, // Adjust width as needed
+            field: 'averagePrice',
+            width: 85,
             headerTooltip: 'Average Price',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Desk',
-            field: 'desk', // Replace with your data field for trading desk
-            width: 120, // Adjust width as needed
-            headerTooltip: 'Trading Desk',
+            headerName: 'Trade',
+            field: 'ownerId',
+            width: 120,
+            headerTooltip: 'Trader',
             sortable: true,
             filter: true,
         },
         {
             headerName: 'Org. Qty',
-            field: 'originalQuantity', // Replace with your data field for original quantity
-            width: 85, // Adjust width as needed
+            field: 'quantity',
+            width: 85,
             headerTooltip: 'Org. Qty',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Org. Notional',
-            field: 'originalNotionalValue', // Replace with your data field for original notional value
-            width: 110, // Adjust width as needed
-            headerTooltip: 'Org. Notional Value',
+            headerName: '$Notional',
+            field: 'orderNotionalValueInUSD',
+            width: 110,
+            headerTooltip: 'Notional Value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
             cellDataType: 'number',
-        },
+        }]), []);
+
+    const clientColumnDefs = useMemo(() =>
+        ([
         {
-            headerName: 'Curr. Qty',
-            field: 'currentQuantity', // Replace with your data field for current quantity
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Curr. Qty',
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Curr. Notional',
-            field: 'currentNotionalValue', // Replace with your data field for current notional value
-            width: 110, // Adjust width as needed
-            headerTooltip: 'Curr. Notional Value',
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-            cellDataType: 'number',
-        },
-    ]), []);
-    const clientColumnDefs = useMemo(() => ( [
-        {
-            headerName: 'Trd. Date',
-            field: 'date', // Replace with your data field for date
-            width: 85, // Adjust width as needed
+            headerName: 'Trade Date',
+            field: 'tradeDate',
+            width: 85,
             headerTooltip: 'Trade Date',
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Stock Code',
-            field: 'stockCode', // Replace with your data field for stock code
-            width: 95, // Adjust width as needed
-            headerTooltip: 'Stock Code (RIC)',
+            headerName: 'Instrument Code',
+            field: 'instrumentCode',
+            width: 95,
+            headerTooltip: 'Instrument Code (RIC)',
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Stock Description',
-            field: 'stockDescription', // Replace with your data field for stock description
-            width: 140, // Adjust width as needed
-            headerTooltip: 'Stock Description',
+            headerName: 'Instrument Description',
+            field: 'instrumentDescription',
+            width: 140,
+            headerTooltip: 'Instrument Description',
             sortable: true,
             filter: true,
         },
         {
             headerName: 'Avg. Px',
-            field: 'averagePrice', // Replace with your data field for average price
-            width: 85, // Adjust width as needed
+            field: 'averagePrice',
+            width: 85,
             headerTooltip: 'Average Price',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Desk',
-            field: 'desk', // Replace with your data field for trading desk
-            width: 100, // Adjust width as needed
-            headerTooltip: 'Trading Desk',
+            headerName: 'Trader',
+            field: 'ownerId',
+            width: 100,
+            headerTooltip: 'Trader',
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Org. Qty',
-            field: 'originalQuantity', // Replace with your data field for original quantity
-            width: 90, // Adjust width as needed
-            headerTooltip: 'Org. Qty',
+            headerName: 'Quantity',
+            field: 'quantity',
+            width: 90,
+            headerTooltip: 'Quantity',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Org. Notional',
-            field: 'originalNotionalValue', // Replace with your data field for original notional value
-            width: 110, // Adjust width as needed
+            headerName: '$Notional ',
+            field: 'orderNotionalValueInUSD',
+            width: 110,
             headerTooltip: 'Org. Notional Value',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
             cellDataType: 'number',
-        },
-        {
-            headerName: 'Curr. Qty',
-            field: 'currentQuantity', // Replace with your data field for current quantity
-            width: 85, // Adjust width as needed
-            headerTooltip: 'Curr. Qty',
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-        },
-        {
-            headerName: 'Curr. Notional',
-            field: 'currentNotionalValue', // Replace with your data field for current notional value
-            width: 110, // Adjust width as needed
-            headerTooltip: 'Curr. Notional Value',
-            valueFormatter: numberFormatter,
-            sortable: true,
-            filter: true,
-            cellDataType: 'number',
-        },
-    ]), []);
+        }]), []);
+
+
+    useEffect(() =>
+    {
+        fetchTradeHistory().then(() => loggerService.logInfo("Trade history fetched successfully"));
+    }, []);
 
     return (
         <>
@@ -228,21 +214,17 @@ const TradeHistoryApp = () =>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
                         <Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>
-                        <Tab className="client-trade-history-tab" label={stockTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
+                        <Tab className="client-trade-history-tab" label={instrumentTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
                     </TabList>
 
                     {selectedTab === "1" && (
                     <TabPanel value="1" className="client-trade-history">
-                        <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="client"
-                                                    dataId="client_trade_history" columnDefs={clientColumnDefs}
-                                                    windowId={windowId}/>
+                        <TradeHistoryGridsComponent rows={clientTradeHistory} historyProperty="clientCode" dataId="client_trade_history" columnDefs={clientColumnDefs} windowId={windowId}/>
                     </TabPanel>)}
 
                     {selectedTab === "2" && (
                     <TabPanel value="2" className="client-trade-history">
-                        <TradeHistoryGridsComponent rows={stockTradeHistory} historyProperty="stockCode"
-                                                    dataId="stock_trade_history" columnDefs={stockColumnDefs}
-                                                    windowId={windowId}/>
+                        <TradeHistoryGridsComponent rows={instrumentTradeHistory} historyProperty="instrumentCode" dataId="instrument_trade_history" columnDefs={instrumentColumnDefs} windowId={windowId}/>
                     </TabPanel>)}
                 </TabContext>
             </div>

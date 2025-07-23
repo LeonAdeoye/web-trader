@@ -39,6 +39,18 @@ export const createArrayFromScore = (score) =>
         throw new Error("Input must be a positive integer");
 }
 
+export const getDateMinusDays = (days) =>
+{
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const dd = String(date.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+
 export const orderStateStyling = (orderState) =>
 {
     const styleMapping = {

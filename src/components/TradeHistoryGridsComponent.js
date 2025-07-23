@@ -81,15 +81,15 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
     const onCellClicked = useCallback((params) =>
     {
         const {colDef, data} = params;
-        let client = data.client === "Client Masked" ? null : data.client;
-        let stockCode = data.stockCode;
+        let clientCode = data.clientCode === "Client Masked" ? null : data.clientCode;
+        let instrumentCode = data.instrumentCode;
 
-        if (colDef.field === 'stockCode' && stockCode)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
-        else if (colDef.field === 'client' && client)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, client), null, windowId);
-        else if(stockCode && client)
-            window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, client), null, windowId);
+        if (colDef.field === 'instrumentCode' && instrumentCode)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(instrumentCode, null), null, windowId);
+        else if (colDef.field === 'clientCode' && clientCode)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, clientCode), null, windowId);
+        else if(instrumentCode && clientCode)
+            window.messenger.sendMessageToMain(FDC3Service.createContextShare(instrumentCode, clientCode), null, windowId);
     }, []);
 
     return (
