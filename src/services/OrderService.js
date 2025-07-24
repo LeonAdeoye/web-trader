@@ -78,6 +78,7 @@ export class OrderService
             targetSource: "ORDER_MANAGEMENT_SERVICE",
             executedTime: '',
             messageType: 'CHILD_ORDER',
+            version: 1
         };
     }
 

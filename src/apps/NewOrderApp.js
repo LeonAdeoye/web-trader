@@ -96,7 +96,8 @@ export const NewOrderApp = () =>
         currentSource: "WEB_TRADER",
         targetSource: "ORDER_MANAGEMENT_SERVICE",
         executedTime: '',
-        messageType: 'PARENT_ORDER'
+        messageType: 'PARENT_ORDER',
+        version: 1
     }), []);
 
     const [order, setOrder] = useState(blankOrder);
