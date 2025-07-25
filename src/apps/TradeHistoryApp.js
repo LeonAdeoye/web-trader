@@ -74,8 +74,8 @@ const TradeHistoryApp = () =>
 
             const data = await response.json();
 
-            setInstrumentTradeHistory({instrumentCode: "0001.HK", buyTrades: data.filter(order => order.side = "BUY"), sellTrades: data.filter(order => order.side != "BUY")});
-            setClientTradeHistory({clientCode: "GS", buyTrades: data.filter(order => order.side == "BUY"), sellTrades: data.filter(order => order.side != "BUY")});
+            setInstrumentTradeHistory({instrumentCode: "0001.HK", buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
+            setClientTradeHistory({clientCode: "GS", buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
         }
         catch (error)
         {
@@ -88,7 +88,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Trade Date',
             field: 'tradeDate',
-            width: 100,
+            width: 90,
             headerTooltip: 'Trade Date',
             sortable: true,
             filter: true,
@@ -104,14 +104,14 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Avg. Px',
             field: 'averagePrice',
-            width: 85,
+            width: 80,
             headerTooltip: 'Average Price',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Trade',
+            headerName: 'Trader',
             field: 'ownerId',
             width: 120,
             headerTooltip: 'Trader',
@@ -119,10 +119,10 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: 'Org. Qty',
+            headerName: 'Quantity',
             field: 'quantity',
-            width: 85,
-            headerTooltip: 'Org. Qty',
+            width: 80,
+            headerTooltip: 'Original Qty',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
@@ -143,7 +143,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Trade Date',
             field: 'tradeDate',
-            width: 100,
+            width: 90,
             headerTooltip: 'Trade Date',
             sortable: true,
             filter: true,
@@ -151,7 +151,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Instrument',
             field: 'instrumentCode',
-            width: 105,
+            width: 90,
             headerTooltip: 'Instrument Code (RIC)',
             sortable: true,
             filter: true,
@@ -159,7 +159,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Instrument Desc.',
             field: 'instrumentDescription',
-            width: 140,
+            width: 180,
             headerTooltip: 'Instrument Description',
             sortable: true,
             filter: true,
@@ -167,7 +167,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Avg. Px',
             field: 'averagePrice',
-            width: 85,
+            width: 80,
             headerTooltip: 'Average Price',
             valueFormatter: numberFormatter,
             sortable: true,
@@ -184,8 +184,8 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Quantity',
             field: 'quantity',
-            width: 90,
-            headerTooltip: 'Quantity',
+            width: 80,
+            headerTooltip: 'Original Quantity',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
