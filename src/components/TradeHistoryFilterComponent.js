@@ -22,8 +22,8 @@ const TradeHistoryFilterComponent = ({historyPropertyValue, buySkew, sellSkew}) 
                         <FormControlLabel value="180" control={<Radio size="small" sx={{color: grey[100],'&.Mui-checked': { color: red[600] }}}/>} label={<Typography sx={{ fontSize: '12px' }}>180</Typography>}labelPlacement="start"/>
                     </div>
                     <div className="skews" style={{marginLeft: "80px", marginRight: "230px"}}>
-                        {sellSkew > 0 ? <Typography sx={{ fontSize: '12px'}}>Sell Skew {sellSkew.toFixed(2)}:1</Typography> : ""}
-                        {buySkew > 0 ? <Typography sx={{ fontSize: '12px' }}>Buy Skew {buySkew.toFixed(2)}:1</Typography> : ""}
+                        {sellSkew > 0 ? <Typography sx={{ fontSize: '12px'}}>Sell Skew {sellSkew.toFixed(0)}:1</Typography> : ""}
+                        {buySkew > 0 ? <Typography sx={{ fontSize: '12px' }}>Buy Skew {buySkew.toFixed(0)}:1</Typography> : ""}
                     </div>
                     <span>{historyPropertyValue}</span>
                 </RadioGroup>

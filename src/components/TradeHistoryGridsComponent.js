@@ -34,8 +34,8 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
         }
         else
         {
-            setTotalBuyQty(rows.buyTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
-            setTotalBuyNotional(rows.buyTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
+            setTotalBuyQty(rows.buyTrades.reduce((total, trade) => total + trade.quantity, 0));
+            setTotalBuyNotional(rows.buyTrades.reduce((total, trade) => total + trade.orderNotionalValueInUSD, 0));
         }
 
         if(rows.sellTrades.length === 0)
@@ -46,8 +46,8 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
         }
         else
         {
-            setTotalSellQty(rows.sellTrades.reduce((total, trade) => total + trade.currentQuantity, 0));
-            setTotalSellNotional(rows.sellTrades.reduce((total, trade) => total + trade.currentNotionalValue, 0));
+            setTotalSellQty(rows.sellTrades.reduce((total, trade) => total + trade.quantity, 0));
+            setTotalSellNotional(rows.sellTrades.reduce((total, trade) => total + trade.orderNotionalValueInUSD, 0));
         }
     }, [rows]);
 
