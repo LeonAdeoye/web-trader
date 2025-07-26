@@ -11,6 +11,8 @@ import {titleBarContextShareColourState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import {getDateMinusDays, numberFormatter} from "../utilities";
+import {tradeHistoryDialogDisplayState} from "../atoms/dialog-state";
+import TradeHistorySearchDialog from "../dialogs/TradeHistorySearchDialog";
 
 const TradeHistoryApp = () =>
 {
@@ -23,6 +25,7 @@ const TradeHistoryApp = () =>
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
     const [instrumentTradeHistoryTabLabel, setInstrumentTradeHistoryTabLabel] = useState("Instrument Trade History");
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const [, setTradeHistoryDialogOpenFlag ] = useRecoilState(tradeHistoryDialogDisplayState);
     const loggerService = useRef(new LoggerService(TradeHistoryApp.name)).current;
 
     const windowId = useMemo(() => window.command.getWindowId("Trade History"), []);
@@ -113,7 +116,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Trader',
             field: 'ownerId',
-            width: 120,
+            width: 90,
             headerTooltip: 'Trader',
             sortable: true,
             filter: true,
@@ -128,10 +131,18 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: '$Notional',
+            headerName: 'Executed',
+            field: 'executed',
+            width: 90,
+            headerTooltip: 'Executed Quantity',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: '$Ord. Notional',
             field: 'orderNotionalValueInUSD',
             width: 110,
-            headerTooltip: 'Notional Value in USD',
+            headerTooltip: 'Order Notional Value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
@@ -157,14 +168,6 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: 'Instrument Desc.',
-            field: 'instrumentDescription',
-            width: 180,
-            headerTooltip: 'Instrument Description',
-            sortable: true,
-            filter: true,
-        },
-        {
             headerName: 'Avg. Px',
             field: 'averagePrice',
             width: 80,
@@ -176,7 +179,7 @@ const TradeHistoryApp = () =>
         {
             headerName: 'Trader',
             field: 'ownerId',
-            width: 100,
+            width:90,
             headerTooltip: 'Trader',
             sortable: true,
             filter: true,
@@ -191,10 +194,18 @@ const TradeHistoryApp = () =>
             filter: true,
         },
         {
-            headerName: '$Notional ',
+            headerName: 'Executed',
+            field: 'executed',
+            width: 90,
+            headerTooltip: 'Executed Quantity',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: '$Ord. Notional ',
             field: 'orderNotionalValueInUSD',
             width: 110,
-            headerTooltip: 'Org. Notional Value',
+            headerTooltip: 'Order Notional Value in USD',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
@@ -209,7 +220,10 @@ const TradeHistoryApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Trade History" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <TitleBarComponent title="Trade History" windowId={windowId} addButtonProps={{
+                handler: () => setTradeHistoryDialogOpenFlag(true),
+                tooltipText: "Select instrument's or client's trade history..."
+            }}  showChannel={false} showTools={false}/>
             <div className="trade-history-app" style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
@@ -228,6 +242,7 @@ const TradeHistoryApp = () =>
                     </TabPanel>)}
                 </TabContext>
             </div>
+            <TradeHistorySearchDialog />
         </>
     );
 };
