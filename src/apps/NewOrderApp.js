@@ -293,8 +293,7 @@ export const NewOrderApp = () =>
                             <ClientAutoCompleteWidget
                                 clients={clients}
                                 handleInputChange={handleInputChange}
-                                clientCode={order.clientCode}
-                            />
+                                clientCode={order.clientCode}/>
                             {order.clientCode !== '' && (
                             <TextField
                                 size="small"

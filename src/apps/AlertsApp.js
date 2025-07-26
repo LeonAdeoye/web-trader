@@ -17,8 +17,6 @@ export const AlertsApp = () =>
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setAlertDialogDisplayFlag] = useRecoilState(alertDialogDisplayState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
-
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("Alerts"), []);
 
     useEffect(() =>
@@ -128,16 +126,9 @@ export const AlertsApp = () =>
 
     return (
         <div>
-            <TitleBarComponent title="Alerts" windowId={windowId} addButtonProps={{
-                handler:  () => setAlertDialogDisplayFlag(true),
-                tooltipText: "Add new alert..."
-            }} showChannel={true} showTools={false}/>
+            <TitleBarComponent title="Alerts" windowId={windowId} addButtonProps={{ handler:  () => setAlertDialogDisplayFlag(true), tooltipText: "Add new alert..." }} showChannel={true} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-                <GenericGridComponent rowHeight={22}
-                                      gridTheme={"ag-theme-alpine"}
-                                      rowIdArray={["id"]}
-                                      columnDefs={columnDefs}
-                                      gridData={filterAlertsUsingContext}/>
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]} columnDefs={columnDefs} gridData={filterAlertsUsingContext}/>
             </div>
         </div>);
 };

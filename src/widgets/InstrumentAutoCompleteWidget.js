@@ -22,13 +22,13 @@ export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, in
             renderInput={(params) => (
                 <TextField 
                     {...params} 
-                    label='Select instrument'
+                    label='Select instrument code'
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     inputProps={{ ...params.inputProps, style: { fontSize: '0.75rem', padding: '6.5px 14px'} }}
                 />
             )}
             style={{ width: '203px'}}
-            label={'Select Instrument'}
+            label={'Select instrument code'}
             value={instrumentCode || null}
             options={(instruments || []).map(inst => inst.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}

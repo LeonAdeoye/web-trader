@@ -22,7 +22,7 @@ export const sliceDialogDisplayState = atom({
 
 export const tradeHistoryDialogDisplayState = atom({
     key: 'tradeHistoryDialogDisplayState',
-    default: false
+    default: true
 });
 
 export const clientInterestDialogDisplayState = atom({

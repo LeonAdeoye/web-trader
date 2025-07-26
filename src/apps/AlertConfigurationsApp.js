@@ -14,8 +14,8 @@ import SideRenderer from "../components/SideRenderer";
 
 export const AlertConfigurationsApp = () =>
 {
-    const [selectedGenericGridRow, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
-    const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
+    const [, setSelectedGenericGridRow ] = useRecoilState(selectedGenericGridRowState);
+    const [, setAlertConfiguration] = useRecoilState(alertConfigurationState);
 
     const [alertConfigurations, setAlertConfigurations] = useState([]);
     const [ownerId, setOwnerId] = useState('');
@@ -167,10 +167,7 @@ export const AlertConfigurationsApp = () =>
 
    return(
         <>
-            <TitleBarComponent title="Alert Configurations" windowId={windowId} addButtonProps={{
-                handler: () => launchWizardApp(),
-                tooltipText: "Add new alert configuration..."
-            }} showChannel={false} showTools={false}/>
+            <TitleBarComponent title="Alert Configurations" windowId={windowId} addButtonProps={{ handler: () => launchWizardApp(), tooltipText: "Add new alert configuration..." }} showChannel={false} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]}
                                       columnDefs={columnDefs} gridData={alertConfigurations} handleAction={handleAction}/>
