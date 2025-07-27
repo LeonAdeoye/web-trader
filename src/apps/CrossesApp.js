@@ -8,7 +8,6 @@ import {titleBarContextShareColourState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 
-
 const CrossesApp = () =>
 {
     const [stockRows, setStockRows] = useState([]);
@@ -35,14 +34,15 @@ const CrossesApp = () =>
         const newCross = event.data.cross;
         setCrossesReceived((prevData) =>
         {
-            const filtered = prevData.filter((item) => item.state !== 'FULLY_FILLED' && item.state !== 'DONE_FOR_DAY');
-            if (newCross.state === 'PARTIALLY_FILLED')
-                return [...filtered.filter((item) => item.orderId !== newCross.orderId), newCross,];
-            return filtered;
+            if (newCross.state !== 'FULLY_FILLED' && newCross.state !== 'DONE_FOR_DAY')
+            {
+                const filtered = prevData.filter((item) => item.orderId !== newCross.orderId);
+                return [...filtered, newCross];
+            }
+            else
+                return prevData.filter((item) => item.orderId !== newCross.orderId);
         });
     }, []);
-
-
 
     window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {

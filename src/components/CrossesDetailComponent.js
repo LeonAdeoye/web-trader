@@ -4,7 +4,7 @@ import '../styles/css/main.css';
 import {FDC3Service} from "../services/FDC3Service";
 import {useRecoilState} from "recoil";
 import {selectedGenericGridRowState} from "../atoms/component-state";
-import {createRowId, currencyFormatter, getRowIdValue, numberFormatter} from "../utilities";
+import {currencyFormatter, getRowIdValue, numberFormatter} from "../utilities";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
@@ -41,8 +41,8 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
             filter: true,
         },
         {
-            headerName: 'Stock Code',
-            field: 'stockCode',
+            headerName: 'Instrument',
+            field: 'instrumentCode',
             width: 100,
             sortable: true,
             filter: true,
