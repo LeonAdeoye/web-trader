@@ -1,5 +1,7 @@
 const { Client, Command } = require('amps');
 const { onAmpsOrderMessage } = require("./message_handler");
+const {LoggerService} = require("../services/LoggerService");
+let loggerService = new LoggerService("child-order-reader.js");
 
 const main = async () =>
 {
@@ -11,13 +13,12 @@ const main = async () =>
         await client.connect(url);
         const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui");
         await client.execute(inboundCmd, onAmpsOrderMessage);
-
-        console.log("Connected to AMPS and subscribed to both inbound and outbound topics.");
+        loggerService.logInfo(`Child order reader web worker connected to AMPS using URL: ${url}`);
     }
     catch (e)
     {
-        console.error("Connection or subscription error:", e);
+        loggerService.logError(`Exception thrown in child-order-reader.js: ${e}`);
     }
 };
 
-main().then(() => console.log("Order reader AMPS subscription initialized."));
+main().then(() => loggerService.logInfo("Child order reader AMPS subscription initialized."));

@@ -3,6 +3,8 @@ const {onAmpsPriceMessage} = require("./message_handler");
 const clientName = "web-trader-price-chart-reader";
 const topicName = "prices";
 const url = "ws://localhost:9008/amps/json";
+const {LoggerService} = require("../services/LoggerService");
+let loggerService = new LoggerService("price-chart-reader.js");
 
 const main = async () =>
 {
@@ -14,7 +16,8 @@ const main = async () =>
         {
             if(currentConnectionId)
             {
-                console.log("Client is already connected. Disconnecting client with connectionId: " + currentConnectionId);
+                loggerService.logInfo(`Client is already connected. Disconnecting client with connectionId: ${currentConnectionId}`);
+                loggerService.logInfo(`Disconnecting client with connectionId: ${currentConnectionId}`);
                 await client.unsubscribe(currentConnectionId);
                 await client.disconnect();
             }
@@ -22,13 +25,13 @@ const main = async () =>
             await client.connect(url);
             const cmd = new Command("sow_and_subscribe").topic(topicName).options("select=[-/,+/time_stamp, +/best_ask, +/best_bid, +/symbol]").filter(`/symbol = '${symbol}'`);
             let connectionId = await client.execute(cmd, onAmpsPriceMessage);
-            console.log("New connection Id: " + JSON.stringify(connectionId));
+            loggerService.logInfo(`New connection Id: ${JSON.stringify(connectionId)}`);
             postMessage({messageType: "connectionId", currentConnectionId: connectionId});
-            console.log("Price chart reader web worker Connected to AMPS using URL: ", url);
+            loggerService.logInfo(`Price chart reader web worker connected to AMPS using URL: ${url}`);
         }
         catch (e)
         {
-            console.error(e);
+            loggerService.logError(`Exception thrown in price-chart-reader.js: ${e}`);
         }
     }
 
@@ -39,5 +42,5 @@ const main = async () =>
     }
 }
 
-main().then(() => console.log("AMPS subscription completed."));
+main().then(() => loggerService.logInfo("Price chart reader AMPS subscription initialized."));
 

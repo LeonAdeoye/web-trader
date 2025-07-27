@@ -1,5 +1,7 @@
 const {Client, Command} = require('amps');
 const {onAmpsAlertMessage} = require("./message_handler");
+const {LoggerService} = require("../services/LoggerService");
+let loggerService = new LoggerService("alert-reader.js");
 
 const main = async () =>
 {
@@ -12,12 +14,12 @@ const main = async () =>
         await client.connect(url);
         const cmd = new Command("sow_and_subscribe").topic(topicName);
         await client.execute(cmd, onAmpsAlertMessage);
-        console.log("Alert reader web worker connected to AMPS using URL: ", url);
+        loggerService.logInfo(`Alert reader web worker connected to AMPS using URL: ${url}`);
     }
     catch (e)
     {
-        console.error(e);
+        loggerService.logError(`Exception thrown in alert-reader.js: ${e}`);
     }
 }
 
-main().then(() => console.log("Alert reader AMPS subscription completed."));
+main().then(() => loggerService.logInfo("Alert reader AMPS subscription initialized."));

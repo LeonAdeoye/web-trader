@@ -1,4 +1,6 @@
 const { Client } = require("amps");
+const {LoggerService} = require("../services/LoggerService");
+let loggerService = new LoggerService("manager-order.js");
 
 const main = async () => {
     try
@@ -8,7 +10,7 @@ const main = async () => {
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        console.log("Manage order web worker connected to AMPS using URL: ", url);
+        loggerService.logInfo(`Manage order web worker connected to AMPS using URL: ${url}`);
 
         onmessage = async function (event)
         {
@@ -23,22 +25,22 @@ const main = async () => {
                     try
                     {
                         await client.publish(topicName, order);
-                        console.log(`Manage order web worker published message to topic '${topicName}':`, order);
+                        loggerService.logInfo(`Manage order web worker published message to topic '${topicName}':${JSON.stringify(order)}`);
                     }
                     catch (error)
                     {
-                        console.error("Manage order web worker failed to publish message:", error);
+                        loggerService.logError("Manage order web worker failed to publish message:", error);
                     }
                     break;
                 default:
-                    console.error(`Manage order web worker received an unknown message type: ${order.state}`);
+                    loggerService.logError(`Manage order web worker received an unknown message type: ${order.state}`);
             }
         };
     }
     catch (e)
     {
-        console.error(e);
+        loggerService.logError(`Exception thrown in manage-order.js: ${e}`);
     }
 };
 
-main().then(() => console.log("Manage order web worker setup completed."));
+main().then(() => loggerService.logInfo("Manager Order AMPS subscription initialized."));

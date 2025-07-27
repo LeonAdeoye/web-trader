@@ -56,7 +56,7 @@ const TradeHistorySearchDialog = () =>
             setInstruments(referenceDataService.getInstruments());
             setClients(clientService.getClients());
         };
-        loadData().then(() => loggerService.logInfo('TradeHistorySearchDialog data loaded successfully.'))
+        loadData().then(() => loggerService.logInfo('TradeHistorySearchDialog search input data loaded successfully.'))
     }, [ referenceDataService, clientService, traderService, loggerService]);
 
     const handleSearch = useCallback(() =>

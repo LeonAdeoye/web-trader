@@ -220,7 +220,7 @@ const TradeHistoryApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Trade History" windowId={windowId} addButtonProps={{ handler: () => setTradeHistoryDialogOpenFlag(true), tooltipText: "Search trade history..." }}  showChannel={false} showTools={false}/>
+            <TitleBarComponent title="Trade History" windowId={windowId} addButtonProps={{ handler: () => setTradeHistoryDialogOpenFlag(true), tooltipText: "Search trade history..." }}  showChannel={true} showTools={false}/>
             <div className="trade-history-app" style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
