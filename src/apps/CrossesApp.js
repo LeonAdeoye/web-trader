@@ -1,24 +1,25 @@
 import React, {useMemo, useState, useCallback, useRef, useEffect} from 'react';
 import '../styles/css/main.css';
-import {TradeDataService} from "../services/TradeDataService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {CrossesSummaryComponent} from "../components/CrossesSummaryComponent";
 import {CrossesDetailComponent} from "../components/CrossesDetailComponent";
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 import TitleBarComponent from "../components/TitleBarComponent";
+import {LoggerService} from "../services/LoggerService";
 
 
 const CrossesApp = () =>
 {
-    const tradeDataService = useRef(new TradeDataService()).current;
     const [stockRows, setStockRows] = useState([]);
+    const [crossesReceived, setCrossesReceived] = useState([]);
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const [exchangeRatesLoaded, setExchangeRatesLoaded] = useState(false);
     const [worker, setWorker] = useState(null);
     const [instrumentCode, setInstrumentCode] = useState(null);
-    const [client, setClient] = useState(null);
+    const [clientCode, setClientCode] = useState(null);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const loggerService = useRef(new LoggerService(CrossesApp.name)).current;
 
     const windowId = useMemo(() => window.command.getWindowId("Crosses"), []);
 
@@ -32,7 +33,7 @@ const CrossesApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const newCross = event.data.cross;
-        setStockRows((prevData) => [...prevData, newCross]); //TODO
+        setCrossesReceived((prevData) => [...prevData, newCross]);
     }, []);
 
     window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
@@ -48,9 +49,9 @@ const CrossesApp = () =>
                 setInstrumentCode(null);
 
             if(fdc3Message.clients?.[0]?.id.name)
-                setClient(fdc3Message.clients[0].id.name);
+                setClientCode(fdc3Message.clients[0].id.name);
             else
-                setClient(null);
+                setClientCode(null);
         }
     });
 
@@ -69,12 +70,89 @@ const CrossesApp = () =>
     useEffect(() =>
     {
         exchangeRateService.loadExchangeRates().then(() => setExchangeRatesLoaded(true));
-    }, []);
+    }, [exchangeRateService]);
+
+    const transformCrosses = (crossesArray) =>
+    {
+        const grouped = {};
+        for (const order of crossesArray)
+        {
+            const instrumentCode = order.instrumentCode;
+            if (!grouped[instrumentCode])
+            {
+                grouped[instrumentCode] =
+                {
+                    instrumentCode,
+                    stockDescription: order.instrumentDescription,
+                    currency: order.settlementCurrency,
+                    buyOrders: [],
+                    sellOrders: []
+                };
+            }
+
+            const formattedOrder =
+            {
+                desk: "Unknown Desk",
+                trader: order.ownerId || "Unknown Trader",
+                quantity: order.quantity,
+                instrumentCode: order.instrumentCode,
+                notionalValue: order.orderNotionalValueInUSD || 0,
+                instruction: order.handlingInstruction || "Unknown Instruction",
+                price: order.price,
+                client: order.clientDescription || "Client Masked",
+                time: order.arrivalTime || "Unknown Time"
+            };
+
+            if (order.side === "BUY")
+                grouped[instrumentCode].buyOrders.push(formattedOrder);
+            else if (order.side !== "BUY")
+                grouped[instrumentCode].sellOrders.push(formattedOrder);
+        }
+
+        return Object.values(grouped);
+    }
+
+    const filterCrosses = (crosses, instrumentCode, clientCode) =>
+    {
+        let result = [];
+
+        if(instrumentCode)
+        {
+            loggerService.logInfo(`Filtering crosses for instrument code: ${instrumentCode}.`);
+            result = crosses.filter((item) => item.instrumentCode === instrumentCode);
+        }
+
+        if(clientCode)
+        {
+            loggerService.logInfo(`Filtering crosses for client code: ${clientCode}.`);
+            for (const cross of crosses)
+            {
+                const { buyOrders, sellOrders, ...rest } = cross;
+                const hasMatchingBuy = buyOrders.some((order) => order.clientCode === clientCode && order.instrumentCode !== instrumentCode);
+                const hasMatchingSell = sellOrders.some((order) => order.clientCode === clientCode && order.instrumentCode !== instrumentCode);
+
+                if (hasMatchingBuy || hasMatchingSell)
+                    result.push({ ...rest, buyOrders, sellOrders });
+            }
+        }
+
+        if(!clientCode && !instrumentCode)
+        {
+            loggerService.logInfo("No filters applied, returning all crosses.");
+            for(const cross of crosses)
+            {
+                const { buyOrders, sellOrders, ...rest } = cross;
+                result.push({ ...rest, buyOrders, sellOrders });
+            }
+        }
+
+        return result;
+    }
 
     const calculateMaximumCrossableAmount = (buyOrders, sellOrders, currency) =>
     {
-        if(buyOrders.length === 0 || sellOrders.length === 0)
-            return { minimumQuantity: 0, minimumNotionalValue: 0 };
+        if(buyOrders?.length === 0 || sellOrders?.length === 0)
+            return { maximumCrossableQuantity: 0, maximumCrossableNotionalValue: 0 };
 
         const totalNotionalBuy = buyOrders.reduce((total, order) => total + order.notionalValue, 0);
         const totalNotionalSell = sellOrders.reduce((total, order) => total + order.notionalValue, 0);
@@ -92,7 +170,7 @@ const CrossesApp = () =>
         if(!exchangeRatesLoaded)
             return;
 
-        const result = tradeDataService.getData(TradeDataService.CROSSES, instrumentCode, client);
+        const result = filterCrosses(transformCrosses(crossesReceived), instrumentCode, clientCode);
 
         if(result.length === 0)
         {
@@ -113,7 +191,7 @@ const CrossesApp = () =>
                 return (
                     <div key={index} className="opportunity-row">
                         <div className="stock-info">
-                            <CrossesSummaryComponent stockCode={cross.stockCode} stockCurrency={cross.currency} stockDescription={cross.stockDescription}
+                            <CrossesSummaryComponent stockCode={cross.instrumentCode} stockCurrency={cross.currency} stockDescription={cross.stockDescription}
                                                      maxCrossableQty={maximumCrossableQuantity.toLocaleString()} maxCrossableNotional={maximumCrossableNotionalValue.toLocaleString()}/>
                             <CrossesDetailComponent windowId={windowId} buyOrders={cross.buyOrders} sellOrders={cross.sellOrders}/>
                         </div>
@@ -121,7 +199,7 @@ const CrossesApp = () =>
                 );
             }));
         }
-    }, [exchangeRatesLoaded, instrumentCode, client]);
+    }, [exchangeRatesLoaded, instrumentCode, clientCode, crossesReceived, windowId]);
 
     return(
         <>
