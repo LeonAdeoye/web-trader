@@ -33,8 +33,16 @@ const CrossesApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const newCross = event.data.cross;
-        setCrossesReceived((prevData) => [...prevData, newCross]);
+        setCrossesReceived((prevData) =>
+        {
+            const filtered = prevData.filter((item) => item.state !== 'FULLY_FILLED' && item.state !== 'DONE_FOR_DAY');
+            if (newCross.state === 'PARTIALLY_FILLED')
+                return [...filtered.filter((item) => item.orderId !== newCross.orderId), newCross,];
+            return filtered;
+        });
     }, []);
+
+
 
     window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
@@ -95,11 +103,14 @@ const CrossesApp = () =>
                 desk: "Unknown Desk",
                 trader: order.ownerId || "Unknown Trader",
                 quantity: order.quantity,
+                pending: order.pending,
+                orderId: order.orderId,
                 instrumentCode: order.instrumentCode,
-                notionalValue: order.orderNotionalValueInUSD || 0,
-                instruction: order.handlingInstruction || "Unknown Instruction",
+                resiNotionalValueInUSD: order.resiNotionalValueInUSD || 0,
+                instruction: order.handlingInstruction || "No Instruction",
                 price: order.price,
-                client: order.clientDescription || "Client Masked",
+                arrivalTime: order.arrivalTime,
+                clientDescription: order.clientDescription || "Client Masked",
                 time: order.arrivalTime || "Unknown Time"
             };
 
@@ -151,7 +162,7 @@ const CrossesApp = () =>
 
     const calculateMaximumCrossableAmount = (buyOrders, sellOrders, currency) =>
     {
-        if(buyOrders?.length === 0 || sellOrders?.length === 0)
+        if(buyOrders?.length === 0 || sellOrders?.length === 0 || exchangeRateService.getExchangeRate(currency) === 0)
             return { maximumCrossableQuantity: 0, maximumCrossableNotionalValue: 0 };
 
         const totalNotionalBuy = buyOrders.reduce((total, order) => total + order.notionalValue, 0);
@@ -192,7 +203,7 @@ const CrossesApp = () =>
                     <div key={index} className="opportunity-row">
                         <div className="stock-info">
                             <CrossesSummaryComponent stockCode={cross.instrumentCode} stockCurrency={cross.currency} stockDescription={cross.stockDescription}
-                                                     maxCrossableQty={maximumCrossableQuantity.toLocaleString()} maxCrossableNotional={maximumCrossableNotionalValue.toLocaleString()}/>
+                                 maxCrossableQty={maximumCrossableQuantity.toLocaleString()} maxCrossableNotional={maximumCrossableNotionalValue.toLocaleString()}/>
                             <CrossesDetailComponent windowId={windowId} buyOrders={cross.buyOrders} sellOrders={cross.sellOrders}/>
                         </div>
                     </div>

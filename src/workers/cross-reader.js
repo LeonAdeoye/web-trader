@@ -10,7 +10,7 @@ const main = async () =>
     {
         const clientName = "web-trader-cross-reader";
         const topicName = "inbound.gui";
-        const filter = `/state NOT IN ('DONE_FOR_DAY', 'FULLY_FILLED', 'REJECTED_BY_OMS', 'REJECTED_BY_DESK', 'REJECTED_BY_EXCH', 'CANCELLED_BY_DESK', 'CANCELLED_BY_EXCH') AND /messageType = 'PARENT_ORDER' AND /tradeDate >= ${getDateToday()}`;
+        const filter = `/state NOT IN ('REJECTED_BY_OMS', 'REJECTED_BY_DESK', 'REJECTED_BY_EXCH', 'CANCELLED_BY_DESK', 'CANCELLED_BY_EXCH') AND /messageType = 'PARENT_ORDER' AND /tradeDate >= ${getDateToday()}`;
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);

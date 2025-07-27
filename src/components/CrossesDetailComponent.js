@@ -4,7 +4,7 @@ import '../styles/css/main.css';
 import {FDC3Service} from "../services/FDC3Service";
 import {useRecoilState} from "recoil";
 import {selectedGenericGridRowState} from "../atoms/component-state";
-import {currencyFormatter, numberFormatter} from "../utilities";
+import {createRowId, currencyFormatter, getRowIdValue, numberFormatter} from "../utilities";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
@@ -18,9 +18,18 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
         {
             headerName: 'Desk',
             field: 'desk',
-            width: 100,
+            width: 110,
             headerTooltip: "Trader's desk",
             sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Order Id',
+            field: 'orderId',
+            width: 150,
+            headerTooltip: "Order Id",
+            sortable: true,
+            hide: true,
             filter: true,
         },
         {
@@ -42,33 +51,42 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
         {
             headerName: 'Qty',
             field: 'quantity',
-            width: 80,
-            headerTooltip: 'Remaining quantity of the order',
+            width: 90,
+            headerTooltip: 'Quantity of the order',
             valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Notional',
-            field: 'notionalValue',
-            valueFormatter: currencyFormatter,
-            width: 100,
-            cellDataType: 'number',
-            headerTooltip: 'Notional value in USD',
-            sortable: true,
-            filter: true
-
-        },
-        {
-            headerName: 'Instr',
-            field: 'instruction',
-            width: 80,
-            headerTooltip: "Client's instructions",
+            headerName: 'Pending',
+            field: 'pending',
+            width: 90,
+            headerTooltip: 'Pending un-executed quantity of the order',
+            valueFormatter: numberFormatter,
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Px',
+            headerName: '$Res. Notional',
+            field: 'residualNotionalValueInUSD',
+            valueFormatter: currencyFormatter,
+            width: 110,
+            cellDataType: 'number',
+            headerTooltip: 'Residual notional value in USD',
+            sortable: true,
+            filter: true
+        },
+        {
+            headerName: 'Instruction',
+            field: 'instruction',
+            width: 100,
+            headerTooltip: "Client's instructions",
+            sortable: true,
+            filter: true,
+            hide:true
+        },
+        {
+            headerName: 'Price',
             field: 'price',
             width: 80,
             headerTooltip: "Order price in local currency",
@@ -78,16 +96,16 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
         },
         {
             headerName: 'Client',
-            field: 'client',
-            width: 100,
-            headerTooltip: "The client of the order",
+            field: 'clientDescription',
+            width: 130,
+            headerTooltip: "The description of the client that instigated the order",
             sortable: true,
             filter: true,
         },
         {
-            headerName: 'Time',
-            field: 'time',
-            width: 100,
+            headerName: 'Arr. Time',
+            field: 'arrivalTime',
+            width: 110,
             sortable: true,
             filter: true,
         },
@@ -120,17 +138,34 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, data.client), null, windowId);
         else
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(data.stockCode, data.client), null, windowId);
+    }, [windowId]);
+
+    const getRowId = useMemo(() => (row) =>
+    {
+        return getRowIdValue(["orderId"], row.data);
     }, []);
+
+    const onGridReady = (params) =>
+    {
+        params.columnApi.applyColumnState({
+            state: [{ colId: 'quantity', sort: 'desc' }, { colId: 'arrivalTime', sort: 'desc' }],
+            applyOrder: true,
+        });
+    };
 
     return(<div className="bottom-part">
             <div className="buy-orders">
                 <div className="ag-theme-balham">
                     <AgGridReact
+                        onGridReady={onGridReady}
                         columnDefs={columnDefs}
                         rowData={buyOrders}
+                        getRowId={getRowId}
                         domLayout='autoHeight'
                         rowSelection={'single'}
                         onSelectionChanged={onBuySelectionChanged}
+                        enableCellChangeFlash={true}
+                        animateRows={true}
                         onCellClicked={onCellClicked}
                         ref={buyGridApiRef}
                         headerHeight={22}
@@ -141,13 +176,17 @@ export const CrossesDetailComponent = ({windowId, buyOrders, sellOrders}) =>
             <div className="sell-orders">
                 <div className="ag-theme-balham">
                     <AgGridReact
+                        onGridReady={onGridReady}
                         columnDefs={columnDefs}
+                        getRowId={getRowId}
                         rowData={sellOrders}
+                        domLayout='autoHeight'
                         rowSelection={'single'}
                         onSelectionChanged={onSellSelectionChanged}
+                        enableCellChangeFlash={true}
+                        animateRows={true}
                         onCellClicked={onCellClicked}
                         ref={sellGridApiRef}
-                        domLayout='autoHeight'
                         headerHeight={22}
                         rowHeight={22}
                     />
