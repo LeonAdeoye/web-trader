@@ -90,7 +90,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(null, clientCode), null, windowId);
         else if(instrumentCode && clientCode)
             window.messenger.sendMessageToMain(FDC3Service.createContextShare(instrumentCode, clientCode), null, windowId);
-    }, []);
+    }, [windowId]);
 
     return (
         <div className="trade-history-app">
@@ -98,7 +98,7 @@ const TradeHistoryGridsComponent = ({rows, historyProperty, dataId, columnDefs, 
                 <div className="trade-history-row">
                     <div className="stock-info">
                         <div className="top-part">
-                            <TradeHistoryFilterComponent historyPropertyValue={`${rows ? rows[historyProperty] : ''} Trade History`} buySkew={buySkew} sellSkew={sellSkew}/>
+                            <TradeHistoryFilterComponent historyPropertyValue={historyProperty !== "" ? (`${rows ? rows[historyProperty] : ''} Trade History`) : ""} buySkew={buySkew} sellSkew={sellSkew}/>
                         </div>
                         <div className="bottom-part">
                             <div className="buy-orders">

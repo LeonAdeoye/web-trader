@@ -16,7 +16,7 @@ import TradeHistorySearchDialog from "../dialogs/TradeHistorySearchDialog";
 
 const TradeHistoryApp = () =>
 {
-    const [selectedTab, setSelectedTab] = useState("1");
+    const [selectedTab, setSelectedTab] = useState("3");
     const [filterDays] = useRecoilState(filterDaysState);
     const [instrumentCode, setInstrumentCode] = useState("");
     const [clientCode, setClientCode] = useState("");
@@ -79,8 +79,8 @@ const TradeHistoryApp = () =>
         {
             const startDate = getDateMinusDays(filterDays);
             const endDate = new Date().toISOString().split('T')[0];
-            const clientSuffix = clientCode !== "" ? `&clientCode=${clientCode}` : `&clientCode=""`;
-            const instrumentSuffix = instrumentCode !== "" ? `&instrumentCode=${instrumentCode}` : `&instrumentCode=""`;
+            const clientSuffix = clientCode !== "" ? `&clientCode=${clientCode}` : `&clientCode=`;
+            const instrumentSuffix = instrumentCode !== "" ? `&instrumentCode=${instrumentCode}` : `&instrumentCode=`;
             const url = `http://localhost:20013/orders/history?startTradeDate=${startDate}&endTradeDate=${endDate}${clientSuffix}${instrumentSuffix}`;
             loggerService.logInfo(`Fetching trade history using URL: ${url}`);
             const response = await fetch(url);
@@ -228,7 +228,7 @@ const TradeHistoryApp = () =>
     useEffect(() =>
     {
         fetchTradeHistory(filterDays, clientCode, instrumentCode).then(() => loggerService.logInfo("Trade history fetched successfully"));
-    }, [filterDays, instrumentCode, clientCode]);
+    }, [filterDays, instrumentCode, clientCode, loggerService]);
 
     return (
         <>
@@ -236,8 +236,9 @@ const TradeHistoryApp = () =>
             <div className="trade-history-app" style={{width: '100%', height: 'calc(100vh - 67px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
-                        <Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>
-                        <Tab className="client-trade-history-tab" label={instrumentTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
+                        {clientCode !== "" && (<Tab className="client-trade-history-tab" label={clientTradeHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>)}
+                        {instrumentCode !== "" && (<Tab className="client-trade-history-tab" label={instrumentTradeHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
+                        {(instrumentCode === "" && clientCode === "") && (<Tab className="client-trade-history-tab" label={"No filters selected"} value="3"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
                     </TabList>
 
                     {selectedTab === "1" && (
@@ -249,6 +250,12 @@ const TradeHistoryApp = () =>
                     <TabPanel value="2" className="client-trade-history">
                         <TradeHistoryGridsComponent rows={instrumentTradeHistory} historyProperty="instrumentCode" dataId="instrument_trade_history" columnDefs={instrumentColumnDefs} windowId={windowId}/>
                     </TabPanel>)}
+
+                    {selectedTab === "3" && (
+                        <TabPanel value="3" className="client-trade-history">
+                            <TradeHistoryGridsComponent rows={instrumentTradeHistory} historyProperty="" dataId="instrument_trade_history" columnDefs={instrumentColumnDefs} windowId={windowId}/>
+                        </TabPanel>)}
+
                 </TabContext>
             </div>
             <TradeHistorySearchDialog onSearch={handleDialogSearch}/>
