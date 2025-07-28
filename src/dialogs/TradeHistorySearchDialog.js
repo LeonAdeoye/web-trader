@@ -11,7 +11,7 @@ import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {tradeHistoryDialogDisplayState} from "../atoms/dialog-state";
 
-const TradeHistorySearchDialog = () =>
+const TradeHistorySearchDialog = ({ onSearch }) =>
 {
     const [tradeHistoryDialogDisplay, setTradeHistoryDialogDisplay] = useRecoilState(tradeHistoryDialogDisplayState);
     const clientService = useRef(new ClientService()).current;
@@ -43,6 +43,14 @@ const TradeHistorySearchDialog = () =>
         }
     }, [loggerService]);
 
+    const handleSearch = useCallback(() =>
+    {
+        if (onSearch)
+            onSearch({ clientCode, instrumentCode, userId });
+
+        setTradeHistoryDialogDisplay(false);
+
+    }, [onSearch, clientCode, instrumentCode, userId]);
 
     useEffect(() =>
     {
@@ -58,11 +66,6 @@ const TradeHistorySearchDialog = () =>
         };
         loadData().then(() => loggerService.logInfo('TradeHistorySearchDialog search input data loaded successfully.'))
     }, [ referenceDataService, clientService, traderService, loggerService]);
-
-    const handleSearch = useCallback(() =>
-    {
-        setTradeHistoryDialogDisplay(false);
-    }, []);
 
     const handleCancel = useCallback(() =>
     {

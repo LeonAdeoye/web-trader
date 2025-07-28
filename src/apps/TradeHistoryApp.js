@@ -18,10 +18,10 @@ const TradeHistoryApp = () =>
 {
     const [selectedTab, setSelectedTab] = useState("1");
     const [filterDays] = useRecoilState(filterDaysState);
-    const [instrumentCode, setInstrumentCode] = useState("0001.HK");
-    const [clientCode, setClientCode] = useState("GS");
-    const [clientTradeHistory, setClientTradeHistory] = useState({instrumentCode: "0001.HK", buyTrades: [], sellTrades: []});
-    const [instrumentTradeHistory, setInstrumentTradeHistory] = useState({clientCode: "GS", buyTrades: [], sellTrades: []});
+    const [instrumentCode, setInstrumentCode] = useState("");
+    const [clientCode, setClientCode] = useState("");
+    const [clientTradeHistory, setClientTradeHistory] = useState({instrumentCode: instrumentCode, buyTrades: [], sellTrades: []});
+    const [instrumentTradeHistory, setInstrumentTradeHistory] = useState({clientCode: clientCode, buyTrades: [], sellTrades: []});
     const [clientTradeHistoryTabLabel, setClientTradeHistoryTabLabel] = useState("Client Trade History");
     const [instrumentTradeHistoryTabLabel, setInstrumentTradeHistoryTabLabel] = useState("Instrument Trade History");
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
@@ -49,6 +49,13 @@ const TradeHistoryApp = () =>
         }
     });
 
+    const handleDialogSearch = useCallback((selectedValues) =>
+    {
+        setClientCode(selectedValues.clientCode);
+        setInstrumentCode(selectedValues.instrumentCode);
+        console.log("Selected Owner/UserID:", selectedValues.userId);
+    }, []);
+
     useEffect(() =>
     {
         if(instrumentCode)
@@ -63,28 +70,33 @@ const TradeHistoryApp = () =>
 
     }, [instrumentCode, clientCode])
 
-    const fetchTradeHistory = useCallback(async () =>
+    const fetchTradeHistory = useCallback(async (filterDays, clientCode, instrumentCode) =>
     {
+        if(clientCode === "" && instrumentCode === "")
+            return;
+
         try
         {
             const startDate = getDateMinusDays(filterDays);
             const endDate = new Date().toISOString().split('T')[0];
-            const url = `http://localhost:20013/orders/history?startTradeDate=${startDate}&endTradeDate=${endDate}`;
+            const clientSuffix = clientCode !== "" ? `&clientCode=${clientCode}` : "";
+            const instrumentSuffix = instrumentCode !== "" ? `&instrumentCode=${instrumentCode}` : "";
+            const url = `http://localhost:20013/orders/history?startTradeDate=${startDate}&endTradeDate=${endDate}${clientSuffix}${instrumentSuffix}`;
+            loggerService.logInfo(`Fetching trade history using URL: ${url}`);
             const response = await fetch(url);
 
             if (!response.ok)
                 throw new Error("Network response was not ok");
 
             const data = await response.json();
-
-            setInstrumentTradeHistory({instrumentCode: "0001.HK", buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
-            setClientTradeHistory({clientCode: "GS", buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
+            setInstrumentTradeHistory({instrumentCode: instrumentCode, buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
+            setClientTradeHistory({clientCode: clientCode, buyTrades: data.filter(order => order.side === "BUY"), sellTrades: data.filter(order => order.side !== "BUY")});
         }
         catch (error)
         {
             loggerService.logError("Failed to fetch trade history: " + error);
         }
-    }, [filterDays]);
+    }, []);
 
     const instrumentColumnDefs = useMemo(() =>
         ([
@@ -215,8 +227,8 @@ const TradeHistoryApp = () =>
 
     useEffect(() =>
     {
-        fetchTradeHistory().then(() => loggerService.logInfo("Trade history fetched successfully"));
-    }, []);
+        fetchTradeHistory(filterDays, clientCode, instrumentCode).then(() => loggerService.logInfo("Trade history fetched successfully"));
+    }, [filterDays, instrumentCode, clientCode]);
 
     return (
         <>
@@ -239,7 +251,7 @@ const TradeHistoryApp = () =>
                     </TabPanel>)}
                 </TabContext>
             </div>
-            <TradeHistorySearchDialog/>
+            <TradeHistorySearchDialog onSearch={handleDialogSearch}/>
         </>
     );
 };
