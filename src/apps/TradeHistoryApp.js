@@ -79,8 +79,8 @@ const TradeHistoryApp = () =>
         {
             const startDate = getDateMinusDays(filterDays);
             const endDate = new Date().toISOString().split('T')[0];
-            const clientSuffix = clientCode !== "" ? `&clientCode=${clientCode}` : "";
-            const instrumentSuffix = instrumentCode !== "" ? `&instrumentCode=${instrumentCode}` : "";
+            const clientSuffix = clientCode !== "" ? `&clientCode=${clientCode}` : `&clientCode=""`;
+            const instrumentSuffix = instrumentCode !== "" ? `&instrumentCode=${instrumentCode}` : `&instrumentCode=""`;
             const url = `http://localhost:20013/orders/history?startTradeDate=${startDate}&endTradeDate=${endDate}${clientSuffix}${instrumentSuffix}`;
             loggerService.logInfo(`Fetching trade history using URL: ${url}`);
             const response = await fetch(url);
