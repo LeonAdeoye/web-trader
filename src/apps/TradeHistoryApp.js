@@ -51,9 +51,27 @@ const TradeHistoryApp = () =>
 
     const handleDialogSearch = useCallback((selectedValues) =>
     {
-        setClientCode(selectedValues.clientCode);
-        setInstrumentCode(selectedValues.instrumentCode);
-        console.log("Selected Owner/UserID:", selectedValues.userId);
+        const { instrumentCode, clientCode, userId} = selectedValues;
+        loggerService.logInfo(`Trade History Search Dialog - Search initiated with Instrument Code: ${instrumentCode||"none"}, Client Code: ${clientCode||"none"}, Trader ID: ${userId||"none"}`);
+
+        if(instrumentCode && clientCode)
+        {
+            setInstrumentCode(instrumentCode);
+            setClientCode(clientCode);
+            setSelectedTab("1");
+        }
+        else if(clientCode)
+        {
+            setClientCode(clientCode);
+            setSelectedTab("1");
+        }
+        else if(instrumentCode)
+        {
+            setInstrumentCode(instrumentCode);
+            setSelectedTab("2");
+        }
+
+        console.log("Selected Trader ID:", userId);
     }, []);
 
     useEffect(() =>
@@ -253,7 +271,6 @@ const TradeHistoryApp = () =>
 
                     {selectedTab === "3" && (
                         <TabPanel value="3" className="client-trade-history">
-                            <TradeHistoryGridsComponent rows={instrumentTradeHistory} historyProperty="" dataId="instrument_trade_history" columnDefs={instrumentColumnDefs} windowId={windowId}/>
                         </TabPanel>)}
 
                 </TabContext>
