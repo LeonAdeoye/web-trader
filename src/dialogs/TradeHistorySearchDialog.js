@@ -2,7 +2,7 @@ import React, {useState, useCallback, useEffect, useRef} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid} from '@mui/material';
 import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
 import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
-import {TraderAutoCompleteWidget} from "../widgets/TraderAutoCompleteWidget";
+import {TraderIdAutoCompleteWidget} from "../widgets/TraderIdAutoCompleteWidget";
 import {ClientService} from "../services/ClientService";
 import {TraderService} from "../services/TraderService";
 import {ReferenceDataService} from "../services/ReferenceDataService";
@@ -23,7 +23,7 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
     const loggerService = useRef(new LoggerService(TradeHistorySearchDialog.name)).current;
     const [clientCode, setClientCode] = useState('');
     const [instrumentCode, setInstrumentCode] = useState('');
-    const [userId, setUserId] = useState('');
+    const [ownerId, setOwnerId] = useState('');
 
     const handleInputChange = useCallback((field, value) =>
     {
@@ -32,8 +32,8 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
             case 'instrumentCode':
                 setInstrumentCode(value);
                 break;
-            case 'userId':
-                setUserId(value);
+            case 'ownerId':
+                setOwnerId(value);
                 break;
             case 'clientCode':
                 setClientCode(value);
@@ -46,11 +46,11 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
     const handleSearch = useCallback(() =>
     {
         if (onSearch)
-            onSearch({ clientCode, instrumentCode, userId });
+            onSearch({ clientCode, instrumentCode, ownerId });
 
         setTradeHistoryDialogDisplay(false);
 
-    }, [onSearch, clientCode, instrumentCode, userId]);
+    }, [onSearch, clientCode, instrumentCode, ownerId]);
 
     useEffect(() =>
     {
@@ -69,7 +69,7 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
 
     const handleCancel = useCallback(() =>
     {
-        setUserId('');
+        setOwnerId('');
         setClientCode('');
         setInstrumentCode('');
         setTradeHistoryDialogDisplay(false);
@@ -77,15 +77,15 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
 
     const handleClear = useCallback(() =>
     {
-        setUserId('');
+        setOwnerId('');
         setClientCode('');
         setInstrumentCode('');
     }, []);
 
     const canDisable = useCallback(() =>
     {
-        return userId === '' && clientCode === '' && instrumentCode === '';
-    }, [userId, clientCode, instrumentCode])
+        return ownerId === '' && clientCode === '' && instrumentCode === '';
+    }, [ownerId, clientCode, instrumentCode])
 
     return (
         <Dialog aria-labelledby='dialog-title' open={tradeHistoryDialogDisplay}>
@@ -99,7 +99,7 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
                         <ClientAutoCompleteWidget  clients={clients} handleInputChange={handleInputChange} clientCode={clientCode}/>
                     </Grid>
                     <Grid item style={{marginLeft: '-15px', marginBottom: '0px' }}>
-                        <TraderAutoCompleteWidget traders={traders} handleInputChange={handleInputChange} userId={userId}/>
+                        <TraderIdAutoCompleteWidget traders={traders} handleInputChange={handleInputChange} ownerId={ownerId}/>
                     </Grid>
                 </Grid>
             </DialogContent>
