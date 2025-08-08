@@ -38,7 +38,6 @@ const getOrdersAppContextMenuOptions = (window) =>
         default:
             console.log("No specific actions available for the current order state: " + state);
     }
-    console.log("Dynamic context menu options: " + JSON.stringify(dynamicContextMenuItems) + " for order: " + orderId + " with state: " + state);
     return dynamicContextMenuItems;
 };
 
@@ -46,11 +45,10 @@ const getTradeHistoryAppContextMenuOptions = (window) =>
 {
     const dynamicContextMenuItems = [];
     dynamicContextMenuItems.push(
-    { label: 'Clear', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'CLEAR'}, window.getTitle(), 'main')},
-    { type: 'separator' },
-    { label: 'Search', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'SEARCH'}, window.getTitle(), 'main')},
-    { type: 'separator' });
-    console.log("Dynamic context menu options: " + JSON.stringify(dynamicContextMenuItems) + " for trade history");
+        { label: '🧹 Clear', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'CLEAR'}, window.getTitle(), 'main') },
+        { type: 'separator' },
+        { label: '🔍 Search', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'SEARCH'}, window.getTitle(), 'main') },
+        { type: 'separator' });
     return dynamicContextMenuItems;
 };
 
