@@ -58,13 +58,11 @@ const TradeHistoryApp = () =>
         if (fdc3Message.type === 'trade-history')
         {
             const {action} = fdc3Message;
+            setInstrumentCode("");
+            setClientCode("");
+            setOwnerId("");
             if(action === "CLEAR")
-            {
-                setInstrumentCode("");
-                setClientCode("");
-                setOwnerId("");
                 setSelectedTab('0');
-            }
             else if(action === "SEARCH")
                 setTradeHistoryDialogOpenFlag(true);
         }

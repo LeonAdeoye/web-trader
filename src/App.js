@@ -4,7 +4,7 @@ import {StockTickerApp} from "./apps/StockTickerApp";
 import React, {useEffect, useState, useRef} from "react";
 import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
 import LaunchPadApp from "./apps/LaunchPadApp";
-import { Route, Routes} from "react-router-dom";
+import {Route, Routes} from "react-router-dom";
 import {UsersApp} from "./apps/UsersApp";
 import {ConfigsApp} from "./apps/ConfigsApp";
 import {ConfigurationService} from "./services/ConfigurationService";
@@ -26,6 +26,7 @@ import {NewOrderApp} from "./apps/NewOrderApp";
 import {NewBasketApp} from "./apps/NewBasketApp";
 import {ChildOrdersApp} from "./apps/ChildOrdersApp";
 import {RfqsApp} from "./apps/RfqsApp";
+import InsightsApp from "./apps/InsightsApp";
 
 
 const App = ({}) =>
@@ -40,6 +41,7 @@ const App = ({}) =>
             { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'} },
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js"} },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
+            { name: 'Insights', path: '/insights', component: InsightsApp },
             { name: 'Users', path: '/users', component: UsersApp },
             { name: 'Orders', path: '/orders', component: OrdersApp},
             { name: 'Alerts', path: '/alerts', component: AlertsApp },
