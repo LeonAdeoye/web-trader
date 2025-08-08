@@ -54,6 +54,20 @@ const TradeHistoryApp = () =>
             else
                 setClientCode(null);
         }
+
+        if (fdc3Message.type === 'trade-history')
+        {
+            const {action} = fdc3Message;
+            if(action === "CLEAR")
+            {
+                setInstrumentCode("");
+                setClientCode("");
+                setOwnerId("");
+                setSelectedTab('0');
+            }
+            else if(action === "SEARCH")
+                setTradeHistoryDialogOpenFlag(true);
+        }
     });
 
     const handleDialogSearch = useCallback((selectedValues) =>
@@ -342,7 +356,7 @@ const TradeHistoryApp = () =>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
                         {clientCode !== "" && (<Tab className="client-trade-history-tab" label={clientHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>)}
-                        {instrumentCode !== "" && (<Tab className="client-trade-history-tab" label={instrumentHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
+                        {instrumentCode !== "" && (<Tab className="stock-trade-history-tab" label={instrumentHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
                         {ownerId !== "" && (<Tab className="client-trade-history-tab" label={traderHistoryTabLabel} value="3"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
                     </TabList>
 

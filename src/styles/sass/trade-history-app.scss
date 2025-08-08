@@ -15,7 +15,7 @@
     border-top-left-radius: 8px;
   }
 
-  .stock-trade-history-tab {
+  .instrument-trade-history-tab {
     min-height: 24px;
     height: 25px;
     text-transform: none;
@@ -24,7 +24,16 @@
     border-top-left-radius: 8px;
   }
 
-  .client-trade-history, .stock-trade-history {
+  .trader-trade-history-tab {
+    min-height: 24px;
+    height: 25px;
+    text-transform: none;
+    color: white;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+  }
+
+  .client-trade-history, .stock-trade-history .trader-trade-history-tab {
     margin: 0;
     padding: 0;
     .trade-history-row {

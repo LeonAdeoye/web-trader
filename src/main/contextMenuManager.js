@@ -42,23 +42,31 @@ const getOrdersAppContextMenuOptions = (window) =>
     return dynamicContextMenuItems;
 };
 
+const getTradeHistoryAppContextMenuOptions = (window) =>
+{
+    const dynamicContextMenuItems = [];
+    dynamicContextMenuItems.push(
+    { label: 'Clear', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'CLEAR'}, window.getTitle(), 'main')},
+    { type: 'separator' },
+    { label: 'Search', click: () => window.webContents.send('message-to-renderer-from-main', {type: 'trade-history', action: 'SEARCH'}, window.getTitle(), 'main')},
+    { type: 'separator' });
+    console.log("Dynamic context menu options: " + JSON.stringify(dynamicContextMenuItems) + " for trade history");
+    return dynamicContextMenuItems;
+};
+
 const addContextMenus = (window, childWindowTitleMap, mainWindow) =>
 {
     if (window?.webContents)
-    {
         console.log("Creating context menus for window: " + window.getTitle() + " with Id: " + window.id);
-    }
     else
-    {
-        console.error("Invalid window object passed to addContextMenus.");
         return;
-    }
 
-    const isMainWindow = window === mainWindow;
+    const isMainWindow = (window === mainWindow);
 
     const contextMenuTemplate =
         [
             ...(window.getTitle().startsWith('Orders') ? getOrdersAppContextMenuOptions(window) : []),
+            ...(window.getTitle().startsWith('Trade History') ? getTradeHistoryAppContextMenuOptions(window) : []),
             ...(isMainWindow ? [
                 { label: 'Impersonate', click: () => console.log('Impersonate clicked') },
                 { type: 'separator' },
