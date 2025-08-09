@@ -1,0 +1,39 @@
+@import './partials/tab-styles';
+
+.insights-app {
+  .insights-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+    margin-top: 3px;
+
+    // Ensure consistent spacing between all tabs
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    // Add a small left gap before the first tab only
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
+  }
+
+  .client-insights-tab,
+  .sector-insights-tab,
+  .country-insights-tab,
+  .instrument-insights-tab {
+    @extend %tab-pill;
+  }
+
+  .client-insights,
+  .sector-insights,
+  .country-insights,
+  .instrument-insights {
+    margin: 0;
+    padding: 0;
+  }
+}

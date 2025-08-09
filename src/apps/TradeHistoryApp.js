@@ -27,9 +27,9 @@ const TradeHistoryApp = () =>
     const [instrumentHistory, setInstrumentHistory] = useState({clientCode: clientCode, buyTrades: [], sellTrades: []});
     const [traderHistory, setTraderHistory] = useState({ownerId: ownerId, buyTrades: [], sellTrades: []});
 
-    const [clientHistoryTabLabel, setClientHistoryTabLabel] = useState("Client History");
-    const [instrumentHistoryTabLabel, setInstrumentHistoryTabLabel] = useState("Instrument History");
-    const [traderHistoryTabLabel, setTraderHistoryTabLabel] = useState("Trader History");
+    const [clientHistoryTabLabel, setClientHistoryTabLabel] = useState("Client");
+    const [instrumentHistoryTabLabel, setInstrumentHistoryTabLabel] = useState("Instrument");
+    const [traderHistoryTabLabel, setTraderHistoryTabLabel] = useState("Trader");
 
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [, setTradeHistoryDialogOpenFlag] = useRecoilState(tradeHistoryDialogDisplayState);
@@ -92,19 +92,19 @@ const TradeHistoryApp = () =>
     useEffect(() =>
     {
         if(instrumentCode)
-            setInstrumentHistoryTabLabel("Instrument History (" + instrumentCode + ")");
+            setInstrumentHistoryTabLabel("Instrument (" + instrumentCode + ")");
         else
-            setInstrumentHistoryTabLabel("Instrument History");
+            setInstrumentHistoryTabLabel("Instrument");
 
         if(clientCode)
-            setClientHistoryTabLabel("Client History (" + clientCode + ")");
+            setClientHistoryTabLabel("Client (" + clientCode + ")");
         else
-            setClientHistoryTabLabel("Client History");
+            setClientHistoryTabLabel("Client");
 
         if(ownerId)
-            setTraderHistoryTabLabel("Trader History (" + ownerId + ")");
+            setTraderHistoryTabLabel("Trader (" + ownerId + ")");
         else
-            setTraderHistoryTabLabel("Trader History");
+            setTraderHistoryTabLabel("Trader");
 
     }, [instrumentCode, clientCode, ownerId])
 
@@ -354,8 +354,8 @@ const TradeHistoryApp = () =>
                 <TabContext value={selectedTab}>
                     <TabList className="trade-history-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} aria-label="Trade History Tabs">
                         {clientCode !== "" && (<Tab className="client-trade-history-tab" label={clientHistoryTabLabel} value="1" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>)}
-                        {instrumentCode !== "" && (<Tab className="stock-trade-history-tab" label={instrumentHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
-                        {ownerId !== "" && (<Tab className="client-trade-history-tab" label={traderHistoryTabLabel} value="3"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
+                        {instrumentCode !== "" && (<Tab className="instrument-trade-history-tab" label={instrumentHistoryTabLabel} value="2"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
+                        {ownerId !== "" && (<Tab className="trader-trade-history-tab" label={traderHistoryTabLabel} value="3"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>)}
                     </TabList>
 
                     {selectedTab === "1" && (

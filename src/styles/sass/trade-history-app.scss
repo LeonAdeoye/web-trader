@@ -1,37 +1,31 @@
+@import './partials/tab-styles';
+
 .trade-history-app
 {
   .trade-history-tab-list {
     min-height: 27px;
     height: 27px;
     background-color: white;
+    margin-top: 3px;
+
+    // Ensure consistent spacing between all tabs
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    // Add a small left gap before the first tab only
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
   }
 
-  .client-trade-history-tab {
-    min-height: 22px;
-    height: 25px;
-    text-transform: none;
-    color: white;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-  }
-
-  .instrument-trade-history-tab {
-    min-height: 24px;
-    height: 25px;
-    text-transform: none;
-    color: white;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-  }
-
-  .trader-trade-history-tab {
-    min-height: 24px;
-    height: 25px;
-    text-transform: none;
-    color: white;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-  }
+  .client-trade-history-tab { @extend %tab-pill; }
+  .instrument-trade-history-tab { @extend %tab-pill; }
+  .trader-trade-history-tab { @extend %tab-pill; }
 
   .client-trade-history, .stock-trade-history .trader-trade-history-tab {
     margin: 0;

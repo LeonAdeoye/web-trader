@@ -51,6 +51,8 @@
   },
   "scripts": {
     "gulp": "gulp",
+    "sass": "gulp styles",
+    "sass:watch": "gulp",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
