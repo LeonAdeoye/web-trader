@@ -25,12 +25,23 @@ export const InsightsApp = () =>
         orderBuyColor: '#2e7d32',
         orderSellColor: '#c62828',
         executedBuyColor: '#1b5e20',
-        executedSellColor: '#8e0000',
-        workingBuyColor: '#66bb6a',
-        workingSellColor: '#ef5350',
+        executedSellColor: '#945050',
+        workingBuyColor: '#8669b0',
+        workingSellColor: '#ef7550',
         dateMode: 'today',
         dateRangeDays: 10
     });
+
+    // Applied settings (only updated on Apply)
+    const [appliedColors, setAppliedColors] = useState({
+        orderSellColor: '#f44336',
+        executedSellColor: '#e57373',
+        orderBuyColor: '#528c74',
+        executedBuyColor: '#81c784',
+        workingBuyColor: '#66bb6a',
+        workingSellColor: '#ef5350'
+    });
+    const [appliedShowWorkingTotals, setAppliedShowWorkingTotals] = useState(false);
 
     const generateDummyData = (categoryType) =>
     {
@@ -62,7 +73,16 @@ export const InsightsApp = () =>
 
     const applyConfig = useCallback(() =>
     {
-        // For now, just log the config and close. Later we will wire this to charts.
+        // Apply colors and working totals toggle to charts and close panel
+        setAppliedColors({
+            orderSellColor: config.orderSellColor,
+            executedSellColor: config.executedSellColor,
+            orderBuyColor: config.orderBuyColor,
+            executedBuyColor: config.executedBuyColor,
+            workingBuyColor: config.workingBuyColor,
+            workingSellColor: config.workingSellColor
+        });
+        setAppliedShowWorkingTotals(config.showWorkingTotals === true);
         loggerService.logInfo(`Applied Insights config: ${JSON.stringify(config)}`);
         setIsConfigOpen(false);
     }, [config]);
@@ -80,22 +100,22 @@ export const InsightsApp = () =>
                     </TabList>
                     {selectedTab === "1" && (
                         <TabPanel value="1" className="client-insights" sx={{ padding: 0, margin: 0 }}>
-                            <HorizontalBarChartComponent title="Client Insights" data={generateDummyData('client')} />
+                            <HorizontalBarChartComponent title="Client Insights" data={generateDummyData('client')} colors={appliedColors} showWorkingTotals={appliedShowWorkingTotals} />
                         </TabPanel>
                     )}
                     {selectedTab === "2" && (
                         <TabPanel value="2" className="sector-insights" sx={{ padding: 0, margin: 0 }}>
-                            <HorizontalBarChartComponent title="Sector Insights" data={generateDummyData('sector')} />
+                            <HorizontalBarChartComponent title="Sector Insights" data={generateDummyData('sector')} colors={appliedColors} showWorkingTotals={appliedShowWorkingTotals} />
                         </TabPanel>
                     )}
                     {selectedTab === "3" && (
                         <TabPanel value="3" className="country-insights" sx={{ padding: 0, margin: 0 }}>
-                            <HorizontalBarChartComponent title="Country Insights" data={generateDummyData('country')} />
+                            <HorizontalBarChartComponent title="Country Insights" data={generateDummyData('country')} colors={appliedColors} showWorkingTotals={appliedShowWorkingTotals} />
                         </TabPanel>
                     )}
                     {selectedTab === "4" && (
                         <TabPanel value="4" className="instrument-insights" sx={{ padding: 0, margin: 0 }}>
-                            <HorizontalBarChartComponent title="Instrument Insights" data={generateDummyData('instrument')} />
+                            <HorizontalBarChartComponent title="Instrument Insights" data={generateDummyData('instrument')} colors={appliedColors} showWorkingTotals={appliedShowWorkingTotals} />
                         </TabPanel>
                     )}
                 </TabContext>
