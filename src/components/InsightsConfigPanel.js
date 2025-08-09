@@ -77,6 +77,18 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                         <FormControlLabel value="notionalLocal" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Notional (Local)</Typography>} />
                                     </RadioGroup>
 
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mt: 0.6 }}>
+                                        <Typography variant="caption" sx={{ fontSize: '0.68rem', whiteSpace: 'nowrap' }}>Max bars</Typography>
+                                        <TextField size="small" type="number" value={config.maxBars ?? 5}
+                                                   onChange={(e) => {
+                                                       const raw = e.target.value;
+                                                       const num = Math.max(1, Number(raw) || 1);
+                                                       onChange({ ...config, maxBars: num });
+                                                   }}
+                                                   inputProps={{ min: 1, style: { padding: '0 4px', height: 16 } }}
+                                                   sx={{ width: 60, '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', textAlign: 'center', padding: '0 4px', height: 16 }, '& .MuiOutlinedInput-root': { height: 18, borderRadius: 1 } }} />
+                                    </Box>
+
                                     <FormControlLabel
                                         sx={{ my: 0, py: 0, minHeight: 20 }}
                                         control={

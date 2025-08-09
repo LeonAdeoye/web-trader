@@ -1,18 +1,34 @@
-import React, { useMemo } from 'react';
+import React, {useCallback, useMemo} from 'react';
 import { AgChartsReact } from 'ag-charts-react';
 
-export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTotals = false }) =>
+export const HorizontalBarChartComponent = ({ title, data, colors, metric, showWorkingTotals = false }) =>
 {
     const formatNumber = (value) => new Intl.NumberFormat('en-US').format(Math.round(value));
     const formatPercent = (value) => `${Math.round(value)}%`;
 
-    // Derive working fields on each datum for use as yKeys when needed
-    const chartData = useMemo(() => {
+    const formatK = (value) =>
+    {
+        const v = Math.abs(value || 0) / 1000;
+        const hasFraction = v % 1 !== 0;
+        const formatted = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: hasFraction ? 1 : 0,
+            maximumFractionDigits: 1
+        }).format(v);
+        return `${formatted}K`;
+    };
+
+    const currencyPrefix = useMemo(() =>
+    {
+        return metric === 'notionalUSD' ? '$' :  '';
+    }, [metric]);
+
+    const chartData = useMemo(() =>
+    {
         if (!Array.isArray(data)) return [];
-        return data.map(d => {
+        return data.map(d =>
+        {
             const workingBuyVal = Math.max(0, (d.orderBuy || 0) - (d.executedBuy || 0));
             const workingSellMagnitude = Math.max(0, Math.abs(d.orderSell || 0) - Math.abs(d.executedSell || 0));
-            // Keep sell to the left by making value negative
             const workingSellVal = -1 * workingSellMagnitude;
             return { ...d, workingBuy: workingBuyVal, workingSell: workingSellVal };
         });
@@ -70,12 +86,12 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
         executedSellColor: colors?.executedSellColor ?? '#e57373',
         orderBuyColor: colors?.orderBuyColor ?? '#528c74',
         executedBuyColor: colors?.executedBuyColor ?? '#81c784',
-        workingBuyColor: colors?.workingBuyColor ?? '#66bb6a',
-        workingSellColor: colors?.workingSellColor ?? '#ef5350'
+        workingBuyColor: colors?.workingBuyColor ?? '#66a7bb',
+        workingSellColor: colors?.workingSellColor ?? '#d9a9a7'
     };
 
-    // Compute totals per series key for accurate percentages
-    const totalsByKey = useMemo(() => {
+    const totalsByKey = useMemo(() =>
+    {
         const keys = showWorkingTotals
             ? ['workingSell', 'workingBuy']
             : ['orderSell', 'executedSell', 'orderBuy', 'executedBuy'];
@@ -86,20 +102,20 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
         return totals;
     }, [baseData, showWorkingTotals]);
 
-    const series = showWorkingTotals
+    const series = useMemo(() => (showWorkingTotals
         ? [
             {
                 type: 'bar',
                 xKey: 'name',
                 yKey: 'workingSell',
                 stacked: true,
-                yName: 'Working Sell Notional',
+                yName: 'Working Sell ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.workingSellColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ datum }) => formatNumber(Math.abs(datum.workingSell))
+                    formatter: ({ datum }) => formatK(datum.workingSell)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -107,8 +123,9 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const yKey = params.yKey;
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             },
@@ -117,13 +134,13 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                 xKey: 'name',
                 yKey: 'workingBuy',
                 stacked: true,
-                yName: 'Working Buy Notional',
+                yName: 'Working Buy ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.workingBuyColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ value }) => formatNumber(value)
+                    formatter: ({ value }) => formatK(value)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -131,8 +148,9 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const yKey = params.yKey;
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             }
@@ -143,13 +161,13 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                 xKey: 'name',
                 yKey: 'orderSell',
                 stacked: true,
-                yName: 'Order Sell Notional',
+                yName: 'Order Sell ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.orderSellColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ datum }) => formatNumber(Math.abs(datum.orderSell))
+                    formatter: ({ datum }) => formatK(datum.orderSell)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -157,8 +175,9 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const yKey = params.yKey;
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             },
@@ -167,13 +186,13 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                 xKey: 'name',
                 yKey: 'executedSell',
                 stacked: true,
-                yName: 'Executed Sell Notional',
+                yName: 'Executed Sell ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.executedSellColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ datum }) => formatNumber(Math.abs(datum.executedSell))
+                    formatter: ({ datum }) => formatK(datum.executedSell)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -182,7 +201,8 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             },
@@ -191,13 +211,13 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                 xKey: 'name',
                 yKey: 'orderBuy',
                 stacked: true,
-                yName: 'Order Buy Notional',
+                yName: 'Order Buy ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.orderBuyColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ value }) => formatNumber(value)
+                    formatter: ({ value }) => formatK(value)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -206,7 +226,8 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             },
@@ -215,13 +236,13 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                 xKey: 'name',
                 yKey: 'executedBuy',
                 stacked: true,
-                yName: 'Executed Buy Notional',
+                yName: 'Executed Buy ' + (metric === 'shares' ? 'Shares' : 'Notional'),
                 fill: applied.executedBuyColor,
                 label: {
                     enabled: true,
                     fontSize: 11,
                     fontFamily: 'Verdana, sans-serif',
-                    formatter: ({ value }) => formatNumber(value)
+                    formatter: ({ value }) => formatK(value)
                 },
                 tooltip: {
                     renderer: (params) =>
@@ -230,11 +251,12 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
                         const value = Math.abs(params.datum[yKey] || 0);
                         const total = totalsByKey[yKey] || 0;
                         const percent = total ? (value / total) * 100 : 0;
-                        return { content: `${formatNumber(value)} (${formatPercent(percent)})` };
+                        const currencyPrefix = metric === 'notionalUSD' ? '$' : '';
+                        return { content: `${currencyPrefix}${formatNumber(value)} (${formatPercent(percent)})` };
                     }
                 }
             }
-        ];
+        ]), [showWorkingTotals, applied, totalsByKey, currencyPrefix, metric]);
 
     const options = {
         title: {
@@ -277,50 +299,47 @@ export const HorizontalBarChartComponent = ({ title, data, colors, showWorkingTo
             }
         },
         padding: { top: 10, bottom: 10, left: 10, right: 10 },
-        height: 200
+        height: 400
     };
 
     return (
         <div style={{ marginBottom: '0px' }}>
-            <div
-                style={{
+            <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
                     justifyContent: 'space-around',
-                    padding: '6px 0px',
+                    padding: '6px 6px',
                     backgroundColor: '#f9f9f9',
                     borderRadius: '6px',
                     marginBottom: '0px',
                     fontFamily: 'Verdana, sans-serif',
-                    fontSize: '13px',
+                    fontSize: '10px',
                     color: '#333',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                }}
-            >
+                }}>
                 <div title="Total notional value of sell orders placed" style={{ color: '#f44336' }}>
-                    <strong>Σ</strong> Order Sell: {formatNumber(Math.abs(summary.orderSell))}
+                    <strong>Σ</strong> Order Sell: {currencyPrefix + formatK(summary.orderSell)}
                 </div>
                 <div title="Total notional value of sell orders that have been executed" style={{ color: '#f44336' }}>
-                    <strong>Σ</strong> Executed Sell: {formatNumber(Math.abs(summary.executedSell))}
+                    <strong>Σ</strong> Executed Sell: {currencyPrefix + formatK(summary.executedSell)}
                 </div>
                 <div title="Remaining notional value of sell orders yet to be executed" style={{ color: '#f44336' }}>
-                    <strong>Σ</strong> Working Sell: {formatNumber(Math.abs(workingSell))}
+                    <strong>Σ</strong> Working Sell: {currencyPrefix + formatK(workingSell)}
                 </div>
                 <div title="Ratio and percentage of total buy vs sell notional"
                      style={{ color: totalBuy >= totalSell ? '#4caf50' : '#f44336' }}>
                     <strong>Buy/Sell Skew: {skewRatio}</strong>
                 </div>
                 <div title="Total notional value of buy orders placed" style={{ color: '#51c541' }}>
-                    <strong>Σ</strong> Order Buy: {formatNumber(summary.orderBuy)}
+                    <strong>Σ</strong> Order Buy: {currencyPrefix + formatK(summary.orderBuy)}
                 </div>
                 <div title="Total notional value of buy orders that have been executed" style={{ color: '#51c541' }}>
-                    <strong>Σ</strong> Executed Buy: {formatNumber(summary.executedBuy)}
+                    <strong>Σ</strong> Executed Buy: {currencyPrefix + formatK(summary.executedBuy)}
                 </div>
                 <div title="Remaining notional value of buy orders yet to be executed" style={{ color: '#51c541' }}>
-                    <strong>Σ</strong> Working Buy: {formatNumber(workingBuy)}
+                    <strong>Σ</strong> Working Buy: {currencyPrefix + formatK(workingBuy)}
                 </div>
             </div>
-
             <AgChartsReact options={options} />
         </div>
     );
