@@ -1,13 +1,13 @@
 import React from 'react';
 import {IconButton, Tooltip} from '@mui/material';
-import { Close,  Remove, Build, Lan} from '@mui/icons-material';
+import { Close, Remove, Build, Lan, Settings} from '@mui/icons-material';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTools}) =>
+const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -22,7 +22,10 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
-                {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={titleBarContextShareColour.toUpperCase() === "WHITE" ? "Context sharing not enabled." : `Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
+                {(showConfig !== undefined) && <Tooltip title={"Click to change chart settings of insights"}><IconButton className="title-bar-tools" onClick={showConfig.handler}>
+                    <Settings/>
+                </IconButton></Tooltip>}
+                {showChannel && <Tooltip style={{color: `${titleBarContextShareColour}`}} title={titleBarContextShareColour.toUpperCase() === "WHITE" ? "Context sharing not enabled. Use context menu to enable." : `Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
                     <IconButton className="title-bar-channel" style={{color:`${titleBarContextShareColour}`}}>
                     <Lan/>
                     </IconButton>

@@ -26,7 +26,7 @@ import {NewOrderApp} from "./apps/NewOrderApp";
 import {NewBasketApp} from "./apps/NewBasketApp";
 import {ChildOrdersApp} from "./apps/ChildOrdersApp";
 import {RfqsApp} from "./apps/RfqsApp";
-import InsightsApp from "./apps/InsightsApp";
+import {InsightsApp} from "./apps/InsightsApp";
 
 
 const App = ({}) =>

@@ -63,6 +63,11 @@ export const algoErrorsState = atom({
     default: []
 });
 
+export const insightsConfigPanelOpenState = atom({
+    key: 'insightsConfigPanelOpenState',
+    default: false
+});
+
 
 
 
