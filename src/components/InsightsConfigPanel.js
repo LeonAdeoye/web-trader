@@ -1,19 +1,5 @@
 import React from 'react';
-import {
-    Box,
-    Grid,
-    IconButton,
-    Typography,
-    Divider,
-    FormControlLabel,
-    Switch,
-    RadioGroup,
-    Radio,
-    TextField,
-    Button,
-    Paper,
-    Slider
-} from '@mui/material';
+import { Box, Grid, IconButton, Typography, Divider, FormControlLabel, Switch, RadioGroup, Radio, TextField, Button, Paper, Slider } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -67,7 +53,6 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                     <Grid container spacing={0.6}>
                         <Grid item xs={12}>
                             <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                {/* Paper bg chosen to contrast with #404040; change here if desired */}
                                 <Box sx={{ pl: 1.8 }}>
                                     <RadioGroup value={config.metric}
                                         onChange={(e) => onChange({ ...config, metric: e.target.value })}
@@ -138,7 +123,6 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                             onChange={(e) => onChange({ ...config, orderSellColor: e.target.value })}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
-
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Executed Buy colour</Typography>
                                         <TextField size="small" fullWidth type="color" value={config.executedBuyColor}
@@ -151,7 +135,6 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                             onChange={(e) => onChange({ ...config, executedSellColor: e.target.value })}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
-
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Working Buy colour</Typography>
                                         <TextField size="small" fullWidth type="color" value={config.workingBuyColor}

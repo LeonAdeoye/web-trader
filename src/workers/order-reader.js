@@ -11,7 +11,7 @@ const main = async () =>
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui");
+        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui").filter("/messageType = 'PARENT_ORDER'")
         await client.execute(inboundCmd, onAmpsOrderMessage);
         loggerService.logInfo(`Order reader web worker connected to AMPS using URL: ${url}`);
     }
