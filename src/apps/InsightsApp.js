@@ -28,7 +28,7 @@ export const InsightsApp = () =>
     const [orders, setOrders] = useState([]);
 
     const [config, setConfig] = useState({
-        metric: 'notionalUSD',
+        metric: 'shares',
         showWorkingTotals: false,
         orderSellColor: '#f44336',
         executedSellColor: '#e57373',
