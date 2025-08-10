@@ -103,9 +103,8 @@ export const InsightsApp = () =>
             const values = extractMetricValues(order, metric);
             const orderValue = values[0];
             const executedValue = values[1];
-
-
             const side = order.side;
+
             if (side.toUpperCase() === 'BUY')
             {
                 aggregated.orderBuy += orderValue;
