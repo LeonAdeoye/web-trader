@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
-import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
+import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
