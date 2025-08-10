@@ -182,4 +182,19 @@ export const xmlToJson = (xmlString) =>
     return parseElement(xmlDoc.documentElement);
 }
 
+export const safeDouble = (value) =>
+{
+    if (value === null || value === undefined) return 0;
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+};
+
+export const defaultIfBlank = (value, fallback) =>
+{
+    if (value === null || value === undefined || value === '')
+        return fallback === null || fallback === undefined ? 'Unknown' : fallback;
+
+    return String(value).trim() === '' ? (fallback === null || fallback === undefined ? 'Unknown' : fallback) : value;
+};
+
 

@@ -7,7 +7,7 @@ import {Tab} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import {HorizontalBarChartComponent} from "../components/HorizontalBarChartComponent";
-import { getDateMinusDays } from "../utilities";
+import {defaultIfBlank, getDateMinusDays, safeDouble} from "../utilities";
 import { useRecoilState } from 'recoil';
 import { insightsConfigPanelOpenState } from '../atoms/component-state';
 import InsightsConfigPanel from "../components/InsightsConfigPanel";
@@ -19,11 +19,13 @@ export const InsightsApp = () =>
     const [selectedTab, setSelectedTab] = useState("1");
     const [isConfigOpen, setIsConfigOpen] = useRecoilState(insightsConfigPanelOpenState);
     const [appliedShowWorkingTotals, setAppliedShowWorkingTotals] = useState(false);
-    const [appliedMetric, setAppliedMetric] = useState('notionalUSD');
+    const [appliedMetric, setAppliedMetric] = useState('shares');
     const [appliedDateMode, setAppliedDateMode] = useState('today');
     const [appliedDateRangeDays, setAppliedDateRangeDays] = useState(10);
     const [appliedMaxBars, setAppliedMaxBars] = useState(5);
     const [insightsData, setInsightsData] = useState([]);
+    const [inboundWorker, setInboundWorker] = useState(null);
+    const [orders, setOrders] = useState([]);
 
     const [config, setConfig] = useState({
         metric: 'notionalUSD',
@@ -56,29 +58,110 @@ export const InsightsApp = () =>
         return 'client';
     }, [selectedTab]);
 
-    const generateDummyData = (categoryType) =>
+    const extractMetricValues = useCallback((order, metric) =>
     {
-        const categories = {
-            client: ['Client A', 'Client B', 'Client C', 'Client D', 'Client E'],
-            sector: ['Tech', 'Finance', 'Healthcare', 'Energy', 'Retail'],
-            country: ['USA', 'UK', 'Germany', 'Japan', 'India'],
-            instrument: ['Stock X', 'Stock Y', 'Stock Z', 'Stock W', 'Stock V']
-        };
-
-        return categories[categoryType].map(name =>
+        switch (metric)
         {
-            const orderBuy = Math.floor(Math.random() * 1000) + 500;
-            const executedBuy = Math.floor(orderBuy * Math.random());
-            const orderSell = -1 * (Math.floor(Math.random() * 1000) + 500);
-            const executedSell = -1 * Math.floor(Math.abs(orderSell) * Math.random());
+            case 'notionalUSD':
+                return [safeDouble(order.orderNotionalValueInUSD), safeDouble(order.executedNotionalValueInUSD)];
+            case 'notionalLocal':
+                return [safeDouble(order.orderNotionalValueInLocal), safeDouble(order.executedNotionalValueInLocal)];
+            case 'shares':
+            default:
+                return [safeDouble(order.quantity), safeDouble(order.executed)];
+        }
+    }, []);
 
-            return { name, orderBuy, executedBuy, orderSell, executedSell };
-        });
-    };
+    const convertOrdersToInsightItems = useCallback((orders, insightType, metric) =>
+    {
+        const grouping = new Map();
+        for (const order of orders)
+        {
+            let name;
+            switch (insightType.toLowerCase())
+            {
+                case 'client':
+                    name = defaultIfBlank(order.clientCode || order.clientDescription, order.clientDescription);
+                    break;
+                case 'sector':
+                    name = defaultIfBlank(order.instrumentCode, 'Unknown');
+                    break;
+                case 'country':
+                    name = defaultIfBlank(order.settlementCurrency, 'Unknown');
+                    break;
+                case 'instrument':
+                    name = defaultIfBlank(order.instrumentCode || order.instrumentDescription, order.instrumentDescription);
+                    break;
+                default:
+                    name = 'Unknown';
+            }
+
+            if (!grouping.has(name))
+                grouping.set(name, {name: name, orderBuy: 0,  executedBuy: 0, orderSell: 0, executedSell: 0});
+
+            const aggregated = grouping.get(name);
+            const values = extractMetricValues(order, metric);
+            const orderValue = values[0];
+            const executedValue = values[1];
+
+
+            const side = order.side;
+            if (side.toUpperCase() === 'BUY')
+            {
+                aggregated.orderBuy += orderValue;
+                aggregated.executedBuy += executedValue;
+            }
+            else
+            {
+                aggregated.orderSell -= orderValue;
+                aggregated.executedSell -= executedValue;
+            }
+        }
+
+        return Array.from(grouping.values());
+    }, [loggerService]);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/insights-reader.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    const handleWorkerMessage = useCallback((event) =>
+    {
+        const incomingOrder = event.data.order;
+        if (incomingOrder)
+        {
+            setOrders(prevOrders => 
+            {
+                const existingOrderIndex = prevOrders.findIndex(order =>  order.orderId === incomingOrder.orderId);                
+                if (existingOrderIndex !== -1) 
+                {
+                    const newOrders = [...prevOrders];
+                    newOrders[existingOrderIndex] = incomingOrder;
+                    return newOrders;
+                }
+                else
+                    return [...prevOrders, incomingOrder];
+            });
+        }
+    }, []);
+
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
 
     const openConfig = useCallback(() =>
     {
-        loggerService.logInfo("Opening Insights configuration.");
         setIsConfigOpen(true);
     }, []);
 
@@ -99,7 +182,6 @@ export const InsightsApp = () =>
         setAppliedDateMode(config.dateMode);
         setAppliedDateRangeDays(config.dateRangeDays);
         setAppliedMaxBars(Math.max(1, parseInt(config.maxBars, 10) || 1));
-        loggerService.logInfo(`Applied Insights config: ${JSON.stringify(config)}`);
         setIsConfigOpen(false);
     }, [config]);
 
@@ -111,8 +193,12 @@ export const InsightsApp = () =>
             {
                 if (appliedDateMode === 'today')
                 {
-                    const generated = generateDummyData(currentInsightType);
-                    setInsightsData(generated);
+                    setInsightsData([]);
+                    if (orders.length > 0)
+                    {
+                        const insightsFromOrders = convertOrdersToInsightItems(orders, currentInsightType, appliedMetric);
+                        setInsightsData(insightsFromOrders);
+                    }
                     return;
                 }
 
@@ -128,13 +214,13 @@ export const InsightsApp = () =>
             }
             catch (error)
             {
-                loggerService.logError("Failed to fetch insights: " + error);
-                setInsightsData(generateDummyData(currentInsightType));
+                loggerService.logError(`Failed to load insights data: ${error.message}`);
+                setInsightsData([]);
             }
         };
 
         loadData().then(() => loggerService.logInfo("Insights data loaded successfully."));
-    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, loggerService]);
+    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService]);
 
     const displayedInsightsData = useMemo(() =>
     {
@@ -149,12 +235,9 @@ export const InsightsApp = () =>
         let metricText = 'Shares';
         if (appliedMetric === 'notionalUSD') metricText = 'Notional value in USD';
         else if (appliedMetric === 'notionalLocal') metricText = 'Notional value in local currency';
-
-        const dateText = appliedDateMode === 'today'
-            ? 'for today'
-            : `for the last ${appliedDateRangeDays} days`;
-
+        const dateText = appliedDateMode === 'today' ? 'for today' : `for the last ${appliedDateRangeDays} days`;
         return ` - ${metricText} ${dateText}`;
+
     }, [appliedMetric, appliedDateMode, appliedDateRangeDays]);
 
     return (

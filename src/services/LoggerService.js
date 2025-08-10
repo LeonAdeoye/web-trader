@@ -12,6 +12,11 @@ export class LoggerService
         this.#logMessage(message, "INFO");
     }
 
+    logWarn = (message) =>
+    {
+        this.#logMessage(message, "WARN");
+    }
+
     logError = (message) =>
     {
         this.#logMessage(message, "ERROR");
