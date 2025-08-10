@@ -25,22 +25,40 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
     };
 
     return (
-        <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px' }}>
+        <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px 15px 10px', height: '40px', marginBottom: '2px' }}>
             <span className="title-bar-text">{title}</span>
+            
+            <TextField
+                value={inputValue}
+                onChange={handleInputChange}
+                variant="outlined"
+                size="small"
+                autoFocus={false}
+                placeholder={snippetPrompt}
+                inputProps={{ style: { fontSize: '12px' } }}
+                style={{ 
+                    position: 'absolute', 
+                    left: '50%', 
+                    top: '50%', 
+                    transform: 'translate(-50%, -50%)',
+                    width: '600px',
+                    WebkitAppRegion: 'no-drag'
+                }}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'white',
+                        height: '22.5px',
+                        '& fieldset': {
+                            borderColor: '#ccc',
+                        },
+                        '&:hover fieldset': {
+                            borderColor: '#999',
+                        },
+                    },
+                }}
+            />
 
-            {/* Text field centered */}
-            <div style={{ flexGrow: 1, textAlign: 'center' }}>
-                <TextField
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    variant="outlined"
-                    size="small"
-                    placeholder="Enter prompt"
-                    inputProps={{ style: { fontSize: '12px' } }}
-                    style={{ width: '200px', margin: '0 auto' }}/>
-            </div>
-
-            <div className="title-bar-controls" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="title-bar-controls" style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
                 {(addButtonProps !== undefined) && (
                     <Tooltip title={addButtonProps.tooltipText}>
                         <IconButton className="title-bar-add" onClick={addButtonProps.handler}>
