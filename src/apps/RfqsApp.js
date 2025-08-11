@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
-import {numberFormatter} from "../utilities";
+import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
@@ -25,6 +25,7 @@ export const RfqsApp = () =>
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
 
+    // RFQ Form State
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -76,6 +77,7 @@ export const RfqsApp = () =>
         legs: []
     });
 
+    // Mock data for dropdowns
     const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
     const [books, setBooks] = useState([]);
@@ -84,11 +86,13 @@ export const RfqsApp = () =>
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
 
+    // Chat functionality
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
     const [selectedInitiator, setSelectedInitiator] = useState(null);
     const [selectedTarget, setSelectedTarget] = useState(null);
 
+    // Commentary fields
     const [salesCommentary, setSalesCommentary] = useState('Sales\' comment...');
     const [tradersCommentary, setTradersCommentary] = useState('Trader\'s comment...');
     const [clientCommentary, setClientCommentary] = useState('Client\'s feedback...');
@@ -137,14 +141,14 @@ export const RfqsApp = () =>
 
     useEffect(() =>
     {
-        const webWorker = new Worker(new URL("../workers/read-rfq.js", import.meta.url));
+        const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
         setInboundWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
 
     useEffect(() =>
     {
-        const webWorker = new Worker(new URL("../workers/send-rfq.js", import.meta.url));
+        const webWorker = new Worker(new URL("../workers/manage-order.js", import.meta.url));
         setOutboundWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
@@ -210,6 +214,8 @@ export const RfqsApp = () =>
 
         setOrders((prevData) =>
         {
+            //incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
+
             const index = prevData.findIndex((element) => element.orderId === incomingOrder.orderId);
             if (index !== -1)
             {
@@ -232,10 +238,9 @@ export const RfqsApp = () =>
         });
     }
 
-    const handleSendChatMessage = () =>
-    {
-        if (messageToBeSent.trim() && selectedInitiator)
-        {
+    // Chat functionality
+    const handleSendChatMessage = () => {
+        if (messageToBeSent.trim() && selectedInitiator) {
             const newMessage = {
                 sequenceId: chatMessages.length + 1,
                 owner: selectedInitiator.userId,
@@ -248,25 +253,24 @@ export const RfqsApp = () =>
         }
     };
 
-    const handleKeyPress = (e) =>
-    {
-        if (e.key === 'Enter')
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
             handleSendChatMessage();
-    };
-
-    const handleRFQFieldChange = (field, value) =>
-    {
-        setSelectedRFQ(prev => ({...prev, [field]: value}));
-    };
-
-    const handleSaveRequest = (isSave) =>
-    {
-        if (isSave)
-        {
-            loggerService.logInfo('Saving RFQ:', selectedRFQ);
         }
-        else
-        {
+    };
+
+    // RFQ form handlers
+    const handleRFQFieldChange = (field, value) => {
+        setSelectedRFQ(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSaveRequest = (isSave) => {
+        if (isSave) {
+            loggerService.logInfo('Saving RFQ:', selectedRFQ);
+        } else {
             loggerService.logInfo('Cancelling RFQ changes');
         }
     };
@@ -482,16 +486,23 @@ export const RfqsApp = () =>
         }
     ], []);
 
-    return (
-    <>
+    return (<>
         <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true}
             showTools={false} snippetPrompt={"Enter client's RFQ snippet..."} validateSnippetPrompt={(value) => console.log("Snippet value: " + value)}/>
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"}  rowIdArray={["request"]}
-                    columnDefs={columnDefs} gridData={mockRFQData} handleAction={null} sortModel={{ colId: 'request', sort: 'asc' }}/>
+                <GenericGridComponent 
+                    rowHeight={22} 
+                    gridTheme={"ag-theme-alpine"} 
+                    rowIdArray={["request"]} 
+                    columnDefs={columnDefs} 
+                    gridData={mockRFQData} 
+                    handleAction={null} 
+                    sortModel={{ colId: 'request', sort: 'asc' }}
+                />
             </div>
         </div>
     </>)
+
 }

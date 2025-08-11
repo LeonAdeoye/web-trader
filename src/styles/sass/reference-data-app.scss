@@ -1,0 +1,57 @@
+@import './partials/tab-styles';
+
+.reference-app {
+  .reference-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+    margin-top: 3px;
+
+    // Ensure consistent spacing between all tabs
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    // Add a small left gap before the first tab only
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
+  }
+
+  // Tab pill styling for all reference data tabs
+  .clients-tab,
+  .exchanges-tab,
+  .brokers-tab,
+  .accounts-tab,
+  .desks-tab,
+  .instruments-tab,
+  .traders-tab {
+    @extend %tab-pill;
+    
+    // Default tab styling
+    background-color: #bdbaba;
+    color: white;
+    
+    // Selected tab styling
+    &.Mui-selected {
+      background-color: #656161;
+      color: white;
+    }
+  }
+
+  // Content area styling for all tab panels
+  .client-ref-data,
+  .exchange-ref-data,
+  .broker-ref-data,
+  .account-ref-data,
+  .desk-ref-data,
+  .instrument-ref-data,
+  .trader-ref-data {
+    margin: 0;
+    padding: 0;
+  }
+}

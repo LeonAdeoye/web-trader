@@ -214,7 +214,7 @@ export const ChildOrdersApp = () =>
         <TitleBarComponent title="Child Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>);
+                <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
             </div>
         </div>
     </>)
