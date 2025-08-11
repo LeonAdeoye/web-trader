@@ -27,6 +27,8 @@ import {NewBasketApp} from "./apps/NewBasketApp";
 import {ChildOrdersApp} from "./apps/ChildOrdersApp";
 import {RfqsApp} from "./apps/RfqsApp";
 import {InsightsApp} from "./apps/InsightsApp";
+import {ReferenceDataApp} from "./apps/ReferenceDataApp";
+import {LimitsApp} from "./apps/LimitsApp";
 
 
 const App = ({}) =>
@@ -43,6 +45,8 @@ const App = ({}) =>
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
             { name: 'Insights', path: '/insights', component: InsightsApp },
             { name: 'Users', path: '/users', component: UsersApp },
+            { name: 'Reference Data', path: '/reference-data', component: ReferenceDataApp },
+            { name: 'Limits', path: '/limits', component: LimitsApp },
             { name: 'Orders', path: '/orders', component: OrdersApp},
             { name: 'Alerts', path: '/alerts', component: AlertsApp },
             { name: 'Crosses', path: '/crosses', component: CrossesApp },
