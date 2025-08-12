@@ -30,7 +30,7 @@ export class AccountService
 
     getAccounts = () =>
     {
-        return this.#accounts.filter(account => account.isActive);
+        return this.#accounts.filter(account => account.active);
     }
 
     getAccountByMnemonic = (mnemonic) =>
@@ -45,11 +45,12 @@ export class AccountService
 
     addNewAccount = async (newAccount) =>
     {
+        const {accountId, ...rest} = newAccount;
         this.#loggerService.logInfo(`Saving new account: ${JSON.stringify(newAccount)}.`);
         return await fetch("http://localhost:20009/account", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newAccount)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
             .then((accountResponse) =>
             {

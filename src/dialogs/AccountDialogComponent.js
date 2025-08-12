@@ -8,9 +8,9 @@ const AccountDialogComponent = ({data, onDataChange}) =>
         accountName: '',
         accountMnemonic: '',
         legalEntity: '',
-        isFirmAccount: false,
-        isRiskAccount: false,
-        isActive: true,
+        firmAccount: false,
+        riskAccount: false,
+        active: true,
         customFlags: ''
     });
     const [isInitializing, setIsInitializing] = useState(true);
@@ -28,9 +28,9 @@ const AccountDialogComponent = ({data, onDataChange}) =>
                 accountName: '',
                 accountMnemonic: '',
                 legalEntity: '',
-                isFirmAccount: false,
-                isRiskAccount: false,
-                isActive: true,
+                firmAccount: false,
+                riskAccount: false,
+                active: true,
                 customFlags: ''
             });
         }
@@ -83,12 +83,16 @@ const AccountDialogComponent = ({data, onDataChange}) =>
                     style={{ width: '200px' }}/>
             </Grid>
             <Grid item xs={5}>
-                <FormControlLabel label="Firm Account" style={{ fontSize: '0.75rem' }}
-                    control={ <Checkbox checked={accountData.isFirmAccount || false} onChange={(e) => handleCheckboxChange('isFirmAccount', e.target.checked)} size="small"/> }/>
+                <FormControlLabel 
+                    label="Firm Account" 
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                    control={ <Checkbox checked={accountData.firmAccount || false} onChange={(e) => handleCheckboxChange('firmAccount', e.target.checked)} size="small"/> }/>
             </Grid>
             <Grid item xs={5}>
-                <FormControlLabel label="Risk Account" style={{ fontSize: '0.75rem' }}
-                    control={ <Checkbox checked={accountData.isRiskAccount || false} onChange={(e) => handleCheckboxChange('isRiskAccount', e.target.checked)} size="small"/> }/>
+                <FormControlLabel 
+                    label="Risk Account" 
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                    control={ <Checkbox checked={accountData.riskAccount || false} onChange={(e) => handleCheckboxChange('riskAccount', e.target.checked)} size="small"/> }/>
             </Grid>
         </Grid>
     );

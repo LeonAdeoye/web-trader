@@ -169,7 +169,7 @@ export const ReferenceDataApp = () =>
         {
             headerName: 'Account Name',
             field: 'accountName',
-            width: 250,
+            width: 190,
             headerTooltip: 'Account Name',
             sortable: true,
             filter: true,
@@ -177,7 +177,7 @@ export const ReferenceDataApp = () =>
         {
             headerName: 'Account Mnemonic',
             field: 'accountMnemonic',
-            width: 150,
+            width: 140,
             headerTooltip: 'Account Mnemonic',
             sortable: true,
             filter: true,
@@ -185,34 +185,88 @@ export const ReferenceDataApp = () =>
         {
             headerName: 'Legal Entity',
             field: 'legalEntity',
-            width: 200,
+            width: 110,
             headerTooltip: 'Legal Entity',
             sortable: true,
             filter: true,
         },
         {
             headerName: 'Firm Account',
-            field: 'isFirmAccount',
+            field: 'firmAccount',
             width: 120,
             headerTooltip: 'Firm Account',
             sortable: true,
             filter: true,
+            cellRenderer: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return '✓';
+                } else if (value === false) {
+                    return '✗';
+                }
+                return '';
+            },
+            cellStyle: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return { color: 'green', fontWeight: 'bold', fontSize: '16px' };
+                } else if (value === false) {
+                    return { color: 'red', fontWeight: 'bold', fontSize: '16px' };
+                }
+                return {};
+            }
         },
         {
             headerName: 'Risk Account',
-            field: 'isRiskAccount',
+            field: 'riskAccount',
             width: 120,
             headerTooltip: 'Risk Account',
             sortable: true,
             filter: true,
+            cellRenderer: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return '✓';
+                } else if (value === false) {
+                    return '✗';
+                }
+                return '';
+            },
+            cellStyle: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return { color: 'green', fontWeight: 'bold', fontSize: '16px' };
+                } else if (value === false) {
+                    return { color: 'red', fontWeight: 'bold', fontSize: '16px' };
+                }
+                return {};
+            }
         },
         {
             headerName: 'Active',
-            field: 'isActive',
+            field: 'active',
             width: 100,
             headerTooltip: 'Active Status',
             sortable: true,
             filter: true,
+            cellRenderer: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return '✓';
+                } else if (value === false) {
+                    return '✗';
+                }
+                return '';
+            },
+            cellStyle: (params) => {
+                const value = params.value;
+                if (value === true) {
+                    return { color: 'green', fontWeight: 'bold', fontSize: '16px' };
+                } else if (value === false) {
+                    return { color: 'red', fontWeight: 'bold', fontSize: '16px' };
+                }
+                return {};
+            }
         },
         {
             headerName: 'Custom Flags',
@@ -454,7 +508,17 @@ export const ReferenceDataApp = () =>
                 setAccounts(accountService.getAccounts());
                 setInstruments(instrumentService.getInstruments());
                 setExchanges(exchangeService.getExchanges());
-                setTraders(traderService.getTraders());
+                
+                // Enrich trader data with desk names
+                const tradersWithDeskNames = traderService.getTraders().map(trader => {
+                    const desk = deskService.getDeskById(trader.deskId);
+                    return {
+                        ...trader,
+                        deskName: desk ? desk.deskName : 'No Desk Assigned'
+                    };
+                });
+                setTraders(tradersWithDeskNames);
+                
                 setDesks(deskService.getDesks());
             }
             catch (error)
@@ -525,7 +589,15 @@ export const ReferenceDataApp = () =>
             case "7": // Traders
                 await traderService.addNewTrader(formData);
                 await traderService.loadTraders();
-                setTraders(traderService.getTraders());
+                // Enrich trader data with desk names
+                const newTradersWithDeskNames = traderService.getTraders().map(trader => {
+                    const desk = deskService.getDeskById(trader.deskId);
+                    return {
+                        ...trader,
+                        deskName: desk ? desk.deskName : 'No Desk Assigned'
+                    };
+                });
+                setTraders(newTradersWithDeskNames);
                 break;
             default:
                 loggerService.logError(`Unknown tab for add: ${tab}`);
@@ -570,7 +642,15 @@ export const ReferenceDataApp = () =>
             case "7": // Traders
                 await traderService.updateTrader(formData);
                 await traderService.loadTraders();
-                setTraders(traderService.getTraders());
+                // Enrich trader data with desk names
+                const updatedTradersWithDeskNames = traderService.getTraders().map(trader => {
+                    const desk = deskService.getDeskById(trader.deskId);
+                    return {
+                        ...trader,
+                        deskName: desk ? desk.deskName : 'No Desk Assigned'
+                    };
+                });
+                setTraders(updatedTradersWithDeskNames);
                 break;
             default:
                 loggerService.logError(`Unknown tab for update: ${tab}`);
@@ -621,7 +701,17 @@ export const ReferenceDataApp = () =>
                 break;
             case "7": // Traders
                 await traderService.deleteTrader(data.traderId);
-                setTraders(prevTraders => prevTraders.filter(trader => trader.traderId !== data.traderId));
+                setTraders(prevTraders => {
+                    const filteredTraders = prevTraders.filter(trader => trader.traderId !== data.traderId);
+                    // Re-enrich the remaining traders with desk names
+                    return filteredTraders.map(trader => {
+                        const desk = deskService.getDeskById(trader.deskId);
+                        return {
+                            ...trader,
+                            deskName: desk ? desk.deskName : 'No Desk Assigned'
+                        };
+                    });
+                });
                 break;
             default:
                 loggerService.logError(`Unknown tab for delete: ${tab}`);

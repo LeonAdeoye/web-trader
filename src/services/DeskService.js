@@ -50,11 +50,12 @@ export class DeskService
 
     addNewDesk = async (newDesk) =>
     {
+        const {deskId, ...rest} = newDesk;
         this.#loggerService.logInfo(`Saving new desk: ${newDesk}.`);
         return await fetch("http://localhost:20009/desk", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newDesk)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
             .then((deskResponse) =>
             {
