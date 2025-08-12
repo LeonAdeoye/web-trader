@@ -10,7 +10,7 @@ import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
 import {LoggerService} from "../services/LoggerService";
 import {AccountService} from "../services/AccountService";
 import {BrokerService} from "../services/BrokerService";
-import {ReferenceDataService} from "../services/ReferenceDataService";
+import {InstrumentService} from "../services/InstrumentService";
 import {ClientService} from "../services/ClientService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import '../styles/css/main.css';
@@ -28,7 +28,7 @@ export const NewOrderApp = () =>
     const brokerService = useRef(new BrokerService()).current;
     const clientService = useRef(new ClientService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
-    const referenceDataService = useRef(new ReferenceDataService()).current;
+    const instrumentService = useRef(new InstrumentService()).current;
     const windowId = useMemo(() => window.command.getWindowId("New Order"), []);
 
     const [accounts, setAccounts] = useState([]);
@@ -114,17 +114,17 @@ export const NewOrderApp = () =>
         {
             await accountService.loadAccounts();
             await brokerService.loadBrokers();
-            await referenceDataService.loadInstruments();
+            await instrumentService.loadInstruments();
             await clientService.loadClients();
             await exchangeRateService.loadExchangeRates();
 
             setAccounts(accountService.getAccounts());
             setBrokers(brokerService.getBrokers());
-            setInstruments(referenceDataService.getInstruments());
+            setInstruments(instrumentService.getInstruments());
             setClients(clientService.getClients());
         };
         loadData();
-    }, [brokerService, accountService, referenceDataService, clientService, exchangeRateService]);
+    }, [brokerService, accountService, instrumentService, clientService, exchangeRateService]);
 
     useEffect(() =>
     {
@@ -151,7 +151,7 @@ export const NewOrderApp = () =>
             const newData = { ...prevData, [name]: value };
             if (name === 'instrumentCode' && value)
             {
-                const instrument = referenceDataService.getInstrumentByCode(value);
+                const instrument = instrumentService.getInstrumentByCode(value);
                 if (instrument)
                 {
                     newData.instrumentDescription = instrument.instrumentDescription;
@@ -191,7 +191,7 @@ export const NewOrderApp = () =>
                 newData.price = '';
             return newData;
         });
-    }, [accountService, brokerService, referenceDataService]);
+    }, [accountService, brokerService, instrumentService]);
 
     const canCreateOrder = () => order.clientCode !== "" && order.instrumentCode !== '' && order.side !== '' && order.quantity !== ''
         && (order.priceType === '1' || (order.priceType !== '1' && order.price !== ''));
@@ -647,7 +647,7 @@ export const NewOrderApp = () =>
                     </Paper>
                 )}
                 {order.destination === 'DSA' && (
-                    <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
+                    <Paper elevation={4} style={{ paddingLeft: '10px', marginBottom: '10px', paddingTop: "10px"}}>
                         <Grid container spacing={0.5} alignItems="flex-start">
                             <Grid item>
                                 <FormControl size="small" style={{ width: "120px", marginBottom: "10px" }}>

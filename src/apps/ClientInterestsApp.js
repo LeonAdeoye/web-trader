@@ -1,18 +1,18 @@
-import {Divider, Grid} from "@mui/material";
-import '../styles/css/main.css';
-import {ClientListComponent} from "../components/ClientListComponent";
-import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
-import {Resizable} from "re-resizable";
-import React, {useEffect, useRef, useMemo, useState} from "react";
-import {useRecoilState} from "recoil";
-import ClientInterestDialog from "../dialogs/ClientInterestDialog";
-import {ReferenceDataService} from "../services/ReferenceDataService";
-import {ClientInterestService} from "../services/ClientInterestService";
-import {clientInterestsChangedState, selectedClientState, titleBarContextShareColourState} from "../atoms/component-state";
+import React, {useState, useRef, useEffect} from "react";
+import {Grid, Divider} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
-import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
-import {ClientService} from "../services/ClientService";
 import {LoggerService} from "../services/LoggerService";
+import {ClientInterestService} from "../services/ClientInterestService";
+import {InstrumentService} from "../services/InstrumentService";
+import {useRecoilState} from "recoil";
+import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
+import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
+import ClientInterestDialog from "../dialogs/ClientInterestDialog";
+import '../styles/css/main.css';
+import {Resizable} from "re-resizable";
+import {clientInterestsChangedState, selectedClientState, titleBarContextShareColourState} from "../atoms/component-state";
+import {ClientService} from "../services/ClientService";
+import {ClientListComponent} from "../components/ClientListComponent";
 
 export const ClientInterestsApp = () =>
 {
@@ -22,12 +22,12 @@ export const ClientInterestsApp = () =>
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     const clientInterestService = useRef(new ClientInterestService()).current;
-    const referenceDataService = useRef(new ReferenceDataService()).current;
+    const instrumentService = useRef(new InstrumentService()).current;
     const clientService = useRef(new ClientService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
 
     const [ownerId, setOwnerId] = useState('');
-    const windowId = useMemo(() => window.command.getWindowId("Client Interests"), []);
+    const windowId = useRef(window.command.getWindowId("Client Interests")).current;
     const [listOfClients, setListOfClients] = useState([]);
 
     const closeHandler = async ({instrumentCode, side, notes, clientInterestId}) =>
@@ -52,7 +52,7 @@ export const ClientInterestsApp = () =>
     {
         if(ownerId)
         {
-            referenceDataService.loadInstruments()
+            instrumentService.loadInstruments()
                 .then(() => clientInterestService.loadClientInterests(ownerId)
                     .then(() => clientService.loadClients()
                         .then(() =>
@@ -67,7 +67,7 @@ export const ClientInterestsApp = () =>
                         })));
         }
 
-    }, [ownerId]);
+    }, [ownerId, instrumentService, clientInterestService, clientService, setListOfClients, setSelectedClient, setClientInterestsChanged]);
 
     window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
     {
@@ -92,8 +92,8 @@ export const ClientInterestsApp = () =>
                 </Resizable>
                 <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
                 <Grid item style={{flexGrow: 1, overflow: 'hidden'}}>
-                    <ClientInterestsComponent instrumentService={referenceDataService} clientInterestService={clientInterestService} loggerService={loggerService}/>
-                    <ClientInterestDialog closeHandler={closeHandler} instrumentService={referenceDataService} clientInterestService={clientInterestService}/>
+                    <ClientInterestsComponent instrumentService={instrumentService} clientInterestService={clientInterestService} loggerService={loggerService}/>
+                    <ClientInterestDialog closeHandler={closeHandler} instruments={instrumentService.getInstruments()}/>
                 </Grid>
             </Grid>
         </Grid>

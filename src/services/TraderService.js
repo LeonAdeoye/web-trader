@@ -1,6 +1,7 @@
 import {LoggerService} from "./LoggerService";
 
-export class TraderService {
+export class TraderService
+{
     #traders;
     #loggerService;
 
@@ -9,32 +10,94 @@ export class TraderService {
         this.#loggerService = new LoggerService(this.constructor.name);
     }
 
-    loadTraders = async () => {
-        if (this.#traders.length !== 0)
-            return;
-
+    loadTraders = async () =>
+    {
         await fetch('http://localhost:20009/trader')
             .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
+            .then(data =>
+            {
+                if (data.length > 0)
+                {
                     this.#traders = data;
                     this.#loggerService.logInfo(`Loaded ${data.length} traders: ${JSON.stringify(this.#traders)}`);
-                } else {
-                    this.#loggerService.logInfo(`Loaded zero traders.`);
                 }
+                else
+                    this.#loggerService.logInfo(`Loaded zero traders.`);
             })
             .catch(err => this.#loggerService.logError(err));
     }
 
-    getTraders = () => {
+    getTraders = () =>
+    {
         return this.#traders;
     }
 
-    getTraderByUserId = (userId) => {
+    getTraderByUserId = (userId) =>
+    {
         return this.#traders.find(trader => trader.userId === userId);
     }
 
-    clear = () => {
+    clear = () =>
+    {
         this.#traders = [];
+    }
+
+    addNewTrader = async (newTrader) =>
+    {
+        this.#loggerService.logInfo(`Saving new trader: ${JSON.stringify(newTrader)}.`);
+        return await fetch("http://localhost:20009/trader", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(newTrader)})
+            .then(response => response.json())
+            .then((traderResponse) =>
+            {
+                this.#traders.push(traderResponse);
+                this.#loggerService.logInfo(`Successfully saved trader: ${JSON.stringify(traderResponse)}.`);
+                return traderResponse;
+            })
+            .catch(error => this.#loggerService.logError(error));
+    }
+
+    updateTrader = async (traderToUpdate) =>
+    {
+        this.#loggerService.logInfo(`Updating trader: ${JSON.stringify(traderToUpdate)}.`);
+        return await fetch(`http://localhost:20009/trader`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(traderToUpdate)})
+            .then(response => response.json())
+            .then((traderResponse) =>
+            {
+                for(const current of this.#traders)
+                {
+                    if(current.traderId === traderResponse.traderId)
+                    {
+                        this.#traders[this.#traders.indexOf(current)] = traderResponse;
+                        break;
+                    }
+                }
+                this.#loggerService.logInfo(`Updated trader: ${JSON.stringify(traderResponse)}.`);
+                return traderResponse;
+            })
+            .catch(error => this.#loggerService.logError(error));
+    }
+
+    deleteTrader = async (traderId) =>
+    {
+        return await fetch(`http://localhost:20009/trader?traderId=${traderId}`, {method: "DELETE"})
+            .then(() =>
+            {
+                for(const current of this.#traders)
+                {
+                    if(current.traderId === traderId)
+                    {
+                        this.#traders.splice(this.#traders.indexOf(current), 1);
+                        this.#loggerService.logInfo(`Successfully deleted trader with trader Id: ${traderId}`);
+                        break;
+                    }
+                }
+            })
+            .catch(error => this.#loggerService.logError(error));
     }
 } 

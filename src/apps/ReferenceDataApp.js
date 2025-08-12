@@ -1,6 +1,6 @@
 import TitleBarComponent from "../components/TitleBarComponent";
 import {GenericGridComponent} from "../components/GenericGridComponent";
-import {useMemo, useRef, useState, useEffect} from "react";
+import {useMemo, useRef, useState, useEffect, useCallback} from "react";
 import * as React from 'react';
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import {Tab} from "@mui/material";
@@ -8,12 +8,14 @@ import {LoggerService} from "../services/LoggerService";
 import {useRecoilState} from "recoil";
 import {referenceDataDialogDisplayState} from "../atoms/dialog-state";
 import ReferenceDataDialog from "../dialogs/ReferenceDataDialog";
+import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 import {BrokerService} from "../services/BrokerService";
 import {AccountService} from "../services/AccountService";
-import {ReferenceDataService} from "../services/ReferenceDataService";
 import {TraderService} from "../services/TraderService";
 import {ClientService} from "../services/ClientService";
 import {DeskService} from "../services/DeskService";
+import {InstrumentService} from "../services/InstrumentService";
+import {ExchangeService} from "../services/ExchangeService";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 
 export const ReferenceDataApp = () =>
@@ -29,13 +31,17 @@ export const ReferenceDataApp = () =>
     const [instruments, setInstruments] = useState([]);
     const [traders, setTraders] = useState([]);
     const [, setReferenceDataDialogOpenFlag] = useRecoilState(referenceDataDialogDisplayState);
-
+    const [dialogMode, setDialogMode] = useState('add'); // 'add', 'update', 'clone'
+    const [editingData, setEditingData] = useState(null);
+    const [deleteConfirmationDialog, setDeleteConfirmationDialog] = useState(false);
+    const [dataToDelete, setDataToDelete] = useState(null);
     const brokerService = useRef(new BrokerService()).current;
     const accountService = useRef(new AccountService()).current;
-    const referenceDataService = useRef(new ReferenceDataService()).current;
     const traderService = useRef(new TraderService()).current;
     const clientService = useRef(new ClientService()).current;
     const deskService = useRef(new DeskService()).current;
+    const instrumentService = useRef(new InstrumentService()).current;
+    const exchangeService = useRef(new ExchangeService()).current;
 
     const clientColumnDefs = useMemo(() => 
     ([
@@ -400,34 +406,33 @@ export const ReferenceDataApp = () =>
         },
     ]), []);
 
-    // Handle CRUD operations for all reference data types
-    const handleAction = async (action, data) => {
-        try {
-            switch (action) {
-                case "update":
-                    // TODO: Implement update functionality for each data type
-                    loggerService.logInfo(`Update action for ${data ? 'selected row' : 'new item'}`);
-                    break;
-                case "delete":
-                    // TODO: Implement delete functionality for each data type
-                    loggerService.logInfo(`Delete action for ${data ? 'selected row' : 'new item'}`);
-                    break;
-                case "clone":
-                    // TODO: Implement clone functionality for each data type
-                    loggerService.logInfo(`Clone action for ${data ? 'selected row' : 'new item'}`);
-                    break;
-                case "add":
-                    // Open the reference data dialog for adding new items
-                    setReferenceDataDialogOpenFlag(true);
-                    loggerService.logInfo(`Add action for ${data ? 'selected row' : 'new item'}`);
-                    break;
-                default:
-                    loggerService.logError(`Unknown action: ${action}`);
-            }
-        } catch (error) {
-            loggerService.logError(`Failed to handle action ${action}: ${error}`);
+    const handleAction = useCallback(async (action, data) =>
+    {
+        switch (action)
+        {
+            case "update":
+                setDialogMode('update');
+                setEditingData(data);
+                setReferenceDataDialogOpenFlag(true);
+                break;
+            case "delete":
+                setDataToDelete(data);
+                setDeleteConfirmationDialog(true);
+                break;
+            case "clone":
+                setDialogMode('clone');
+                setEditingData(data);
+                setReferenceDataDialogOpenFlag(true);
+                break;
+            case "add":
+                setDialogMode('add');
+                setEditingData(null);
+                setReferenceDataDialogOpenFlag(true);
+                break;
+            default:
+                loggerService.logError(`Unknown action: ${action}`);
         }
-    };
+    }, []);
 
     useEffect(() => 
     {
@@ -438,19 +443,18 @@ export const ReferenceDataApp = () =>
                 await clientService.loadClients();
                 await brokerService.loadBrokers();
                 await accountService.loadAccounts();
-                await referenceDataService.loadInstruments();
-                await referenceDataService.loadExchanges();
+                await instrumentService.loadInstruments();
+                await exchangeService.loadExchanges();
                 await traderService.loadTraders();
                 await deskService.loadDesks();
 
                 setClients(clientService.getClients());
                 setBrokers(brokerService.getBrokers());
                 setAccounts(accountService.getAccounts());
-                setInstruments(referenceDataService.getInstruments());
-                setExchanges(referenceDataService.getExchanges());
+                setInstruments(instrumentService.getInstruments());
+                setExchanges(exchangeService.getExchanges());
                 setTraders(traderService.getTraders());
                 setDesks(deskService.getDesks());
-
             }
             catch (error)
             {
@@ -458,11 +462,244 @@ export const ReferenceDataApp = () =>
             }
         };
 
-        loadData();
-    }, [clientService, brokerService, accountService, referenceDataService, traderService, deskService, loggerService]);
+        loadData().then(() => loggerService.logInfo("All reference data loaded successfully."));
+
+    }, [clientService, brokerService, accountService, instrumentService, exchangeService, traderService, deskService, loggerService]);
+
+    const handleSave = useCallback(async (formData) =>
+    {
+        switch (dialogMode)
+        {
+            case 'add':
+                await handleAdd(formData);
+                break;
+            case 'update':
+                await handleUpdate(formData);
+                break;
+            case 'clone':
+                await handleClone(formData);
+                break;
+            default:
+                loggerService.logError(`Unknown dialog mode: ${dialogMode}`);
+        }
+        setDialogMode('add');
+        setEditingData(null);
+    }, [dialogMode, loggerService]);
+
+    const handleAdd = useCallback(async (formData) =>
+    {
+        switch (selectedTab)
+        {
+            case "1": // Clients
+                await clientService.addNewClient(formData);
+                await clientService.loadClients();
+                setClients(clientService.getClients());
+                break;
+            case "2": // Exchanges
+                await exchangeService.addNewExchange(formData);
+                await exchangeService.loadExchanges();
+                setExchanges(exchangeService.getExchanges());
+                break;
+            case "3": // Brokers
+                await brokerService.addNewBroker(formData);
+                await brokerService.loadBrokers();
+                setBrokers(brokerService.getBrokers());
+                break;
+            case "4": // Accounts
+                await accountService.addNewAccount(formData);
+                await accountService.loadAccounts();
+                setAccounts(accountService.getAccounts());
+                break;
+            case "5": // Desks
+                await deskService.addNewDesk(formData);
+                await deskService.loadDesks();
+                setDesks(deskService.getDesks());
+                break;
+            case "6": // Instruments
+                await instrumentService.addNewInstrument(formData);
+                await instrumentService.loadInstruments();
+                setInstruments(instrumentService.getInstruments());
+                break;
+            case "7": // Traders
+                await traderService.addNewTrader(formData);
+                await traderService.loadTraders();
+                setTraders(traderService.getTraders());
+                break;
+            default:
+                loggerService.logError(`Unknown tab for add: ${selectedTab}`);
+        }
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
+
+    const handleUpdate = useCallback(async (formData) =>
+    {
+        switch (selectedTab)
+        {
+            case "1": // Clients
+                await clientService.updateClient(formData);
+                await clientService.loadClients();
+                setClients(clientService.getClients());
+                break;
+            case "2": // Exchanges
+                await exchangeService.updateExchange(formData);
+                await exchangeService.loadExchanges();
+                setExchanges(exchangeService.getExchanges());
+                break;
+            case "3": // Brokers
+                await brokerService.updateBroker(formData);
+                await brokerService.loadBrokers();
+                setBrokers(brokerService.getBrokers());
+                break;
+            case "4": // Accounts
+                await accountService.updateAccount(formData);
+                await accountService.loadAccounts();
+                setAccounts(accountService.getAccounts());
+                break;
+            case "5": // Desks
+                await deskService.updateDesk(formData);
+                await deskService.loadDesks();
+                setDesks(deskService.getDesks());
+                break;
+            case "6": // Instruments
+                await instrumentService.updateInstrument(formData);
+                await instrumentService.loadInstruments();
+                setInstruments(instrumentService.getInstruments());
+                break;
+            case "7": // Traders
+                await traderService.updateTrader(formData);
+                await traderService.loadTraders();
+                setTraders(traderService.getTraders());
+                break;
+            default:
+                loggerService.logError(`Unknown tab for update: ${selectedTab}`);
+        }
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
+
+    const handleClone = useCallback(async (formData) =>
+    {
+        const clonedData = { ...formData };
+        delete clonedData.clientId;
+        delete clonedData.exchangeId;
+        delete clonedData.brokerId;
+        delete clonedData.accountId;
+        delete clonedData.deskId;
+        delete clonedData.instrumentId;
+        delete clonedData.traderId;
+        await handleAdd(clonedData);
+    }, []);
+
+    const handleDelete = useCallback(async (data) =>
+    {
+        try
+        {
+            switch (selectedTab)
+            {
+                case "1": // Clients
+                    await clientService.deleteClient(data.clientId);
+                    // Update local state immediately instead of reloading
+                    setClients(prevClients => prevClients.filter(client => client.clientId !== data.clientId));
+                    break;
+                case "2": // Exchanges
+                    await exchangeService.deleteExchange(data.exchangeId);
+                    setExchanges(prevExchanges => prevExchanges.filter(exchange => exchange.exchangeId !== data.exchangeId));
+                    break;
+                case "3": // Brokers
+                    await brokerService.deleteBroker(data.brokerId);
+                    setBrokers(prevBrokers => prevBrokers.filter(broker => broker.brokerId !== data.brokerId));
+                    break;
+                case "4": // Accounts
+                    await accountService.deleteAccount(data.accountId);
+                    setAccounts(prevAccounts => prevAccounts.filter(account => account.accountId !== data.accountId));
+                    break;
+                case "5": // Desks
+                    await deskService.deleteDesk(data.deskId);
+                    setDesks(prevDesks => prevDesks.filter(desk => desk.deskId !== data.deskId));
+                    break;
+                case "6": // Instruments
+                    await instrumentService.deleteInstrument(data.instrumentId);
+                    setInstruments(prevInstruments => prevInstruments.filter(instrument => instrument.instrumentId !== data.instrumentId));
+                    break;
+                case "7": // Traders
+                    await traderService.deleteTrader(data.traderId);
+                    setTraders(prevTraders => prevTraders.filter(trader => trader.traderId !== data.traderId));
+                    break;
+                default:
+                    loggerService.logError(`Unknown tab for delete: ${selectedTab}`);
+            }
+            loggerService.logInfo(`Successfully deleted ${getDataName(selectedTab)}`);
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to delete ${getDataName(selectedTab)}: ${error}`);
+            throw error;
+        }
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
+
+    const handleDeleteConfirm = useCallback(async () =>
+    {
+        try
+        {
+            if (dataToDelete)
+                await handleDelete(dataToDelete);
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to execute confirmed delete: ${error}`);
+        }
+        finally
+        {
+            setDeleteConfirmationDialog(false);
+            setDataToDelete(null);
+        }
+    }, [dataToDelete]);
+
+    const handleDeleteCancel = useCallback(() =>
+    {
+        setDeleteConfirmationDialog(false);
+        setDataToDelete(null);
+    }, []);
+
+    const getDataName = useCallback((tab) =>
+    {
+        switch (tab)
+        {
+            case "1": return "Client";
+            case "2": return "Exchange";
+            case "3": return "Broker";
+            case "4": return "Account";
+            case "5": return "Desk";
+            case "6": return "Instrument";
+            case "7": return "Trader";
+            default: return "Reference Data";
+        }
+    }, [])
+
+    const getItemDisplayName = useCallback((data, tab) =>
+    {
+        if (!data) return '';
+        
+        switch (tab)
+        {
+            case "1": // Clients
+                return data.clientName ? `${data.clientName} (${data.clientCode || 'No Code'})` : 'Unknown Client';
+            case "2": // Exchanges
+                return data.exchangeName ? `${data.exchangeName} (${data.exchangeAcronym || 'No Acronym'})` : 'Unknown Exchange';
+            case "3": // Brokers
+                return data.brokerAcronym ? `${data.brokerAcronym} - ${data.brokerDescription || 'No Description'}` : 'Unknown Broker';
+            case "4": // Accounts
+                return data.accountName ? `${data.accountName} (${data.accountMnemonic || 'No Mnemonic'})` : 'Unknown Account';
+            case "5": // Desks
+                return data.deskName ? data.deskName : 'Unknown Desk';
+            case "6": // Instruments
+                return data.instrumentCode ? `${data.instrumentCode} - ${data.instrumentDescription || 'No Description'}` : 'Unknown Instrument';
+            case "7": // Traders
+                return data.firstName ? `${data.firstName} ${data.lastName} (${data.userId || 'No User ID'})` : 'Unknown Trader';
+            default:
+                return 'Unknown Item';
+        }
+    }, []);
 
     return (<>
-        <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => setReferenceDataDialogOpenFlag(true), tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
+        <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => { setDialogMode('add'); setEditingData(null); setReferenceDataDialogOpenFlag(true); }, tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
         <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 131px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <TabContext value={selectedTab}>
                 <TabList className="reference-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
@@ -504,16 +741,10 @@ export const ReferenceDataApp = () =>
                 </TabPanel>
             </TabContext>
         </div>
-        <ReferenceDataDialog 
-            dataName={selectedTab === "1" ? "Clients" : 
-                     selectedTab === "2" ? "Exchanges" : 
-                     selectedTab === "3" ? "Brokers" : 
-                     selectedTab === "4" ? "Accounts" : 
-                     selectedTab === "5" ? "Desks" : 
-                     selectedTab === "6" ? "Instruments" : 
-                     selectedTab === "7" ? "Traders" : "Reference Data"}
-            selectedTab={selectedTab}
-            desks={desks}
-        />
+        <ReferenceDataDialog selectedTab={selectedTab} desks={desks} mode={dialogMode} editingData={editingData} onSave={handleSave}
+             onClose={() => { setDialogMode('add'); setEditingData(null); }} dataName={getDataName(selectedTab)}/>
+
+        <DeleteConfirmationDialog open={deleteConfirmationDialog} onClose={handleDeleteCancel} onConfirm={handleDeleteConfirm}
+            dataToDelete={dataToDelete} selectedTab={selectedTab} getDataName={getDataName} getItemDisplayName={getItemDisplayName}/>
     </>)
 }

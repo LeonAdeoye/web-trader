@@ -1,10 +1,8 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {Grid, TextField, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
-import {LoggerService} from "../services/LoggerService";
 
-const TraderDialogComponent = ({data, onDataChange, desks = []}) => {
-    const loggerService = new LoggerService(TraderDialogComponent.name);
-    
+const TraderDialogComponent = ({data, onDataChange, desks = []}) =>
+{
     const [traderData, setTraderData] = useState(data || {
         traderId: '',
         firstName: '',
@@ -12,65 +10,59 @@ const TraderDialogComponent = ({data, onDataChange, desks = []}) => {
         userId: '',
         deskId: ''
     });
+    const [isInitializing, setIsInitializing] = useState(true);
 
-    const handleInputChange = useCallback((field, value) => {
+    useEffect(() =>
+    {
+        if (data && Object.keys(data).length > 0)
+            setTraderData(data);
+        else if (data && Object.keys(data).length === 0)
+            setTraderData({traderId: '', firstName: '', lastName: '', userId: '', deskId: '' });
+
+        if (isInitializing)
+            setIsInitializing(false);
+
+    }, [data, isInitializing]);
+
+    const handleInputChange = useCallback((field, value) =>
+    {
         const newData = { ...traderData, [field]: value };
         setTraderData(newData);
-        if (onDataChange) {
+        if (onDataChange && !isInitializing)
             onDataChange(newData);
-        }
-        loggerService.logInfo(`Trader dialog - Field ${field} changed to: ${value}`);
-    }, [traderData, onDataChange, loggerService]);
+
+    }, [traderData, onDataChange, isInitializing]);
 
     return (
-        <Grid container spacing={0.5} alignItems="flex-start">
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="First Name"
-                    value={traderData.firstName || ''}
+        <Grid container alignItems="flex-start">
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="First Name" value={traderData.firstName || ''}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="Last Name"
-                    value={traderData.lastName || ''}
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Last Name" value={traderData.lastName || ''}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="User ID"
-                    value={traderData.userId || ''}
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="User ID" value={traderData.userId || ''}
                     onChange={(e) => handleInputChange('userId', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <FormControl size="small" style={{ width: '200px' }}>
                     <InputLabel style={{ fontSize: '0.75rem' }}>Desk</InputLabel>
                     <Select
                         value={traderData.deskId || ''}
                         onChange={(e) => handleInputChange('deskId', e.target.value)}
-                        style={{ fontSize: '0.75rem', height: '32px' }}
-                    >
+                        style={{ fontSize: '0.75rem', height: '32px' }}>
                         <MenuItem value="">
                             <em>Select a desk</em>
                         </MenuItem>

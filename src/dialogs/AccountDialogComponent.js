@@ -1,10 +1,8 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {Grid, TextField, FormControlLabel, Checkbox} from '@mui/material';
-import {LoggerService} from "../services/LoggerService";
 
-const AccountDialogComponent = ({data, onDataChange}) => {
-    const loggerService = new LoggerService(AccountDialogComponent.name);
-    
+const AccountDialogComponent = ({data, onDataChange}) =>
+{
     const [accountData, setAccountData] = useState(data || {
         accountId: '',
         accountName: '',
@@ -15,99 +13,82 @@ const AccountDialogComponent = ({data, onDataChange}) => {
         isActive: true,
         customFlags: ''
     });
+    const [isInitializing, setIsInitializing] = useState(true);
 
-    const handleInputChange = useCallback((field, value) => {
+    useEffect(() =>
+    {
+        if (data && Object.keys(data).length > 0)
+        {
+            setAccountData(data);
+        }
+        else if (data && Object.keys(data).length === 0)
+        {
+            setAccountData({
+                accountId: '',
+                accountName: '',
+                accountMnemonic: '',
+                legalEntity: '',
+                isFirmAccount: false,
+                isRiskAccount: false,
+                isActive: true,
+                customFlags: ''
+            });
+        }
+        if (isInitializing)
+            setIsInitializing(false);
+    }, [data, isInitializing]);
+
+    const handleInputChange = useCallback((field, value) =>
+    {
         const newData = { ...accountData, [field]: value };
         setAccountData(newData);
-        if (onDataChange) {
+        if (onDataChange && !isInitializing)
             onDataChange(newData);
-        }
-        loggerService.logInfo(`Account dialog - Field ${field} changed to: ${value}`);
-    }, [accountData, onDataChange, loggerService]);
 
-    const handleCheckboxChange = useCallback((field, checked) => {
+    }, [accountData, onDataChange, isInitializing]);
+
+    const handleCheckboxChange = useCallback((field, checked) =>
+    {
         handleInputChange(field, checked);
     }, [handleInputChange]);
 
     return (
-        <Grid container spacing={0.5} alignItems="flex-start">
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="Account Name"
-                    value={accountData.accountName || ''}
+        <Grid container alignItems="flex-start">
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Account Name" value={accountData.accountName || ''}
                     onChange={(e) => handleInputChange('accountName', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="Account Mnemonic"
-                    value={accountData.accountMnemonic || ''}
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField  size="small" label="Account Mnemonic" value={accountData.accountMnemonic || ''}
                     onChange={(e) => handleInputChange('accountMnemonic', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="Legal Entity"
-                    value={accountData.legalEntity || ''}
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Legal Entity" value={accountData.legalEntity || ''}
                     onChange={(e) => handleInputChange('legalEntity', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <TextField
-                    size="small"
-                    label="Custom Flags"
-                    value={accountData.customFlags || ''}
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Custom Flags" value={accountData.customFlags || ''}
                     onChange={(e) => handleInputChange('customFlags', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={6}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={accountData.isFirmAccount || false}
-                            onChange={(e) => handleCheckboxChange('isFirmAccount', e.target.checked)}
-                            size="small"
-                        />
-                    }
-                    label="Firm Account"
-                    style={{ fontSize: '0.75rem' }}
-                />
+            <Grid item xs={5}>
+                <FormControlLabel label="Firm Account" style={{ fontSize: '0.75rem' }}
+                    control={ <Checkbox checked={accountData.isFirmAccount || false} onChange={(e) => handleCheckboxChange('isFirmAccount', e.target.checked)} size="small"/> }/>
             </Grid>
-            <Grid item xs={6}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={accountData.isRiskAccount || false}
-                            onChange={(e) => handleCheckboxChange('isRiskAccount', e.target.checked)}
-                            size="small"
-                        />
-                    }
-                    label="Risk Account"
-                    style={{ fontSize: '0.75rem' }}
-                />
+            <Grid item xs={5}>
+                <FormControlLabel label="Risk Account" style={{ fontSize: '0.75rem' }}
+                    control={ <Checkbox checked={accountData.isRiskAccount || false} onChange={(e) => handleCheckboxChange('isRiskAccount', e.target.checked)} size="small"/> }/>
             </Grid>
         </Grid>
     );

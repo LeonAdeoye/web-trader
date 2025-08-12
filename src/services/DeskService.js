@@ -13,9 +13,6 @@ export class DeskService
 
     loadDesks = async () =>
     {
-        if(this.#desks.length !== 0)
-            return;
-
         await fetch(`http://localhost:20009/desk`)
             .then(response => response.json())
             .then(data =>
@@ -70,7 +67,7 @@ export class DeskService
 
     deleteDesk = async (deskId) =>
     {
-        fetch(`http://localhost:20009/desk?deskId=${deskId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/desk?deskId=${deskId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#desks)

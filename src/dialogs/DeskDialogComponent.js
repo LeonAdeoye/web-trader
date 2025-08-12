@@ -1,52 +1,48 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect } from 'react';
 import {Grid, TextField} from '@mui/material';
-import {LoggerService} from "../services/LoggerService";
 
-const DeskDialogComponent = ({data, onDataChange}) => {
-    const loggerService = new LoggerService(DeskDialogComponent.name);
-    
-    const [deskData, setDeskData] = useState(data || {
-        deskId: '',
-        deskCode: '',
-        deskName: ''
-    });
+const DeskDialogComponent = ({data, onDataChange}) =>
+{
+    const [deskData, setDeskData] = useState(data || { deskId: '', deskName: '' });
+    const [isInitializing, setIsInitializing] = useState(true);
 
-    const handleInputChange = useCallback((field, value) => {
+    useEffect(() =>
+    {
+        if (data && Object.keys(data).length > 0)
+        {
+            setDeskData(data);
+        }
+        else if (data && Object.keys(data).length === 0)
+        {
+            setDeskData({
+                deskId: '',
+                deskName: ''
+            });
+        }
+
+        if (isInitializing)
+            setIsInitializing(false);
+
+    }, [data, isInitializing]);
+
+    const handleInputChange = useCallback((field, value) =>
+    {
         const newData = { ...deskData, [field]: value };
         setDeskData(newData);
-        if (onDataChange) {
+        if (onDataChange && !isInitializing)
             onDataChange(newData);
-        }
-        loggerService.logInfo(`Desk dialog - Field ${field} changed to: ${value}`);
-    }, [deskData, onDataChange, loggerService]);
+
+    }, [deskData, onDataChange, isInitializing]);
 
     return (
-        <Grid container spacing={0.5} direction="column" alignItems="flex-start">
+        <Grid container direction="column" alignItems="flex-start">
             <Grid item>
-                <TextField
-                    size="small"
-                    label="Desk Code"
-                    value={deskData.deskCode || ''}
-                    onChange={(e) => handleInputChange('deskCode', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' }
-                    }}
-                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
-            </Grid>
-            <Grid item>
-                <TextField
-                    size="small"
-                    label="Desk Name"
+                <TextField size="small" label="Desk Name"
                     value={deskData.deskName || ''}
                     onChange={(e) => handleInputChange('deskName', e.target.value)}
-                    InputProps={{
-                        style: { fontSize: '0.75rem', height: '32px' } 
-                    }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }}
-                />
+                    style={{ width: '200px' }}/>
             </Grid>
         </Grid>
     );

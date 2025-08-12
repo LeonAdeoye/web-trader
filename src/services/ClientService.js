@@ -13,9 +13,6 @@ export class ClientService
 
     loadClients = async () =>
     {
-        if(this.#clients.length !== 0)
-            return;
-
         await fetch(`http://localhost:20009/client`)
             .then(response => response.json())
             .then(data =>
@@ -34,16 +31,17 @@ export class ClientService
 
     addNewClient = async (newClient) =>
     {
-        this.#loggerService.logInfo(`Saving new client: ${newClient}.`);
+        const {clientId, ...rest} = newClient;
+        this.#loggerService.logInfo(`Saving new client: ${JSON.stringify(rest)}.`);
         return await fetch("http://localhost:20009/client", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newClient)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
             .then((clientResponse) =>
             {
                 this.#clients.push(clientResponse);
-                this.#loggerService.logInfo(`Successfully saved client: ${clientResponse}.`);
+                this.#loggerService.logInfo(`Successfully saved client: ${JSON.stringify(clientResponse)}.`);
                 return clientResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -51,12 +49,12 @@ export class ClientService
 
     deleteClient = async (clientId) =>
     {
-        fetch(`http://localhost:20009/client?clientId=${clientId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/client?clientId=${clientId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#clients)
                 {
-                    if(current.blastId === clientId)
+                    if(current.clientId === clientId)
                     {
                         this.#clients.splice(this.#clients.indexOf(current), 1);
                         this.#loggerService.logInfo(`Successfully deleted client with client Id: ${clientId}`);
@@ -69,7 +67,7 @@ export class ClientService
 
     updateClient = async (clientToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating client: ${clientToUpdate}.`);
+        this.#loggerService.logInfo(`Updating client: ${JSON.stringify(clientToUpdate)}.`);
         return await fetch(`http://localhost:20009/client`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -79,14 +77,14 @@ export class ClientService
             {
                 for(const current of this.#clients)
                 {
-                    if(current.blastId === clientResponse.blastId)
+                    if(current.clientId === clientResponse.clientId)
                     {
                         this.#clients[this.#clients.indexOf(current)] = clientResponse;
                         break;
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated client: ${clientResponse}.`);
+                this.#loggerService.logInfo(`Updated client: ${JSON.stringify(clientResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

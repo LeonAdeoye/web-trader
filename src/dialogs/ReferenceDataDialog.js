@@ -1,8 +1,7 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid} from '@mui/material';
+import React, {useState, useCallback, useEffect} from 'react';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from '@mui/material';
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
-import {LoggerService} from "../services/LoggerService";
 import {referenceDataDialogDisplayState} from "../atoms/dialog-state";
 import ClientDialogComponent from "./ClientDialogComponent";
 import ExchangeDialogComponent from "./ExchangeDialogComponent";
@@ -12,19 +11,20 @@ import DeskDialogComponent from "./DeskDialogComponent";
 import InstrumentDialogComponent from "./InstrumentDialogComponent";
 import TraderDialogComponent from "./TraderDialogComponent";
 
-const ReferenceDataDialog = ({dataName, selectedTab, desks = []}) =>
+const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', editingData = null, onSave, onClose}) =>
 {
     const [referenceDataDialogDisplay, setReferenceDataDialogDisplay] = useRecoilState(referenceDataDialogDisplayState);
-    const loggerService = useRef(new LoggerService(ReferenceDataDialog.name)).current;
     const [formData, setFormData] = useState({});
 
-    const handleInputChange = useCallback((data) => {
+    const handleInputChange = useCallback((data) =>
+    {
         setFormData(data);
-        loggerService.logInfo(`Reference Data Dialog - Form data updated: ${JSON.stringify(data)}`);
-    }, [loggerService]);
+    }, []);
 
-    const renderComponent = useCallback(() => {
-        switch (selectedTab) {
+    const renderComponent = useCallback(() =>
+    {
+        switch (selectedTab)
+        {
             case "1": // Clients
                 return <ClientDialogComponent data={formData} onDataChange={handleInputChange} />;
             case "2": // Exchanges
@@ -46,40 +46,93 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = []}) =>
 
     const handleAdd = useCallback(() =>
     {
-        loggerService.logInfo(`Adding new reference data: ${JSON.stringify(formData)}`);
-        // TODO: Implement actual add functionality based on selectedTab
-        // This would call the appropriate service method
+        if (onSave)
+        {
+            if (mode === 'update' && editingData)
+            {
+                // For updates, merge the form data with the original data to preserve any missing fields
+                const updatedData = { ...editingData, ...formData };
+                onSave(updatedData);
+            }
+            else
+            {
+                onSave(formData);
+            }
+        }
+
         setReferenceDataDialogDisplay(false);
-    }, [formData, setReferenceDataDialogDisplay, loggerService]);
+        if (onClose)
+            onClose();
+
+    }, [formData, setReferenceDataDialogDisplay, mode, editingData, onSave, onClose]);
 
     useEffect(() =>
     {
-        if (referenceDataDialogDisplay) {
-            setFormData({});
-            loggerService.logInfo("Reference Data Dialog opened - form data cleared");
+        if (referenceDataDialogDisplay)
+        {
+            if (mode === 'add')
+                setFormData({});
+            else if (mode === 'update' && editingData)
+                setFormData(editingData);
+            else if (mode === 'clone' && editingData)
+            {
+                const clonedData = { ...editingData };
+                delete clonedData.clientId;
+                delete clonedData.exchangeId;
+                delete clonedData.brokerId;
+                delete clonedData.accountId;
+                delete clonedData.deskId;
+                delete clonedData.instrumentId;
+                delete clonedData.traderId;
+                setFormData(clonedData);
+            }
         }
-    }, [referenceDataDialogDisplay, loggerService]);
+        else
+        {
+            setFormData({});
+            if (onClose)
+                onClose();
+        }
+    }, [referenceDataDialogDisplay, mode, editingData,  onClose]);
 
     const handleCancel = useCallback(() =>
     {
-        // TODO
         setReferenceDataDialogDisplay(false);
-    }, []);
+        setFormData({});
+        if (onClose)
+            onClose();
+
+    }, [setReferenceDataDialogDisplay, onClose]);
 
     const handleClear = useCallback(() =>
     {
-        setFormData({});
-        loggerService.logInfo("Reference Data Dialog - Form cleared");
-    }, [loggerService]);
+        if (mode === 'add')
+            setFormData({});
+        else if (mode === 'update' && editingData)
+            setFormData(editingData);
+        else if (mode === 'clone' && editingData)
+        {
+            const clonedData = { ...editingData };
+            delete clonedData.clientId;
+            delete clonedData.exchangeId;
+            delete clonedData.brokerId;
+            delete clonedData.accountId;
+            delete clonedData.deskId;
+            delete clonedData.instrumentId;
+            delete clonedData.traderId;
+            setFormData(clonedData);
+        }
+    }, [mode, editingData]);
 
     const canDisable = useCallback(() =>
     {
-        // Check if required fields are filled based on selected tab
         if (!selectedTab) return true;
+        if (mode === 'update' && editingData) return false;
         
-        switch (selectedTab) {
+        switch (selectedTab)
+        {
             case "1": // Clients
-                return !formData.clientName || !formData.clientCode;
+                return !formData.clientName;
             case "2": // Exchanges
                 return !formData.exchangeName || !formData.exchangeAcronym;
             case "3": // Brokers
@@ -87,7 +140,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = []}) =>
             case "4": // Accounts
                 return !formData.accountName || !formData.accountMnemonic;
             case "5": // Desks
-                return !formData.deskCode || !formData.deskName;
+                return !formData.deskName;
             case "6": // Instruments
                 return !formData.instrumentCode || !formData.instrumentDescription;
             case "7": // Traders
@@ -95,23 +148,25 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = []}) =>
             default:
                 return true;
         }
-    }, [selectedTab, formData]);
+    }, [selectedTab, formData, mode, editingData]);
 
-    const getDialogWidth = useCallback(() => {
-        switch (selectedTab) {
-            case "1": // Clients - 2 fields, single column
+    const getDialogWidth = useCallback(() =>
+    {
+        switch (selectedTab)
+        {
+            case "1": // Clients
                 return "300px";
-            case "2": // Exchanges - 2 fields, single column
+            case "2": // Exchanges
                 return "300px";
-            case "3": // Brokers - 2 fields, single column
+            case "3": // Brokers
                 return "300px";
-            case "4": // Accounts - 8 fields, 2 columns
+            case "4": // Accounts
                 return "500px";
-            case "5": // Desks - 2 fields, single column
+            case "5": // Desks
                 return "300px";
-            case "6": // Instruments - 9 fields, 2 columns
-                return "600px";
-            case "7": // Traders - 4 fields, 2 columns
+            case "6": // Instruments
+                return "550px";
+            case "7": // Traders
                 return "450px";
             default:
                 return "450px";
@@ -120,14 +175,14 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = []}) =>
 
     return (
         <Dialog aria-labelledby='dialog-title' open={referenceDataDialogDisplay}>
-            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{`${dataName} Reference Data Maintenance`}</DialogTitle>
-            <DialogContent style={{width: getDialogWidth(), padding: '20px'}}>
-                {renderComponent()}
-            </DialogContent>
+            <DialogTitle id='dialog-title' style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>{`${dataName} Reference Data ${mode === 'add' ? 'Add' : mode === 'update' ? 'Update' : 'Clone'}`}</DialogTitle>
+            <DialogContent style={{width: getDialogWidth(), padding: '20px'}}>{renderComponent()}</DialogContent>
             <DialogActions style={{height: '40px'}}>
                 <Button className="dialog-action-button submit" color="primary" style={{ marginRight: '0px', marginLeft: '0px', fontSize: '0.75rem'}} variant='contained' disabled={false} onClick={handleCancel}>Cancel</Button>
                 <Button className="dialog-action-button submit" color="primary" style={{ marginRight: '0px', marginLeft: '10px', fontSize: '0.75rem'}} variant='contained' disabled={canDisable()} onClick={handleClear}>Clear</Button>
-                <Button className="dialog-action-button submit" color="primary" style={{ marginRight: '0px', marginLeft: '10px', fontSize: '0.75rem'}} variant='contained' disabled={canDisable()} onClick={handleAdd}>Add</Button>
+                <Button className="dialog-action-button submit" color="primary" style={{ marginRight: '0px', marginLeft: '10px', fontSize: '0.75rem'}} variant='contained' disabled={canDisable()} onClick={handleAdd}>
+                    {mode === 'add' ? 'Add' : mode === 'update' ? 'Update' : 'Save'}
+                </Button>
             </DialogActions>
         </Dialog>);
 };

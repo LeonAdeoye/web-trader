@@ -1,22 +1,22 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid} from '@mui/material';
-import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
-import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
-import {TraderIdAutoCompleteWidget} from "../widgets/TraderIdAutoCompleteWidget";
+import React, {useState, useCallback, useRef, useEffect} from "react";
+import {Button, Grid, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
+import {LoggerService} from "../services/LoggerService";
 import {ClientService} from "../services/ClientService";
 import {TraderService} from "../services/TraderService";
-import {ReferenceDataService} from "../services/ReferenceDataService";
-import {LoggerService} from "../services/LoggerService";
-import '../styles/css/main.css';
+import {InstrumentService} from "../services/InstrumentService";
 import {useRecoilState} from "recoil";
 import {tradeHistoryDialogDisplayState} from "../atoms/dialog-state";
+import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
+import {TraderIdAutoCompleteWidget} from "../widgets/TraderIdAutoCompleteWidget";
+import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
+import '../styles/css/main.css';
 
 const TradeHistorySearchDialog = ({ onSearch }) =>
 {
     const [tradeHistoryDialogDisplay, setTradeHistoryDialogDisplay] = useRecoilState(tradeHistoryDialogDisplayState);
     const clientService = useRef(new ClientService()).current;
     const traderService = useRef(new TraderService()).current;
-    const referenceDataService = useRef(new ReferenceDataService()).current;
+    const instrumentService = useRef(new InstrumentService()).current;
     const [traders, setTraders] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [clients, setClients] = useState([]);
@@ -57,15 +57,15 @@ const TradeHistorySearchDialog = ({ onSearch }) =>
         const loadData = async () =>
         {
             await traderService.loadTraders()
-            await referenceDataService.loadInstruments();
+            await instrumentService.loadInstruments();
             await clientService.loadClients();
 
             setTraders(traderService.getTraders());
-            setInstruments(referenceDataService.getInstruments());
+            setInstruments(instrumentService.getInstruments());
             setClients(clientService.getClients());
         };
         loadData().then(() => loggerService.logInfo('TradeHistorySearchDialog search input data loaded successfully.'))
-    }, [ referenceDataService, clientService, traderService, loggerService]);
+    }, [ instrumentService, clientService, traderService, loggerService]);
 
     const handleCancel = useCallback(() =>
     {
