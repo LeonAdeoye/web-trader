@@ -77,7 +77,7 @@ export class InstrumentService
 
     deleteInstrument = async (instrumentId) =>
     {
-        return await fetch(`http://localhost:20009/instrument?instrumentId=${instrumentId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/instrument/${instrumentId}`, {method: "DELETE"})
             .then(() => {
                 for(const current of this.#instruments) {
                     if(current.instrumentId === instrumentId) {

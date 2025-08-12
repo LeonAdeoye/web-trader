@@ -67,7 +67,7 @@ export class DeskService
 
     deleteDesk = async (deskId) =>
     {
-        return await fetch(`http://localhost:20009/desk?deskId=${deskId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/desk/${deskId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#desks)

@@ -86,7 +86,7 @@ export class AccountService
 
     deleteAccount = async (accountId) =>
     {
-        return await fetch(`http://localhost:20009/account?accountId=${accountId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/account/${accountId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#accounts)
