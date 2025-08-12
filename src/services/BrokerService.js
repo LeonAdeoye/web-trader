@@ -44,11 +44,12 @@ export class BrokerService
 
     addNewBroker = async (newBroker) =>
     {
+        const {brokerId, ...rest} = newBroker;
         this.#loggerService.logInfo(`Saving new broker: ${JSON.stringify(newBroker)}.`);
         return await fetch("http://localhost:20009/broker", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newBroker)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
             .then((brokerResponse) =>
             {
@@ -85,7 +86,7 @@ export class BrokerService
 
     deleteBroker = async (brokerId) =>
     {
-        return await fetch(`http://localhost:20009/broker?brokerId=${brokerId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/broker/${brokerId}`, {method: "DELETE"})
             .then(() =>
             {
                 for(const current of this.#brokers)

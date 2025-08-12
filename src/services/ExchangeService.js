@@ -35,13 +35,15 @@ export class ExchangeService
 
     addNewExchange = async (newExchange) =>
     {
-        this.#loggerService.logInfo(`Saving new exchange: ${JSON.stringify(newExchange)}.`);
+        const {exchangeId, ...rest} = newExchange;
+        this.#loggerService.logInfo(`Saving new exchange: ${JSON.stringify(rest)}.`);
         return await fetch("http://localhost:20009/exchange", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newExchange)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
-            .then((exchangeResponse) => {
+            .then((exchangeResponse) =>
+            {
                 this.#exchanges.push(exchangeResponse);
                 this.#loggerService.logInfo(`Successfully saved exchange: ${JSON.stringify(exchangeResponse)}.`);
                 return exchangeResponse;
@@ -72,7 +74,7 @@ export class ExchangeService
 
     deleteExchange = async (exchangeId) =>
     {
-        return await fetch(`http://localhost:20009/exchange?exchangeId=${exchangeId}`, {method: "DELETE"})
+        return await fetch(`http://localhost:20009/exchange/${exchangeId}`, {method: "DELETE"})
             .then(() => {
                 for(const current of this.#exchanges) {
                     if(current.exchangeId === exchangeId) {

@@ -23,6 +23,7 @@ export const ReferenceDataApp = () =>
     const windowId = useMemo(() => window.command.getWindowId("Reference Data"), []);
     const loggerService = useRef(new LoggerService(ReferenceDataApp.name)).current;
     const [selectedTab, setSelectedTab] = useState("1");
+    const selectedTabRef = useRef("1");
     const [clients, setClients] = useState([]);
     const [exchanges, setExchanges] = useState([]);
     const [brokers, setBrokers] = useState([]);
@@ -432,7 +433,7 @@ export const ReferenceDataApp = () =>
             default:
                 loggerService.logError(`Unknown action: ${action}`);
         }
-    }, []);
+    }, [loggerService]);
 
     useEffect(() => 
     {
@@ -488,7 +489,8 @@ export const ReferenceDataApp = () =>
 
     const handleAdd = useCallback(async (formData) =>
     {
-        switch (selectedTab)
+        const tab = selectedTabRef.current;
+        switch (tab)
         {
             case "1": // Clients
                 await clientService.addNewClient(formData);
@@ -526,13 +528,14 @@ export const ReferenceDataApp = () =>
                 setTraders(traderService.getTraders());
                 break;
             default:
-                loggerService.logError(`Unknown tab for add: ${selectedTab}`);
+                loggerService.logError(`Unknown tab for add: ${tab}`);
         }
     }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
 
     const handleUpdate = useCallback(async (formData) =>
     {
-        switch (selectedTab)
+        const tab = selectedTabRef.current;
+        switch (tab)
         {
             case "1": // Clients
                 await clientService.updateClient(formData);
@@ -570,7 +573,7 @@ export const ReferenceDataApp = () =>
                 setTraders(traderService.getTraders());
                 break;
             default:
-                loggerService.logError(`Unknown tab for update: ${selectedTab}`);
+                loggerService.logError(`Unknown tab for update: ${tab}`);
         }
     }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
 
@@ -589,48 +592,39 @@ export const ReferenceDataApp = () =>
 
     const handleDelete = useCallback(async (data) =>
     {
-        try
+        const tab = selectedTabRef.current;
+        switch (tab)
         {
-            switch (selectedTab)
-            {
-                case "1": // Clients
-                    await clientService.deleteClient(data.clientId);
-                    // Update local state immediately instead of reloading
-                    setClients(prevClients => prevClients.filter(client => client.clientId !== data.clientId));
-                    break;
-                case "2": // Exchanges
-                    await exchangeService.deleteExchange(data.exchangeId);
-                    setExchanges(prevExchanges => prevExchanges.filter(exchange => exchange.exchangeId !== data.exchangeId));
-                    break;
-                case "3": // Brokers
-                    await brokerService.deleteBroker(data.brokerId);
-                    setBrokers(prevBrokers => prevBrokers.filter(broker => broker.brokerId !== data.brokerId));
-                    break;
-                case "4": // Accounts
-                    await accountService.deleteAccount(data.accountId);
-                    setAccounts(prevAccounts => prevAccounts.filter(account => account.accountId !== data.accountId));
-                    break;
-                case "5": // Desks
-                    await deskService.deleteDesk(data.deskId);
-                    setDesks(prevDesks => prevDesks.filter(desk => desk.deskId !== data.deskId));
-                    break;
-                case "6": // Instruments
-                    await instrumentService.deleteInstrument(data.instrumentId);
-                    setInstruments(prevInstruments => prevInstruments.filter(instrument => instrument.instrumentId !== data.instrumentId));
-                    break;
-                case "7": // Traders
-                    await traderService.deleteTrader(data.traderId);
-                    setTraders(prevTraders => prevTraders.filter(trader => trader.traderId !== data.traderId));
-                    break;
-                default:
-                    loggerService.logError(`Unknown tab for delete: ${selectedTab}`);
-            }
-            loggerService.logInfo(`Successfully deleted ${getDataName(selectedTab)}`);
-        }
-        catch (error)
-        {
-            loggerService.logError(`Failed to delete ${getDataName(selectedTab)}: ${error}`);
-            throw error;
+            case "1": // Clients
+                await clientService.deleteClient(data.clientId);
+                setClients(prevClients => prevClients.filter(client => client.clientId !== data.clientId));
+                break;
+            case "2": // Exchanges
+                await exchangeService.deleteExchange(data.exchangeId);
+                setExchanges(prevExchanges => prevExchanges.filter(exchange => exchange.exchangeId !== data.exchangeId));
+                break;
+            case "3": // Brokers
+                await brokerService.deleteBroker(data.brokerId);
+                setBrokers(prevBrokers => prevBrokers.filter(broker => broker.brokerId !== data.brokerId));
+                break;
+            case "4": // Accounts
+                await accountService.deleteAccount(data.accountId);
+                setAccounts(prevAccounts => prevAccounts.filter(account => account.accountId !== data.accountId));
+                break;
+            case "5": // Desks
+                await deskService.deleteDesk(data.deskId);
+                setDesks(prevDesks => prevDesks.filter(desk => desk.deskId !== data.deskId));
+                break;
+            case "6": // Instruments
+                await instrumentService.deleteInstrument(data.instrumentId);
+                setInstruments(prevInstruments => prevInstruments.filter(instrument => instrument.instrumentId !== data.instrumentId));
+                break;
+            case "7": // Traders
+                await traderService.deleteTrader(data.traderId);
+                setTraders(prevTraders => prevTraders.filter(trader => trader.traderId !== data.traderId));
+                break;
+            default:
+                loggerService.logError(`Unknown tab for delete: ${tab}`);
         }
     }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, selectedTab, loggerService]);
 
@@ -702,7 +696,11 @@ export const ReferenceDataApp = () =>
         <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => { setDialogMode('add'); setEditingData(null); setReferenceDataDialogOpenFlag(true); }, tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
         <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 131px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <TabContext value={selectedTab}>
-                <TabList className="reference-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
+                <TabList className="reference-tab-list" onChange={(event, newValue) =>
+                {
+                    selectedTabRef.current = newValue;
+                    setSelectedTab(newValue);
+                }}>
                     <Tab className="clients-tab" label={"Clients"} value="1"/>
                     <Tab className="exchanges-tab" label={"Exchanges"} value="2"/>
                     <Tab className="brokers-tab" label={"Brokers"} value="3"/>
