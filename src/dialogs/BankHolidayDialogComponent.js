@@ -41,54 +41,54 @@ const BankHolidayDialogComponent = ({data, onDataChange}) =>
     ];
 
     return (
-        <Grid container spacing={2} direction="column">
-            <Grid item>
-                <FormControl fullWidth size="small">
-                    <InputLabel>Country</InputLabel>
+        <Grid container spacing={2} alignItems="flex-start">
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
+                <FormControl size="small" style={{ width: '200px' }}>
+                    <InputLabel style={{ fontSize: '0.75rem' }}>Country</InputLabel>
                     <Select
                         value={bankHolidayData.countryCode || ''}
                         onChange={(e) => handleInputChange('countryCode', e.target.value)}
-                        label="Country">
+                        style={{ fontSize: '0.75rem', height: '32px' }}>
                         {countries.map(country =>
-                            <MenuItem key={country.code} value={country.code}>
+                            <MenuItem key={country.code} value={country.code} style={{ fontSize: '0.75rem' }}>
                                 {country.name}
                             </MenuItem>
                         )}
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid item>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField
-                    fullWidth
                     size="small"
                     label="Holiday Name"
                     value={bankHolidayData.holidayName || ''}
                     onChange={(e) => handleInputChange('holidayName', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
-                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}/>
+                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField
-                    fullWidth
                     size="small"
                     label="Holiday Date (YYYY-MM-DD)"
                     value={bankHolidayData.holidayDate || ''}
                     onChange={(e) => handleInputChange('holidayDate', e.target.value)}
                     placeholder="2024-12-25"
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
-                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}/>
+                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}/>
             </Grid>
-            <Grid item>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField
-                    fullWidth
                     size="small"
                     label="Description"
                     value={bankHolidayData.description || ''}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     multiline
                     rows={2}
-                    InputProps={{ style: { fontSize: '0.75rem' } }}
-                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}/>
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
+                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}/>
             </Grid>
         </Grid>
     );

@@ -17,6 +17,7 @@ import {DeskService} from "../services/DeskService";
 import {InstrumentService} from "../services/InstrumentService";
 import {ExchangeService} from "../services/ExchangeService";
 import {BankHolidayService} from "../services/BankHolidayService";
+import {BookService} from "../services/BookService";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 
 export const ReferenceDataApp = () =>
@@ -33,6 +34,7 @@ export const ReferenceDataApp = () =>
     const [instruments, setInstruments] = useState([]);
     const [traders, setTraders] = useState([]);
     const [bankHolidays, setBankHolidays] = useState([]);
+    const [books, setBooks] = useState([]);
     const [, setReferenceDataDialogOpenFlag] = useRecoilState(referenceDataDialogDisplayState);
     const [dialogMode, setDialogMode] = useState('add'); // 'add', 'update', 'clone'
     const [editingData, setEditingData] = useState(null);
@@ -46,6 +48,7 @@ export const ReferenceDataApp = () =>
     const instrumentService = useRef(new InstrumentService()).current;
     const exchangeService = useRef(new ExchangeService()).current;
     const bankHolidayService = useRef(new BankHolidayService()).current;
+    const bookService = useRef(new BookService()).current;
 
     const clientColumnDefs = useMemo(() => 
     ([
@@ -523,6 +526,51 @@ export const ReferenceDataApp = () =>
         },
     ]), []);
 
+    const bookColumnDefs = useMemo(() =>
+    ([
+        {
+            headerName: 'Book ID',
+            field: 'bookId',
+            width: 230,
+            hide: true,
+            headerTooltip: 'Book ID',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Book Code',
+            field: 'bookCode',
+            width: 150,
+            headerTooltip: 'Book Code',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Book Name',
+            field: 'bookName',
+            width: 250,
+            headerTooltip: 'Book Name',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Desk',
+            field: 'deskName',
+            width: 200,
+            headerTooltip: 'Desk Name',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Actions',
+            field: 'actions',
+            sortable: false,
+            width: 140,
+            filter: false,
+            cellRenderer: ActionIconsRenderer
+        },
+    ]), []);
+
     const handleAction = useCallback(async (action, data) =>
     {
         switch (action)
@@ -565,6 +613,7 @@ export const ReferenceDataApp = () =>
                 await deskService.loadDesks(); // Load desks first
                 await traderService.loadTraders();
                 await bankHolidayService.loadBankHolidays(); // Added later
+                await bookService.loadBooks(); // Added later
 
                 setClients(clientService.getClients());
                 setBrokers(brokerService.getBrokers());
@@ -573,6 +622,17 @@ export const ReferenceDataApp = () =>
                 setExchanges(exchangeService.getExchanges());
                 setDesks(deskService.getDesks());
                 setBankHolidays(bankHolidayService.getBankHolidays()); // Added later
+                
+                // Enrich books with desk names
+                const booksWithDeskNames = bookService.getBooks().map(book =>
+                {
+                    const desk = desks.find(d => d.deskId === book.deskId);
+                    return {
+                        ...book,
+                        deskName: desk ? desk.deskName : 'Unknown Desk'
+                    };
+                });
+                setBooks(booksWithDeskNames);
                 
                 // Enrich trader data with desk names - now desks are guaranteed to be loaded
                 const desks = deskService.getDesks();
@@ -595,7 +655,7 @@ export const ReferenceDataApp = () =>
 
         loadData().then(() => loggerService.logInfo("All reference data loaded successfully."));
 
-    }, [clientService, brokerService, accountService, instrumentService, exchangeService, traderService, deskService, bankHolidayService, loggerService]);
+    }, [clientService, brokerService, accountService, instrumentService, exchangeService, traderService, deskService, bankHolidayService, bookService, loggerService]);
 
     const handleSave = useCallback(async (formData) =>
     {
@@ -702,10 +762,23 @@ export const ReferenceDataApp = () =>
                 await bankHolidayService.loadBankHolidays();
                 setBankHolidays(bankHolidayService.getBankHolidays());
                 break;
+            case "9": // Books
+                await bookService.addNewBook(formData);
+                await bookService.loadBooks();
+                const booksWithDeskNames = bookService.getBooks().map(book =>
+                {
+                    const desk = desks.find(d => d.deskId === book.deskId);
+                    return {
+                        ...book,
+                        deskName: desk ? desk.deskName : 'Unknown Desk'
+                    };
+                });
+                setBooks(booksWithDeskNames);
+                break;
             default:
                 loggerService.logError(`Unknown tab for add: ${tab}`);
         }
-    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService]);
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, bookService, selectedTab, loggerService]);
 
     const handleUpdate = useCallback(async (formData) =>
     {
@@ -806,10 +879,23 @@ export const ReferenceDataApp = () =>
                 await bankHolidayService.loadBankHolidays();
                 setBankHolidays(bankHolidayService.getBankHolidays());
                 break;
+            case "9": // Books
+                await bookService.updateBook(formData);
+                await bookService.loadBooks();
+                const updatedBooksWithDeskNames = bookService.getBooks().map(book =>
+                {
+                    const desk = desks.find(d => d.deskId === book.deskId);
+                    return {
+                        ...book,
+                        deskName: desk ? desk.deskName : 'Unknown Desk'
+                    };
+                });
+                setBooks(updatedBooksWithDeskNames);
+                break;
             default:
                 loggerService.logError(`Unknown tab for update: ${tab}`);
         }
-    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService]);
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService, traders, desks]);
 
     const handleClone = useCallback(async (formData) =>
     {
@@ -821,6 +907,7 @@ export const ReferenceDataApp = () =>
         delete clonedData.deskId;
         delete clonedData.instrumentId;
         delete clonedData.traderId;
+        delete clonedData.bookId;
         await handleAdd(clonedData);
     }, []);
 
@@ -893,10 +980,14 @@ export const ReferenceDataApp = () =>
                 await bankHolidayService.deleteBankHoliday(data.id);
                 setBankHolidays(prevHolidays => prevHolidays.filter(holiday => holiday.id !== data.id));
                 break;
+            case "9": // Books
+                await bookService.deleteBook(data.bookId);
+                setBooks(prevBooks => prevBooks.filter(book => book.bookId !== data.bookId));
+                break;
             default:
                 loggerService.logError(`Unknown tab for delete: ${tab}`);
         }
-    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService]);
+    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, bookService, selectedTab, loggerService]);
 
     const handleDeleteConfirm = useCallback(async () =>
     {
@@ -934,6 +1025,7 @@ export const ReferenceDataApp = () =>
             case "6": return "Instrument";
             case "7": return "Trader";
             case "8": return "Bank Holiday";
+            case "9": return "Book";
             default: return "Reference Data";
         }
     }, []);
@@ -960,6 +1052,8 @@ export const ReferenceDataApp = () =>
                 return data.firstName ? `${data.firstName} ${data.lastName} (${data.userId || 'No User ID'})` : 'Unknown Trader';
             case "8": // Bank Holidays
                 return data.holidayName ? `${data.holidayName} (${data.countryCode || 'No Country'})` : 'Unknown Holiday';
+            case "9": // Books
+                return data.bookName ? `${data.bookName} (${data.bookCode || 'No Code'})` : 'Unknown Book';
             default:
                 return 'Unknown Item';
         }
@@ -982,6 +1076,7 @@ export const ReferenceDataApp = () =>
                     <Tab className="instruments-tab" label={"Instruments"} value="6"/>
                     <Tab className="traders-tab" label={"Traders"} value="7"/>
                     <Tab className="bank-holidays-tab" label={"Bank Holidays"} value="8"/>
+                    <Tab className="books-tab" label={"Books"} value="9"/>
                 </TabList>
                 
                 <TabPanel value="1" className="client-ref-data">
@@ -1014,6 +1109,10 @@ export const ReferenceDataApp = () =>
                 
                 <TabPanel value="8" className="bank-holiday-ref-data">
                     <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]} columnDefs={bankHolidayColumnDefs} gridData={bankHolidays} windowId={windowId} handleAction={handleAction}/>
+                </TabPanel>
+                
+                <TabPanel value="9" className="book-ref-data">
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["bookId"]} columnDefs={bookColumnDefs} gridData={books} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
             </TabContext>
         </div>

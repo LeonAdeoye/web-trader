@@ -7,7 +7,7 @@ import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, snippetPrompt, validateSnippetPrompt, onSnippetSubmit}) =>
+const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, snippetPrompt, onSnippetSubmit}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -15,23 +15,11 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
     const handleClose = () => window.command.close(windowId);
     const [titleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
-    const [inputValue, setInputValue] = useState(snippetPrompt || "");
+    const [inputValue, setInputValue] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [showError, setShowError] = useState(false);
 
-    const handleInputChange = (e) =>
-    {
-        const newValue = e.target.value;
-        setInputValue(newValue);
-        validateSnippetPrompt?.(newValue);
-        
-        // Clear error when user starts typing
-        if (showError)
-        {
-            setShowError(false);
-            setErrorMessage("");
-        }
-    };
+    const handleInputChange = (e) => setInputValue(e.target.value);
 
     const handleKeyPress = (e) =>
     {
@@ -40,7 +28,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
             const result = onSnippetSubmit(inputValue);
             if (result && result.success)
             {
-                setInputValue(""); // Clear input on success
+                setInputValue("");
                 setShowError(false);
                 setErrorMessage("");
             }
@@ -90,10 +78,8 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                             borderColor: '#999',
                         },
                     },
-                }}
-            />
-            
-            {/* Error Message */}
+                }}/>
+
             {showError && (
                 <Box
                     className="snippet-error-container"
@@ -105,8 +91,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                         zIndex: 1001,
                         width: '600px',
                         animation: 'slideDown 0.3s ease-out'
-                    }}
-                >
+                    }}>
                     <Alert
                         severity="error"
                         className="snippet-error-alert"
@@ -126,8 +111,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                             >
                                 <Close fontSize="inherit" />
                             </MuiIconButton>
-                        }
-                    >
+                        }>
                         {errorMessage}
                     </Alert>
                 </Box>

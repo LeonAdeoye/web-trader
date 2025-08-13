@@ -84,6 +84,7 @@ export const RfqsApp = () =>
 
     const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
+    const [clientsLoading, setClientsLoading] = useState(true);
     const [books, setBooks] = useState([]);
     const [currencies, setCurrencies] = useState([]);
     const [dayCountConventions, setDayCountConventions] = useState([]);
@@ -105,16 +106,61 @@ export const RfqsApp = () =>
         {
             await exchangeRateService.loadExchangeRates();
 
+            // Load clients from service
+            setClientsLoading(true);
+            try
+            {
+                loggerService.logInfo("Loading clients from ClientService...");
+                
+                // Add timeout to prevent hanging
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Client loading timeout')), 10000)
+                );
+                
+                await Promise.race([
+                    clientService.loadClients(),
+                    timeoutPromise
+                ]);
+                
+                const loadedClients = clientService.getClients();
+                
+                // Ensure we have valid client data with clientName property
+                const validClients = loadedClients.filter(client => client && client.clientName);
+                
+                if (validClients.length === 0)
+                {
+                    loggerService.logWarning("No valid clients found in service response");
+                    throw new Error("No valid clients found");
+                }
+                
+                setClients(validClients);
+                loggerService.logInfo(`Loaded ${validClients.length} valid clients from service: ${JSON.stringify(validClients.map(c => c.clientName))}`);
+                console.log('Clients state updated:', validClients);
+                console.log('Client names for dropdown:', validClients.map(c => c.clientName));
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load clients: ${error.message}`);
+                // Fallback to mock data if service fails
+                const fallbackClients = [
+                    { clientName: 'Client A', code: 'CLIENT_A' },
+                    { clientName: 'Client B', code: 'CLIENT_B' },
+                    { clientName: 'Client C', code: 'CLIENT_C' }
+                ];
+                setClients(fallbackClients);
+                loggerService.logInfo("Using fallback mock client data");
+                console.log('Fallback clients set:', fallbackClients);
+                console.log('Fallback client names for dropdown:', fallbackClients.map(c => c.clientName));
+            }
+            finally
+            {
+                setClientsLoading(false);
+            }
+
             setUsers([
                 { userId: 'user1', name: 'User 1' },
                 { userId: 'user2', name: 'User 2' },
                 { userId: 'user3', name: 'User 3' }
-            ]);
-            
-            setClients([
-                { name: 'Client A', code: 'CLIENT_A' },
-                { name: 'Client B', code: 'CLIENT_B' },
-                { name: 'Client C', code: 'CLIENT_C' }
             ]);
             
             setBooks([
@@ -138,7 +184,20 @@ export const RfqsApp = () =>
             ]);
         };
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
-    }, [exchangeRateService]);
+    }, [exchangeRateService, clientService, loggerService]);
+
+    // Debug effect to monitor clients state changes
+    useEffect(() =>
+    {
+        console.log('Clients state changed:', clients);
+        console.log('Clients loading state:', clientsLoading);
+        console.log('Number of clients:', clients.length);
+        if (clients.length > 0)
+        {
+            console.log('First client:', clients[0]);
+            console.log('All client names:', clients.map(c => c.clientName));
+        }
+    }, [clients, clientsLoading]);
 
     useEffect(() =>
     {
@@ -312,190 +371,148 @@ export const RfqsApp = () =>
         }
     }, [selectedContextShare, windowId]);
 
-    const columnDefs = useMemo(() => ([
-        // Basic RFQ Information
-        {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: true},
-        {headerName: "Client", field: "client", sortable: true, minWidth: 150, width: 150, filter: true, 
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: clients.map(c => c.name) }},
-        {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
-        {headerName: "Book Code", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
-        
-        // Notional and Currency
-        {headerName: "Notional (m)", field: "notionalMillions", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-        {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        
-        // Trading Details
-        {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
-        {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, cellRenderer: 'agDateCellRenderer'},
-        {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        
-        // Sales Credit
-        {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-        
-        // Settlement
-        {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-        {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, cellRenderer: 'agDateCellRenderer'},
-        
-        // Hedge
-        {headerName: "Hedge Type", field: "hedgeType", sortable: true, minWidth: 120, width: 120, filter: true,
-         cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
-        {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-        
-        // Implied Volatility
-        {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Premium Amounts
-        {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Premium Percentages
-        {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Greeks - Delta
-        {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Greeks - Gamma
-        {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Greeks - Theta
-        {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Greeks - Vega
-        {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Greeks - Rho
-        {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
-         editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true, 
-         editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-        
-        // Legs count
-        {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true, 
-         editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
-    ]), [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums]);
-
-    const mockRFQData = useMemo(() => [
-        {
-            request: 'Sample RFQ Request 1',
-            client: 'Client A',
-            status: 'Pending',
-            bookCode: 'BOOK1',
-            notionalMillions: 100,
-            notionalCurrency: 'USD',
-            notionalFXRate: 1.0,
-            dayCountConvention: 'ACT/365',
-            tradeDate: new Date('2024-01-15'),
-            multiplier: 100,
-            contracts: 1000,
-            quantity: 100000,
-            lotSize: 100,
-            salesCreditPercentage: 0.5,
-            salesCreditAmount: 50000,
-            salesCreditFXRate: 1.0,
-            salesCreditCurrency: 'USD',
-            premiumSettlementFXRate: 1.0,
-            premiumSettlementDaysOverride: 2,
-            premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: new Date('2024-01-17'),
-            hedgeType: 'Full',
-            hedgePrice: 50.0,
-            askImpliedVol: 0.25,
-            impliedVol: 0.23,
-            bidImpliedVol: 0.21,
-            askPremiumAmount: 2500000,
-            premiumAmount: 2300000,
-            bidPremiumAmount: 2100000,
-            askPremiumPercentage: 0.025,
-            premiumPercentage: 0.023,
-            bidPremiumPercentage: 0.021,
-            deltaShares: 50000,
-            deltaNotional: 2500000,
-            delta: 0.5,
-            gammaShares: 1000,
-            gammaNotional: 50000,
-            gamma: 0.01,
-            thetaShares: -5000,
-            thetaNotional: -250000,
-            theta: -0.05,
-            vegaShares: 10000,
-            vegaNotional: 500000,
-            vega: 0.1,
-            rhoShares: 2000,
-            rhoNotional: 100000,
-            rho: 0.02,
-            legs: []
-        }
-    ], []);
-
-    useEffect(() =>
+    const getUniqueClientNames = useCallback(() =>
     {
-        setRfqs(mockRFQData);
-    }, [mockRFQData]);
+        const uniqueNames = [...new Set(clients.map(c => c.clientName))];
+        console.log('getUniqueClientNames called with clients:', clients);
+        console.log('Returning unique names:', uniqueNames);
+        return uniqueNames.sort(); // Sort alphabetically for better UX
+    }, [clients]);
+
+    const columnDefs = useMemo(() => 
+    {
+        const clientDropdownValues = clientsLoading ? [] : getUniqueClientNames();
+        console.log('Creating columnDefs with client dropdown values:', clientDropdownValues);
+        console.log('Clients state at columnDefs creation:', clients);
+        console.log('Clients loading state at columnDefs creation:', clientsLoading);
+        
+        return ([
+            // Basic RFQ Information
+            {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: true},
+            {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }},
+            {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
+            {headerName: "Book Code", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
+            
+            // Notional and Currency
+            {headerName: "Notional (m)", field: "notionalMillions", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+            {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            
+            // Trading Details
+            {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
+            {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, cellRenderer: 'agDateCellRenderer'},
+            {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            
+            // Sales Credit
+            {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+            
+            // Settlement
+            {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+            {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, cellRenderer: 'agDateCellRenderer'},
+            
+            // Hedge
+            {headerName: "Hedge Type", field: "hedgeType", sortable: true, minWidth: 120, width: 120, filter: true,
+             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
+            {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            
+            // Implied Volatility
+            {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Premium Amounts
+            {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Premium Percentages
+            {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Greeks - Delta
+            {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Greeks - Gamma
+            {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Greeks - Theta
+            {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Greeks - Vega
+            {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Greeks - Rho
+            {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true, 
+             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            
+            // Legs count
+            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true, 
+             editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
+        ]);
+    }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
@@ -505,13 +522,13 @@ export const RfqsApp = () =>
             if (!snippet)
             {
                 loggerService.logError("Snippet cannot be empty");
-                return {success: false, error: "Snippet cannot be empty"};
+                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
             }
 
             if(!optionRequestParserService.isValidOptionRequest(snippet))
             {
                 loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
-                return { success: false, error: "Invalid RFQ snippet format" };
+                return { success: false, error: "Invalid RFQ snippet format.\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
             }
 
             const parsedOptions = optionRequestParserService.parseRequest(snippet);
@@ -540,7 +557,7 @@ export const RfqsApp = () =>
         
         return {
             request: snippet,
-            client: 'Client A', // Default client
+            client: clients.length > 0 ? clients[0].clientName : 'Default Client', // Use first available client or fallback
             status: 'Pending',
             bookCode: 'BOOK1',
             notionalMillions: totalQuantity / 1000000, // Convert to millions
@@ -588,7 +605,7 @@ export const RfqsApp = () =>
             rho: 0.02,
             legs: parsedOptions
         };
-    }, []);
+    }, [clients]);
 
     return (<>
         <SnippetTitleBarComponent 
@@ -597,23 +614,29 @@ export const RfqsApp = () =>
             addButtonProps={undefined} 
             showChannel={true}
             showTools={false} 
-            snippetPrompt={"Enter RFQ snippet..."} 
-            validateSnippetPrompt={(value) => console.log("Snippet value: " + value)}
+            snippetPrompt={"Enter RFQ snippet..."}
             onSnippetSubmit={handleSnippetSubmit}
         />
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-            <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                <GenericGridComponent 
-                    rowHeight={22} 
-                    gridTheme={"ag-theme-alpine"} 
-                    rowIdArray={["request"]} 
-                    columnDefs={columnDefs} 
-                    gridData={rfqs}
-                    handleAction={null} 
-                    sortModel={{ colId: 'request', sort: 'asc' }}
-                />
-            </div>
+            {clientsLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <div>Loading clients...</div>
+                </div>
+            ) : (
+                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                    <GenericGridComponent 
+                        key={`rfq-grid-${clients.length}-${clientsLoading}`}
+                        rowHeight={22} 
+                        gridTheme={"ag-theme-alpine"} 
+                        rowIdArray={["request"]} 
+                        columnDefs={columnDefs} 
+                        gridData={rfqs}
+                        handleAction={null} 
+                        sortModel={{ colId: 'request', sort: 'asc' }}
+                    />
+                </div>
+            )}
         </div>
     </>)
 

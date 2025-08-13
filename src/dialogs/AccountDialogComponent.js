@@ -49,48 +49,48 @@ const AccountDialogComponent = ({data, onDataChange}) =>
     }, [handleInputChange]);
 
     return (
-        <Grid container alignItems="flex-start">
-            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+        <Grid container spacing={2} alignItems="flex-start">
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Account Name" value={accountData.accountName || ''}
                     onChange={(e) => handleInputChange('accountName', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={5} style={{ paddingTop: '10px' }}>
-                <TextField  size="small" label="Account Mnemonic" value={accountData.accountMnemonic || ''}
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Account Mnemonic" value={accountData.accountMnemonic || ''}
                     onChange={(e) => handleInputChange('accountMnemonic', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Legal Entity" value={accountData.legalEntity || ''}
                     onChange={(e) => handleInputChange('legalEntity', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Custom Flags" value={accountData.customFlags || ''}
                     onChange={(e) => handleInputChange('customFlags', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     style={{ width: '200px' }}/>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <FormControlLabel 
                     label="Firm Account" 
                     sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
                     control={ <Checkbox checked={accountData.firmAccount || false} onChange={(e) => handleCheckboxChange('firmAccount', e.target.checked)} size="small"/> }/>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <FormControlLabel 
                     label="Risk Account" 
                     sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
                     control={ <Checkbox checked={accountData.riskAccount || false} onChange={(e) => handleCheckboxChange('riskAccount', e.target.checked)} size="small"/> }/>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={6} style={{ paddingTop: '10px' }}>
                 <FormControlLabel 
                     label="Active" 
                     sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
