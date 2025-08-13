@@ -44,11 +44,12 @@ export class TraderService
 
     addNewTrader = async (newTrader) =>
     {
+        const {traderId, ...rest} = newTrader;
         this.#loggerService.logInfo(`Saving new trader: ${JSON.stringify(newTrader)}.`);
         return await fetch("http://localhost:20009/trader", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newTrader)})
+            body: JSON.stringify(rest)})
             .then(response => response.json())
             .then((traderResponse) =>
             {

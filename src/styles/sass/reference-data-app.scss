@@ -29,7 +29,8 @@
   .accounts-tab,
   .desks-tab,
   .instruments-tab,
-  .traders-tab {
+  .traders-tab,
+  .bank-holidays-tab {
     @extend %tab-pill;
     
     // Default tab styling
@@ -50,7 +51,8 @@
   .account-ref-data,
   .desk-ref-data,
   .instrument-ref-data,
-  .trader-ref-data {
+  .trader-ref-data,
+  .bank-holiday-ref-data {
     margin: 0;
     padding: 0;
   }

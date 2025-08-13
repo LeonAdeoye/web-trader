@@ -1,4 +1,4 @@
-import { TextField, Tooltip, IconButton } from '@mui/material';
+import { TextField, Tooltip, IconButton, Box, Alert, IconButton as MuiIconButton } from '@mui/material';
 import { useState } from 'react';
 import {Build, Close, Remove, Lan} from "@mui/icons-material";
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
@@ -7,7 +7,7 @@ import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, snippetPrompt, validateSnippetPrompt}) =>
+const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, snippetPrompt, validateSnippetPrompt, onSnippetSubmit}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -16,12 +16,46 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
     const [titleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     const [inputValue, setInputValue] = useState(snippetPrompt || "");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [showError, setShowError] = useState(false);
 
     const handleInputChange = (e) =>
     {
         const newValue = e.target.value;
         setInputValue(newValue);
         validateSnippetPrompt?.(newValue);
+        
+        // Clear error when user starts typing
+        if (showError)
+        {
+            setShowError(false);
+            setErrorMessage("");
+        }
+    };
+
+    const handleKeyPress = (e) =>
+    {
+        if (e.key === 'Enter' && onSnippetSubmit)
+        {
+            const result = onSnippetSubmit(inputValue);
+            if (result && result.success)
+            {
+                setInputValue(""); // Clear input on success
+                setShowError(false);
+                setErrorMessage("");
+            }
+            else
+            {
+                setErrorMessage(result?.error || "Invalid snippet format");
+                setShowError(true);
+            }
+        }
+    };
+
+    const handleCloseError = () =>
+    {
+        setShowError(false);
+        setErrorMessage("");
     };
 
     return (
@@ -31,6 +65,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
             <TextField
                 value={inputValue}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 variant="outlined"
                 size="small"
                 autoFocus={false}
@@ -57,6 +92,46 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                     },
                 }}
             />
+            
+            {/* Error Message */}
+            {showError && (
+                <Box
+                    className="snippet-error-container"
+                    sx={{
+                        position: 'fixed',
+                        top: '65px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 1001,
+                        width: '600px',
+                        animation: 'slideDown 0.3s ease-out'
+                    }}
+                >
+                    <Alert
+                        severity="error"
+                        className="snippet-error-alert"
+                        sx={{
+                            backgroundColor: '#8B0000',
+                            color: 'white',
+                            '& .MuiAlert-icon': {
+                                color: 'white'
+                            }
+                        }}
+                        action={
+                            <MuiIconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={handleCloseError}
+                            >
+                                <Close fontSize="inherit" />
+                            </MuiIconButton>
+                        }
+                    >
+                        {errorMessage}
+                    </Alert>
+                </Box>
+            )}
 
             <div className="title-bar-controls" style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
                 {(addButtonProps !== undefined) && (

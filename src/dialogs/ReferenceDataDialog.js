@@ -10,6 +10,7 @@ import AccountDialogComponent from "./AccountDialogComponent";
 import DeskDialogComponent from "./DeskDialogComponent";
 import InstrumentDialogComponent from "./InstrumentDialogComponent";
 import TraderDialogComponent from "./TraderDialogComponent";
+import BankHolidayDialogComponent from "./BankHolidayDialogComponent";
 
 const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', editingData = null, onSave, onClose}) =>
 {
@@ -39,6 +40,8 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return <InstrumentDialogComponent data={formData} onDataChange={handleInputChange} />;
             case "7": // Traders
                 return <TraderDialogComponent data={formData} onDataChange={handleInputChange} desks={desks} />;
+            case "8": // Bank Holidays
+                return <BankHolidayDialogComponent data={formData} onDataChange={handleInputChange} />;
             default:
                 return <div>Please select a tab</div>;
         }
@@ -55,9 +58,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 onSave(updatedData);
             }
             else
-            {
                 onSave(formData);
-            }
         }
 
         setReferenceDataDialogDisplay(false);
@@ -84,6 +85,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 delete clonedData.deskId;
                 delete clonedData.instrumentId;
                 delete clonedData.traderId;
+                delete clonedData.id;
                 setFormData(clonedData);
             }
         }
@@ -93,7 +95,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             if (onClose)
                 onClose();
         }
-    }, [referenceDataDialogDisplay, mode, editingData,  onClose]);
+    }, [referenceDataDialogDisplay, mode, editingData, onClose, setReferenceDataDialogDisplay]);
 
     const handleCancel = useCallback(() =>
     {
@@ -145,6 +147,8 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return !formData.instrumentCode || !formData.instrumentDescription;
             case "7": // Traders
                 return !formData.firstName || !formData.lastName || !formData.userId;
+            case "8": // Bank Holidays
+                return !formData.countryCode || !formData.holidayName;
             default:
                 return true;
         }
@@ -168,6 +172,8 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return "550px";
             case "7": // Traders
                 return "450px";
+            case "8": // Bank Holidays
+                return "400px";
             default:
                 return "450px";
         }

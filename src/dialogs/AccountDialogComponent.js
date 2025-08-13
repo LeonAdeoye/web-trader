@@ -18,11 +18,8 @@ const AccountDialogComponent = ({data, onDataChange}) =>
     useEffect(() =>
     {
         if (data && Object.keys(data).length > 0)
-        {
             setAccountData(data);
-        }
         else if (data && Object.keys(data).length === 0)
-        {
             setAccountData({
                 accountId: '',
                 accountName: '',
@@ -33,7 +30,6 @@ const AccountDialogComponent = ({data, onDataChange}) =>
                 active: true,
                 customFlags: ''
             });
-        }
         if (isInitializing)
             setIsInitializing(false);
     }, [data, isInitializing]);
@@ -93,6 +89,12 @@ const AccountDialogComponent = ({data, onDataChange}) =>
                     label="Risk Account" 
                     sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
                     control={ <Checkbox checked={accountData.riskAccount || false} onChange={(e) => handleCheckboxChange('riskAccount', e.target.checked)} size="small"/> }/>
+            </Grid>
+            <Grid item xs={5}>
+                <FormControlLabel 
+                    label="Active" 
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                    control={ <Checkbox checked={accountData.active || false} onChange={(e) => handleCheckboxChange('active', e.target.checked)} size="small"/> }/>
             </Grid>
         </Grid>
     );

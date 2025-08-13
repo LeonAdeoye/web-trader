@@ -1,18 +1,21 @@
 import * as React from 'react';
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
-import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
+import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import {LoggerService} from "../services/LoggerService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
+import {OptionRequestParserService} from "../services/OptionRequestParserService";
 import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
+import {BankHolidayService} from "../services/BankHolidayService";
+import {ClientService} from "../services/ClientService";
 
 export const RfqsApp = () =>
 {
-    const [orders, setOrders] = useState([]);
+    const [rfqs, setRfqs] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
     const [outboundWorker, setOutboundWorker] = useState(null);
     const [instrumentCode, setInstrumentCode] = useState(null);
@@ -24,8 +27,10 @@ export const RfqsApp = () =>
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
+    const optionRequestParserService = useRef(new OptionRequestParserService()).current;
+    const bankHolidayService = useRef(new BankHolidayService()).current;
+    const clientService = useRef(new ClientService()).current;
 
-    // RFQ Form State
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -77,7 +82,6 @@ export const RfqsApp = () =>
         legs: []
     });
 
-    // Mock data for dropdowns
     const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
     const [books, setBooks] = useState([]);
@@ -86,13 +90,11 @@ export const RfqsApp = () =>
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
 
-    // Chat functionality
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
     const [selectedInitiator, setSelectedInitiator] = useState(null);
     const [selectedTarget, setSelectedTarget] = useState(null);
 
-    // Commentary fields
     const [salesCommentary, setSalesCommentary] = useState('Sales\' comment...');
     const [tradersCommentary, setTradersCommentary] = useState('Trader\'s comment...');
     const [clientCommentary, setClientCommentary] = useState('Client\'s feedback...');
@@ -102,8 +104,7 @@ export const RfqsApp = () =>
         const loadData = async () =>
         {
             await exchangeRateService.loadExchangeRates();
-            
-            // Load mock data for dropdowns
+
             setUsers([
                 { userId: 'user1', name: 'User 1' },
                 { userId: 'user2', name: 'User 2' },
@@ -199,20 +200,20 @@ export const RfqsApp = () =>
     const filterOrdersUsingContext = useMemo(() =>
     {
         if(instrumentCode && clientCode)
-            return orders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
+            return rfqs.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
         else if(instrumentCode)
-            return orders.filter((order) => order.instrumentCode === instrumentCode);
+            return rfqs.filter((order) => order.instrumentCode === instrumentCode);
         else if(clientCode)
-            return orders.filter((order) => order.clientCode === clientCode);
+            return rfqs.filter((order) => order.clientCode === clientCode);
         else
-            return orders;
-    }, [orders, instrumentCode, clientCode]);
+            return rfqs;
+    }, [rfqs, instrumentCode, clientCode]);
 
     const handleWorkerMessage = useCallback((event) =>
     {
         const incomingOrder = event.data.order;
 
-        setOrders((prevData) =>
+        setRfqs((prevData) =>
         {
             //incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
 
@@ -238,9 +239,10 @@ export const RfqsApp = () =>
         });
     }
 
-    // Chat functionality
-    const handleSendChatMessage = () => {
-        if (messageToBeSent.trim() && selectedInitiator) {
+    const handleSendChatMessage = () =>
+    {
+        if (messageToBeSent.trim() && selectedInitiator)
+        {
             const newMessage = {
                 sequenceId: chatMessages.length + 1,
                 owner: selectedInitiator.userId,
@@ -253,24 +255,30 @@ export const RfqsApp = () =>
         }
     };
 
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
+    const handleKeyPress = (e) =>
+    {
+        if (e.key === 'Enter')
+        {
             handleSendChatMessage();
         }
     };
 
-    // RFQ form handlers
-    const handleRFQFieldChange = (field, value) => {
+    const handleRFQFieldChange = (field, value) =>
+    {
         setSelectedRFQ(prev => ({
             ...prev,
             [field]: value
         }));
     };
 
-    const handleSaveRequest = (isSave) => {
-        if (isSave) {
+    const handleSaveRequest = (isSave) =>
+    {
+        if (isSave)
+        {
             loggerService.logInfo('Saving RFQ:', selectedRFQ);
-        } else {
+        }
+        else
+        {
             loggerService.logInfo('Cancelling RFQ changes');
         }
     };
@@ -304,7 +312,6 @@ export const RfqsApp = () =>
         }
     }, [selectedContextShare, windowId]);
 
-    // Comprehensive RFQ Details Column Definitions based on C# XAML
     const columnDefs = useMemo(() => ([
         // Basic RFQ Information
         {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: true},
@@ -432,7 +439,6 @@ export const RfqsApp = () =>
          editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
     ]), [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums]);
 
-    // Mock RFQ data for demonstration
     const mockRFQData = useMemo(() => [
         {
             request: 'Sample RFQ Request 1',
@@ -442,7 +448,7 @@ export const RfqsApp = () =>
             notionalMillions: 100,
             notionalCurrency: 'USD',
             notionalFXRate: 1.0,
-            dayCountConvention: '30/360',
+            dayCountConvention: 'ACT/365',
             tradeDate: new Date('2024-01-15'),
             multiplier: 100,
             contracts: 1000,
@@ -486,9 +492,115 @@ export const RfqsApp = () =>
         }
     ], []);
 
+    useEffect(() =>
+    {
+        setRfqs(mockRFQData);
+    }, [mockRFQData]);
+
+    const handleSnippetSubmit = useCallback((snippetInput) =>
+    {
+        try
+        {
+            const snippet = snippetInput.trim();
+            if (!snippet)
+            {
+                loggerService.logError("Snippet cannot be empty");
+                return {success: false, error: "Snippet cannot be empty"};
+            }
+
+            if(!optionRequestParserService.isValidOptionRequest(snippet))
+            {
+                loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
+                return { success: false, error: "Invalid RFQ snippet format" };
+            }
+
+            const parsedOptions = optionRequestParserService.parseRequest(snippet);
+            loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
+            
+            if (!parsedOptions || parsedOptions.length === 0)
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+
+            const newRFQ = createRFQFromOptions(snippet.trim(), parsedOptions);
+            setRfqs(prevOrders => [newRFQ, ...prevOrders]);
+            loggerService.logInfo(`Successfully created RFQ from snippet: ${snippet}`);
+            return { success: true };
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to parse snippet: ${error.message}`);
+            return { success: false, error: `Failed to parse snippet: ${error.message}` };
+        }
+    }, [optionRequestParserService, loggerService]);
+
+    const createRFQFromOptions = useCallback((snippet, parsedOptions) =>
+    {
+        const now = new Date();
+        const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
+        const firstOption = parsedOptions[0];
+        
+        return {
+            request: snippet,
+            client: 'Client A', // Default client
+            status: 'Pending',
+            bookCode: 'BOOK1',
+            notionalMillions: totalQuantity / 1000000, // Convert to millions
+            notionalCurrency: firstOption.currency || 'USD',
+            notionalFXRate: 1.0,
+            dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
+            tradeDate: now,
+            multiplier: 100,
+            contracts: totalQuantity,
+            quantity: totalQuantity,
+            lotSize: 100,
+            salesCreditPercentage: 0.5,
+            salesCreditAmount: 50000,
+            salesCreditFXRate: 1.0,
+            salesCreditCurrency: 'USD',
+            premiumSettlementFXRate: 1.0,
+            premiumSettlementDaysOverride: 2,
+            premiumSettlementCurrency: 'USD',
+            premiumSettlementDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+            hedgeType: 'Full',
+            hedgePrice: firstOption.strikePrice || 100.0,
+            askImpliedVol: firstOption.volatility || 0.25,
+            impliedVol: firstOption.volatility || 0.23,
+            bidImpliedVol: firstOption.volatility || 0.21,
+            askPremiumAmount: 2500000,
+            premiumAmount: 2300000,
+            bidPremiumAmount: 2100000,
+            askPremiumPercentage: 0.025,
+            premiumPercentage: 0.023,
+            bidPremiumPercentage: 0.021,
+            deltaShares: 50000,
+            deltaNotional: 2500000,
+            delta: 0.5,
+            gammaShares: 1000,
+            gammaNotional: 50000,
+            gamma: 0.01,
+            thetaShares: -5000,
+            thetaNotional: -250000,
+            theta: -0.05,
+            vegaShares: 10000,
+            vegaNotional: 500000,
+            vega: 0.1,
+            rhoShares: 2000,
+            rhoNotional: 100000,
+            rho: 0.02,
+            legs: parsedOptions
+        };
+    }, []);
+
     return (<>
-        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true}
-            showTools={false} snippetPrompt={"Enter client's RFQ snippet..."} validateSnippetPrompt={(value) => console.log("Snippet value: " + value)}/>
+        <SnippetTitleBarComponent 
+            title="Request For Quote" 
+            windowId={windowId} 
+            addButtonProps={undefined} 
+            showChannel={true}
+            showTools={false} 
+            snippetPrompt={"Enter RFQ snippet..."} 
+            validateSnippetPrompt={(value) => console.log("Snippet value: " + value)}
+            onSnippetSubmit={handleSnippetSubmit}
+        />
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
@@ -497,7 +609,7 @@ export const RfqsApp = () =>
                     gridTheme={"ag-theme-alpine"} 
                     rowIdArray={["request"]} 
                     columnDefs={columnDefs} 
-                    gridData={mockRFQData} 
+                    gridData={rfqs}
                     handleAction={null} 
                     sortModel={{ colId: 'request', sort: 'asc' }}
                 />
