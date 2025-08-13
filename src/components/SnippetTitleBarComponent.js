@@ -82,26 +82,10 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
 
             {showError && (
                 <Box
-                    className="snippet-error-container"
-                    sx={{
-                        position: 'fixed',
-                        top: '65px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 1001,
-                        width: '600px',
-                        animation: 'slideDown 0.3s ease-out'
-                    }}>
+                    className="snippet-error-container">
                     <Alert
                         severity="error"
                         className="snippet-error-alert"
-                        sx={{
-                            backgroundColor: '#8B0000',
-                            color: 'white',
-                            '& .MuiAlert-icon': {
-                                color: 'white'
-                            }
-                        }}
                         action={
                             <MuiIconButton
                                 aria-label="close"
