@@ -11,6 +11,9 @@ import {LoggerService} from "../services/LoggerService";
 import SliceDialog from "../dialogs/SliceDialog";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import { Tab } from '@mui/material';
+import '../styles/sass/orders-app.scss';
 
 
 export const OrdersApp = () =>
@@ -28,6 +31,56 @@ export const OrdersApp = () =>
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const orderService = useRef(new OrderService()).current;
+    const [ownerId, setOwnerId] = useState('');
+    const [selectedTab, setSelectedTab] = useState('0'); // 0: Incoming Orders, 1: My Orders, 2: Desk's Orders
+
+    const handleTabChange = useCallback((event, newValue) =>
+    {
+        setSelectedTab(newValue);
+    }, []);
+
+    const filteredOrders = useMemo(() =>
+    {
+        if (!orders || orders.length === 0)
+            return [];
+
+        let tabFilteredOrders;
+        switch (selectedTab)
+        {
+            case '0': // Incoming Orders
+                tabFilteredOrders = orders.filter(order =>
+                    order.state === 'NEW_ORDER' || order.state === 'PENDING_NEW'
+                    || order.state === 'ACCEPTED_BY_OMS' || order.state === 'REJECTED_BY_OMS');
+                break;
+            case '1': // My Orders
+                tabFilteredOrders = orders.filter(order => order.ownerId === ownerId
+                    && order.state !== 'NEW_ORDER' && order.state !== 'PENDING_NEW'
+                    && order.state !== 'ACCEPTED_BY_OMS' && order.state !== 'REJECTED_BY_OMS');
+                break;
+            case '2': // Desk's Orders
+                tabFilteredOrders = orders.filter(order => order.ownerId !== ownerId
+                    && order.state !== 'NEW_ORDER' && order.state !== 'PENDING_NEW'
+                    && order.state !== 'ACCEPTED_BY_OMS' && order.state !== 'REJECTED_BY_OMS');
+                break;
+            default:
+                tabFilteredOrders = orders;
+        }
+
+        if(instrumentCode && clientCode)
+            return tabFilteredOrders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
+        else if(instrumentCode)
+            return tabFilteredOrders.filter((order) => order.instrumentCode === instrumentCode);
+        else if(clientCode)
+            return tabFilteredOrders.filter((order) => order.clientCode === clientCode);
+        else
+            return tabFilteredOrders;
+    }, [orders, selectedTab, ownerId, instrumentCode, clientCode]);
+
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner().then(() => loggerService.logInfo("Owner loaded in OrdersApp"));
+    }, []);
 
     useEffect(() =>
     {
@@ -143,18 +196,6 @@ export const OrdersApp = () =>
 
     }, [selectedGenericGridRow]);
 
-    const filterOrdersUsingContext = useMemo(() =>
-    {
-        if(instrumentCode && clientCode)
-            return orders.filter((order) => order.instrumentCode === instrumentCode && order.clientCode === clientCode);
-        else if(instrumentCode)
-            return orders.filter((order) => order.instrumentCode === instrumentCode);
-        else if(clientCode)
-            return orders.filter((order) => order.clientCode === clientCode);
-        else
-            return orders;
-    }, [orders, instrumentCode, clientCode]);
-
     const handleWorkerMessage = useCallback((event) =>
     {
         const incomingOrder = event.data.order;
@@ -220,6 +261,7 @@ export const OrdersApp = () =>
     }, [selectedContextShare, windowId]);
 
     const columnDefs = useMemo(() => ([
+        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 110, width: 110, headerTooltip: 'Arrival time of the order'},
         {headerName: "Parent Order Id", field: "orderId", sortable: true, minWidth: 225, width: 225, filter: true},
         {headerName: "Instrument", field: "instrumentCode", sortable: true, minWidth: 105, width: 105, filter: true},
         {headerName: "Side", field: "side", sortable: true, minWidth: 75, width: 75, filter: true, cellStyle: params => orderSideStyling(params.value)},
@@ -232,7 +274,6 @@ export const OrdersApp = () =>
         {headerName: "Owner", field: "ownerId", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Current owner fo the order'},
         {headerName: "Instruction", field: "traderInstruction", sortable: true, minWidth: 110, width: 110, filter: true, headerTooltip: 'Trader instruction for the order' },
         {headerName: "CCY", field: "settlementCurrency", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Settlement currency of the order' },
-        {headerName: "Arrived", field: "arrivalTime", sortable: true, minWidth: 110, width: 110, headerTooltip: 'Arrival time of the order'},
         {headerName: "Arr Px", field: "arrivalPrice", sortable: true, minWidth: 80, width: 80, headerTooltip: 'Arrival price of the order', valueFormatter: numberFormatter},
         {headerName: "Avg Px", field: "averagePrice", sortable: true, minWidth: 80, width: 80, filter: false, headerTooltip: 'Average executed price', valueFormatter: numberFormatter},
         {headerName: "Qty", field: "quantity", sortable: true, minWidth: 90, width: 90, filter: true, headerTooltip: 'Original order quantity', valueFormatter: numberFormatter, sortingOrder: ['desc', 'asc']},
@@ -258,8 +299,102 @@ export const OrdersApp = () =>
     return (<>
             <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={filterOrdersUsingContext} handleAction={null} sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
+                <div className="orders-app">
+                    <TabContext value={selectedTab}>
+                        <TabList 
+                            onChange={handleTabChange} 
+                            className="orders-tab-list"
+                        >
+                            <Tab 
+                                label="Incoming Orders" 
+                                value="0" 
+                                className="incoming-orders-tab"
+                                sx={{ 
+                                    marginRight: "5px", 
+                                    minHeight: "25px", 
+                                    height: "25px", 
+                                    backgroundColor: "#bdbaba", 
+                                    color: "white", 
+                                    '&.Mui-selected': {
+                                        backgroundColor: '#656161', 
+                                        color: "white"
+                                    }
+                                }}
+                            />
+                            <Tab 
+                                label="My Orders" 
+                                value="1" 
+                                className="my-orders-tab"
+                                sx={{ 
+                                    minHeight: "25px", 
+                                    height: "25px", 
+                                    backgroundColor: "#bdbaba", 
+                                    color: "white", 
+                                    '&.Mui-selected': {
+                                        backgroundColor: '#656161', 
+                                        color: "white"
+                                    }
+                                }}
+                            />
+                            <Tab 
+                                label="Desk's Orders" 
+                                value="2" 
+                                className="desk-orders-tab"
+                                sx={{ 
+                                    minHeight: "25px", 
+                                    height: "25px", 
+                                    backgroundColor: "#bdbaba", 
+                                    color: "white", 
+                                    '&.Mui-selected': {
+                                        backgroundColor: '#656161', 
+                                        color: "white"
+                                    }
+                                }}
+                            />
+                        </TabList>
+                        
+                        <TabPanel value="0" className="incoming-orders">
+                            <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 120px)', width: '100%' , padding: '0px', margin:'0px'}}>
+                                <GenericGridComponent 
+                                    rowHeight={22} 
+                                    gridTheme={"ag-theme-alpine"} 
+                                    rowIdArray={["orderId"]} 
+                                    columnDefs={columnDefs} 
+                                    gridData={filteredOrders} 
+                                    handleAction={null} 
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
+                                />
+                            </div>
+                        </TabPanel>
+                        
+                        <TabPanel value="1" className="my-orders">
+                            <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 120px)', width: '100%' , padding: '0px', margin:'0px'}}>
+                                <GenericGridComponent 
+                                    rowHeight={22} 
+                                    gridTheme={"ag-theme-alpine"} 
+                                    rowIdArray={["orderId"]} 
+                                    columnDefs={columnDefs} 
+                                    gridData={filteredOrders} 
+                                    handleAction={null} 
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
+                                />
+                            </div>
+                        </TabPanel>
+                        
+                        <TabPanel value="2" className="desk-orders">
+                            <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 120px)', width: '100%' , padding: '0px', margin:'0px'}}>
+                                <GenericGridComponent 
+                                    rowHeight={22} 
+                                    gridTheme={"ag-theme-alpine"} 
+                                    rowIdArray={["orderId"]} 
+                                    columnDefs={columnDefs} 
+                                    gridData={filteredOrders} 
+                                    handleAction={null} 
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
+                                />
+                            </div>
+                        </TabPanel>
+                    </TabContext>
                 </div>
             </div>
             <SliceDialog handleSendSlice={handleSendSlice}/>
