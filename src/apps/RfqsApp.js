@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {GenericGridComponent} from "../components/GenericGridComponent";
+import {RfqGridComponent} from "../components/RfqGridComponent";
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
@@ -135,8 +135,6 @@ export const RfqsApp = () =>
                 
                 setClients(validClients);
                 loggerService.logInfo(`Loaded ${validClients.length} valid clients from service: ${JSON.stringify(validClients.map(c => c.clientName))}`);
-                console.log('Clients state updated:', validClients);
-                console.log('Client names for dropdown:', validClients.map(c => c.clientName));
             }
             catch (error)
             {
@@ -149,8 +147,6 @@ export const RfqsApp = () =>
                 ];
                 setClients(fallbackClients);
                 loggerService.logInfo("Using fallback mock client data");
-                console.log('Fallback clients set:', fallbackClients);
-                console.log('Fallback client names for dropdown:', fallbackClients.map(c => c.clientName));
             }
             finally
             {
@@ -186,18 +182,7 @@ export const RfqsApp = () =>
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
     }, [exchangeRateService, clientService, loggerService]);
 
-    // Debug effect to monitor clients state changes
-    useEffect(() =>
-    {
-        console.log('Clients state changed:', clients);
-        console.log('Clients loading state:', clientsLoading);
-        console.log('Number of clients:', clients.length);
-        if (clients.length > 0)
-        {
-            console.log('First client:', clients[0]);
-            console.log('All client names:', clients.map(c => c.clientName));
-        }
-    }, [clients, clientsLoading]);
+
 
     useEffect(() =>
     {
@@ -374,41 +359,36 @@ export const RfqsApp = () =>
     const getUniqueClientNames = useCallback(() =>
     {
         const uniqueNames = [...new Set(clients.map(c => c.clientName))];
-        console.log('getUniqueClientNames called with clients:', clients);
-        console.log('Returning unique names:', uniqueNames);
         return uniqueNames.sort(); // Sort alphabetically for better UX
     }, [clients]);
 
     const columnDefs = useMemo(() => 
     {
         const clientDropdownValues = clientsLoading ? [] : getUniqueClientNames();
-        console.log('Creating columnDefs with client dropdown values:', clientDropdownValues);
-        console.log('Clients state at columnDefs creation:', clients);
-        console.log('Clients loading state at columnDefs creation:', clientsLoading);
         
         return ([
             // Basic RFQ Information
             {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: true},
-            {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }},
-            {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
-            {headerName: "Book Code", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
+                         {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
+             {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
+             {headerName: "Book Code", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
             
             // Notional and Currency
             {headerName: "Notional (m)", field: "notionalMillions", sortable: true, minWidth: 120, width: 120, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+                         {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
-            {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
-            {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, 
-             editable: true, cellRenderer: 'agDateCellRenderer'},
+                         {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
+                         {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+              editable: true, cellEditor: 'agDateInputCellEditor'},
             {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, 
@@ -425,22 +405,22 @@ export const RfqsApp = () =>
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+                         {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             
             // Settlement
             {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-            {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, 
-             editable: true, cellRenderer: 'agDateCellRenderer'},
+                         {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
+             {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+              editable: true, cellEditor: 'agDateInputCellEditor'},
             
             // Hedge
             {headerName: "Hedge Type", field: "hedgeType", sortable: true, minWidth: 120, width: 120, filter: true,
-             cellRenderer: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
+             cellEditor: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
             {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
@@ -554,7 +534,11 @@ export const RfqsApp = () =>
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
         const firstOption = parsedOptions[0];
         
+        // Generate a unique order ID
+        const orderId = `RFQ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
         return {
+            orderId: orderId, // Add unique order ID
             request: snippet,
             client: clients.length > 0 ? clients[0].clientName : 'Default Client', // Use first available client or fallback
             status: 'Pending',
@@ -623,18 +607,18 @@ export const RfqsApp = () =>
                     <div>Loading clients...</div>
                 </div>
             ) : (
-                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                    <GenericGridComponent 
-                        key={`rfq-grid-${clients.length}-${clientsLoading}`}
-                        rowHeight={22} 
-                        gridTheme={"ag-theme-alpine"} 
-                        rowIdArray={["request"]} 
-                        columnDefs={columnDefs} 
-                        gridData={rfqs}
-                        handleAction={null} 
-                        sortModel={{ colId: 'request', sort: 'asc' }}
-                    />
-                </div>
+                                 <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                     <RfqGridComponent 
+                         key={`rfq-grid-${clients.length}-${clientsLoading}-${rfqs.length}`}
+                         rowHeight={22} 
+                         gridTheme={"ag-theme-alpine"} 
+                         rowIdArray={["orderId"]} 
+                         columnDefs={columnDefs} 
+                         gridData={rfqs}
+                         handleAction={null} 
+                         sortModel={{ colId: 'request', sort: 'asc' }}
+                     />
+                 </div>
             )}
         </div>
     </>)

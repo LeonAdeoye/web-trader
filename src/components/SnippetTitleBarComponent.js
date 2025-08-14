@@ -1,5 +1,5 @@
 import { TextField, Tooltip, IconButton, Box, Alert, IconButton as MuiIconButton } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {Build, Close, Remove, Lan} from "@mui/icons-material";
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -26,6 +26,8 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
         if (e.key === 'Enter' && onSnippetSubmit)
         {
             const result = onSnippetSubmit(inputValue);
+            console.log('Snippet submit result:', result); // Debug logging
+            
             if (result && result.success)
             {
                 setInputValue("");
@@ -34,7 +36,9 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
             }
             else
             {
-                setErrorMessage(result?.error || "Invalid snippet format");
+                const errorMsg = result?.error || "Invalid snippet format";
+                console.log('Setting error message:', errorMsg); // Debug logging
+                setErrorMessage(errorMsg);
                 setShowError(true);
             }
         }
@@ -46,43 +50,42 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
         setErrorMessage("");
     };
 
+    // Debug effect to monitor error state changes
+    useEffect(() => {
+        console.log('Error state changed:', { showError, errorMessage });
+    }, [showError, errorMessage]);
+
     return (
-        <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px 15px 10px', height: '40px', marginBottom: '2px' }}>
+        <div className="snippet-title-bar">
             <span className="title-bar-text">{title}</span>
             
-            <TextField
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                variant="outlined"
-                size="small"
-                autoFocus={false}
-                placeholder={snippetPrompt}
-                inputProps={{ style: { fontSize: '12px' } }}
-                style={{ 
-                    position: 'absolute', 
-                    left: '50%', 
-                    top: '50%', 
-                    transform: 'translate(-50%, -50%)',
-                    width: '600px',
-                    WebkitAppRegion: 'no-drag'
-                }}
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'white',
-                        height: '22.5px',
-                        '& fieldset': {
-                            borderColor: '#ccc',
+            <div className="snippet-input-container">
+                <TextField
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onKeyPress={handleKeyPress}
+                    variant="outlined"
+                    size="small"
+                    autoFocus={false}
+                    placeholder={snippetPrompt}
+                    inputProps={{ style: { fontSize: '12px' } }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            backgroundColor: 'white',
+                            height: '22.5px',
+                            width: '100%',
+                            '& fieldset': {
+                                borderColor: '#ccc',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: '#999',
+                            },
                         },
-                        '&:hover fieldset': {
-                            borderColor: '#999',
-                        },
-                    },
-                }}/>
+                    }}/>
+            </div>
 
             {showError && (
-                <Box
-                    className="snippet-error-container">
+                <div className="snippet-error-container">
                     <Alert
                         severity="error"
                         className="snippet-error-alert"
@@ -96,12 +99,27 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                 <Close fontSize="inherit" />
                             </MuiIconButton>
                         }>
-                        {errorMessage}
+                        <div>
+                            {errorMessage.includes('\n\nExamples of valid formats:') ? (
+                                <>
+                                    <span className="error-main-text">
+                                        {errorMessage.split('\n\nExamples of valid formats:')[0]}
+                                    </span>
+                                    <div className="error-examples">
+                                        Examples of valid formats:{errorMessage.split('\n\nExamples of valid formats:')[1]}
+                                    </div>
+                                </>
+                            ) : (
+                                <span className="error-main-text">
+                                    {errorMessage}
+                                </span>
+                            )}
+                        </div>
                     </Alert>
-                </Box>
+                </div>
             )}
 
-            <div className="title-bar-controls" style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+            <div className="title-bar-controls">
                 {(addButtonProps !== undefined) && (
                     <Tooltip title={addButtonProps.tooltipText}>
                         <IconButton className="title-bar-add" onClick={addButtonProps.handler}>
