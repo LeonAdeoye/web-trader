@@ -39,6 +39,12 @@ export const OrdersApp = () =>
         setSelectedTab(newValue);
     }, []);
 
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner();
+    }, []);
+
     const filteredOrders = useMemo(() =>
     {
         if (!orders || orders.length === 0)
@@ -76,11 +82,7 @@ export const OrdersApp = () =>
             return tabFilteredOrders;
     }, [orders, selectedTab, ownerId, instrumentCode, clientCode]);
 
-    useEffect(() =>
-    {
-        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
-        loadOwner().then(() => loggerService.logInfo("Owner loaded in OrdersApp"));
-    }, []);
+
 
     useEffect(() =>
     {
