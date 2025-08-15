@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {RfqGridComponent} from "../components/RfqGridComponent";
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
@@ -12,6 +11,7 @@ import {OptionRequestParserService} from "../services/OptionRequestParserService
 import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
 import {BankHolidayService} from "../services/BankHolidayService";
 import {ClientService} from "../services/ClientService";
+import {GenericGridComponent} from "../components/GenericGridComponent";
 
 export const RfqsApp = () =>
 {
@@ -201,7 +201,7 @@ export const RfqsApp = () =>
     useEffect(() =>
     {
         if(selectedGenericGridRow)
-            window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext({orderId: selectedGenericGridRow.orderId, orderState: selectedGenericGridRow.state}), null, windowId);
+            window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext({rfqId: selectedGenericGridRow.rfqId, orderState: selectedGenericGridRow.state}), null, windowId);
 
     }, [selectedGenericGridRow, windowId]);
 
@@ -379,117 +379,117 @@ export const RfqsApp = () =>
             // Notional and Currency
             {headerName: "Notional (m)", field: "notionalMillions", sortable: true, minWidth: 120, width: 120, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-                         {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
-                         {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
+             {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
-                         {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+             {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true,
               editable: true, cellEditor: 'agDateInputCellEditor'},
-            {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            
+
             // Sales Credit
-            {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-                         {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-            
+
             // Settlement
-            {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-                         {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-             {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true,
               editable: true, cellEditor: 'agDateInputCellEditor'},
-            
+
             // Hedge
             {headerName: "Hedge Type", field: "hedgeType", sortable: true, minWidth: 120, width: 120, filter: true,
              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
-            {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            
+            //
             // Implied Volatility
-            {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Premium Amounts
-            {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Premium Percentages
-            {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Greeks - Delta
-            {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Greeks - Gamma
-            {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Greeks - Theta
-            {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Greeks - Vega
-            {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Greeks - Rho
-            {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true, 
+            {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true, 
+            {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            
+
             // Legs count
-            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true, 
+            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
              editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames]);
@@ -534,11 +534,8 @@ export const RfqsApp = () =>
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
         const firstOption = parsedOptions[0];
         
-        // Generate a unique order ID
-        const orderId = `RFQ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
         return {
-            orderId: orderId, // Add unique order ID
+            rfqId: crypto.randomUUID(),
             request: snippet,
             client: clients.length > 0 ? clients[0].clientName : 'Default Client', // Use first available client or fallback
             status: 'Pending',
@@ -602,24 +599,17 @@ export const RfqsApp = () =>
         />
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-            {clientsLoading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <div>Loading clients...</div>
-                </div>
-            ) : (
-                                 <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                     <RfqGridComponent 
-                         key={`rfq-grid-${clients.length}-${clientsLoading}-${rfqs.length}`}
-                         rowHeight={22} 
-                         gridTheme={"ag-theme-alpine"} 
-                         rowIdArray={["orderId"]} 
-                         columnDefs={columnDefs} 
-                         gridData={rfqs}
-                         handleAction={null} 
-                         sortModel={{ colId: 'request', sort: 'asc' }}
-                     />
-                 </div>
-            )}
+             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                 <GenericGridComponent
+                     rowHeight={22}
+                     gridTheme={"ag-theme-alpine"}
+                     rowIdArray={["rfqId"]}
+                     columnDefs={columnDefs}
+                     gridData={rfqs}
+                     handleAction={null}
+                     sortModel={{ colId: 'request', sort: 'asc' }}
+                 />
+             </div>
         </div>
     </>)
 
