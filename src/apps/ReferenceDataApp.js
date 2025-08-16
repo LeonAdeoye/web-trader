@@ -659,7 +659,7 @@ export const ReferenceDataApp = () =>
 
         loadData().then(() => loggerService.logInfo("All reference data loaded successfully."));
 
-    }, [clientService, brokerService, accountService, instrumentService, exchangeService, traderService, deskService, bankHolidayService, bookService, loggerService]);
+    }, [desks, clientService, brokerService, accountService, instrumentService, exchangeService, traderService, bankHolidayService, bookService, loggerService]);
 
     const handleSave = useCallback(async (formData) =>
     {
