@@ -21,8 +21,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
 
     const onGridReady = (params) =>
     {
-        // sortModel should be an object: { colId: 'arrivalTime', sort: 'desc' }
-        if(sortModel !== undefined || sortModel !== null)
+        if(sortModel !== undefined && sortModel !== null)
             params.columnApi.applyColumnState({
                 state: [sortModel],
                 applyOrder: true,

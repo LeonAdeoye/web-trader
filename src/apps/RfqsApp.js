@@ -11,6 +11,8 @@ import {OptionRequestParserService} from "../services/OptionRequestParserService
 import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
 import {BankHolidayService} from "../services/BankHolidayService";
 import {ClientService} from "../services/ClientService";
+import {InstrumentService} from "../services/InstrumentService";
+import {BookService} from "../services/BookService";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 
 export const RfqsApp = () =>
@@ -30,6 +32,8 @@ export const RfqsApp = () =>
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bankHolidayService = useRef(new BankHolidayService()).current;
     const clientService = useRef(new ClientService()).current;
+    const bookService = useRef(new BookService()).current;
+    const instrumentService = useRef(new InstrumentService).current;
 
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
@@ -86,6 +90,7 @@ export const RfqsApp = () =>
     const [clients, setClients] = useState([]);
     const [clientsLoading, setClientsLoading] = useState(true);
     const [books, setBooks] = useState([]);
+    const [instruments, setInstruments] = useState([]);
     const [currencies, setCurrencies] = useState([]);
     const [dayCountConventions, setDayCountConventions] = useState([]);
     const [statusEnums, setStatusEnums] = useState([]);
@@ -105,66 +110,20 @@ export const RfqsApp = () =>
         const loadData = async () =>
         {
             await exchangeRateService.loadExchangeRates();
+            await clientService.loadClients();
+            await bookService.loadBooks();
+            await instrumentService.loadInstruments();
 
-            // Load clients from service
-            setClientsLoading(true);
-            try
-            {
-                loggerService.logInfo("Loading clients from ClientService...");
-                
-                // Add timeout to prevent hanging
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Client loading timeout')), 10000)
-                );
-                
-                await Promise.race([
-                    clientService.loadClients(),
-                    timeoutPromise
-                ]);
-                
-                const loadedClients = clientService.getClients();
-                
-                // Ensure we have valid client data with clientName property
-                const validClients = loadedClients.filter(client => client && client.clientName);
-                
-                if (validClients.length === 0)
-                {
-                    loggerService.logWarning("No valid clients found in service response");
-                    throw new Error("No valid clients found");
-                }
-                
-                setClients(validClients);
-                loggerService.logInfo(`Loaded ${validClients.length} valid clients from service: ${JSON.stringify(validClients.map(c => c.clientName))}`);
-            }
-            catch (error)
-            {
-                loggerService.logError(`Failed to load clients: ${error.message}`);
-                // Fallback to mock data if service fails
-                const fallbackClients = [
-                    { clientName: 'Client A', code: 'CLIENT_A' },
-                    { clientName: 'Client B', code: 'CLIENT_B' },
-                    { clientName: 'Client C', code: 'CLIENT_C' }
-                ];
-                setClients(fallbackClients);
-                loggerService.logInfo("Using fallback mock client data");
-            }
-            finally
-            {
-                setClientsLoading(false);
-            }
+            setClients(clientService.getClients());
+            setBooks(bookService.getBooks());
+            setInstruments(instrumentService.getInstruments());
 
             setUsers([
                 { userId: 'user1', name: 'User 1' },
                 { userId: 'user2', name: 'User 2' },
                 { userId: 'user3', name: 'User 3' }
             ]);
-            
-            setBooks([
-                { bookCode: 'BOOK1', description: 'Book 1' },
-                { bookCode: 'BOOK2', description: 'Book 2' },
-                { bookCode: 'BOOK3', description: 'Book 3' }
-            ]);
-            
+
             setCurrencies(['USD', 'EUR', 'GBP', 'JPY', 'CHF']);
             setDayCountConventions(['30/360', 'ACT/360', 'ACT/365', 'ACT/ACT']);
             setStatusEnums([
@@ -180,7 +139,7 @@ export const RfqsApp = () =>
             ]);
         };
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
-    }, [exchangeRateService, clientService, loggerService]);
+    }, [exchangeRateService, bookService, clientService, loggerService]);
 
 
 
@@ -302,29 +261,17 @@ export const RfqsApp = () =>
     const handleKeyPress = (e) =>
     {
         if (e.key === 'Enter')
-        {
             handleSendChatMessage();
-        }
     };
 
-    const handleRFQFieldChange = (field, value) =>
-    {
-        setSelectedRFQ(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
+    const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
 
     const handleSaveRequest = (isSave) =>
     {
         if (isSave)
-        {
             loggerService.logInfo('Saving RFQ:', selectedRFQ);
-        }
         else
-        {
             loggerService.logInfo('Cancelling RFQ changes');
-        }
     };
 
     useEffect(() =>
@@ -359,21 +306,22 @@ export const RfqsApp = () =>
     const getUniqueClientNames = useCallback(() =>
     {
         const uniqueNames = [...new Set(clients.map(c => c.clientName))];
-        return uniqueNames.sort(); // Sort alphabetically for better UX
+        return uniqueNames.sort();
     }, [clients]);
 
     const columnDefs = useMemo(() => 
     {
-        const clientDropdownValues = clientsLoading ? [] : getUniqueClientNames();
+        const clientDropdownValues = getUniqueClientNames();
         
         return ([
             // Basic RFQ Information
-            {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: true},
-                         {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
+             {headerName: "Arrival Time", field: "arrivalTime", sortable: true, minWidth: 130, width: 130, filter: true, editable: false},
+             {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
+             {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
-             {headerName: "Book Code", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
+             {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
             
             // Notional and Currency
@@ -423,7 +371,7 @@ export const RfqsApp = () =>
              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
             {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            //
+
             // Implied Volatility
             {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
@@ -499,7 +447,7 @@ export const RfqsApp = () =>
         try
         {
             const snippet = snippetInput.trim();
-            if(!snippet || snippet.trim() === '')
+            if(!snippet || snippet === '')
             {
                 return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
             }
@@ -516,7 +464,7 @@ export const RfqsApp = () =>
             if (!parsedOptions || parsedOptions.length === 0)
                 return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
 
-            const newRFQ = createRFQFromOptions(snippet.trim(), parsedOptions);
+            const newRFQ = createRFQFromOptions(snippet, parsedOptions);
             setRfqs(prevOrders => [newRFQ, ...prevOrders]);
             loggerService.logInfo(`Successfully created RFQ from snippet: ${snippet}`);
             return { success: true };
@@ -530,21 +478,21 @@ export const RfqsApp = () =>
 
     const createRFQFromOptions = useCallback((snippet, parsedOptions) =>
     {
-        const now = new Date();
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
         const firstOption = parsedOptions[0];
         
         return {
+            arrivalTime: new Date().toLocaleTimeString(),
             rfqId: crypto.randomUUID(),
             request: snippet,
-            client: clients.length > 0 ? clients[0].clientName : 'Default Client', // Use first available client or fallback
+            client:  'Select Client',
             status: 'Pending',
-            bookCode: 'BOOK1',
-            notionalMillions: totalQuantity / 1000000, // Convert to millions
+            bookCode: 'Select Book',
+            notionalMillions: totalQuantity / 1000000,
             notionalCurrency: firstOption.currency || 'USD',
             notionalFXRate: 1.0,
             dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
-            tradeDate: now,
+            tradeDate: new Date().toLocaleDateString(),
             multiplier: 100,
             contracts: totalQuantity,
             quantity: totalQuantity,
@@ -556,7 +504,7 @@ export const RfqsApp = () =>
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: 2,
             premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+            premiumSettlementDate: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
             hedgeType: 'Full',
             hedgePrice: firstOption.strikePrice || 100.0,
             askImpliedVol: firstOption.volatility || 0.25,
@@ -607,7 +555,7 @@ export const RfqsApp = () =>
                      columnDefs={columnDefs}
                      gridData={rfqs}
                      handleAction={null}
-                     sortModel={{ colId: 'request', sort: 'asc' }}
+                     sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
                  />
              </div>
         </div>
