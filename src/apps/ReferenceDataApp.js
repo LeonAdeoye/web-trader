@@ -601,6 +601,16 @@ export const ReferenceDataApp = () =>
 
     useEffect(() =>
     {
+        const loadDesks = async () =>
+        {
+                await deskService.loadDesks();
+                setDesks(deskService.getDesks());
+        };
+    }, [deskService]);
+
+
+    useEffect(() =>
+    {
         const loadData = async () =>
         {
             try
@@ -610,7 +620,6 @@ export const ReferenceDataApp = () =>
                 await accountService.loadAccounts();
                 await instrumentService.loadInstruments();
                 await exchangeService.loadExchanges();
-                await deskService.loadDesks(); // Load desks first
                 await traderService.loadTraders();
                 await bankHolidayService.loadBankHolidays(); // Added later
                 await bookService.loadBooks(); // Added later
@@ -620,7 +629,6 @@ export const ReferenceDataApp = () =>
                 setAccounts(accountService.getAccounts());
                 setInstruments(instrumentService.getInstruments());
                 setExchanges(exchangeService.getExchanges());
-                setDesks(deskService.getDesks());
                 setBankHolidays(bankHolidayService.getBankHolidays()); // Added later
 
                 const booksWithDeskNames = bookService.getBooks().map(book =>
@@ -633,7 +641,6 @@ export const ReferenceDataApp = () =>
                 });
                 setBooks(booksWithDeskNames);
 
-                const desks = deskService.getDesks();
                 const tradersWithDeskNames = traderService.getTraders().map(trader =>
                 {
                     const desk = desks.find(d => d.traders && d.traders.includes(trader.traderId));
@@ -718,7 +725,6 @@ export const ReferenceDataApp = () =>
                     const desk = deskService.getDeskById(formData.deskId);
                     if (desk)
                     {
-                        // Get the newly created trader to get their ID
                         await traderService.loadTraders();
                         const newTrader = traderService.getTraders().find(t =>
                             t.firstName === formData.firstName &&
@@ -736,12 +742,9 @@ export const ReferenceDataApp = () =>
                         }
                     }
                 }
-                
-                // Reload both desks and traders to get the updated data
+
                 await deskService.loadDesks();
                 await traderService.loadTraders();
-                
-                // Enrich trader data with desk names using the correct lookup logic
                 const desks = deskService.getDesks();
                 const newTradersWithDeskNames = traderService.getTraders().map(trader =>
                 {
