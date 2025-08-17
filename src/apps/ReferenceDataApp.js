@@ -6,8 +6,9 @@ import {TabContext, TabList, TabPanel} from "@mui/lab";
 import {Tab} from "@mui/material";
 import {LoggerService} from "../services/LoggerService";
 import {useRecoilState} from "recoil";
-import {referenceDataDialogDisplayState} from "../atoms/dialog-state";
+import {referenceDataDialogDisplayState, bookDialogDisplayState} from "../atoms/dialog-state";
 import ReferenceDataDialog from "../dialogs/ReferenceDataDialog";
+import BookDialog from "../dialogs/BookDialog";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 import {BrokerService} from "../services/BrokerService";
 import {AccountService} from "../services/AccountService";
@@ -36,7 +37,8 @@ export const ReferenceDataApp = () =>
     const [bankHolidays, setBankHolidays] = useState([]);
     const [books, setBooks] = useState([]);
     const [, setReferenceDataDialogOpenFlag] = useRecoilState(referenceDataDialogDisplayState);
-    const [dialogMode, setDialogMode] = useState('add'); // 'add', 'update', 'clone'
+    const [, setBookDialogOpenFlag] = useRecoilState(bookDialogDisplayState);
+    const [dialogMode, setDialogMode] = useState('add');
     const [editingData, setEditingData] = useState(null);
     const [deleteConfirmationDialog, setDeleteConfirmationDialog] = useState(false);
     const [dataToDelete, setDataToDelete] = useState(null);
@@ -571,43 +573,16 @@ export const ReferenceDataApp = () =>
         },
     ]), []);
 
-    const handleAction = useCallback(async (action, data) =>
-    {
-        switch (action)
-        {
-            case "update":
-                setDialogMode('update');
-                setEditingData(data);
-                setReferenceDataDialogOpenFlag(true);
-                break;
-            case "delete":
-                setDataToDelete(data);
-                setDeleteConfirmationDialog(true);
-                break;
-            case "clone":
-                setDialogMode('clone');
-                setEditingData(data);
-                setReferenceDataDialogOpenFlag(true);
-                break;
-            case "add":
-                setDialogMode('add');
-                setEditingData(null);
-                setReferenceDataDialogOpenFlag(true);
-                break;
-            default:
-                loggerService.logError(`Unknown action: ${action}`);
-        }
-    }, [loggerService]);
-
     useEffect(() =>
     {
         const loadDesks = async () =>
         {
-                await deskService.loadDesks();
-                setDesks(deskService.getDesks());
+            await deskService.loadDesks();
+            setDesks(deskService.getDesks());
         };
-    }, [deskService]);
 
+        loadDesks().then(() => loggerService.logInfo("Desks loaded successfully."));
+    }, [deskService]);
 
     useEffect(() =>
     {
@@ -621,15 +596,15 @@ export const ReferenceDataApp = () =>
                 await instrumentService.loadInstruments();
                 await exchangeService.loadExchanges();
                 await traderService.loadTraders();
-                await bankHolidayService.loadBankHolidays(); // Added later
-                await bookService.loadBooks(); // Added later
+                await bankHolidayService.loadBankHolidays();
+                await bookService.loadBooks();
 
                 setClients(clientService.getClients());
                 setBrokers(brokerService.getBrokers());
                 setAccounts(accountService.getAccounts());
                 setInstruments(instrumentService.getInstruments());
                 setExchanges(exchangeService.getExchanges());
-                setBankHolidays(bankHolidayService.getBankHolidays()); // Added later
+                setBankHolidays(bankHolidayService.getBankHolidays());
 
                 const booksWithDeskNames = bookService.getBooks().map(book =>
                 {
@@ -661,24 +636,75 @@ export const ReferenceDataApp = () =>
 
     }, [desks, clientService, brokerService, accountService, instrumentService, exchangeService, traderService, bankHolidayService, bookService, loggerService]);
 
-    const handleSave = useCallback(async (formData) =>
+    const handleAction = useCallback(async (action, data) =>
     {
-        switch (dialogMode)
+        const tab = selectedTabRef.current;
+        switch (action)
         {
-            case 'add':
-                await handleAdd(formData);
+            case "update":
+                setDialogMode('update');
+                setEditingData(data);
+                if(tab === '9')
+                    setBookDialogOpenFlag(true);
+                else
+                    setReferenceDataDialogOpenFlag(true);
                 break;
-            case 'update':
-                await handleUpdate(formData);
+            case "delete":
+                setDataToDelete(data);
+                setDeleteConfirmationDialog(true);
                 break;
-            case 'clone':
-                await handleClone(formData);
+            case "clone":
+                setDialogMode('clone');
+                setEditingData(data);
+                if(tab === '9')
+                    setBookDialogOpenFlag(true);
+                else
+                    setReferenceDataDialogOpenFlag(true);
+                break;
+            case "add":
+                setDialogMode('add');
+                setEditingData(null);
+                if(tab === '9')
+                    setBookDialogOpenFlag(true);
+                else
+                    setReferenceDataDialogOpenFlag(true);
                 break;
             default:
-                loggerService.logError(`Unknown dialog mode: ${dialogMode}`);
+                loggerService.logError(`Unknown action: ${action}`);
         }
-        setDialogMode('add');
-        setEditingData(null);
+    }, [loggerService]);
+
+    const handleSave = useCallback(async (formData) =>
+    {
+        if (formData.bookCode !== undefined && formData.bookName !== undefined && formData.deskId !== undefined)
+        {
+            if (formData.bookId)
+                await handleUpdate(formData);
+            else
+                await handleAdd(formData);
+
+            setDialogMode('add');
+            setEditingData(null);
+        }
+        else
+        {
+            switch (dialogMode)
+            {
+                case 'add':
+                    await handleAdd(formData);
+                    break;
+                case 'update':
+                    await handleUpdate(formData);
+                    break;
+                case 'clone':
+                    await handleClone(formData);
+                    break;
+                default:
+                    loggerService.logError(`Unknown dialog mode: ${dialogMode}`);
+            }
+            setDialogMode('add');
+            setEditingData(null);
+        }
     }, [dialogMode, loggerService]);
 
     const handleAdd = useCallback(async (formData) =>
@@ -718,8 +744,7 @@ export const ReferenceDataApp = () =>
                 break;
             case "7": // Traders
                 await traderService.addNewTrader(formData);
-                
-                // If the new trader is assigned to a desk, update the desk's traders list
+
                 if (formData.deskId)
                 {
                     const desk = deskService.getDeskById(formData.deskId);
@@ -778,7 +803,7 @@ export const ReferenceDataApp = () =>
             default:
                 loggerService.logError(`Unknown tab for add: ${tab}`);
         }
-    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, bookService, selectedTab, loggerService]);
+    }, [desks, clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, bookService, selectedTab, loggerService]);
 
     const handleUpdate = useCallback(async (formData) =>
     {
@@ -816,18 +841,13 @@ export const ReferenceDataApp = () =>
                 setInstruments(instrumentService.getInstruments());
                 break;
             case "7": // Traders
-                // Get the original trader data to know which desk they were previously assigned to
                 const originalTrader = traders.find(t => t.traderId === formData.traderId);
                 const oldDeskId = originalTrader?.deskId;
                 const newDeskId = formData.deskId;
-                
-                // Update the trader
+
                 await traderService.updateTrader(formData);
-                
-                // Update desk assignments if the desk changed
                 if (oldDeskId !== newDeskId)
                 {
-                    // Remove trader from old desk if they had one
                     if (oldDeskId)
                     {
                         const oldDesk = deskService.getDeskById(oldDeskId);
@@ -840,8 +860,7 @@ export const ReferenceDataApp = () =>
                             await deskService.updateDesk(updatedOldDesk);
                         }
                     }
-                    
-                    // Add trader to new desk if they're being assigned to one
+
                     if (newDeskId)
                     {
                         const newDesk = deskService.getDeskById(newDeskId);
@@ -855,16 +874,12 @@ export const ReferenceDataApp = () =>
                         }
                     }
                 }
-                
-                // Reload both desks and traders to get the updated data
+
                 await deskService.loadDesks();
                 await traderService.loadTraders();
-                
-                // Enrich trader data with desk names using the correct lookup logic
                 const desks = deskService.getDesks();
                 const updatedTradersWithDeskNames = traderService.getTraders().map(trader =>
                 {
-                    // Find which desk contains this trader in its traders array
                     const desk = desks.find(d => d.traders && d.traders.includes(trader.traderId));
                     return {
                         ...trader,
@@ -895,7 +910,7 @@ export const ReferenceDataApp = () =>
             default:
                 loggerService.logError(`Unknown tab for update: ${tab}`);
         }
-    }, [clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService, traders, desks]);
+    }, [desks, clientService, brokerService, accountService, exchangeService, traderService, deskService, instrumentService, bankHolidayService, selectedTab, loggerService, traders, desks]);
 
     const handleClone = useCallback(async (formData) =>
     {
@@ -941,7 +956,6 @@ export const ReferenceDataApp = () =>
                 setInstruments(prevInstruments => prevInstruments.filter(instrument => instrument.instrumentId !== data.instrumentId));
                 break;
             case "7": // Traders
-                // Remove trader from their assigned desk before deleting
                 const traderToDelete = traders.find(t => t.traderId === data.traderId);
                 if (traderToDelete?.deskId)
                 {
@@ -957,13 +971,10 @@ export const ReferenceDataApp = () =>
                 }
                 
                 await traderService.deleteTrader(data.traderId);
-                
-                // Reload desks and update the traders state
                 await deskService.loadDesks();
                 setTraders(prevTraders =>
                 {
                     const filteredTraders = prevTraders.filter(trader => trader.traderId !== data.traderId);
-                    // Re-enrich the remaining traders with desk names using correct logic
                     const desks = deskService.getDesks();
                     return filteredTraders.map(trader =>
                     {
@@ -1060,7 +1071,19 @@ export const ReferenceDataApp = () =>
     }, []);
 
     return (<>
-        <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => { setDialogMode('add'); setEditingData(null); setReferenceDataDialogOpenFlag(true); }, tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
+        <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => { 
+            const tab = selectedTabRef.current;
+            if (tab === "9")
+            {
+                setDialogMode('add'); 
+                setEditingData(null); 
+                setBookDialogOpenFlag(true);
+            } else {
+                setDialogMode('add'); 
+                setEditingData(null); 
+                setReferenceDataDialogOpenFlag(true);
+            }
+        }, tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
         <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 131px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <TabContext value={selectedTab}>
                 <TabList className="reference-tab-list" onChange={(event, newValue) => { selectedTabRef.current = newValue; setSelectedTab(newValue);}}>
@@ -1114,6 +1137,8 @@ export const ReferenceDataApp = () =>
         </div>
         <ReferenceDataDialog selectedTab={selectedTab} desks={desks} mode={dialogMode} editingData={editingData} onSave={handleSave}
              onClose={() => { setDialogMode('add'); setEditingData(null); }} dataName={getDataName(selectedTab)}/>
+
+        <BookDialog desks={desks} mode={dialogMode} editingData={editingData} onSave={handleSave}/>
 
         <DeleteConfirmationDialog open={deleteConfirmationDialog} onClose={handleDeleteCancel} onConfirm={handleDeleteConfirm}
             dataToDelete={dataToDelete} selectedTab={selectedTab} getDataName={getDataName} getItemDisplayName={getItemDisplayName}/>
