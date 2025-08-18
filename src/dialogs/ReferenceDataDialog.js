@@ -11,7 +11,6 @@ import DeskDialogComponent from "./DeskDialogComponent";
 import InstrumentDialogComponent from "./InstrumentDialogComponent";
 import TraderDialogComponent from "./TraderDialogComponent";
 import BankHolidayDialogComponent from "./BankHolidayDialogComponent";
-import BookDialogComponent from "./BookDialogComponent";
 
 const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', editingData = null, onSave, onClose}) =>
 {
@@ -43,8 +42,6 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return <TraderDialogComponent data={formData} onDataChange={handleInputChange} desks={desks} />;
             case "8": // Bank Holidays
                 return <BankHolidayDialogComponent data={formData} onDataChange={handleInputChange} />;
-            case "9": // Books
-                return <BookDialogComponent data={formData} onDataChange={handleInputChange} desks={desks} />;
             default:
                 return <div>Please select a tab</div>;
         }
@@ -89,7 +86,6 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 delete clonedData.instrumentId;
                 delete clonedData.traderId;
                 delete clonedData.id;
-                delete clonedData.bookId;
                 setFormData(clonedData);
             }
         }
@@ -126,7 +122,6 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             delete clonedData.deskId;
             delete clonedData.instrumentId;
             delete clonedData.traderId;
-            delete clonedData.bookId;
             setFormData(clonedData);
         }
     }, [mode, editingData]);
@@ -154,8 +149,6 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return !formData.firstName || !formData.lastName || !formData.userId;
             case "8": // Bank Holidays
                 return !formData.countryCode || !formData.holidayName;
-            case "9": // Books
-                return !formData.bookCode || !formData.bookName || !formData.deskId;
             default:
                 return true;
         }
@@ -181,8 +174,6 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
                 return "450px";
             case "8": // Bank Holidays
                 return "450px";
-            case "9": // Books
-                return "300px";
             default:
                 return "450px";
         }

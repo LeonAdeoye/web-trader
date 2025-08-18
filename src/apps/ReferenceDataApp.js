@@ -682,9 +682,6 @@ export const ReferenceDataApp = () =>
                 await handleUpdate(formData);
             else
                 await handleAdd(formData);
-
-            setDialogMode('add');
-            setEditingData(null);
         }
         else
         {
@@ -702,9 +699,10 @@ export const ReferenceDataApp = () =>
                 default:
                     loggerService.logError(`Unknown dialog mode: ${dialogMode}`);
             }
-            setDialogMode('add');
-            setEditingData(null);
         }
+        setDialogMode('add');
+        setEditingData(null);
+
     }, [dialogMode, loggerService]);
 
     const handleAdd = useCallback(async (formData) =>
@@ -768,9 +766,7 @@ export const ReferenceDataApp = () =>
                     }
                 }
 
-                await deskService.loadDesks();
                 await traderService.loadTraders();
-                const desks = deskService.getDesks();
                 const newTradersWithDeskNames = traderService.getTraders().map(trader =>
                 {
                     const desk = desks.find(d => d.traders && d.traders.includes(trader.traderId));
@@ -875,9 +871,7 @@ export const ReferenceDataApp = () =>
                     }
                 }
 
-                await deskService.loadDesks();
                 await traderService.loadTraders();
-                const desks = deskService.getDesks();
                 const updatedTradersWithDeskNames = traderService.getTraders().map(trader =>
                 {
                     const desk = desks.find(d => d.traders && d.traders.includes(trader.traderId));
@@ -887,7 +881,7 @@ export const ReferenceDataApp = () =>
                     };
                 });
                 setTraders(updatedTradersWithDeskNames);
-                setDesks(deskService.getDesks());
+                setDesks(desks);
                 break;
             case "8": // Bank Holidays
                 await bankHolidayService.updateBankHoliday(formData);
@@ -971,11 +965,9 @@ export const ReferenceDataApp = () =>
                 }
                 
                 await traderService.deleteTrader(data.traderId);
-                await deskService.loadDesks();
                 setTraders(prevTraders =>
                 {
                     const filteredTraders = prevTraders.filter(trader => trader.traderId !== data.traderId);
-                    const desks = deskService.getDesks();
                     return filteredTraders.map(trader =>
                     {
                         const desk = desks.find(d => d.traders && d.traders.includes(trader.traderId));
@@ -1071,19 +1063,17 @@ export const ReferenceDataApp = () =>
     }, []);
 
     return (<>
-        <TitleBarComponent title="Reference Data" windowId={windowId} addButtonProps={{ handler: () => { 
-            const tab = selectedTabRef.current;
-            if (tab === "9")
-            {
-                setDialogMode('add'); 
-                setEditingData(null); 
-                setBookDialogOpenFlag(true);
-            } else {
-                setDialogMode('add'); 
-                setEditingData(null); 
-                setReferenceDataDialogOpenFlag(true);
-            }
-        }, tooltipText: "Add Reference Data..." }} showChannel={false} showTools={false}/>
+        <TitleBarComponent title="Reference Data" windowId={windowId} showChannel={false} showTools={false}
+           addButtonProps={{ tooltipText: "Add Reference Data...", handler: () =>
+           {
+                const tab = selectedTabRef.current;
+                setDialogMode('add');
+                setEditingData(null);
+                if (tab === "9")
+                    setBookDialogOpenFlag(true);
+                else
+                    setReferenceDataDialogOpenFlag(true);
+            }}}/>
         <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 131px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <TabContext value={selectedTab}>
                 <TabList className="reference-tab-list" onChange={(event, newValue) => { selectedTabRef.current = newValue; setSelectedTab(newValue);}}>
@@ -1099,39 +1089,39 @@ export const ReferenceDataApp = () =>
                 </TabList>
                 
                 <TabPanel value="1" className="client-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["clientId"]} columnDefs={clientColumnDefs} gridData={clients} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["clientId"]} columnDefs={clientColumnDefs} gridData={clients} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="2" className="exchange-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={exchangeColumnDefs} gridData={exchanges} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={exchangeColumnDefs} gridData={exchanges} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="3" className="broker-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["brokerId"]} columnDefs={brokerColumnDefs} gridData={brokers} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["brokerId"]} columnDefs={brokerColumnDefs} gridData={brokers} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="4" className="account-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["accountId"]} columnDefs={accountColumnDefs} gridData={accounts} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["accountId"]} columnDefs={accountColumnDefs} gridData={accounts} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="5" className="desk-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["deskId"]} columnDefs={deskColumnDefs} gridData={desks} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["deskId"]} columnDefs={deskColumnDefs} gridData={desks} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="6" className="instrument-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["instrumentId"]} columnDefs={instrumentColumnDefs} gridData={instruments} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["instrumentId"]} columnDefs={instrumentColumnDefs} gridData={instruments} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="7" className="trader-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["traderId"]} columnDefs={traderColumnDefs} gridData={traders} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["traderId"]} columnDefs={traderColumnDefs} gridData={traders} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="8" className="bank-holiday-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]} columnDefs={bankHolidayColumnDefs} gridData={bankHolidays} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["id"]} columnDefs={bankHolidayColumnDefs} gridData={bankHolidays} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
                 
                 <TabPanel value="9" className="book-ref-data">
-                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["bookId"]} columnDefs={bookColumnDefs} gridData={books} windowId={windowId} handleAction={handleAction} sortModel={undefined}/>
+                    <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["bookId"]} columnDefs={bookColumnDefs} gridData={books} windowId={windowId} handleAction={handleAction}/>
                 </TabPanel>
             </TabContext>
         </div>

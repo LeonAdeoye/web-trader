@@ -4,7 +4,7 @@ import { useRecoilState } from 'recoil';
 import { bookDialogDisplayState } from '../atoms/dialog-state';
 import '../styles/css/book-dialog.css';
 
-const BookDialog = ({ desks = [], onSave, mode = null, editingData = null }) =>
+const BookDialog = ({ desks = [], onSave, mode, editingData = null }) =>
 {
     const [bookDialogDisplay, setBookDialogDisplay] = useRecoilState(bookDialogDisplayState);
     const [formData, setFormData] = useState({ bookCode: '', bookName: '', deskId: ''});
@@ -16,7 +16,7 @@ const BookDialog = ({ desks = [], onSave, mode = null, editingData = null }) =>
             if (mode === 'add')
                 setFormData({ bookCode: '', bookName: '', deskId: ''});
             else if (mode === 'update' && editingData)
-                setFormData({ bookCode: editingData.bookCode, bookName: editingData.bookName, deskId: editingData.deskId});
+                setFormData({ bookCode: editingData.bookCode, bookName: editingData.bookName, deskId: editingData.deskId, bookId: editingData.bookId });
             else if (mode === 'clone' && editingData)
                 setFormData({ bookCode: editingData.bookCode, bookName: editingData.bookName, deskId: editingData.deskId});
         }
@@ -33,7 +33,6 @@ const BookDialog = ({ desks = [], onSave, mode = null, editingData = null }) =>
             else
                 await onSave(formData);
         }
-        
         setBookDialogDisplay(false);
     };
 
