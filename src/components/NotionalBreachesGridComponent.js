@@ -5,7 +5,7 @@ import * as React from "react";
 
 const NotionalBreachesGridComponent = () =>
 {
-    const deskData = [];
+    const [breaches, setBreaches] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
 
     useEffect(() =>
@@ -27,8 +27,19 @@ const NotionalBreachesGridComponent = () =>
         };
     }, [inboundWorker]);
 
-    const handleWorkerMessage = useCallback((event) => {
+    const handleWorkerMessage = useCallback((event) =>
+    {
         const notionalBreach = event.data.order;
+        console.log("Notional breach: " + JSON.stringify(notionalBreach))
+        setBreaches(prevData => {
+            const updatedData = [...prevData];
+            const existingIndex = updatedData.findIndex(item => item.orderId === notionalBreach.orderId);
+            if (existingIndex >= 0)
+                updatedData[existingIndex] = notionalBreach;
+            else
+                updatedData.push(notionalBreach);
+            return updatedData;
+        });
     }, []);
 
     const columnDefs = useMemo(() => ([
@@ -40,7 +51,7 @@ const NotionalBreachesGridComponent = () =>
             valueFormatter: (params) => `${params.data.limitPercentage} % ${params.data.breachType}`, cellStyle: params => getLimitBreachTypeColour(params)},
         { headerName: 'Order Id', field: 'orderId'},
         { headerName: 'Timestamp', field: 'tradeTimestamp', filter: true, width: 150, valueFormatter: (params) => `${params.value[3]}:${params.value[4]}:${params.value[5]}`},
-        { headerName: 'Symbol', field: 'symbol', filter: true, width: 150},
+        { headerName: 'Instrument', field: 'symbol', filter: true, width: 150},
         { headerName: 'Side', field: 'side', filter: true, width: 100, cellStyle: (params) => getSideColour(params)},
         { headerName: 'Price', field: 'price', width: 150},
         { headerName: 'Quantity', field: 'quantity', valueFormatter: numberFormatter, width: 180},
@@ -64,7 +75,7 @@ const NotionalBreachesGridComponent = () =>
     }, []);
 
 
-    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={deskData} handleAction={null}/>);
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={breaches} handleAction={null}/>);
 }
 
 export default NotionalBreachesGridComponent;

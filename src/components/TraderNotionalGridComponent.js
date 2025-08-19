@@ -5,7 +5,7 @@ import * as React from "react";
 
 const TraderNotionalGridComponent = () =>
 {
-    const traderData = [];
+    const [traderData, setTraderData] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
 
     useEffect(() =>
@@ -27,8 +27,19 @@ const TraderNotionalGridComponent = () =>
         };
     }, [inboundWorker]);
 
-    const handleWorkerMessage = useCallback((event) => {
+    const handleWorkerMessage = useCallback((event) =>
+    {
         const traderNotional = event.data.order;
+        console.log("Trader Notional: " + JSON.stringify(traderNotional))
+        setTraderData(prevData => {
+            const updatedData = [...prevData];
+            const existingIndex = updatedData.findIndex(item => item.traderId === traderNotional.traderId);
+            if (existingIndex >= 0)
+                updatedData[existingIndex] = traderNotional;
+            else
+                updatedData.push(traderNotional);
+            return updatedData;
+        });
     }, []);
 
     const columnDefs = useMemo(() => ([
@@ -46,7 +57,7 @@ const TraderNotionalGridComponent = () =>
         { headerName: 'Current Gross Utilization %', field: 'grossUtilizationPercentage', width: 220, cellStyle: (params) => getPercentageColour(params)}
     ]), []);
 
-    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={traderData} handleAction={null}/>);
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["traderId"]} columnDefs={columnDefs} gridData={traderData} handleAction={null}/>);
 }
 
 export default TraderNotionalGridComponent;
