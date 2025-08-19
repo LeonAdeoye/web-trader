@@ -197,4 +197,18 @@ export const defaultIfBlank = (value, fallback) =>
     return String(value).trim() === '' ? (fallback === null || fallback === undefined ? 'Unknown' : fallback) : value;
 };
 
+export const getPercentageColour = (params) =>
+{
+    if (params.value >  90) return  {backgroundColor: 'pink', color: 'black'};
+    if (params.value >  75) return  {backgroundColor: 'gold', color: 'black'};
+}
 
+export const getSideColour = (params) =>
+{
+    return (params.value === "BUY") ? {fontWeight: 'bold', color: 'darkblue'} : {fontWeight: 'bold', color: 'darkred'};
+}
+
+export const getLimitBreachTypeColour = (params) =>
+{
+    if (params.value.includes("Full")) return {fontWeight: 'bold', color: 'olive'};
+}
