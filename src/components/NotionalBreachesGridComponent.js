@@ -30,8 +30,8 @@ const NotionalBreachesGridComponent = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const notionalBreach = event.data.order;
-        console.log("Notional breach: " + JSON.stringify(notionalBreach))
-        setBreaches(prevData => {
+        setBreaches(prevData =>
+        {
             const updatedData = [...prevData];
             const existingIndex = updatedData.findIndex(item => item.orderId === notionalBreach.orderId);
             if (existingIndex >= 0)
@@ -42,7 +42,8 @@ const NotionalBreachesGridComponent = () =>
         });
     }, []);
 
-    const columnDefs = useMemo(() => ([
+    const columnDefs = useMemo(() =>
+    ([
         { headerName: 'Desk', field: 'deskName', filter: true, pinned: 'left'},
         { headerName: 'Trader', field: 'traderName', filter: true, pinned: 'left'},
         { headerName: 'Desk Id', field: 'deskId', hide: true},
@@ -68,12 +69,6 @@ const NotionalBreachesGridComponent = () =>
         { headerName: 'Gross Notional $', field: 'currentGrossNotional' , valueFormatter: numberFormatter, width: 170},
         { headerName: 'Gross Utilization %', field: 'grossUtilizationPercentage', width: 180, cellStyle: (params) => getPercentageColour(params) },
     ]), []);
-
-    useEffect(() =>
-    {
-
-    }, []);
-
 
     return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={breaches} handleAction={null}/>);
 }

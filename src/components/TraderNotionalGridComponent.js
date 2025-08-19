@@ -30,8 +30,8 @@ const TraderNotionalGridComponent = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const traderNotional = event.data.order;
-        console.log("Trader Notional: " + JSON.stringify(traderNotional))
-        setTraderData(prevData => {
+        setTraderData(prevData =>
+        {
             const updatedData = [...prevData];
             const existingIndex = updatedData.findIndex(item => item.traderId === traderNotional.traderId);
             if (existingIndex >= 0)
@@ -42,7 +42,8 @@ const TraderNotionalGridComponent = () =>
         });
     }, []);
 
-    const columnDefs = useMemo(() => ([
+    const columnDefs = useMemo(() =>
+    ([
         { headerName: 'Trader', field: 'traderName', width: 150, filter: true},
         { headerName: 'Trader Id', field: 'traderId', width: 150, hide: true},
         { headerName: 'Desk', field: 'deskName', width: 200, filter: true},

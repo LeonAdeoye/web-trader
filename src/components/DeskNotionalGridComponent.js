@@ -30,8 +30,8 @@ const DeskNotionalGridComponent = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const deskNotional = event.data.order;
-        console.log("Desk Notional: " + JSON.stringify(deskNotional));
-        setDeskData(prevData => {
+        setDeskData(prevData =>
+        {
             const updatedData = [...prevData];
             const existingIndex = updatedData.findIndex(item => item.deskId === deskNotional.deskId);
             if (existingIndex >= 0)
@@ -42,7 +42,8 @@ const DeskNotionalGridComponent = () =>
         });
     }, []);
 
-    const columnDefs = useMemo(() => ([
+    const columnDefs = useMemo(() =>
+    ([
         { headerName: 'DeskName', field: 'deskName', filter: true},
         { headerName: 'Desk Id', field: 'deskId', hide: true},
         { headerName: 'Buy Notional Limit', field: 'buyNotionalLimit' , valueFormatter: numberFormatter},
