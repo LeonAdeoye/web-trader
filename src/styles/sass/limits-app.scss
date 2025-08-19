@@ -1,0 +1,39 @@
+@import './partials/tab-styles';
+
+.limits-app {
+  .limits-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+    margin-top: 3px;
+
+    // Ensure consistent spacing between all tabs
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    // Add a small left gap before the first tab only
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
+  }
+
+  .desk-notionals-tab,
+  .trader-notionals-tab,
+  .notional-breaches-tab {
+    @extend %tab-pill;
+  }
+
+  // Content area styling for all tab panels
+  .desk-notionals,
+  .trader-notionals,
+  .notional-breaches {
+    margin: 0;
+    padding: 0;
+  }
+}
+

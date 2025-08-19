@@ -27,18 +27,7 @@ const TraderNotionalGridComponent = () =>
         { headerName: 'Current Gross Utilization %', field: 'grossUtilizationPercentage', width: 220, cellStyle: (params) => getPercentageColour(params)}
     ]), []);
 
-    return (
-        <div style={{ marginTop: 10, marginLeft: 10, height: 500, width: '99%'}}>
-            <GenericGridComponent
-                rowHeight={22}
-                gridTheme={"ag-theme-alpine"}
-                rowIdArray={["orderId"]}
-                columnDefs={columnDefs}
-                gridData={traderData}
-                handleAction={null}
-            />
-        </div>
-    );
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={traderData} handleAction={null}/>);
 }
 
 export default TraderNotionalGridComponent;

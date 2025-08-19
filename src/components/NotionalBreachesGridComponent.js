@@ -40,18 +40,7 @@ const NotionalBreachesGridComponent = () =>
     }, []);
 
 
-    return (
-        <div style={{ marginTop: 10, marginLeft: 10, height: 500, width: '99%'}}>
-            <GenericGridComponent
-                rowHeight={22}
-                gridTheme={"ag-theme-alpine"}
-                rowIdArray={["orderId"]}
-                columnDefs={columnDefs}
-                gridData={deskData}
-                handleAction={null}
-            />
-        </div>
-    );
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={deskData} handleAction={null}/>);
 }
 
 export default NotionalBreachesGridComponent;
