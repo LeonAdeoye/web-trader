@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from "react";
+import {useEffect, useMemo, useCallback, useState} from "react";
 import {getLimitBreachTypeColour, getPercentageColour, getSideColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import * as React from "react";
@@ -6,6 +6,30 @@ import * as React from "react";
 const NotionalBreachesGridComponent = () =>
 {
     const deskData = [];
+    const [inboundWorker, setInboundWorker] = useState(null);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/notional-breach-reader.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
+
+    const handleWorkerMessage = useCallback((event) => {
+        const notionalBreach = event.data.order;
+    }, []);
 
     const columnDefs = useMemo(() => ([
         { headerName: 'Desk', field: 'deskName', filter: true, pinned: 'left'},

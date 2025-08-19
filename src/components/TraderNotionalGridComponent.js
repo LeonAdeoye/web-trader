@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from "react";
+import {useEffect, useMemo, useState, useCallback} from "react";
 import {getPercentageColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import * as React from "react";
@@ -6,10 +6,29 @@ import * as React from "react";
 const TraderNotionalGridComponent = () =>
 {
     const traderData = [];
+    const [inboundWorker, setInboundWorker] = useState(null);
 
     useEffect(() =>
     {
+        const webWorker = new Worker(new URL("../workers/trader-notional-reader.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
 
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
+
+    const handleWorkerMessage = useCallback((event) => {
+        const traderNotional = event.data.order;
     }, []);
 
     const columnDefs = useMemo(() => ([

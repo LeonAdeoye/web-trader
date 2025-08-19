@@ -1,16 +1,34 @@
-import {useEffect, useMemo} from "react";
+import {useEffect, useMemo, useCallback, useState} from "react";
 import {getPercentageColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
 import * as React from "react";
 
-
 const DeskNotionalGridComponent = () =>
 {
     const deskData = [];
+    const [inboundWorker, setInboundWorker] = useState(null);
 
     useEffect(() =>
     {
+        const webWorker = new Worker(new URL("../workers/desk-notional-reader.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
 
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
+
+    const handleWorkerMessage = useCallback((event) => {
+        const deskNotional = event.data.order;
     }, []);
 
     const columnDefs = useMemo(() => ([
