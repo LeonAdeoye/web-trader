@@ -167,9 +167,7 @@ const QuantityLimitsGridComponent = () =>
                 await loadExchangeData();
             }
             else
-            {
                 loggerService.logError(`Failed to save quantity limits: ${response.status}`);
-            }
         }
         catch (error)
         {
@@ -182,10 +180,7 @@ const QuantityLimitsGridComponent = () =>
         if (editingRows.has(params.data.exchangeId))
         {
             setExchangeData(prev => prev.map(exchange => 
-                exchange.exchangeId === params.data.exchangeId 
-                    ? { ...exchange, [params.colDef.field]: params.newValue }
-                    : exchange
-            ));
+                exchange.exchangeId === params.data.exchangeId ? { ...exchange, [params.colDef.field]: params.newValue } : exchange));
         }
     }, [editingRows]);
 
@@ -285,14 +280,8 @@ const QuantityLimitsGridComponent = () =>
 
     return (
         <div className="quantity-limits-grid">
-            <GenericGridComponent 
-                rowHeight={22} 
-                gridTheme={"ag-theme-alpine"} 
-                rowIdArray={["exchangeId"]} 
-                columnDefs={columnDefs} 
-                gridData={exchangeData} 
-                handleAction={null}
-                onCellValueChanged={handleCellValueChanged}/>
+            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={columnDefs}
+                gridData={exchangeData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
         </div>
     );
 }

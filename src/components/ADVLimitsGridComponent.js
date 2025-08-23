@@ -94,8 +94,7 @@ const ADVLimitsGridComponent = () =>
             newSet.delete(data.exchangeId);
             return newSet;
         });
-        
-        // Revert to original values
+
         setExchangeData(prev => prev.map(exchange => 
             exchange.exchangeId === data.exchangeId 
                 ? {
@@ -105,8 +104,7 @@ const ADVLimitsGridComponent = () =>
                 }
                 : exchange
         ));
-        
-        // Clean up original data
+
         setOriginalData(prev =>
         {
             const newData = { ...prev };
@@ -133,15 +131,13 @@ const ADVLimitsGridComponent = () =>
 
             if (response.ok)
             {
-                // Exit edit mode
                 setEditingRows(prev =>
                 {
                     const newSet = new Set(prev);
                     newSet.delete(data.exchangeId);
                     return newSet;
                 });
-                
-                // Clean up original data
+
                 setOriginalData(prev =>
                 {
                     const newData = { ...prev };
@@ -237,14 +233,8 @@ const ADVLimitsGridComponent = () =>
 
     return (
         <div className="adv-limits-grid">
-            <GenericGridComponent 
-                rowHeight={22} 
-                gridTheme={"ag-theme-alpine"} 
-                rowIdArray={["exchangeId"]} 
-                columnDefs={columnDefs} 
-                gridData={exchangeData} 
-                handleAction={null}
-                onCellValueChanged={handleCellValueChanged}/>
+            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={columnDefs}
+                gridData={exchangeData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
         </div>
     );
 }

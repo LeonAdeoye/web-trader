@@ -46,7 +46,8 @@ const PriceLimitsGridComponent = () =>
                     if (response.ok)
                     {
                         const limits = await response.json();
-                        limitData = {
+                        limitData =
+                        {
                             stockPriceDifferenceLimit: limits.stockPriceDifferenceLimit || 0,
                             etfPriceDifferenceLimit: limits.etfPriceDifferenceLimit || 0,
                             futurePriceDifferenceLimit: limits.futurePriceDifferenceLimit || 0,
@@ -87,7 +88,8 @@ const PriceLimitsGridComponent = () =>
     const handleEdit = useCallback((data) =>
     {
         setEditingRows(prev => new Set(prev).add(data.exchangeId));
-        setOriginalData(prev => ({
+        setOriginalData(prev =>
+        ({
             ...prev,
             [data.exchangeId]: {
                 stockPriceDifferenceLimit: data.stockPriceDifferenceLimit,
@@ -101,7 +103,8 @@ const PriceLimitsGridComponent = () =>
 
     const handleCancel = useCallback((data) =>
     {
-        setEditingRows(prev => {
+        setEditingRows(prev =>
+        {
             const newSet = new Set(prev);
             newSet.delete(data.exchangeId);
             return newSet;
@@ -150,7 +153,8 @@ const PriceLimitsGridComponent = () =>
 
             if (response.ok)
             {
-                setEditingRows(prev => {
+                setEditingRows(prev =>
+                {
                     const newSet = new Set(prev);
                     newSet.delete(data.exchangeId);
                     return newSet;
@@ -189,7 +193,6 @@ const PriceLimitsGridComponent = () =>
     const PriceLimitsActionRenderer = useCallback(({data}) =>
     {
         const isEditing = editingRows.has(data.exchangeId);
-
         return (
             <div>
                 {!isEditing ? (
@@ -282,14 +285,8 @@ const PriceLimitsGridComponent = () =>
 
     return (
         <div className="price-limits-grid">
-            <GenericGridComponent 
-                rowHeight={22} 
-                gridTheme={"ag-theme-alpine"} 
-                rowIdArray={["exchangeId"]} 
-                columnDefs={columnDefs} 
-                gridData={exchangeData} 
-                handleAction={null}
-                onCellValueChanged={handleCellValueChanged}/>
+            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={columnDefs}
+                gridData={exchangeData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
         </div>
     );
 }

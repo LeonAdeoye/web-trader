@@ -44,7 +44,8 @@ const NotionalLimitsGridComponent = () =>
                     if (response.ok)
                     {
                         const limits = await response.json();
-                        limitData = {
+                        limitData =
+                        {
                             buyNotionalLimit: limits.buyNotionalLimit || 0,
                             sellNotionalLimit: limits.sellNotionalLimit || 0,
                             grossNotionalLimit: limits.grossNotionalLimit || 0
@@ -94,13 +95,13 @@ const NotionalLimitsGridComponent = () =>
 
     const handleCancel = useCallback((data) =>
     {
-        setEditingRows(prev => {
+        setEditingRows(prev =>
+        {
             const newSet = new Set(prev);
             newSet.delete(data.deskId);
             return newSet;
         });
-        
-        // Revert to original values
+
         setDeskData(prev => prev.map(desk => 
             desk.deskId === data.deskId 
                 ? {
@@ -111,8 +112,7 @@ const NotionalLimitsGridComponent = () =>
                 }
                 : desk
         ));
-        
-        // Clean up original data
+
         setOriginalData(prev =>
         {
             const newData = { ...prev };
@@ -141,23 +141,20 @@ const NotionalLimitsGridComponent = () =>
 
             if (response.ok)
             {
-                // Exit edit mode
                 setEditingRows(prev =>
                 {
                     const newSet = new Set(prev);
                     newSet.delete(data.deskId);
                     return newSet;
                 });
-                
-                // Clean up original data
+
                 setOriginalData(prev =>
                 {
                     const newData = { ...prev };
                     delete newData[data.deskId];
                     return newData;
                 });
-                
-                // Reload data to ensure consistency
+
                 await loadDeskData();
             }
             else
@@ -174,19 +171,13 @@ const NotionalLimitsGridComponent = () =>
     const handleCellValueChanged = useCallback((params) =>
     {
         if (editingRows.has(params.data.deskId))
-        {
-            setDeskData(prev => prev.map(desk => 
-                desk.deskId === params.data.deskId 
-                    ? { ...desk, [params.colDef.field]: params.newValue }
-                    : desk
-            ));
-        }
+            setDeskData(prev => prev.map(desk => desk.deskId === params.data.deskId ? { ...desk, [params.colDef.field]: params.newValue } : desk));
+
     }, [editingRows]);
 
     const NotionalLimitsActionRenderer = useCallback(({data}) =>
     {
         const isEditing = editingRows.has(data.deskId);
-
         return (
             <div>
                 {!isEditing ? (
@@ -259,14 +250,8 @@ const NotionalLimitsGridComponent = () =>
 
     return (
         <div className="notional-limits-grid">
-            <GenericGridComponent 
-                rowHeight={22} 
-                gridTheme={"ag-theme-alpine"} 
-                rowIdArray={["deskId"]} 
-                columnDefs={columnDefs} 
-                gridData={deskData} 
-                handleAction={null}
-                onCellValueChanged={handleCellValueChanged}/>
+            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["deskId"]} columnDefs={columnDefs}
+                gridData={deskData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
         </div>
     );
 }
