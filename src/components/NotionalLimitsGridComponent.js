@@ -19,7 +19,7 @@ const NotionalLimitsGridComponent = () =>
 
     useEffect(() =>
     {
-        loadDeskData();
+        loadDeskData().then(() => loggerService.logInfo("Desk reference data loaded successfully"));
     }, []);
 
     const loadDeskData = useCallback(async () =>
@@ -76,7 +76,7 @@ const NotionalLimitsGridComponent = () =>
         {
             loggerService.logError(`Failed to load desk data: ${error}`);
         }
-    }, [deskService]);
+    }, [deskService, loggerService]);
 
     const handleEdit = useCallback((data) =>
     {
@@ -169,7 +169,7 @@ const NotionalLimitsGridComponent = () =>
         {
             loggerService.logError(`Error saving limits: ${error}`);
         }
-    }, [loadDeskData]);
+    }, [loadDeskData, loggerService]);
 
     const handleCellValueChanged = useCallback((params) =>
     {

@@ -19,7 +19,7 @@ const QuantityLimitsGridComponent = () =>
 
     useEffect(() =>
     {
-        loadExchangeData();
+        loadExchangeData().then(() => loggerService.logInfo("Exchange reference data loaded successfully"));
     }, []);
 
     const loadExchangeData = useCallback(async () =>
@@ -81,7 +81,7 @@ const QuantityLimitsGridComponent = () =>
         {
             loggerService.logError(`Failed to load exchange data: ${error}`);
         }
-    }, [exchangeService]);
+    }, [exchangeService, loggerService]);
 
     const handleEdit = useCallback((data) =>
     {
@@ -175,7 +175,7 @@ const QuantityLimitsGridComponent = () =>
         {
             loggerService.logError(`Error saving quantity limits: ${error}`);
         }
-    }, [loadExchangeData]);
+    }, [loadExchangeData, loggerService]);
 
     const handleCellValueChanged = useCallback((params) =>
     {
