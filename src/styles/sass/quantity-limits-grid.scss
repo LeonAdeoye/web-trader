@@ -1,0 +1,40 @@
+.quantity-limits-grid {
+  .ag-theme-alpine {
+    .ag-header-cell-label {
+      font-size: 9px !important;
+    }
+
+    .ag-cell {
+      font-size: 10px !important;
+    }
+
+    // Style for editable cells
+    .ag-cell-edit-input {
+      font-size: 10px !important;
+      padding: 2px 4px;
+    }
+
+    // Style for action column
+    .ag-cell.ag-cell-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Custom styling for action buttons
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  // Hover effects for action icons
+  .MuiSvgIcon-root {
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: #656161 !important;
+    }
+  }
+}

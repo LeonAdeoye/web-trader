@@ -24,6 +24,13 @@
 
   .desk-notionals-tab,
   .trader-notionals-tab,
+  .price-limits-tab,
+  .quantity-limits-tab,
+  .adv-limits-tab,
+  .notional-limits-tab,
+  .adv-breaches-tab,
+  .quantity-breaches-tab,
+  .price-breaches-tab,
   .notional-breaches-tab {
     @extend %tab-pill;
   }
@@ -31,6 +38,13 @@
   // Content area styling for all tab panels
   .desk-notionals,
   .trader-notionals,
+  .notional-limits,
+  .adv-limits,
+  .price-limits,
+  .quantity-limits,
+  .quantity-breaches,
+  .adv-breaches,
+  .price-breaches,
   .notional-breaches {
     margin: 0;
     padding: 0;
