@@ -12,7 +12,7 @@ import {Tooltip} from "@mui/material";
 const NotionalLimitsGridComponent = () =>
 {
     const [deskData, setDeskData] = useState([]);
-    const [editingRows, setEditingRows] = useState(new Set());
+    const [editingRowId, setEditingRowId] = useState(null);
     const [originalData, setOriginalData] = useState({});
     const deskService = useMemo(() => new DeskService(), []);
     const loggerService = useRef(new LoggerService(NotionalLimitsGridComponent.name)).current;
@@ -35,12 +35,13 @@ const NotionalLimitsGridComponent = () =>
                 {
                     loggerService.logInfo(`Loading notional limits for desk ${desk.deskId}`);
                     const response = await fetch(`http://localhost:20017/desk/limits/${desk.deskId}`);
-                    let limitData = {
+                    let limitData =
+                    {
                         buyNotionalLimit: 0,
                         sellNotionalLimit: 0,
                         grossNotionalLimit: 0
                     };
-                    
+
                     if (response.ok)
                     {
                         const limits = await response.json();
@@ -51,11 +52,13 @@ const NotionalLimitsGridComponent = () =>
                             grossNotionalLimit: limits.grossNotionalLimit || 0
                         };
                     }
-                    
+
                     return {
-                        deskId: desk.deskId,
-                        deskName: desk.deskName,
-                        ...limitData
+                        deskId: String(desk.deskId),
+                        deskName: String(desk.deskName),
+                        buyNotionalLimit: Number(limitData.buyNotionalLimit || 0),
+                        sellNotionalLimit: Number(limitData.sellNotionalLimit || 0),
+                        grossNotionalLimit: Number(limitData.grossNotionalLimit || 0)
                     };
                 }
                 catch (limitError)
@@ -81,44 +84,31 @@ const NotionalLimitsGridComponent = () =>
 
     const handleEdit = useCallback((data) =>
     {
-        setEditingRows(prev => new Set(prev).add(data.deskId));
-        setOriginalData(prev =>
-        ({
-            ...prev,
-            [data.deskId]: {
-                buyNotionalLimit: data.buyNotionalLimit,
-                sellNotionalLimit: data.sellNotionalLimit,
-                grossNotionalLimit: data.grossNotionalLimit
-            }
-        }));
+        setEditingRowId(data.deskId);
+        setOriginalData({
+            buyNotionalLimit: Number(data.buyNotionalLimit),
+            sellNotionalLimit: Number(data.sellNotionalLimit),
+            grossNotionalLimit: Number(data.grossNotionalLimit)
+        });
     }, []);
 
     const handleCancel = useCallback((data) =>
     {
-        setEditingRows(prev =>
-        {
-            const newSet = new Set(prev);
-            newSet.delete(data.deskId);
-            return newSet;
-        });
-
-        setDeskData(prev => prev.map(desk => 
-            desk.deskId === data.deskId 
+        setDeskData(prev =>
+            prev.map(desk =>
+                desk.deskId === data.deskId
                 ? {
                     ...desk,
-                    buyNotionalLimit: originalData[data.deskId]?.buyNotionalLimit || 0,
-                    sellNotionalLimit: originalData[data.deskId]?.sellNotionalLimit || 0,
-                    grossNotionalLimit: originalData[data.deskId]?.grossNotionalLimit || 0
+                    buyNotionalLimit: originalData.buyNotionalLimit || 0,
+                    sellNotionalLimit: originalData.sellNotionalLimit || 0,
+                    grossNotionalLimit: originalData.grossNotionalLimit || 0
                 }
                 : desk
-        ));
+            )
+        );
 
-        setOriginalData(prev =>
-        {
-            const newData = { ...prev };
-            delete newData[data.deskId];
-            return newData;
-        });
+        setOriginalData(null);
+        setEditingRowId(null);
     }, [originalData]);
 
     const handleSave = useCallback(async (data) =>
@@ -141,26 +131,22 @@ const NotionalLimitsGridComponent = () =>
 
             if (response.ok)
             {
-                setEditingRows(prev =>
-                {
-                    const newSet = new Set(prev);
-                    newSet.delete(data.deskId);
-                    return newSet;
-                });
+                setEditingRowId(null);
+                setOriginalData({});
 
-                setOriginalData(prev =>
-                {
-                    const newData = { ...prev };
-                    delete newData[data.deskId];
-                    return newData;
-                });
-
-                await loadDeskData();
+                setDeskData(prev => prev.map(desk =>
+                    desk.deskId === data.deskId
+                        ? {
+                            ...desk,
+                            buyNotionalLimit: data.buyNotionalLimit,
+                            sellNotionalLimit: data.sellNotionalLimit,
+                            grossNotionalLimit: data.grossNotionalLimit
+                        }
+                        : desk
+                ));
             }
             else
-            {
                 loggerService.logError(`Failed to save limits: ${response.status}`);
-            }
         }
         catch (error)
         {
@@ -168,23 +154,24 @@ const NotionalLimitsGridComponent = () =>
         }
     }, [loadDeskData, loggerService]);
 
-    const handleCellValueChanged = useCallback((params) =>
-    {
-        if (editingRows.has(params.data.deskId))
-            setDeskData(prev => prev.map(desk => desk.deskId === params.data.deskId ? { ...desk, [params.colDef.field]: params.newValue } : desk));
-
-    }, [editingRows]);
-
     const NotionalLimitsActionRenderer = useCallback(({data}) =>
     {
-        const isEditing = editingRows.has(data.deskId);
+        const isEditing = editingRowId === data.deskId;
+        const isAnyRowEditing = editingRowId !== null;
+        
         return (
             <div>
                 {!isEditing ? (
                     <Tooltip title="Edit limits">
                         <EditIcon 
-                            onClick={() => handleEdit(data)} 
-                            style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+                            onClick={() => !isAnyRowEditing && handleEdit(data)}
+                            style={{
+                                cursor: isAnyRowEditing ? 'not-allowed' : 'pointer', 
+                                marginRight: '5px', 
+                                color: isAnyRowEditing ? '#cccccc' : '#404040', 
+                                height:'20px'
+                            }}
+                        />
                     </Tooltip>
                 ) : (
                     <>
@@ -202,7 +189,7 @@ const NotionalLimitsGridComponent = () =>
                 )}
             </div>
         );
-    }, [editingRows, handleEdit, handleSave, handleCancel]);
+    }, [editingRowId, handleEdit, handleSave, handleCancel]);
 
     const columnDefs = useMemo(() =>
     ([
@@ -212,7 +199,7 @@ const NotionalLimitsGridComponent = () =>
             headerName: 'Buy Notional Limit', 
             field: 'buyNotionalLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.deskId),
+            editable: (params) => editingRowId === params.data.deskId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -222,7 +209,7 @@ const NotionalLimitsGridComponent = () =>
             headerName: 'Sell Notional Limit', 
             field: 'sellNotionalLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.deskId),
+            editable: (params) => editingRowId === params.data.deskId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -232,7 +219,7 @@ const NotionalLimitsGridComponent = () =>
             headerName: 'Gross Notional Limit', 
             field: 'grossNotionalLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.deskId),
+            editable: (params) => editingRowId === params.data.deskId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -246,12 +233,11 @@ const NotionalLimitsGridComponent = () =>
             cellRenderer: NotionalLimitsActionRenderer,
             width: 120
         }
-    ]), [editingRows, NotionalLimitsActionRenderer]);
+    ]), [editingRowId, NotionalLimitsActionRenderer]);
 
     return (
         <div className="notional-limits-grid">
-            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["deskId"]} columnDefs={columnDefs}
-                gridData={deskData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
+            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["deskId"]} columnDefs={columnDefs} gridData={deskData} handleAction={null}/>
         </div>
     );
 }
