@@ -191,7 +191,7 @@ const PriceLimitsGridComponent = () =>
         { headerName: 'Exchange Id', field: 'exchangeId', hide: true, filter: true},
         { headerName: 'Exchange Name', field: 'exchangeName', filter: true, editable: false},
         { 
-            headerName: 'Stock Price Difference Limit', 
+            headerName: 'Stock Price Difference % Limit',
             field: 'stockPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
@@ -201,7 +201,7 @@ const PriceLimitsGridComponent = () =>
             }
         },
         { 
-            headerName: 'ETF Price Difference Limit', 
+            headerName: 'ETF Price Difference % Limit',
             field: 'etfPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
@@ -211,7 +211,7 @@ const PriceLimitsGridComponent = () =>
             }
         },
         { 
-            headerName: 'Future Price Difference Limit', 
+            headerName: 'Future Price Difference % Limit',
             field: 'futurePriceDifferenceLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
@@ -221,7 +221,7 @@ const PriceLimitsGridComponent = () =>
             }
         },
         { 
-            headerName: 'Option Price Difference Limit', 
+            headerName: 'Option Price Difference % Limit',
             field: 'optionPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
@@ -231,7 +231,7 @@ const PriceLimitsGridComponent = () =>
             }
         },
         { 
-            headerName: 'Crypto Price Difference Limit', 
+            headerName: 'Crypto Price Difference % Limit',
             field: 'cryptoPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,

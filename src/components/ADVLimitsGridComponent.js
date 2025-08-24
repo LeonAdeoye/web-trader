@@ -167,7 +167,7 @@ const ADVLimitsGridComponent = () =>
         { headerName: 'Exchange Id', field: 'exchangeId', hide: true, filter: true},
         { headerName: 'Exchange Name', field: 'exchangeName', filter: true, editable: false},
         { 
-            headerName: 'Buy ADV% Limit',
+            headerName: 'Buy ADV % Limit',
             field: 'buyADVLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
@@ -177,7 +177,7 @@ const ADVLimitsGridComponent = () =>
             }
         },
         { 
-            headerName: 'Sell ADV% Limit',
+            headerName: 'Sell ADV % Limit',
             field: 'sellADVLimit', 
             valueFormatter: numberFormatter,
             editable: (params) => editingRow === params.data.exchangeId,
