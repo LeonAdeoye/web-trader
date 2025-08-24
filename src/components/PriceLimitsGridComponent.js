@@ -29,52 +29,28 @@ const PriceLimitsGridComponent = () =>
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
 
-            const transformedData = await Promise.all(exchanges.map(async (exchange) =>
+            const response = await fetch("http://localhost:20017/limits/price");
+            let limitsData = [];
+
+            if (response.ok)
+                limitsData = await response.json(); // Array of price limits
+            else
+                loggerService.logError(`Failed to fetch price limits: ${response.statusText}`);
+
+            const transformedData = exchanges.map((exchange) =>
             {
-                try
-                {
-                    loggerService.logInfo(`Loading price limits for exchange ${exchange.exchangeId}`);
-                    const response = await fetch(`http://localhost:20017/price/limits/${exchange.exchangeId}`);
-                    let limitData = {
-                        stockPriceDifferenceLimit: 0,
-                        etfPriceDifferenceLimit: 0,
-                        futurePriceDifferenceLimit: 0,
-                        optionPriceDifferenceLimit: 0,
-                        cryptoPriceDifferenceLimit: 0
-                    };
-                    
-                    if (response.ok)
-                    {
-                        const limits = await response.json();
-                        limitData = {
-                            stockPriceDifferenceLimit: limits.stockPriceDifferenceLimit || 0,
-                            etfPriceDifferenceLimit: limits.etfPriceDifferenceLimit || 0,
-                            futurePriceDifferenceLimit: limits.futurePriceDifferenceLimit || 0,
-                            optionPriceDifferenceLimit: limits.optionPriceDifferenceLimit || 0,
-                            cryptoPriceDifferenceLimit: limits.cryptoPriceDifferenceLimit || 0
-                        };
-                    }
-                    
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        ...limitData
-                    };
-                }
-                catch (limitError)
-                {
-                    loggerService.logError(`Failed to load price limits for exchange ${exchange.exchangeId}: ${limitError}`);
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        stockPriceDifferenceLimit: 0,
-                        etfPriceDifferenceLimit: 0,
-                        futurePriceDifferenceLimit: 0,
-                        optionPriceDifferenceLimit: 0,
-                        cryptoPriceDifferenceLimit: 0
-                    };
-                }
-            }));
+                const limit = limitsData.find(l => l.exchangeId === exchange.exchangeId);
+
+                return {
+                    exchangeId: exchange.exchangeId,
+                    exchangeName: exchange.exchangeName,
+                    stockPriceDifferenceLimit: limit?.stockPriceDifferenceLimit || 0,
+                    etfPriceDifferenceLimit: limit?.etfPriceDifferenceLimit || 0,
+                    futurePriceDifferenceLimit: limit?.futurePriceDifferenceLimit || 0,
+                    optionPriceDifferenceLimit: limit?.optionPriceDifferenceLimit || 0,
+                    cryptoPriceDifferenceLimit: limit?.cryptoPriceDifferenceLimit || 0
+                };
+            });
             
             setExchangeData(transformedData);
         }

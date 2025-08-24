@@ -28,42 +28,26 @@ const ADVLimitsGridComponent = () =>
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
-            const transformedData = await Promise.all(exchanges.map(async (exchange) =>
+
+            const response = await fetch("http://localhost:20017/limits/adv");
+            let limitsData = [];
+
+            if (response.ok)
+                limitsData = await response.json(); // Array of ADV limits
+            else
+                loggerService.logError(`Failed to fetch ADV limits: ${response.statusText}`);
+
+            const transformedData = exchanges.map((exchange) =>
             {
-                try
-                {
-                    const response = await fetch(`http://localhost:20017/adv/limits/${exchange.exchangeId}`);
-                    let limitData = {
-                        buyADVLimit: 0,
-                        sellADVLimit: 0
-                    };
-                    
-                    if (response.ok)
-                    {
-                        const limits = await response.json();
-                        limitData = {
-                            buyADVLimit: limits.buyADVLimit || 0,
-                            sellADVLimit: limits.sellADVLimit || 0
-                        };
-                    }
-                    
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        ...limitData
-                    };
-                }
-                catch (limitError)
-                {
-                    loggerService.logError(`Failed to load ADV limits for exchange ${exchange.exchangeId}: ${limitError}`);
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        buyADVLimit: 0,
-                        sellADVLimit: 0
-                    };
-                }
-            }));
+                const limit = limitsData.find(l => l.exchangeId === exchange.exchangeId);
+
+                return {
+                    exchangeId: exchange.exchangeId,
+                    exchangeName: exchange.exchangeName,
+                    buyADVLimit: limit?.buyADVLimit || 0,
+                    sellADVLimit: limit?.sellADVLimit || 0
+                };
+            });
             
             setExchangeData(transformedData);
         }
@@ -106,7 +90,7 @@ const ADVLimitsGridComponent = () =>
         setOriginalData({});
         try
         {
-            const response = await fetch(`http://localhost:20017/adv/limits/`, {
+            const response = await fetch(`http://localhost:20017/limits/adv`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json' },
                 body: JSON.stringify({

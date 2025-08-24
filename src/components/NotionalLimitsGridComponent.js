@@ -29,46 +29,26 @@ const NotionalLimitsGridComponent = () =>
             await deskService.loadDesks();
             const desks = deskService.getDesks();
 
-            const transformedData = await Promise.all(desks.map(async (desk) =>
+            const response = await fetch("http://localhost:20017/limits/desk");
+            let limitsData = [];
+
+            if (response.ok)
+                limitsData = await response.json(); // Array of DeskNotionalLimit
+            else
+                loggerService.logError(`Failed to fetch desk limits: ${response.statusText}`);
+
+            const transformedData = desks.map((desk) =>
             {
-                try
-                {
-                    loggerService.logInfo(`Loading notional limits for desk ${desk.deskId}`);
-                    const response = await fetch(`http://localhost:20017/desk/limits/${desk.deskId}`);
-                    let limitData = {
-                        buyNotionalLimit: 0,
-                        sellNotionalLimit: 0,
-                        grossNotionalLimit: 0
-                    };
-                    
-                    if (response.ok)
-                    {
-                        const limits = await response.json();
-                        limitData = {
-                            buyNotionalLimit: limits.buyNotionalLimit || 0,
-                            sellNotionalLimit: limits.sellNotionalLimit || 0,
-                            grossNotionalLimit: limits.grossNotionalLimit || 0
-                        };
-                    }
-                    
-                    return {
-                        deskId: desk.deskId,
-                        deskName: desk.deskName,
-                        ...limitData
-                    };
-                }
-                catch (limitError)
-                {
-                    loggerService.logError(`Failed to load limits for desk ${desk.deskId}: ${limitError}`);
-                    return {
-                        deskId: desk.deskId,
-                        deskName: desk.deskName,
-                        buyNotionalLimit: 0,
-                        sellNotionalLimit: 0,
-                        grossNotionalLimit: 0
-                    };
-                }
-            }));
+                const limit = limitsData.find(l => l.deskId === desk.deskId);
+
+                return {
+                    deskId: desk.deskId,
+                    deskName: desk.deskName,
+                    buyNotionalLimit: limit?.buyNotionalLimit || 0,
+                    sellNotionalLimit: limit?.sellNotionalLimit || 0,
+                    grossNotionalLimit: limit?.grossNotionalLimit || 0
+                };
+            });
 
             setDeskData(transformedData);
         }

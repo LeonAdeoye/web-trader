@@ -28,52 +28,29 @@ const QuantityLimitsGridComponent = () =>
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
-            const transformedData = await Promise.all(exchanges.map(async (exchange) =>
+
+            const response = await fetch("http://localhost:20017/qty/limits");
+            let limitsData = [];
+
+            if (response.ok)
+                limitsData = await response.json(); // Array of quantity limits
+            else
+                loggerService.logError(`Failed to fetch quantity limits: ${response.statusText}`);
+
+            const transformedData = exchanges.map((exchange) =>
             {
-                try
-                {
-                    loggerService.logInfo(`Loading quantity limits for exchange ${exchange.exchangeId}`);
-                    const response = await fetch(`http://localhost:20017/qty/limits/${exchange.exchangeId}`);
-                    let limitData = {
-                        stockQuantityLimit: 0,
-                        etfQuantityLimit: 0,
-                        futureQuantityLimit: 0,
-                        optionQuantityLimit: 0,
-                        cryptoQuantityLimit: 0
-                    };
-                    
-                    if (response.ok)
-                    {
-                        const limits = await response.json();
-                        limitData = {
-                            stockQuantityLimit: limits.stockQuantityLimit || 0,
-                            etfQuantityLimit: limits.etfQuantityLimit || 0,
-                            futureQuantityLimit: limits.futureQuantityLimit || 0,
-                            optionQuantityLimit: limits.optionQuantityLimit || 0,
-                            cryptoQuantityLimit: limits.cryptoQuantityLimit || 0
-                        };
-                    }
-                    
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        ...limitData
-                    };
-                }
-                catch (limitError)
-                {
-                    loggerService.logError(`Failed to load quantity limits for exchange ${exchange.exchangeId}: ${limitError}`);
-                    return {
-                        exchangeId: exchange.exchangeId,
-                        exchangeName: exchange.exchangeName,
-                        stockQuantityLimit: 0,
-                        etfQuantityLimit: 0,
-                        futureQuantityLimit: 0,
-                        optionQuantityLimit: 0,
-                        cryptoQuantityLimit: 0
-                    };
-                }
-            }));
+                const limit = limitsData.find(l => l.exchangeId === exchange.exchangeId);
+
+                return {
+                    exchangeId: exchange.exchangeId,
+                    exchangeName: exchange.exchangeName,
+                    stockQuantityLimit: limit?.stockQuantityLimit || 0,
+                    etfQuantityLimit: limit?.etfQuantityLimit || 0,
+                    futureQuantityLimit: limit?.futureQuantityLimit || 0,
+                    optionQuantityLimit: limit?.optionQuantityLimit || 0,
+                    cryptoQuantityLimit: limit?.cryptoQuantityLimit || 0
+                };
+            });
             
             setExchangeData(transformedData);
         }
