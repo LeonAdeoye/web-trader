@@ -29,7 +29,7 @@ const QuantityLimitsGridComponent = () =>
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
 
-            const response = await fetch("http://localhost:20017/qty/limits");
+            const response = await fetch("http://localhost:20017/limits/qty");
             let limitsData = [];
 
             if (response.ok)
@@ -101,7 +101,7 @@ const QuantityLimitsGridComponent = () =>
         try
         {
             loggerService.logInfo(`Saving quantity limits for exchange ${data.exchangeId}`);
-            const response = await fetch(`http://localhost:20017/qty/limits/`, {
+            const response = await fetch(`http://localhost:20017/limits/qty`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

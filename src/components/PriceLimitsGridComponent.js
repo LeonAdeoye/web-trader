@@ -101,7 +101,7 @@ const PriceLimitsGridComponent = () =>
         try
         {
             loggerService.logInfo(`Saving price limits for exchange ${data.exchangeId}`);
-            const response = await fetch(`http://localhost:20017/price/limits/`, {
+            const response = await fetch(`http://localhost:20017/limits/price`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

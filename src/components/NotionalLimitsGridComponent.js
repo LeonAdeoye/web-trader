@@ -94,7 +94,7 @@ const NotionalLimitsGridComponent = () =>
         try
         {
             loggerService.logInfo(`Saving notional limits for desk ${data.deskId}`);
-            const response = await fetch(`http://localhost:20017/desk/limits/`, {
+            const response = await fetch(`http://localhost:20017/limits/desk`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
