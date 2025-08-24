@@ -1,6 +1,5 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {numberFormatter} from "../utilities";
-import {GenericGridComponent} from "./GenericGridComponent";
 import {ExchangeService} from "../services/ExchangeService";
 import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
@@ -8,11 +7,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
+import {AgGridReact} from "ag-grid-react";
 
 const QuantityLimitsGridComponent = () =>
 {
     const [exchangeData, setExchangeData] = useState([]);
-    const [editingRows, setEditingRows] = useState(new Set());
+    const [editingRow, setEditingRow] = useState(null);
     const [originalData, setOriginalData] = useState({});
     const exchangeService = useMemo(() => new ExchangeService(), []);
     const loggerService = useRef(new LoggerService(QuantityLimitsGridComponent.name)).current;
@@ -85,7 +85,7 @@ const QuantityLimitsGridComponent = () =>
 
     const handleEdit = useCallback((data) =>
     {
-        setEditingRows(prev => new Set(prev).add(data.exchangeId));
+        setEditingRow(data.exchangeId);
         setOriginalData(prev => ({
             ...prev,
             [data.exchangeId]: {
@@ -100,13 +100,6 @@ const QuantityLimitsGridComponent = () =>
 
     const handleCancel = useCallback((data) =>
     {
-        setEditingRows(prev =>
-        {
-            const newSet = new Set(prev);
-            newSet.delete(data.exchangeId);
-            return newSet;
-        });
-
         setExchangeData(prev => prev.map(exchange => 
             exchange.exchangeId === data.exchangeId 
                 ? {
@@ -120,16 +113,14 @@ const QuantityLimitsGridComponent = () =>
                 : exchange
         ));
 
-        setOriginalData(prev =>
-        {
-            const newData = { ...prev };
-            delete newData[data.exchangeId];
-            return newData;
-        });
+        setEditingRow(null);
+        setOriginalData({});
     }, [originalData]);
 
     const handleSave = useCallback(async (data) =>
     {
+        setEditingRow(null);
+        setOriginalData({});
         try
         {
             loggerService.logInfo(`Saving quantity limits for exchange ${data.exchangeId}`);
@@ -148,62 +139,42 @@ const QuantityLimitsGridComponent = () =>
                 })
             });
 
-            if (response.ok)
-            {
-                setEditingRows(prev =>
-                {
-                    const newSet = new Set(prev);
-                    newSet.delete(data.exchangeId);
-                    return newSet;
-                });
-
-                setOriginalData(prev =>
-                {
-                    const newData = { ...prev };
-                    delete newData[data.exchangeId];
-                    return newData;
-                });
-
-                await loadExchangeData();
-            }
-            else
+            if (!response.ok)
                 loggerService.logError(`Failed to save quantity limits: ${response.status}`);
         }
         catch (error)
         {
             loggerService.logError(`Error saving quantity limits: ${error}`);
         }
-    }, [loadExchangeData, loggerService]);
-
-    const handleCellValueChanged = useCallback((params) =>
-    {
-        if (editingRows.has(params.data.exchangeId))
-        {
-            setExchangeData(prev => prev.map(exchange => 
-                exchange.exchangeId === params.data.exchangeId ? { ...exchange, [params.colDef.field]: params.newValue } : exchange));
-        }
-    }, [editingRows]);
+    }, [loggerService]);
 
     const QuantityLimitsActionRenderer = useCallback(({data}) =>
     {
-        const isEditing = editingRows.has(data.exchangeId);
+        const isEditingThisRow = editingRow === data.exchangeId;
+        const isAnyRowEditing = editingRow !== null;
 
         return (
             <div>
-                {!isEditing ? (
-                    <Tooltip title="Edit quantity limits">
+                {!isEditingThisRow ? (
+                    <Tooltip title="Edit quantity limits for this exchange">
                         <EditIcon 
-                            onClick={() => handleEdit(data)} 
-                            style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+                            style={{
+                                cursor: isAnyRowEditing ? 'not-allowed' : 'pointer', 
+                                marginRight: '5px', 
+                                color: isAnyRowEditing ? '#ccc' : '#404040', 
+                                height:'20px'
+                            }}
+                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}
+                        />
                     </Tooltip>
                 ) : (
                     <>
-                        <Tooltip title="Save changes the recently updated quantity limits">
+                        <Tooltip title="Save changes to quantity limits">
                             <SaveIcon 
                                 onClick={() => handleSave(data)} 
                                 style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
                         </Tooltip>
-                        <Tooltip title="Cancel changes the recently updated quantity limits">
+                        <Tooltip title="Cancel changes to quantity limits">
                             <CancelIcon 
                                 onClick={() => handleCancel(data)} 
                                 style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
@@ -212,7 +183,7 @@ const QuantityLimitsGridComponent = () =>
                 )}
             </div>
         );
-    }, [editingRows, handleEdit, handleSave, handleCancel]);
+    }, [editingRow, handleEdit, handleSave, handleCancel]);
 
     const columnDefs = useMemo(() =>
     ([
@@ -222,7 +193,7 @@ const QuantityLimitsGridComponent = () =>
             headerName: 'Stock Quantity Limit', 
             field: 'stockQuantityLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -232,7 +203,7 @@ const QuantityLimitsGridComponent = () =>
             headerName: 'ETF Quantity Limit', 
             field: 'etfQuantityLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -242,7 +213,7 @@ const QuantityLimitsGridComponent = () =>
             headerName: 'Future Quantity Limit', 
             field: 'futureQuantityLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -252,7 +223,7 @@ const QuantityLimitsGridComponent = () =>
             headerName: 'Option Quantity Limit', 
             field: 'optionQuantityLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -262,7 +233,7 @@ const QuantityLimitsGridComponent = () =>
             headerName: 'Crypto Quantity Limit', 
             field: 'cryptoQuantityLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -276,12 +247,16 @@ const QuantityLimitsGridComponent = () =>
             cellRenderer: QuantityLimitsActionRenderer,
             width: 120
         }
-    ]), [editingRows, QuantityLimitsActionRenderer]);
+    ]), [editingRow, QuantityLimitsActionRenderer]);
 
     return (
-        <div className="quantity-limits-grid">
-            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={columnDefs}
-                gridData={exchangeData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
+        <div className="ag-theme-alpine quantity-limits-grid" style={{ height: '100%', width: '100%' }}>
+            <AgGridReact
+                rowData={exchangeData}
+                columnDefs={columnDefs}
+                rowHeight={22}
+                headerHeight={22}
+                getRowId={params => params.data.exchangeId}/>
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {numberFormatter} from "../utilities";
-import {GenericGridComponent} from "./GenericGridComponent";
 import {ExchangeService} from "../services/ExchangeService";
 import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
@@ -8,11 +7,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
+import {AgGridReact} from "ag-grid-react";
 
 const PriceLimitsGridComponent = () =>
 {
     const [exchangeData, setExchangeData] = useState([]);
-    const [editingRows, setEditingRows] = useState(new Set());
+    const [editingRow, setEditingRow] = useState(null);
     const [originalData, setOriginalData] = useState({});
     const exchangeService = useMemo(() => new ExchangeService(), []);
     const loggerService = useRef(new LoggerService(PriceLimitsGridComponent.name)).current;
@@ -46,8 +46,7 @@ const PriceLimitsGridComponent = () =>
                     if (response.ok)
                     {
                         const limits = await response.json();
-                        limitData =
-                        {
+                        limitData = {
                             stockPriceDifferenceLimit: limits.stockPriceDifferenceLimit || 0,
                             etfPriceDifferenceLimit: limits.etfPriceDifferenceLimit || 0,
                             futurePriceDifferenceLimit: limits.futurePriceDifferenceLimit || 0,
@@ -87,9 +86,8 @@ const PriceLimitsGridComponent = () =>
 
     const handleEdit = useCallback((data) =>
     {
-        setEditingRows(prev => new Set(prev).add(data.exchangeId));
-        setOriginalData(prev =>
-        ({
+        setEditingRow(data.exchangeId);
+        setOriginalData(prev => ({
             ...prev,
             [data.exchangeId]: {
                 stockPriceDifferenceLimit: data.stockPriceDifferenceLimit,
@@ -103,13 +101,6 @@ const PriceLimitsGridComponent = () =>
 
     const handleCancel = useCallback((data) =>
     {
-        setEditingRows(prev =>
-        {
-            const newSet = new Set(prev);
-            newSet.delete(data.exchangeId);
-            return newSet;
-        });
-
         setExchangeData(prev => prev.map(exchange => 
             exchange.exchangeId === data.exchangeId 
                 ? {
@@ -123,16 +114,14 @@ const PriceLimitsGridComponent = () =>
                 : exchange
         ));
 
-        setOriginalData(prev =>
-        {
-            const newData = { ...prev };
-            delete newData[data.exchangeId];
-            return newData;
-        });
+        setEditingRow(null);
+        setOriginalData({});
     }, [originalData]);
 
     const handleSave = useCallback(async (data) =>
     {
+        setEditingRow(null);
+        setOriginalData({});
         try
         {
             loggerService.logInfo(`Saving price limits for exchange ${data.exchangeId}`);
@@ -151,64 +140,42 @@ const PriceLimitsGridComponent = () =>
                 })
             });
 
-            if (response.ok)
-            {
-                setEditingRows(prev =>
-                {
-                    const newSet = new Set(prev);
-                    newSet.delete(data.exchangeId);
-                    return newSet;
-                });
-
-                setOriginalData(prev =>
-                {
-                    const newData = { ...prev };
-                    delete newData[data.exchangeId];
-                    return newData;
-                });
-
-                await loadExchangeData();
-            }
-            else
+            if (!response.ok)
                 loggerService.logError(`Failed to save price limits: ${response.status}`);
         }
         catch (error)
         {
             loggerService.logError(`Error saving price limits: ${error}`);
         }
-    }, [loadExchangeData, loggerService]);
-
-    const handleCellValueChanged = useCallback((params) =>
-    {
-        if (editingRows.has(params.data.exchangeId))
-        {
-            setExchangeData(prev => prev.map(exchange => 
-                exchange.exchangeId === params.data.exchangeId 
-                    ? { ...exchange, [params.colDef.field]: params.newValue }
-                    : exchange
-            ));
-        }
-    }, [editingRows]);
+    }, [loggerService]);
 
     const PriceLimitsActionRenderer = useCallback(({data}) =>
     {
-        const isEditing = editingRows.has(data.exchangeId);
+        const isEditingThisRow = editingRow === data.exchangeId;
+        const isAnyRowEditing = editingRow !== null;
+
         return (
             <div>
-                {!isEditing ? (
-                    <Tooltip title="Edit price difference limits.">
+                {!isEditingThisRow ? (
+                    <Tooltip title="Edit price difference limits for this exchange">
                         <EditIcon 
-                            onClick={() => handleEdit(data)} 
-                            style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
+                            style={{
+                                cursor: isAnyRowEditing ? 'not-allowed' : 'pointer', 
+                                marginRight: '5px', 
+                                color: isAnyRowEditing ? '#ccc' : '#404040', 
+                                height:'20px'
+                            }}
+                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}
+                        />
                     </Tooltip>
                 ) : (
                     <>
-                        <Tooltip title="Save changes to the recently updated price difference limits.">
+                        <Tooltip title="Save changes to price difference limits">
                             <SaveIcon 
                                 onClick={() => handleSave(data)} 
                                 style={{cursor: 'pointer', marginRight: '5px', color:'#404040', height:'20px'}}/>
                         </Tooltip>
-                        <Tooltip title="Cancel changes to the recently updated price difference limits.">
+                        <Tooltip title="Cancel changes to price difference limits">
                             <CancelIcon 
                                 onClick={() => handleCancel(data)} 
                                 style={{cursor: 'pointer', color:'#404040', height:'20px'}}/>
@@ -217,7 +184,7 @@ const PriceLimitsGridComponent = () =>
                 )}
             </div>
         );
-    }, [editingRows, handleEdit, handleSave, handleCancel]);
+    }, [editingRow, handleEdit, handleSave, handleCancel]);
 
     const columnDefs = useMemo(() =>
     ([
@@ -227,7 +194,7 @@ const PriceLimitsGridComponent = () =>
             headerName: 'Stock Price Difference Limit', 
             field: 'stockPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -237,7 +204,7 @@ const PriceLimitsGridComponent = () =>
             headerName: 'ETF Price Difference Limit', 
             field: 'etfPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -247,7 +214,7 @@ const PriceLimitsGridComponent = () =>
             headerName: 'Future Price Difference Limit', 
             field: 'futurePriceDifferenceLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -257,7 +224,7 @@ const PriceLimitsGridComponent = () =>
             headerName: 'Option Price Difference Limit', 
             field: 'optionPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -267,7 +234,7 @@ const PriceLimitsGridComponent = () =>
             headerName: 'Crypto Price Difference Limit', 
             field: 'cryptoPriceDifferenceLimit', 
             valueFormatter: numberFormatter,
-            editable: (params) => editingRows.has(params.data.exchangeId),
+            editable: (params) => editingRow === params.data.exchangeId,
             cellEditor: 'agNumberCellEditor',
             cellEditorParams: {
                 min: 0
@@ -281,12 +248,16 @@ const PriceLimitsGridComponent = () =>
             cellRenderer: PriceLimitsActionRenderer,
             width: 120
         }
-    ]), [editingRows, PriceLimitsActionRenderer]);
+    ]), [editingRow, PriceLimitsActionRenderer]);
 
     return (
-        <div className="price-limits-grid">
-            <GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["exchangeId"]} columnDefs={columnDefs}
-                gridData={exchangeData} handleAction={null} onCellValueChanged={handleCellValueChanged}/>
+        <div className="ag-theme-alpine price-limits-grid" style={{ height: '100%', width: '100%' }}>
+            <AgGridReact
+                rowData={exchangeData}
+                columnDefs={columnDefs}
+                rowHeight={22}
+                headerHeight={22}
+                getRowId={params => params.data.exchangeId}/>
         </div>
     );
 }
