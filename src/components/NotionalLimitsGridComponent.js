@@ -217,14 +217,7 @@ const NotionalLimitsGridComponent = () =>
                     headerHeight={22}
                     getRowId={params => params.data.deskId}/>
             </div>
-            {errorMessage && (
-                <ErrorMessageComponent
-                    message={errorMessage}
-                    duration={3000}
-                    onDismiss={() => setErrorMessage(null)}
-                    position="bottom-right"
-                    maxWidth="900px"/>
-            )}
+            {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </>
     );
 }

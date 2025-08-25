@@ -201,14 +201,7 @@ const ADVLimitsGridComponent = () =>
                     headerHeight={22}
                     getRowId={params => params.data.exchangeId}/>
             </div>
-            {errorMessage && (
-                <ErrorMessageComponent
-                    message={errorMessage}
-                    duration={3000}
-                    onDismiss={() => setErrorMessage(null)}
-                    position="bottom-right"
-                    maxWidth="900px"/>
-            )}
+            {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </>
     );
 }
