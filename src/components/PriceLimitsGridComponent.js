@@ -8,12 +8,14 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
 import {AgGridReact} from "ag-grid-react";
+import ErrorMessageComponent from "./ErrorMessageComponent";
 
 const PriceLimitsGridComponent = () =>
 {
     const [exchangeData, setExchangeData] = useState([]);
     const [editingRow, setEditingRow] = useState(null);
     const [originalData, setOriginalData] = useState({});
+    const [errorMessage, setErrorMessage] = useState(null);
     const exchangeService = useMemo(() => new ExchangeService(), []);
     const loggerService = useRef(new LoggerService(PriceLimitsGridComponent.name)).current;
 
@@ -24,18 +26,22 @@ const PriceLimitsGridComponent = () =>
 
     const loadExchangeData = useCallback(async () =>
     {
+        const url = "http://localhost:20017/limits/price";
         try
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
 
-            const response = await fetch("http://localhost:20017/limits/price");
+            const response = await fetch(url);
             let limitsData = [];
 
             if (response.ok)
                 limitsData = await response.json(); // Array of price limits
             else
+            {
                 loggerService.logError(`Failed to fetch price limits: ${response.statusText}`);
+                setErrorMessage(`Failed to fetch price difference limits from REST limits service: ${response.statusText}`);
+            }
 
             const transformedData = exchanges.map((exchange) =>
             {
@@ -57,6 +63,7 @@ const PriceLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError(`Failed to load exchange data: ${error}`);
+            setErrorMessage(`Failed to load price difference limits from REST limits service using URL: ${url}`);
         }
     }, [exchangeService, loggerService]);
 
@@ -96,12 +103,13 @@ const PriceLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
+        const url = "http://localhost:20017/limits/price";
         setEditingRow(null);
         setOriginalData({});
         try
         {
             loggerService.logInfo(`Saving price limits for exchange ${data.exchangeId}`);
-            const response = await fetch(`http://localhost:20017/limits/price`, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -117,7 +125,10 @@ const PriceLimitsGridComponent = () =>
             });
 
             if (!response.ok)
+            {
                 loggerService.logError(`Failed to save price limits: ${response.status}`);
+                setErrorMessage(`Failed to save price difference limits to REST limits service: ${response.statusText}`);
+            }
         }
         catch (error)
         {
@@ -227,14 +238,25 @@ const PriceLimitsGridComponent = () =>
     ]), [editingRow, PriceLimitsActionRenderer]);
 
     return (
-        <div className="ag-theme-alpine price-limits-grid" style={{ height: '100%', width: '100%' }}>
-            <AgGridReact
-                rowData={exchangeData}
-                columnDefs={columnDefs}
-                rowHeight={22}
-                headerHeight={22}
-                getRowId={params => params.data.exchangeId}/>
-        </div>
+        <>
+            <div className="ag-theme-alpine price-limits-grid" style={{ height: '100%', width: '100%' }}>
+                <AgGridReact
+                    rowData={exchangeData}
+                    columnDefs={columnDefs}
+                    rowHeight={22}
+                    headerHeight={22}
+                    getRowId={params => params.data.exchangeId}/>
+            </div>
+            {errorMessage && (
+                <ErrorMessageComponent
+                    message={errorMessage}
+                    duration={3000}
+                    onDismiss={() => setErrorMessage(null)}
+                    position="bottom-right"
+                    maxWidth="900px"
+                />
+            )}
+        </>
     );
 }
 
