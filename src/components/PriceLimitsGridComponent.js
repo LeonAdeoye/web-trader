@@ -36,7 +36,7 @@ const PriceLimitsGridComponent = () =>
             let limitsData = [];
 
             if (response.ok)
-                limitsData = await response.json(); // Array of price limits
+                limitsData = await response.json();
             else
             {
                 loggerService.logError(`Failed to fetch price limits: ${response.statusText}`);
@@ -152,8 +152,7 @@ const PriceLimitsGridComponent = () =>
                                 color: isAnyRowEditing ? '#ccc' : '#404040', 
                                 height:'20px'
                             }}
-                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}
-                        />
+                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}/>
                     </Tooltip>
                 ) : (
                     <>
@@ -253,8 +252,7 @@ const PriceLimitsGridComponent = () =>
                     duration={3000}
                     onDismiss={() => setErrorMessage(null)}
                     position="bottom-right"
-                    maxWidth="900px"
-                />
+                    maxWidth="900px"/>
             )}
         </>
     );

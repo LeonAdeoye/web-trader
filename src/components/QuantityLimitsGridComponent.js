@@ -36,7 +36,7 @@ const QuantityLimitsGridComponent = () =>
             let limitsData = [];
 
             if (response.ok)
-                limitsData = await response.json(); // Array of quantity limits
+                limitsData = await response.json();
             else
             {
                 loggerService.logError(`Failed to fetch quantity limits: ${response.statusText}`);
@@ -152,8 +152,7 @@ const QuantityLimitsGridComponent = () =>
                                 color: isAnyRowEditing ? '#ccc' : '#404040', 
                                 height:'20px'
                             }}
-                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}
-                        />
+                            onClick={isAnyRowEditing ? undefined : () => handleEdit(data)}/>
                     </Tooltip>
                 ) : (
                     <>
@@ -253,8 +252,7 @@ const QuantityLimitsGridComponent = () =>
                     duration={3000}
                     onDismiss={() => setErrorMessage(null)}
                     position="bottom-right"
-                    maxWidth="900px"
-                />
+                    maxWidth="900px"/>
             )}
         </>
     );
