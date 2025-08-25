@@ -8,12 +8,14 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
 import {AgGridReact} from "ag-grid-react";
+import ErrorMessageComponent from "./ErrorMessageComponent";
 
 const NotionalLimitsGridComponent = () =>
 {
     const [deskData, setDeskData] = useState([]);
     const [editingRow, setEditingRow] = useState(null);
     const [originalData, setOriginalData] = useState({});
+    const [errorMessage, setErrorMessage] = useState(null);
     const deskService = useMemo(() => new DeskService(), []);
     const loggerService = useRef(new LoggerService(NotionalLimitsGridComponent.name)).current;
 
@@ -24,18 +26,22 @@ const NotionalLimitsGridComponent = () =>
 
     const loadDeskData = useCallback(async () =>
     {
+        const url = "http://localhost:20017/limits/desk";
         try
         {
             await deskService.loadDesks();
             const desks = deskService.getDesks();
 
-            const response = await fetch("http://localhost:20017/limits/desk");
+            const response = await fetch(url);
             let limitsData = [];
 
             if (response.ok)
-                limitsData = await response.json(); // Array of DeskNotionalLimit
+                limitsData = await response.json();
             else
+            {
                 loggerService.logError(`Failed to fetch desk limits: ${response.statusText}`);
+                setErrorMessage(`Failed to fetch notional limits from REST limits service: ${response.statusText}`);
+            }
 
             const transformedData = desks.map((desk) =>
             {
@@ -55,6 +61,7 @@ const NotionalLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError(`Failed to load desk data: ${error}`);
+            setErrorMessage(`Failed to load notional limits from REST limits service using URL: ${url}`);
         }
     }, [deskService, loggerService]);
 
@@ -89,12 +96,12 @@ const NotionalLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
+        const url = "http://localhost:20017/limits/desk";
         setEditingRow(null);
         setOriginalData({});
-        try
-        {
+        try {
             loggerService.logInfo(`Saving notional limits for desk ${data.deskId}`);
-            const response = await fetch(`http://localhost:20017/limits/desk`, {
+            const response = await fetch(`${url}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -108,7 +115,10 @@ const NotionalLimitsGridComponent = () =>
             });
 
             if (!response.ok)
+            {
                 loggerService.logError(`Failed to save limits: ${response.status}`);
+                setErrorMessage(`Failed to save notional limits to REST limits service: ${response.statusText}`);
+            }
         }
         catch (error)
         {
@@ -198,14 +208,25 @@ const NotionalLimitsGridComponent = () =>
     ]), [editingRow, NotionalLimitsActionRenderer]);
 
     return (
-        <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
-            <AgGridReact
-                rowData={deskData}
-                columnDefs={columnDefs}
-                rowHeight={22}
-                headerHeight={22}
-                getRowId={params => params.data.deskId}/>
-        </div>
+        <>
+            <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
+                <AgGridReact
+                    rowData={deskData}
+                    columnDefs={columnDefs}
+                    rowHeight={22}
+                    headerHeight={22}
+                    getRowId={params => params.data.deskId}/>
+            </div>
+            {errorMessage && (
+                <ErrorMessageComponent
+                    message={errorMessage}
+                    duration={3000}
+                    onDismiss={() => setErrorMessage(null)}
+                    position="bottom-right"
+                    maxWidth="900px"
+                />
+            )}
+        </>
     );
 }
 
