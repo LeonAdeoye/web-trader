@@ -8,12 +8,14 @@ import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
 import {LoggerService} from "../services/LoggerService";
 import {AgGridReact} from "ag-grid-react";
+import ErrorMessageComponent from "./ErrorMessageComponent";
 
 const ADVLimitsGridComponent = () =>
 {
     const [exchangeData, setExchangeData] = useState([]);
     const [editingRow, setEditingRow] = useState(null);
     const [originalData, setOriginalData] = useState({});
+    const [errorMessage, setErrorMessage] = useState(null);
     const exchangeService = useMemo(() => new ExchangeService(), []);
     const loggerService = useRef(new LoggerService(ADVLimitsGridComponent.name)).current;
 
@@ -24,18 +26,22 @@ const ADVLimitsGridComponent = () =>
 
     const loadExchangeData = useCallback(async () =>
     {
+        const url = "http://localhost:20017/limits/adv";
         try
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
 
-            const response = await fetch("http://localhost:20017/limits/adv");
+            const response = await fetch(url);
             let limitsData = [];
 
             if (response.ok)
                 limitsData = await response.json(); // Array of ADV limits
             else
-                loggerService.logError(`Failed to fetch ADV limits: ${response.statusText}`);
+            {
+                loggerService.logError(`Failed to fetch ADV % limits: ${response.statusText}`);
+                setErrorMessage(`Failed to fetch ADV % limits from REST limits service: ${response.statusText}`);
+            }
 
             const transformedData = exchanges.map((exchange) =>
             {
@@ -54,6 +60,7 @@ const ADVLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError("Failed to load exchange data: " + error);
+            setErrorMessage(`Failed to load ADV% limits from REST limits service using URL: ${url}`);
         }
     }, [exchangeService, loggerService]);
 
@@ -86,11 +93,12 @@ const ADVLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
+        const url = "http://localhost:20017/limits/adv";
         setEditingRow(null);
         setOriginalData({});
         try
         {
-            const response = await fetch(`http://localhost:20017/limits/adv`, {
+            const response = await fetch(`${url}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -101,7 +109,10 @@ const ADVLimitsGridComponent = () =>
             });
 
             if (!response.ok)
-                loggerService.logError(`Failed to save ADV% limits: ${response.status}`);
+            {
+                loggerService.logError(`Failed to save ADV % limits: ${response.status}`);
+                setErrorMessage(`Failed to save ADV % limits to REST limits service: ${response.statusText}`);
+            }
         }
         catch (error)
         {
@@ -181,14 +192,24 @@ const ADVLimitsGridComponent = () =>
     ]), [editingRow, ADVLimitsActionRenderer]);
 
     return (
-        <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
-            <AgGridReact
-                rowData={exchangeData}
-                columnDefs={columnDefs}
-                rowHeight={22}
-                headerHeight={22}
-                getRowId={params => params.data.exchangeId}/>
-        </div>
+        <>
+            <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
+                <AgGridReact
+                    rowData={exchangeData}
+                    columnDefs={columnDefs}
+                    rowHeight={22}
+                    headerHeight={22}
+                    getRowId={params => params.data.exchangeId}/>
+            </div>
+            {errorMessage && (
+                <ErrorMessageComponent
+                    message={errorMessage}
+                    duration={3000}
+                    onDismiss={() => setErrorMessage(null)}
+                    position="bottom-right"
+                    maxWidth="900px"/>
+            )}
+        </>
     );
 }
 

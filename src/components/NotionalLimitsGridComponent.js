@@ -223,8 +223,7 @@ const NotionalLimitsGridComponent = () =>
                     duration={3000}
                     onDismiss={() => setErrorMessage(null)}
                     position="bottom-right"
-                    maxWidth="900px"
-                />
+                    maxWidth="900px"/>
             )}
         </>
     );
