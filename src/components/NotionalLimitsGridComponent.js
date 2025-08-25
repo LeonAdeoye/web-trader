@@ -210,12 +210,7 @@ const NotionalLimitsGridComponent = () =>
     return (
         <>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
-                <AgGridReact
-                    rowData={deskData}
-                    columnDefs={columnDefs}
-                    rowHeight={22}
-                    headerHeight={22}
-                    getRowId={params => params.data.deskId}/>
+                <AgGridReact rowData={deskData} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.deskId}/>
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </>

@@ -239,12 +239,7 @@ const QuantityLimitsGridComponent = () =>
     return (
         <>
             <div className="ag-theme-alpine quantity-limits-grid" style={{ height: '100%', width: '100%' }}>
-                <AgGridReact
-                    rowData={exchangeData}
-                    columnDefs={columnDefs}
-                    rowHeight={22}
-                    headerHeight={22}
-                    getRowId={params => params.data.exchangeId}/>
+                <AgGridReact rowData={exchangeData} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.exchangeId}/>
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </>
