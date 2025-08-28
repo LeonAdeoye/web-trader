@@ -38,7 +38,6 @@ export const RfqsApp = () =>
     const clientService = useRef(new ClientService()).current;
     const bookService = useRef(new BookService()).current;
     const instrumentService = useRef(new InstrumentService).current;
-
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -90,8 +89,6 @@ export const RfqsApp = () =>
         rho: '',
         legs: []
     });
-
-    const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
     const [clientsLoading, setClientsLoading] = useState(true);
     const [books, setBooks] = useState([]);
@@ -123,12 +120,6 @@ export const RfqsApp = () =>
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
             setInstruments(instrumentService.getInstruments());
-
-            setUsers([
-                { userId: 'user1', name: 'User 1' },
-                { userId: 'user2', name: 'User 2' },
-                { userId: 'user3', name: 'User 3' }
-            ]);
 
             setCurrencies(['USD', 'EUR', 'GBP', 'JPY', 'CHF']);
             setDayCountConventions(['30/360', 'ACT/360', 'ACT/365', 'ACT/ACT']);
@@ -332,7 +323,7 @@ export const RfqsApp = () =>
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             
-            // Notional and Currency
+
             {headerName: "Notional in USD", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true,
@@ -344,7 +335,7 @@ export const RfqsApp = () =>
             
             // Trading Details
              {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }, editable: true},
              {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value),
                  editable: false, cellEditor: 'agDateInputCellEditor'},
             {headerName: "Maturity Date", field: "maturityDate", sortable: true, minWidth: 130, width: 130, filter: true, valueFormatter: (params) => formatDate(params.value),
@@ -354,26 +345,16 @@ export const RfqsApp = () =>
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Quantity", field: "quantity", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
                 editable: false, valueFormatter: (params) => params.value ? params.value.length : 0},
 
             // Sales Credit
             {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true,
-             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit Curr", field: "salesCreditCurrency", sortable: true, minWidth: 130, width: 130, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
 
             // Settlement
-            {headerName: "Stt.FX", field: "premiumSettlementFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
@@ -491,6 +472,11 @@ export const RfqsApp = () =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
         const firstOption = parsedOptions[0];
+        const fxRate = exchangeRateService.getExchangeRate(firstOption.currency || 'USD');
+        const multiplier = 100;
+        const notionalInLocal = totalQuantity * multiplier * firstOption.strikePrice;
+        const notionalInUSD = (notionalInLocal / fxRate).toFixed(3);
+        const salesCreditPercentage = 0.5;
         
         return {
             arrivalTime: new Date().toLocaleTimeString(),
@@ -499,22 +485,18 @@ export const RfqsApp = () =>
             client:  'Select Client',
             status: 'Pending',
             bookCode: 'Select Book',
-            notionalInUSD: totalQuantity / 1000000,
-            notionalInLocal: totalQuantity / 1000000,
+            notionalInUSD: notionalInUSD,
+            notionalInLocal: notionalInLocal,
             notionalCurrency: firstOption.currency || 'USD',
-            notionalFXRate: exchangeRateService.getExchangeRate(firstOption.currency || 'USD'),
+            notionalFXRate: fxRate,
             dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
             tradeDate: new Date().toLocaleDateString(),
             maturityDate: firstOption.maturityDate,
             daysToExpiry: firstOption.daysToExpiry,
             multiplier: 100,
             contracts: totalQuantity,
-            quantity: totalQuantity,
-            lotSize: 100,
-            salesCreditPercentage: 0.5,
-            salesCreditAmount: 50000,
-            salesCreditFXRate: 1.0,
-            salesCreditCurrency: 'USD',
+            salesCreditPercentage: salesCreditPercentage,
+            salesCreditAmount: (salesCreditPercentage * notionalInUSD / 100).toFixed(3),
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: 2,
             premiumSettlementCurrency: 'USD',
@@ -547,7 +529,7 @@ export const RfqsApp = () =>
             rho: 0.02,
             legs: parsedOptions
         };
-    }, [clients]);
+    }, [clients, exchangeRateService]);
 
     const onGridReady = (params) =>
     {
