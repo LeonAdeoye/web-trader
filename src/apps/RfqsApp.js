@@ -15,6 +15,7 @@ import {InstrumentService} from "../services/InstrumentService";
 import {BookService} from "../services/BookService";
 import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
+import {TraderService} from "../services/TraderService";
 
 export const RfqsApp = () =>
 {
@@ -31,6 +32,7 @@ export const RfqsApp = () =>
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
+    const traderService = useRef(new TraderService()).current;
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bankHolidayService = useRef(new BankHolidayService()).current;
     const clientService = useRef(new ClientService()).current;
@@ -116,6 +118,7 @@ export const RfqsApp = () =>
             await clientService.loadClients();
             await bookService.loadBooks();
             await instrumentService.loadInstruments();
+            await traderService.loadTraders();
 
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
@@ -308,9 +311,13 @@ export const RfqsApp = () =>
 
     const getUniqueClientNames = useCallback(() =>
     {
-        const uniqueNames = [...new Set(clients.map(c => c.clientName))];
-        return uniqueNames.sort();
+        return clients.map(c => c.clientName).sort();
     }, [clients]);
+
+    const getUniqueBookCodes = useCallback(() =>
+    {
+        return books.map(b => b.bookCode).sort();
+    }, [books]);
 
     const columnDefs = useMemo(() => 
     {
@@ -325,7 +332,7 @@ export const RfqsApp = () =>
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             
             // Notional and Currency
             {headerName: "Notional in USD", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true,
@@ -445,7 +452,7 @@ export const RfqsApp = () =>
             {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
              editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
         ]);
-    }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames]);
+    }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames, getUniqueBookCodes]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
