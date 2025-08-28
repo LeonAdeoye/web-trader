@@ -13,7 +13,8 @@ import {BankHolidayService} from "../services/BankHolidayService";
 import {ClientService} from "../services/ClientService";
 import {InstrumentService} from "../services/InstrumentService";
 import {BookService} from "../services/BookService";
-import {GenericGridComponent} from "../components/GenericGridComponent";
+import {AgGridReact} from "ag-grid-react";
+import ErrorMessageComponent from "../components/ErrorMessageComponent";
 
 export const RfqsApp = () =>
 {
@@ -22,6 +23,7 @@ export const RfqsApp = () =>
     const [outboundWorker, setOutboundWorker] = useState(null);
     const [instrumentCode, setInstrumentCode] = useState(null);
     const [clientCode, setClientCode] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -40,7 +42,8 @@ export const RfqsApp = () =>
         client: null,
         status: null,
         bookCode: null,
-        notionalMillions: '',
+        notionalInUSD: '',
+        notionalInLocal: '',
         notionalCurrency: null,
         notionalFXRate: '',
         dayCountConvention: null,
@@ -325,8 +328,10 @@ export const RfqsApp = () =>
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: books.map(b => b.bookCode) }},
             
             // Notional and Currency
-            {headerName: "Notional (m)", field: "notionalMillions", sortable: true, minWidth: 120, width: 120, filter: true, 
+            {headerName: "Notional in USD", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true,
+                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
@@ -488,7 +493,8 @@ export const RfqsApp = () =>
             client:  'Select Client',
             status: 'Pending',
             bookCode: 'Select Book',
-            notionalMillions: totalQuantity / 1000000,
+            notionalInUSD: totalQuantity / 1000000,
+            notionalInLocal: totalQuantity / 1000000,
             notionalCurrency: firstOption.currency || 'USD',
             notionalFXRate: 1.0,
             dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
@@ -535,6 +541,17 @@ export const RfqsApp = () =>
         };
     }, [clients]);
 
+    const onGridReady = (params) =>
+    {
+        const sortModel = { colId: 'arrivalTime', sort: 'desc' }
+        if(sortModel !== undefined && sortModel !== null)
+            params.columnApi.applyColumnState({
+                state: [sortModel],
+                applyOrder: true,
+            });
+    };
+
+
     return (<>
         <SnippetTitleBarComponent 
             title="Request For Quote" 
@@ -547,17 +564,10 @@ export const RfqsApp = () =>
         />
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
-             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
-                 <GenericGridComponent
-                     rowHeight={22}
-                     gridTheme={"ag-theme-alpine"}
-                     rowIdArray={["rfqId"]}
-                     columnDefs={columnDefs}
-                     gridData={rfqs}
-                     handleAction={null}
-                     sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
-                 />
-             </div>
+            <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
+                <AgGridReact rowData={rfqs} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.rfqId}/>
+            </div>
+            {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </div>
     </>)
 
