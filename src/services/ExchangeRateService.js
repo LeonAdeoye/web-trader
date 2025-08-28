@@ -27,11 +27,12 @@ export class ExchangeRateService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    getExchangeRate = (currencyCode) =>
+    getExchangeRate = (currencyCode, dp = 3) =>
     {
         const rate = this.#exchangeRates[currencyCode.toUpperCase()];
-        return rate !== undefined ? rate : 1.0;
-    }
+        const finalRate = rate !== undefined ? rate : 1.0;
+        return parseFloat(finalRate.toFixed(dp));
+    };
 
     convert = (amount, fromCurrency, toCurrency) =>
     {

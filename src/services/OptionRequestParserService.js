@@ -1,16 +1,20 @@
 import {LoggerService} from "./LoggerService";
 import {BankHolidayService} from "../services/BankHolidayService";
+import {InstrumentService} from "./InstrumentService";
 
 export class OptionRequestParserService
 {
     #loggerService;
     #bankHolidayService;
+    #instrumentService;
     #constants;
 
     constructor()
     {
         this.#loggerService = new LoggerService(this.constructor.name);
         this.#bankHolidayService = new BankHolidayService();
+        this.#instrumentService = new InstrumentService();
+        this.#instrumentService.loadInstruments();
 
         this.#constants = {
             DEFAULT_VOLATILITY: 0.25,
@@ -22,9 +26,9 @@ export class OptionRequestParserService
 
     isValidOptionRequest = (request) =>
     {
-        const optionRequestPattern = /^[+-]\d+[CP](?:,[+-]\d+[CP])*\s+\d+(?:,\d+)*\s+\d{1,2}[A-Z]{3}\d{4}(?:,\d{1,2}[A-Z]{3}\d{4})*\s+[A-Z0-9]+(?:\.[A-Z]+)?(?:,[A-Z0-9]+(?:\.[A-Z]+)?)*$/;
+        const optionRequestPattern = /^[+-](?:1)?\d*[CP](?:,[+-](?:1)?\d*[CP])*\s+\d+(?:,\d+)*\s+\d{1,2}[A-Z]{3}\d{2,4}(?:,\d{1,2}[A-Z]{3}\d{2,4})*\s+[A-Z0-9]+(?:\.[A-Z]+)?(?:,[A-Z0-9]+(?:\.[A-Z]+)?)*$/;
         return optionRequestPattern.test(request);
-    }
+    };
 
     parseOptionStrikes = (delimitedStrikes, optionLegs) =>
     {
@@ -50,7 +54,6 @@ export class OptionRequestParserService
         
         if (dates.length === 1 && optionLegs.length > 1)
         {
-            // Apply single date to all legs
             const maturityDate = this.parseDate(dates[0]);
             optionLegs.forEach(leg =>
             {
@@ -60,7 +63,6 @@ export class OptionRequestParserService
         }
         else if (dates.length === optionLegs.length)
         {
-            // Assign dates to corresponding legs
             optionLegs.forEach((leg, index) =>
             {
                 const maturityDate = this.parseDate(dates[index]);
@@ -94,7 +96,11 @@ export class OptionRequestParserService
         optionLeg.volatility = this.#constants.DEFAULT_VOLATILITY;
         optionLeg.interestRate = this.#constants.DEFAULT_INTEREST_RATE;
         optionLeg.dayCountConvention = this.#constants.DEFAULT_DAY_COUNT_CONVENTION;
-        optionLeg.currency = this.#constants.DEFAULT_CURRENCY;
+        const instrument = this.#instrumentService.getInstrumentByCode(underlying);
+        if (instrument?.settlementCurrency)
+            optionLeg.currency = instrument.settlementCurrency;
+        else
+            optionLeg.currency = this.#constants.DEFAULT_CURRENCY;
     }
 
     parseRequest = (request, parent) =>
@@ -123,15 +129,15 @@ export class OptionRequestParserService
         const optionLegs = [];
         const legStrings = request.split(',');
 
-        legStrings.forEach(legString =>
-        {
-            const match = legString.match(/^([+-])(\d+)([CP])$/);
-            if (match)
-            {
+        legStrings.forEach(legString => {
+            const match = legString.match(/^([+-])(?:(\d+))?([CP])$/);
+            if (match) {
                 const [, side, quantity, optionType] = match;
+                const parsedQuantity = quantity ? parseInt(quantity) : 1;
+
                 optionLegs.push({
                     side: side === '+' ? 'BUY' : 'SELL',
-                    quantity: parseInt(quantity),
+                    quantity: parsedQuantity,
                     optionType: optionType === 'C' ? 'CALL' : 'PUT',
                     strikePrice: null,
                     maturityDate: null,
@@ -142,13 +148,13 @@ export class OptionRequestParserService
                     currency: null,
                     daysToExpiry: null
                 });
-            }
-            else
+            } else {
                 this.#loggerService.logError(`Invalid option leg format: ${legString}`);
+            }
         });
 
         return optionLegs;
-    }
+    };
 
     parseDate = (dateStr) =>
     {
@@ -157,11 +163,14 @@ export class OptionRequestParserService
             'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
         };
 
-        const match = dateStr.match(/^(\d{1,2})([A-Z]{3})(\d{4})$/);
+        const match = dateStr.match(/^(\d{1,2})([A-Z]{3})(\d{2,4})$/);
         if (match)
         {
             const [, day, month, year] = match;
-            return new Date(parseInt(year), months[month], parseInt(day));
+            if(year.length === 2)
+                return new Date(2000 + parseInt(year), months[month], parseInt(day));
+            else
+                return new Date(parseInt(year), months[month], parseInt(day));
         }
 
         this.#loggerService.logError(`Invalid date format: ${dateStr}`);
@@ -179,33 +188,13 @@ export class OptionRequestParserService
         while (currentDate < maturityDate)
         {
             currentDate.setDate(currentDate.getDate() + 1);
-            
-            // Skip weekends (0 = Sunday, 6 = Saturday)
             if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6)
             {
-                // Skip bank holidays if bankHolidayManager is available
-                if (this.#bankHolidayService.isBankHoliday(currentDate))
+                if (!this.#bankHolidayService.isBankHoliday(currentDate))
                     businessDays++;
             }
         }
 
         return businessDays;
-    }
-
-    createSampleOptionDetail = () =>
-    {
-        return {
-            side: 'BUY',
-            quantity: 1,
-            optionType: 'CALL',
-            strikePrice: 100,
-            maturityDate: new Date(),
-            underlying: 'AAPL.OQ',
-            volatility: this.#constants.DEFAULT_VOLATILITY,
-            interestRate: this.#constants.DEFAULT_INTEREST_RATE,
-            dayCountConvention: this.#constants.DEFAULT_DAY_COUNT_CONVENTION,
-            currency: this.#constants.DEFAULT_CURRENCY,
-            daysToExpiry: 30
-        };
     }
 }

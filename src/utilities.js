@@ -61,6 +61,19 @@ export const getDateToday = () =>
     return `${yyyy}-${mm}-${dd}`;
 }
 
+export const formatDate = (date) =>
+{
+    if (!(date instanceof Date)) date = new Date(date);
+    if (isNaN(date)) return ''; // Handle invalid dates
+
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
+}
+
+
 export const orderStateStyling = (orderState) =>
 {
     const styleMapping = {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
-import {numberFormatter} from "../utilities";
+import {formatDate, numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
@@ -146,8 +146,6 @@ export const RfqsApp = () =>
         };
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
     }, [exchangeRateService, bookService, clientService, loggerService]);
-
-
 
     useEffect(() =>
     {
@@ -336,9 +334,9 @@ export const RfqsApp = () =>
             
             // Notional and Currency
             {headerName: "Notional in USD", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true,
-                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
@@ -347,8 +345,11 @@ export const RfqsApp = () =>
             // Trading Details
              {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }},
-             {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true,
-              editable: true, cellEditor: 'agDateInputCellEditor'},
+             {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value),
+                 editable: false, cellEditor: 'agDateInputCellEditor'},
+            {headerName: "Maturity Date", field: "maturityDate", sortable: true, minWidth: 130, width: 130, filter: true, valueFormatter: (params) => formatDate(params.value),
+                editable: false, cellEditor: 'agDateInputCellEditor'},
+            {headerName: "Days to Expiry", field: "daysToExpiry", sortable: true, minWidth: 120, width: 120, filter: true},
             {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true,
@@ -357,10 +358,12 @@ export const RfqsApp = () =>
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Lot Size", field: "lotSize", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
+                editable: false, valueFormatter: (params) => params.value ? params.value.length : 0},
 
             // Sales Credit
             {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "S.Credit FX", field: "salesCreditFXRate", sortable: true, minWidth: 120, width: 120, filter: true,
@@ -414,7 +417,7 @@ export const RfqsApp = () =>
             {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Gamma
             {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true,
@@ -422,7 +425,7 @@ export const RfqsApp = () =>
             {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Theta
             {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true,
@@ -430,7 +433,7 @@ export const RfqsApp = () =>
             {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Vega
             {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true,
@@ -438,7 +441,7 @@ export const RfqsApp = () =>
             {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Rho
             {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true,
@@ -446,11 +449,7 @@ export const RfqsApp = () =>
             {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true,
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-
-            // Legs count
-            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
-             editable: false, valueFormatter: (params) => params.value ? params.value.length : 0}
+             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)}
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames, getUniqueBookCodes]);
 
@@ -458,7 +457,7 @@ export const RfqsApp = () =>
     {
         try
         {
-            const snippet = snippetInput.trim();
+            const snippet = snippetInput.toUpperCase().trim();
             if(!snippet || snippet === '')
             {
                 return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
@@ -503,9 +502,11 @@ export const RfqsApp = () =>
             notionalInUSD: totalQuantity / 1000000,
             notionalInLocal: totalQuantity / 1000000,
             notionalCurrency: firstOption.currency || 'USD',
-            notionalFXRate: 1.0,
+            notionalFXRate: exchangeRateService.getExchangeRate(firstOption.currency || 'USD'),
             dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
             tradeDate: new Date().toLocaleDateString(),
+            maturityDate: firstOption.maturityDate,
+            daysToExpiry: firstOption.daysToExpiry,
             multiplier: 100,
             contracts: totalQuantity,
             quantity: totalQuantity,
