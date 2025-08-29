@@ -29,7 +29,7 @@ import {RfqsApp} from "./apps/RfqsApp";
 import {InsightsApp} from "./apps/InsightsApp";
 import {ReferenceDataApp} from "./apps/ReferenceDataApp";
 import {LimitsApp} from "./apps/LimitsApp";
-
+import {ParametricsApp} from "./apps/ParametricsApp";
 
 const App = ({}) =>
 {
@@ -65,6 +65,7 @@ const App = ({}) =>
             { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
             { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
             { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
+            { name: 'Parametrics', path: '/parametrics', component: ParametricsApp }
         ];
 
     useEffect( () =>
@@ -76,23 +77,17 @@ const App = ({}) =>
     // TODO move this inside the component.
     useEffect(() =>
     {
-        // create the server chooser
         const chooser = new DefaultServerChooser();
         chooser.add(`ws://localhost:9008/amps/json`);
-
-        // create the AMPS HA client object
         const client = new Client('web-trader-market-data-subscriber');
         client.serverChooser(chooser);
         client.subscriptionManager(new DefaultSubscriptionManager());
-
-        // now we can establish connection and update the state
         client.connect().then(() =>
         {
             setClient(client);
             loggerService.logInfo("connected to ws://localhost:9008/amps/json");
         });
 
-        // disconnect the client from AMPS when the component is destructed
         return () =>
         {
             client.disconnect().then(() => loggerService.logInfo('disconnected from AMPS'));

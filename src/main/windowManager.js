@@ -33,11 +33,12 @@ const saveChildWindowDimensions = async () =>
 const createMainWindow = () =>
 {
     const mainWindow = new BrowserWindow({
-        width: 1000,
+        width: 1140,
         height: 660,
         minHeight: 660,
+        minWidth: 1140,
         maxHeight: 1860,
-        minWidth:400,
+        minWidth:660,
         title: 'Launch Pad',
         frame: false,
         webPreferences:
@@ -90,8 +91,10 @@ const createOpenAppHandler = (mainWindow) =>
             modal: modalFlag ?? false,
             show: true,
             frame: false,
-            width: 800,
-            height: 600,
+            width: 1140,
+            height: 660,
+            minHeight: 550,
+            minWidth: 1140,
             icon: path.join(__dirname, `../../assets/${title}.png`),
             webPreferences: {
                 nodeIntegration: true,

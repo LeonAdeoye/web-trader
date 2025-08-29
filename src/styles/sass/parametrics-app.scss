@@ -1,0 +1,111 @@
+@import './partials/tab-styles';
+
+.parametric-app {
+  .parametric-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+    margin-top: 3px;
+
+    // Ensure consistent spacing between all tabs
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    // Add a small left gap before the first tab only
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
+  }
+
+  // Tab pill styling for parametrics tabs
+  .volatility-parametric-tab,
+  .interest-rate-parametric-tab {
+    @extend %tab-pill;
+    
+    // Default tab styling
+    background-color: #bdbaba;
+    color: white;
+    
+    // Selected tab styling
+    &.Mui-selected {
+      background-color: #656161;
+      color: white;
+    }
+  }
+
+  // Content area styling for all tab panels
+  .volatility-parametric,
+  .interest-rate-parametric {
+    margin: 0;
+    padding: 0;
+  }
+
+  // Volatility grid styling
+  .volatility-parametric {
+    .ag-theme-alpine {
+      .ag-header-cell-label {
+        font-size: 9px !important;
+      }
+
+      .ag-cell {
+        font-size: 10px !important;
+      }
+
+      // Style for editable cells
+      .ag-cell-edit-input {
+        font-size: 10px !important;
+        padding: 2px 4px;
+      }
+
+      // Highlight editable volatility cells
+      .ag-cell[col-id="volatilityPercentage"] {
+        background-color: #f0f8ff !important;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: #e6f3ff !important;
+        }
+      }
+    }
+  }
+
+  // Interest Rate grid styling
+  .interest-rate-parametric {
+    .ag-theme-alpine {
+      .ag-header-cell-label {
+        font-size: 9px !important;
+      }
+
+      .ag-cell {
+        font-size: 10px !important;
+      }
+
+      // Style for editable cells
+      .ag-cell-edit-input {
+        font-size: 10px !important;
+        padding: 2px 4px;
+      }
+
+      // Highlight editable interest rate cells
+      .ag-cell[col-id="interestRatePercentage"] {
+        background-color: #f0f8ff !important;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: #e6f3ff !important;
+        }
+      }
+    }
+  }
+
+  // Loading spinner animation
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}

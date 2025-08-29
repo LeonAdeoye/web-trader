@@ -324,9 +324,9 @@ export const RfqsApp = () =>
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             
 
-            {headerName: "Notional in USD", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true,
+            {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true,
+            {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in local currency',
                 editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
@@ -334,32 +334,32 @@ export const RfqsApp = () =>
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
-             {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true,
+             {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Day count convention used for interest calculations',
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }, editable: true},
              {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value),
                  editable: false, cellEditor: 'agDateInputCellEditor'},
             {headerName: "Maturity Date", field: "maturityDate", sortable: true, minWidth: 130, width: 130, filter: true, valueFormatter: (params) => formatDate(params.value),
                 editable: false, cellEditor: 'agDateInputCellEditor'},
             {headerName: "Days to Expiry", field: "daysToExpiry", sortable: true, minWidth: 120, width: 120, filter: true},
-            {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Contract multiplier defining the number of units of the underlying asset per option contract',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Number of option contracts in the RFQ',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true,
+            {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true, headerTooltip: 'Number of legs in the option strategy',
                 editable: false, valueFormatter: (params) => params.value ? params.value.length : 0},
 
             // Sales Credit
-            {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "S.Credit %", field: "salesCreditPercentage", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Sales credit as a percentage of the notional amount',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "S.Credit Amount", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "S.Credit$", field: "salesCreditAmount", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Amount of sales credit in USD',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Settlement
-            {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Stt.Days", field: "premiumSettlementDaysOverride", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Override the standard premium settlement days',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Stt.Curr", field: "premiumSettlementCurrency", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Currency in which the option premium is settled',
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-            {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value), headerTooltip: 'Date on which the option premium is settled',
               editable: true, cellEditor: 'agDateInputCellEditor'},
 
             // Hedge
@@ -369,67 +369,68 @@ export const RfqsApp = () =>
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Implied Volatility
-            {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the ask price of the option',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the theoretical (model-driven) value of the option',
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the bid price of the option',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Premium Amounts
-            {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Spread", field: "spreadAmount", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'USD difference between the ask and bid premium amounts'},
+            {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'USD theoretical price of the option based on the option model',
+                editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+            {headerName: "Ask Premium$", field: "askPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'USD price at which sellers are willing to sell the option',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Premium$", field: "premiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Bid Premium$", field: "bidPremiumAmount", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'USD price at which buyers are willing to buy the option',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Premium Percentages
-            {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Ask premium as a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Fair premium as a percentage of the underlying price',
              editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Bid premium as a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Delta
-            {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option delta × number of contracts × contract multiplier',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Delta shares × underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Delta %", field: "delta", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option delta expressed a percentage (rate of change of option price with respect to changes in the underlying price)',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Gamma
-            {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option gamma × number of contracts × contract multiplier',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Gamma shares × underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Gamma %", field: "gamma", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option gamma expressed a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Theta
-            {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option theta × number of contracts × contract multiplier',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theta shares × underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Theta %", field: "theta", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option theta expressed a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Vega
-            {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option vega × number of contracts × contract multiplier',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Vega shares × underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Vega %", field: "vega", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option vega expressed a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Greeks - Rho
-            {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true,
+            {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option rho × number of contracts × contract multiplier',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true,
+            {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Rho shares × underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
-            {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option rho expressed a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)}
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames, getUniqueBookCodes]);
@@ -500,7 +501,7 @@ export const RfqsApp = () =>
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: 2,
             premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
+            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(firstOption.maturityDate, 2),
             hedgeType: 'Full',
             hedgePrice: firstOption.strikePrice || 100.0,
             askImpliedVol: firstOption.volatility || 0.25,
@@ -540,7 +541,6 @@ export const RfqsApp = () =>
                 applyOrder: true,
             });
     };
-
 
     return (<>
         <SnippetTitleBarComponent 

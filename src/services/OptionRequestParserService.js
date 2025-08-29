@@ -197,4 +197,25 @@ export class OptionRequestParserService
 
         return businessDays;
     }
+
+    calculateSettlementDate(endDate, settlementDays = 2)
+    {
+        if (!endDate || settlementDays < 1)
+            return endDate;
+
+        let businessDaysAdded = 0;
+        const settlementDate = new Date(endDate);
+
+        while (businessDaysAdded < settlementDays)
+        {
+            settlementDate.setDate(settlementDate.getDate() + 1);
+            if (settlementDate.getDay() !== 0 && settlementDate.getDay() !== 6)
+            {
+                if (!this.#bankHolidayService.isBankHoliday(settlementDate))
+                    businessDaysAdded++;
+            }
+        }
+
+        return settlementDate.toLocaleDateString();
+    }
 }
