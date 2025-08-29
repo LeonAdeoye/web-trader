@@ -45,4 +45,9 @@ export class ExchangeRateService
         }
         return (amountNum / fromRate) * toRate;
     }
+
+    getCurrencyCodes = () =>
+    {
+        return Object.keys(this.#exchangeRates);
+    }
 }

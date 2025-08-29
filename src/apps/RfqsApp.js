@@ -16,6 +16,8 @@ import {BookService} from "../services/BookService";
 import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
 import {TraderService} from "../services/TraderService";
+import {VolatilityService} from "../services/VolatilityService";
+import {RateService} from "../services/RateService";
 
 export const RfqsApp = () =>
 {
@@ -32,12 +34,14 @@ export const RfqsApp = () =>
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
+    const volatilityService = useRef(new VolatilityService()).current;
+    const rateService = useRef(new RateService()).current;
     const traderService = useRef(new TraderService()).current;
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bankHolidayService = useRef(new BankHolidayService()).current;
     const clientService = useRef(new ClientService()).current;
     const bookService = useRef(new BookService()).current;
-    const instrumentService = useRef(new InstrumentService).current;
+    const instrumentService = useRef(new InstrumentService()).current;
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -90,7 +94,6 @@ export const RfqsApp = () =>
         legs: []
     });
     const [clients, setClients] = useState([]);
-    const [clientsLoading, setClientsLoading] = useState(true);
     const [books, setBooks] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [currencies, setCurrencies] = useState([]);
@@ -116,12 +119,14 @@ export const RfqsApp = () =>
             await bookService.loadBooks();
             await instrumentService.loadInstruments();
             await traderService.loadTraders();
+            await volatilityService.loadVolatilities();
+            await rateService.loadRates();
 
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
             setInstruments(instrumentService.getInstruments());
 
-            setCurrencies(['USD', 'EUR', 'GBP', 'JPY', 'CHF']);
+            setCurrencies(exchangeRateService.getCurrencyCodes());
             setDayCountConventions(['30/360', 'ACT/360', 'ACT/365', 'ACT/ACT']);
             setStatusEnums([
                 { value: 'PENDING', description: 'Pending' },
@@ -136,20 +141,20 @@ export const RfqsApp = () =>
             ]);
         };
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
-    }, [exchangeRateService, bookService, clientService, loggerService]);
+    }, [exchangeRateService, bookService, clientService, loggerService, instrumentService, traderService, volatilityService, rateService]);
 
     useEffect(() =>
     {
-        const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
-        setInboundWorker(webWorker);
-        return () => webWorker.terminate();
+        // const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
+        // setInboundWorker(webWorker);
+        // return () => webWorker.terminate();
     }, []);
 
     useEffect(() =>
     {
-        const webWorker = new Worker(new URL("../workers/manage-order.js", import.meta.url));
-        setOutboundWorker(webWorker);
-        return () => webWorker.terminate();
+        // const webWorker = new Worker(new URL("../workers/manage-order.js", import.meta.url));
+        // setOutboundWorker(webWorker);
+        // return () => webWorker.terminate();
     }, []);
 
     useEffect(() =>
@@ -322,7 +327,6 @@ export const RfqsApp = () =>
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
-            
 
             {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
@@ -332,6 +336,10 @@ export const RfqsApp = () =>
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true, 
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Interest Rate%", field: "interestRate", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Risk free interest rate for the option currency',
+                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Volatility%", field: "volatility", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Annualized volatility of the underlying asset',
+                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
              {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Day count convention used for interest calculations',
@@ -433,7 +441,7 @@ export const RfqsApp = () =>
             {headerName: "Rho %", field: "rho", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option rho expressed a percentage of the underlying price',
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)}
         ]);
-    }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, clientsLoading, getUniqueClientNames, getUniqueBookCodes]);
+    }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, getUniqueClientNames, getUniqueBookCodes]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
@@ -442,20 +450,20 @@ export const RfqsApp = () =>
             const snippet = snippetInput.toUpperCase().trim();
             if(!snippet || snippet === '')
             {
-                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
+                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
             }
 
             if(!optionRequestParserService.isValidOptionRequest(snippet))
             {
                 loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15ayg2025 0700.hk\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC24 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
             }
 
             const parsedOptions = optionRequestParserService.parseRequest(snippet);
             loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
             
             if (!parsedOptions || parsedOptions.length === 0)
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1C,+1P 150 10JAN2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
 
             const newRFQ = createRFQFromOptions(snippet, parsedOptions);
             setRfqs(prevOrders => [newRFQ, ...prevOrders]);
@@ -478,6 +486,8 @@ export const RfqsApp = () =>
         const notionalInLocal = totalQuantity * multiplier * firstOption.strikePrice;
         const notionalInUSD = (notionalInLocal / fxRate).toFixed(3);
         const salesCreditPercentage = 0.5;
+        const volatility = volatilityService.getVolatility(firstOption.underlying);
+        const interestRate = rateService.getInterestRate(firstOption.currency);
         
         return {
             arrivalTime: new Date().toLocaleTimeString(),
@@ -490,6 +500,8 @@ export const RfqsApp = () =>
             notionalInLocal: notionalInLocal,
             notionalCurrency: firstOption.currency || 'USD',
             notionalFXRate: fxRate,
+            volatility: volatility,
+            interestRate: interestRate,
             dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
             tradeDate: new Date().toLocaleDateString(),
             maturityDate: firstOption.maturityDate,
@@ -543,15 +555,8 @@ export const RfqsApp = () =>
     };
 
     return (<>
-        <SnippetTitleBarComponent 
-            title="Request For Quote" 
-            windowId={windowId} 
-            addButtonProps={undefined} 
-            showChannel={true}
-            showTools={false} 
-            snippetPrompt={"Enter RFQ snippet..."}
-            onSnippetSubmit={handleSnippetSubmit}
-        />
+        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true}
+            showTools={false} snippetPrompt={"Enter RFQ snippet..."} onSnippetSubmit={handleSnippetSubmit}/>
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>

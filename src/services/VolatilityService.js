@@ -105,4 +105,11 @@ export class VolatilityService
     }
 
     clear = () => this.#volatilities = [];
+
+    getVolatility = (instrumentCode, decimalPlace = 3) =>
+    {
+        const volatilityRecord = this.#volatilities.find(v => v.instrumentCode === instrumentCode);
+        const volatility = volatilityRecord ? volatilityRecord.volatilityPercentage : 0.2;
+        return parseFloat(volatility.toFixed(decimalPlace));
+    };
 }

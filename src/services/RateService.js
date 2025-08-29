@@ -121,5 +121,12 @@ export class RateService
     {
         this.#rates = [];
     }
+
+    getInterestRate = (currencyCode, decimalPlace = 3) =>
+    {
+        const rateRecord = this.#rates.find(r => r.currencyCode === currencyCode);
+        const rate = rateRecord ? rateRecord.interestRatePercentage : 0.1;
+        return parseFloat(rate.toFixed(decimalPlace));
+    }
 }
 
