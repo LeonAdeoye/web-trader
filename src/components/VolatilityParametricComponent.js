@@ -10,7 +10,6 @@ export const VolatilityParametricComponent = () =>
     const [volatilities, setVolatilities] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [ownerId, setOwnerId] = useState('');
-
     const volatilityService = useRef(new VolatilityService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
     const loggerService = useRef(new LoggerService(VolatilityParametricComponent.name)).current;
@@ -80,7 +79,7 @@ export const VolatilityParametricComponent = () =>
                 params.node.setDataValue('volatilityPercentage', params.oldValue);
             }
         }
-    }, [volatilityService, loggerService]);
+    }, [volatilityService, loggerService, ownerId]);
 
     const columnDefs = useMemo(() =>
     [

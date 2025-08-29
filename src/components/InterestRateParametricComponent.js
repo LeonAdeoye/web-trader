@@ -7,9 +7,7 @@ import {formatDate, numberFormatter} from "../utilities";
 export const InterestRateParametricComponent = () =>
 {
     const [rates, setRates] = useState([]);
-    const [currencies, setCurrencies] = useState([]);
     const [ownerId, setOwnerId] = useState('');
-
     const rateService = useRef(new RateService()).current;
     const loggerService = useRef(new LoggerService(InterestRateParametricComponent.name)).current;
 
@@ -27,16 +25,10 @@ export const InterestRateParametricComponent = () =>
         {
             try
             {
-                await rateService.loadCurrencies();
-                const loadedCurrencies = rateService.getCurrencies();
-                setCurrencies(loadedCurrencies);
-                
                 await rateService.loadRates();
                 let loadedRates = rateService.getRates();
-                
-                if (loadedRates.length === 0 && loadedCurrencies.length > 0)
-                    loadedRates = rateService.createDefaultRates(loadedCurrencies, 5.0);
-                
+                if (loadedRates.length === 0)
+                    loadedRates = rateService.createDefaultRates(5.0);
                 setRates(loadedRates);
             }
             catch (error)
@@ -124,7 +116,7 @@ export const InterestRateParametricComponent = () =>
             editable: false,
             valueFormatter: (params) => formatDate(params.value)
         }
-    ], [currencies]);
+    ], []);
 
     const defaultColDef = useMemo(() =>
     ({
