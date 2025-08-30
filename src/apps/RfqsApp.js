@@ -18,6 +18,7 @@ import ErrorMessageComponent from "../components/ErrorMessageComponent";
 import {TraderService} from "../services/TraderService";
 import {VolatilityService} from "../services/VolatilityService";
 import {RateService} from "../services/RateService";
+import {OptionPricingService} from "../services/OptionPricingService";
 
 export const RfqsApp = () =>
 {
@@ -42,6 +43,7 @@ export const RfqsApp = () =>
     const clientService = useRef(new ClientService()).current;
     const bookService = useRef(new BookService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
+    const optionPricingService = useRef(new OptionPricingService()).current;
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -52,6 +54,7 @@ export const RfqsApp = () =>
         notionalCurrency: null,
         notionalFXRate: '',
         dayCountConvention: null,
+        exerciseType: 'EUROPEAN',
         tradeDate: null,
         multiplier: '',
         contracts: '',
@@ -100,6 +103,8 @@ export const RfqsApp = () =>
     const [dayCountConventions, setDayCountConventions] = useState([]);
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
+    const [exerciseType, setExerciseType] = useState('EUROPEAN');
+    const [exerciseTypes] = useState(['EUROPEAN', 'AMERICAN']);
 
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
@@ -127,7 +132,7 @@ export const RfqsApp = () =>
             setInstruments(instrumentService.getInstruments());
 
             setCurrencies(exchangeRateService.getCurrencyCodes());
-            setDayCountConventions(['30/360', 'ACT/360', 'ACT/365', 'ACT/ACT']);
+            setDayCountConventions([360, 365, 250]);
             setStatusEnums([
                 { value: 'PENDING', description: 'Pending' },
                 { value: 'APPROVED', description: 'Approved' },
@@ -342,6 +347,8 @@ export const RfqsApp = () =>
                 editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
+            {headerName: "Exercise Type" , field: "exerciseType", sortable: false, minWidth: 100, width: 100, editable: false, filter: false, cellEditorParams: { values: exerciseTypes },
+                headerTooltip: "EUROPEAN if the option can only be exercised at maturity, AMERICAN if the option can be exercised at any time up to maturity"},
              {headerName: "Day Count", field: "dayCountConvention", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Day count convention used for interest calculations',
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: dayCountConventions }, editable: true},
              {headerName: "Trade Date", field: "tradeDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value),
@@ -480,14 +487,18 @@ export const RfqsApp = () =>
     const createRFQFromOptions = useCallback((snippet, parsedOptions) =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
-        const firstOption = parsedOptions[0];
-        const fxRate = exchangeRateService.getExchangeRate(firstOption.currency || 'USD');
+        const {currency, strike, underlying, maturityDate, daysToExpiry, dayCountConvention, optionType} = parsedOptions[0];
+        const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
         const multiplier = 100;
-        const notionalInLocal = totalQuantity * multiplier * firstOption.strikePrice;
+        const notionalInLocal = totalQuantity * multiplier * strike;
         const notionalInUSD = (notionalInLocal / fxRate).toFixed(3);
         const salesCreditPercentage = 0.5;
-        const volatility = volatilityService.getVolatility(firstOption.underlying);
-        const interestRate = rateService.getInterestRate(firstOption.currency);
+        const volatility = volatilityService.getVolatility(underlying);
+        const interestRate = rateService.getInterestRate(currency);
+        const underlyingPrice = 80;
+        const isEuropean = (exerciseType === "EUROPEAN");
+        const isCall = (optionType === 'CALL');
+        const optionPriceResult = optionPricingService.calculateOptionPrice({strike, volatility, underlyingPrice, daysToExpiry, interestRate, isCall, isEuropean, dayCountConvention})
         
         return {
             arrivalTime: new Date().toLocaleTimeString(),
@@ -498,14 +509,15 @@ export const RfqsApp = () =>
             bookCode: 'Select Book',
             notionalInUSD: notionalInUSD,
             notionalInLocal: notionalInLocal,
-            notionalCurrency: firstOption.currency || 'USD',
+            notionalCurrency: currency || 'USD',
             notionalFXRate: fxRate,
             volatility: volatility,
             interestRate: interestRate,
-            dayCountConvention: firstOption.dayCountConvention || 'ACT/365',
+            exerciseType: exerciseType,
+            dayCountConvention: dayCountConvention || 365,
             tradeDate: new Date().toLocaleDateString(),
-            maturityDate: firstOption.maturityDate,
-            daysToExpiry: firstOption.daysToExpiry,
+            maturityDate: maturityDate,
+            daysToExpiry: daysToExpiry,
             multiplier: 100,
             contracts: totalQuantity,
             salesCreditPercentage: salesCreditPercentage,
@@ -513,12 +525,12 @@ export const RfqsApp = () =>
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: 2,
             premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(firstOption.maturityDate, 2),
+            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, 2),
             hedgeType: 'Full',
-            hedgePrice: firstOption.strikePrice || 100.0,
-            askImpliedVol: firstOption.volatility || 0.25,
-            impliedVol: firstOption.volatility || 0.23,
-            bidImpliedVol: firstOption.volatility || 0.21,
+            hedgePrice: strike || 100.0,
+            askImpliedVol: volatility || 0.25,
+            impliedVol: volatility || 0.23,
+            bidImpliedVol: volatility || 0.21,
             askPremiumAmount: 2500000,
             premiumAmount: 2300000,
             bidPremiumAmount: 2100000,
@@ -548,10 +560,7 @@ export const RfqsApp = () =>
     {
         const sortModel = { colId: 'arrivalTime', sort: 'desc' }
         if(sortModel !== undefined && sortModel !== null)
-            params.columnApi.applyColumnState({
-                state: [sortModel],
-                applyOrder: true,
-            });
+            params.columnApi.applyColumnState({state: [sortModel], applyOrder: true});
     };
 
     return (<>
@@ -560,7 +569,7 @@ export const RfqsApp = () =>
 
         <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
-                <AgGridReact rowData={rfqs} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.rfqId}/>
+                <AgGridReact rowData={rfqs} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.rfqId} onGridReady={onGridReady}/>
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
         </div>

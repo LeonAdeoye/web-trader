@@ -19,7 +19,7 @@ export class OptionRequestParserService
         this.#constants = {
             DEFAULT_VOLATILITY: 0.25,
             DEFAULT_INTEREST_RATE: 0.05,
-            DEFAULT_DAY_COUNT_CONVENTION: 'ACT/365',
+            DEFAULT_DAY_COUNT_CONVENTION: 365,
             DEFAULT_CURRENCY: 'USD'
         };
     }
@@ -38,9 +38,9 @@ export class OptionRequestParserService
         const strikes = delimitedStrikes.split(',').map(s => parseFloat(s.trim()));
         
         if (strikes.length === 1 && optionLegs.length > 1)
-            optionLegs.forEach(leg => leg.strikePrice = strikes[0]);
+            optionLegs.forEach(leg => leg.strike = strikes[0]);
         else if (strikes.length === optionLegs.length)
-            optionLegs.forEach((leg, index) => leg.strikePrice = strikes[index]);
+            optionLegs.forEach((leg, index) => leg.strike = strikes[index]);
         else
             this.#loggerService.logError(`Mismatch between strikes (${strikes.length}) and option legs (${optionLegs.length})`);
     }
@@ -139,7 +139,7 @@ export class OptionRequestParserService
                     side: side === '+' ? 'BUY' : 'SELL',
                     quantity: parsedQuantity,
                     optionType: optionType === 'C' ? 'CALL' : 'PUT',
-                    strikePrice: null,
+                    strike: null,
                     maturityDate: null,
                     underlying: null,
                     volatility: null,
