@@ -299,8 +299,6 @@ export const RfqsApp = () =>
     const applyConfig = useCallback(() =>
     {
         loggerService.logInfo('Applying RFQ configuration:', config);
-        // The config state is already updated via the onChange prop
-        // This function can be used for additional validation or persistence if needed
         setIsConfigOpen(false);
     }, [config, loggerService, setIsConfigOpen]);
 

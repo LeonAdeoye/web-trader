@@ -1,28 +1,13 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {
-    Button,
-    ButtonGroup,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    TextField,
-    Tooltip,
-    Typography,
-    FormControl,
-    FormLabel,
-    Select,
-    MenuItem,
-    InputLabel
-} from "@mui/material";
+import {Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Tooltip, Typography, FormControl, Select, MenuItem, InputLabel} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {AgGridReact} from "ag-grid-react";
 import {useRecoilState} from "recoil";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
 import {orderSideStyling} from "../utilities";
 
-const defaultRfqContract = {
+const defaultRfqContract =
+{
     optionType: 'CALL',
     numberOfContracts: 1,
     side: 'BUY',
@@ -69,24 +54,13 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     {
         if (canAdd())
         {
-            const newContract = {
-                id: Date.now(),
-                ...rfqContract
-            };
+            const newContract = {id: Date.now(), ...rfqContract};
             setContractsGrid(prev => [...prev, newContract]);
-            
-            // Lock maturity date after first contract
+
             if (!maturityDateLocked)
-            {
                 setMaturityDateLocked(true);
-            }
-            
-            // Reset form except for maturity date and underlying
-            setRfqContract(prev => ({
-                ...defaultRfqContract,
-                underlyingInstrument: prev.underlyingInstrument,
-                maturityDate: prev.maturityDate
-            }));
+
+            setRfqContract(prev => ({...defaultRfqContract, underlyingInstrument: prev.underlyingInstrument, maturityDate: prev.maturityDate}));
         }
     };
 
@@ -95,12 +69,9 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
         setContractsGrid(prev => 
         {
             const newGrid = prev.filter(c => c.id !== contractId);
-            
-            // Unlock maturity date if grid is empty
+
             if (newGrid.length === 0)
-            {
                 setMaturityDateLocked(false);
-            }
             
             return newGrid;
         });
@@ -119,7 +90,6 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     {
         if (canCreate())
         {
-            // Generate RFQ snippet
             const snippet = generateRfqSnippet();
             closeHandler(snippet);
             handleClear();
@@ -131,7 +101,6 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     {
         if (contractsGrid.length === 0) return '';
 
-        // Group contracts by side and option type
         const buyCalls = contractsGrid.filter(c => c.side === 'BUY' && c.optionType === 'CALL');
         const sellCalls = contractsGrid.filter(c => c.side === 'SELL' && c.optionType === 'CALL');
         const buyPuts = contractsGrid.filter(c => c.side === 'BUY' && c.optionType === 'PUT');
@@ -139,39 +108,33 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
 
         let snippet = '';
 
-        // Add buy calls
         if (buyCalls.length > 0)
         {
             const quantities = buyCalls.map(c => c.numberOfContracts).join(',');
             snippet += `+${quantities}C `;
         }
 
-        // Add sell calls
         if (sellCalls.length > 0)
         {
             const quantities = sellCalls.map(c => c.numberOfContracts).join(',');
             snippet += `-${quantities}C `;
         }
 
-        // Add buy puts
         if (buyPuts.length > 0)
         {
             const quantities = buyPuts.map(c => c.numberOfContracts).join(',');
             snippet += `+${quantities}P `;
         }
 
-        // Add sell puts
         if (sellPuts.length > 0)
         {
             const quantities = sellPuts.map(c => c.numberOfContracts).join(',');
             snippet += `-${quantities}P `;
         }
 
-        // Add strike prices
         const strikes = contractsGrid.map(c => c.strikePrice).join(',');
         snippet += `${strikes} `;
 
-        // Add maturity date (all contracts share same date)
         const maturityDate = contractsGrid[0].maturityDate;
         const day = maturityDate.getDate().toString().padStart(2, '0');
         const month = maturityDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
@@ -179,7 +142,6 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
         const formattedDate = `${day}${month}${year}`;
         snippet += `${formattedDate} `;
 
-        // Add underlying instruments
         const underlyings = contractsGrid.map(c => c.underlyingInstrument).join(',');
         snippet += underlyings;
 
@@ -254,8 +216,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                             cursor: 'pointer',
                             color: '#404040',
                             height: '20px'
-                        }}
-                    />
+                        }}/>
                 </Tooltip>
             )
         }
@@ -264,9 +225,8 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     useEffect(() =>
     {
         if (rfqCreationDialogOpen.clear)
-        {
             handleClear();
-        }
+
     }, [rfqCreationDialogOpen.clear]);
 
     return (
@@ -277,25 +237,19 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
             fullWidth={true} 
             open={rfqCreationDialogOpen.open} 
             onClose={handleCancel} 
-            PaperProps={{ style: { width: '800px' } }}
-        >
-            <DialogTitle 
-                id='dialog-title' 
-                style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}
-            >
+            PaperProps={{ style: { width: '800px' } }}>
+            <DialogTitle id='dialog-title'style={{fontSize: 15, backgroundColor: '#404040', color: 'white', height: '20px'}}>
                 Create RFQ
             </DialogTitle>
             <DialogContent>
-                                 <Grid container spacing={1} direction="column" style={{ marginTop: '10px' }}>
-                                                                {/* Top Row: Option Type, Strike Price, Number of Contracts, Add Button */}
+                 <Grid container spacing={1} direction="column" style={{ marginTop: '10px' }}>
                      <Grid item container spacing={1} alignItems="flex-end">
                          <Grid item xs={3}>
                              <FormControl size="small">
                                  <ButtonGroup 
                                      variant="contained" 
                                      aria-label="Option type selection"
-                                     size="small"
-                                 >
+                                     size="small">
                                                                          <Button 
                                          onClick={() => handleInputChange('optionType', 'CALL')}
                                          style={{ 
@@ -306,8 +260,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                              minWidth: '50px',
                                              height: '40px',
                                              textTransform: 'none'
-                                         }}
-                                     >
+                                         }}>
                                          Call
                                      </Button>
                                      <Button 
@@ -320,8 +273,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                              minWidth: '50px',
                                              height: '40px',
                                              textTransform: 'none'
-                                         }}
-                                     >
+                                         }}>
                                          Put
                                      </Button>
                                 </ButtonGroup>
@@ -336,8 +288,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                 onChange={(e) => handleInputChange('strikePrice', e.target.value)}
                                 style={{ width: '100%' }}
                                 InputLabelProps={{ shrink: true, style: { fontSize: '12px' } }}
-                                inputProps={{ style: { fontSize: '12px' } }}
-                            />
+                                inputProps={{ style: { fontSize: '12px' } }}/>
                         </Grid>
                         <Grid item xs={3}>
                             <TextField
@@ -348,22 +299,10 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                 onChange={(e) => handleInputChange('numberOfContracts', parseInt(e.target.value) || 1)}
                                 style={{ width: '100%' }}
                                 InputLabelProps={{ shrink: true, style: { fontSize: '12px' } }}
-                                inputProps={{ min: 1, max: 100, style: { fontSize: '12px' } }}
-                            />
+                                inputProps={{ min: 1, max: 100, style: { fontSize: '12px' } }}/>
                         </Grid>
-                                                 <Grid item xs={3}>
-                             {contractsGrid.length < 10 && canAdd() && (
-                                 <Button
-                                     className="dialog-action-button"
-                                     variant="contained"
-                                     onClick={handleAddContract}
-                                     style={{ 
-                                         height: '35px'
-                                     }}
-                                                                   >
-                                      Add Leg
-                                  </Button>
-                             )}
+                         <Grid item xs={3}>
+                             {contractsGrid.length < 10 && canAdd() && (<Button className="dialog-action-button" variant="contained" onClick={handleAddContract} style={{height: '35px'}}>Add Leg</Button>)}
                          </Grid>
                     </Grid>
 
@@ -371,13 +310,8 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                       <Grid item container spacing={1} alignItems="flex-end">
                           <Grid item xs={3}>
                               <FormControl size="small">
-                                  <ButtonGroup 
-                                      variant="contained" 
-                                      aria-label="Side selection"
-                                      size="small"
-                                  >
-                                                                           <Button 
-                                          onClick={() => handleInputChange('side', 'BUY')}
+                                  <ButtonGroup variant="contained" aria-label="Side selection" size="small">
+                                       <Button onClick={() => handleInputChange('side', 'BUY')}
                                           style={{ 
                                               backgroundColor: rfqContract.side === 'BUY' ? '#0d47a1' : '#bbdefb',
                                               color: rfqContract.side === 'BUY' ? 'white' : '#666',
@@ -386,12 +320,8 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                               minWidth: '50px',
                                               height: '40px',
                                               textTransform: 'none'
-                                          }}
-                                      >
-                                          Buy
-                                      </Button>
-                                      <Button 
-                                          onClick={() => handleInputChange('side', 'SELL')}
+                                          }}>Buy</Button>
+                                      <Button onClick={() => handleInputChange('side', 'SELL')}
                                           style={{ 
                                               backgroundColor: rfqContract.side === 'SELL' ? '#1b5e20' : '#c8e6c9',
                                               color: rfqContract.side === 'SELL' ? 'white' : '#666',
@@ -400,10 +330,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                               minWidth: '50px',
                                               height: '40px',
                                               textTransform: 'none'
-                                          }}
-                                      >
-                                          Sell
-                                      </Button>
+                                          }}>Sell</Button>
                                  </ButtonGroup>
                              </FormControl>
                          </Grid>
@@ -417,8 +344,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                  disabled={maturityDateLocked}
                                  style={{ width: '100%' }}
                                  InputLabelProps={{ shrink: true, style: { fontSize: '12px' } }}
-                                 inputProps={{ style: { fontSize: '12px' } }}
-                             />
+                                 inputProps={{ style: { fontSize: '12px' } }}/>
                          </Grid>
                          <Grid item xs={3}>
                              <FormControl size="small" style={{ width: '100%' }}>
@@ -427,8 +353,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                      value={rfqContract.underlyingInstrument}
                                      onChange={(e) => handleInputChange('underlyingInstrument', e.target.value)}
                                      label="Underlying Instrument"
-                                     style={{ fontSize: '12px' }}
-                                 >
+                                     style={{ fontSize: '12px' }}>
                                      {instruments.map((instrument) => (
                                          <MenuItem key={instrument.instrumentCode} value={instrument.instrumentCode} style={{ fontSize: '12px' }}>
                                              {instrument.instrumentCode}
@@ -449,8 +374,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                  height: '180px', 
                                  width: '100%',
                                  fontSize: '11px'
-                             }}
-                         >
+                             }}>
                             <AgGridReact
                                 rowData={contractsGrid}
                                 columnDefs={columnDefs}
@@ -458,48 +382,25 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                 headerHeight={22}
                                 suppressRowClickSelection={true}
                                 enableCellChangeFlash={false}
-                                animateRows={false}
-                            />
+                                animateRows={false}/>
                         </div>
                     </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions style={{height: '35px'}}>
-                                 <Tooltip title={<Typography fontSize={12}>Clear all entered values and the RFQ option legs in the grid.</Typography>}>
+                 <Tooltip title={<Typography fontSize={12}>Clear all entered values and the RFQ option legs in the grid.</Typography>}>
                      <span>
-                         <Button 
-                             className="dialog-action-button" 
-                             disabled={!canClear()} 
-                             variant='contained' 
-                             onClick={handleClear}
-                         >
-                             Clear
-                         </Button>
+                         <Button className="dialog-action-button" disabled={!canClear()} variant='contained'onClick={handleClear}>Clear</Button>
                      </span>
                  </Tooltip>
                 <Tooltip title={<Typography fontSize={12}>Cancel and close RFQ creation dialog window.</Typography>}>
                     <span>
-                        <Button 
-                            className="dialog-action-button" 
-                            color="primary" 
-                            variant='contained' 
-                            onClick={handleCancel}
-                        >
-                            Cancel
-                        </Button>
+                        <Button className="dialog-action-button" color="primary" variant='contained' onClick={handleCancel}>Cancel</Button>
                     </span>
                 </Tooltip>
-                <Tooltip title={<Typography fontSize={12}>Create the RFQ option legs added to the grid.</Typography>}>
+                <Tooltip title={<Typography fontSize={12}>Create the RFQ option legs and add them to the main RFQ grid.</Typography>}>
                     <span>
-                        <Button 
-                            className="dialog-action-button submit" 
-                            color="primary" 
-                            disabled={!canCreate()} 
-                            variant='contained' 
-                            onClick={handleCreate}
-                        >
-                            Create
-                        </Button>
+                        <Button  className="dialog-action-button submit" color="primary" disabled={!canCreate()} variant='contained' onClick={handleCreate}>Create</Button>
                     </span>
                 </Tooltip>
             </DialogActions>
