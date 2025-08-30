@@ -31,7 +31,7 @@ export const RfqsApp = () =>
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-    const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
+    const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
@@ -544,7 +544,7 @@ export const RfqsApp = () =>
             tradeDate: new Date().toLocaleDateString(),
             maturityDate: maturityDate,
             daysToExpiry: daysToExpiry,
-            multiplier: 100,
+            multiplier: multiplier,
             contracts: totalQuantity,
             salesCreditPercentage: salesCreditPercentage,
             salesCreditAmount: (salesCreditPercentage * notionalInUSD / 100).toFixed(3),
