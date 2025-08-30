@@ -54,3 +54,8 @@ export const bookDialogDisplayState = atom({
     key: 'bookDialogDisplayState',
     default: false
 });
+
+export const rfqCreationDialogDisplayState = atom({
+    key: 'rfqCreationDialogDisplayState',
+    default: {open: false, clear: true}
+});

@@ -21,6 +21,8 @@ import RfqActionIconsRenderer from "../components/RfqActionIconsRenderer";
 import {VolatilityService} from "../services/VolatilityService";
 import {RateService} from "../services/RateService";
 import {OptionPricingService} from "../services/OptionPricingService";
+import RfqCreationDialog from "../dialogs/RfqCreationDialog";
+import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
 
 export const RfqsApp = () =>
 {
@@ -34,6 +36,7 @@ export const RfqsApp = () =>
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const [isConfigOpen, setIsConfigOpen] = useRecoilState(rfqsConfigPanelOpenState);
+    const [, setRfqCreationDialogOpen] = useRecoilState(rfqCreationDialogDisplayState);
     const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
@@ -47,6 +50,23 @@ export const RfqsApp = () =>
     const bookService = useRef(new BookService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
+    const [clients, setClients] = useState([]);
+    const [books, setBooks] = useState([]);
+    const [instruments, setInstruments] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
+    const [dayCountConventions, setDayCountConventions] = useState([]);
+    const [statusEnums, setStatusEnums] = useState([]);
+    const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
+    const [exerciseType, setExerciseType] = useState('EUROPEAN');
+    const [config, setConfig] = useState({
+        defaultSettlementCurrency: 'USD',
+        defaultSettlementDays: 2,
+        decimalPrecision: 3,
+        defaultSpread: 1,
+        defaultSalesCreditPercentage: 0.5,
+        defaultVolatility: 20,
+        defaultDayConvention: 250
+    });
     const [selectedRFQ, setSelectedRFQ] = useState({
         request: '',
         client: null,
@@ -56,20 +76,21 @@ export const RfqsApp = () =>
         notionalInLocal: 0.000,
         notionalCurrency: null,
         notionalFXRate: 0.000,
-        dayCountConvention: null,
+        dayCountConvention: config.defaultDayConvention,
         exerciseType: 'EUROPEAN',
         tradeDate: null,
+        spread: config.defaultSpread,
         multiplier: 100,
         contracts: 1,
         quantity: 1,
         lotSize: 100,
-        salesCreditPercentage: '',
+        salesCreditPercentage: config.defaultSalesCreditPercentage,
         salesCreditAmount: 0.000,
         salesCreditFXRate: '',
         salesCreditCurrency: null,
         premiumSettlementFXRate: '',
-        premiumSettlementDaysOverride: '',
-        premiumSettlementCurrency: null,
+        premiumSettlementDaysOverride: config.defaultSettlementDays,
+        premiumSettlementCurrency: config.defaultSettlementCurrency ,
         premiumSettlementDate: null,
         hedgeType: null,
         askPremiumInLocal: 0.000,
@@ -101,24 +122,7 @@ export const RfqsApp = () =>
         rhoPercent: 0.000,
         legs: []
     });
-    const [clients, setClients] = useState([]);
-    const [books, setBooks] = useState([]);
-    const [instruments, setInstruments] = useState([]);
-    const [currencies, setCurrencies] = useState([]);
-    const [dayCountConventions, setDayCountConventions] = useState([]);
-    const [statusEnums, setStatusEnums] = useState([]);
-    const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
-    const [exerciseType, setExerciseType] = useState('EUROPEAN');
 
-    const [config, setConfig] = useState({
-        defaultSettlementCurrency: 'USD',
-        defaultSettlementDays: 2,
-        decimalPrecision: 3,
-        defaultSpread: 1,
-        defaultSalesCreditPercentage: 0.5,
-        defaultVolatility: 20,
-        defaultDayConvention: 250
-    });
 
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
@@ -295,8 +299,54 @@ export const RfqsApp = () =>
     const applyConfig = useCallback(() =>
     {
         loggerService.logInfo('Applying RFQ configuration:', config);
+        // The config state is already updated via the onChange prop
+        // This function can be used for additional validation or persistence if needed
         setIsConfigOpen(false);
     }, [config, loggerService, setIsConfigOpen]);
+
+    const handleSnippetSubmit = useCallback((snippetInput) =>
+    {
+        try
+        {
+            const snippet = snippetInput.toUpperCase().trim();
+            if(!snippet || snippet === '')
+            {
+                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
+            }
+
+            if(!optionRequestParserService.isValidOptionRequest(snippet))
+            {
+                loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15ayg2025 0700.hk\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC24 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+            }
+
+            const parsedOptions = optionRequestParserService.parseRequest(snippet);
+            loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
+            
+            if (!parsedOptions || parsedOptions.length === 0)
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+
+            createRFQFromOptions(snippet, parsedOptions).then(newRFQ =>
+            {
+                setRfqs(prevOrders => [newRFQ, ...prevOrders]);
+                loggerService.logInfo(`Successfully created RFQ from snippet: ${snippet}`);
+            });
+
+            return { success: true };
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to parse snippet: ${error.message}`);
+            return { success: false, error: `Failed to parse snippet: ${error.message}` };
+        }
+    }, [optionRequestParserService, loggerService]);
+
+    const handleRfqCreation = useCallback((snippet) =>
+    {
+        loggerService.logInfo('Creating RFQ from snippet:', snippet);
+        if (snippet && snippet.trim() !== '')
+            handleSnippetSubmit(snippet);
+    }, [handleSnippetSubmit, loggerService]);
 
     const handleDeleteRfq = useCallback((rfqData) =>
     {
@@ -308,12 +358,7 @@ export const RfqsApp = () =>
     const handleCloneRfq = useCallback((rfqData) =>
     {
         loggerService.logInfo(`Cloning RFQ: ${rfqData.rfqId}`);
-        const clonedRfq = {
-            ...rfqData,
-            rfqId: crypto.randomUUID(),
-            arrivalTime: new Date().toLocaleTimeString(),
-            status: 'Pending'
-        };
+        const clonedRfq = {...rfqData, rfqId: crypto.randomUUID(), arrivalTime: new Date().toLocaleTimeString(), status: 'Pending' };
         setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
         loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
     }, [loggerService, setRfqs]);
@@ -573,43 +618,6 @@ export const RfqsApp = () =>
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, getUniqueClientNames, getUniqueBookCodes]);
 
-    const handleSnippetSubmit = useCallback((snippetInput) =>
-    {
-        try
-        {
-            const snippet = snippetInput.toUpperCase().trim();
-            if(!snippet || snippet === '')
-            {
-                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
-            }
-
-            if(!optionRequestParserService.isValidOptionRequest(snippet))
-            {
-                loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15ayg2025 0700.hk\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC24 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
-            }
-
-            const parsedOptions = optionRequestParserService.parseRequest(snippet);
-            loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
-            
-            if (!parsedOptions || parsedOptions.length === 0)
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
-
-            createRFQFromOptions(snippet, parsedOptions).then(newRFQ =>
-            {
-                setRfqs(prevOrders => [newRFQ, ...prevOrders]);
-                loggerService.logInfo(`Successfully created RFQ from snippet: ${snippet}`);
-            });
-
-            return { success: true };
-        }
-        catch (error)
-        {
-            loggerService.logError(`Failed to parse snippet: ${error.message}`);
-            return { success: false, error: `Failed to parse snippet: ${error.message}` };
-        }
-    }, [optionRequestParserService, loggerService]);
-
     const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
@@ -617,8 +625,8 @@ export const RfqsApp = () =>
         const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
         const multiplier = 100;
         const notionalInLocal = totalQuantity * multiplier * strike;
-        const notionalInUSD = (notionalInLocal / fxRate).toFixed(3);
-        const salesCreditPercentage = 0.5;
+        const notionalInUSD = (notionalInLocal / fxRate).toFixed(config.decimalPrecision);
+
         const volatility = volatilityService.getVolatility(underlying);
         const interestRate = rateService.getInterestRate(currency);
         const underlyingPrice = 80;
@@ -632,9 +640,8 @@ export const RfqsApp = () =>
         const rhoNumber = Number(rho);
         const shares = totalQuantity * multiplier;
         const notionalShares = shares * underlyingPrice;
-        const spread = 1;
-        const askPremium = (price + spread/2);
-        const bidPremium = (price - spread/2);
+        const askPremium = (price + config.defaultSpread/2);
+        const bidPremium = (price - config.defaultSpread/2);
 
         return {
             arrivalTime: new Date().toLocaleTimeString(),
@@ -645,59 +652,58 @@ export const RfqsApp = () =>
             bookCode: 'Select Book',
             notionalInUSD: notionalInUSD,
             notionalInLocal: notionalInLocal,
-            notionalCurrency: currency || 'USD',
+            notionalCurrency: currency || config.defaultSettlementCurrency,
             notionalFXRate: fxRate,
             volatility: volatility,
             interestRate: interestRate,
             exerciseType: exerciseType,
-            dayCountConvention: dayCountConvention || 250,
+            dayCountConvention: dayCountConvention || config.defaultDayConvention,
             tradeDate: new Date().toLocaleDateString(),
             maturityDate: maturityDate,
             daysToExpiry: daysToExpiry,
             multiplier: multiplier,
             contracts: totalQuantity,
-            salesCreditPercentage: salesCreditPercentage,
-            salesCreditAmount: (salesCreditPercentage * notionalInUSD / 100).toFixed(3),
+            salesCreditPercentage: config.defaultSalesCreditPercentage,
+            salesCreditAmount: (config.defaultSalesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision),
             premiumSettlementFXRate: 1.0,
-            premiumSettlementDaysOverride: 2,
-            premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, 2),
+            premiumSettlementDaysOverride: config.defaultSettlementDays,
+            premiumSettlementCurrency: config.defaultSettlementCurrency,
+            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, config.defaultSettlementDays),
             hedgeType: 'Full',
             hedgePrice: strike || 100.0,
-            askImpliedVol: volatility || 0.25,
-            impliedVol: volatility || 0.23,
-            bidImpliedVol: volatility || 0.21,
-            spread: spread,
-            askPremiumInLocal: askPremium.toFixed(3),
-            premiumInUSD: (price/fxRate).toFixed(3),
-            premiumInLocal: price.toFixed(3),
-            bidPremiumInLocal: bidPremium.toFixed(3),
-            askPremiumPercentage: ((askPremium*100)/underlyingPrice).toFixed(3),
-            premiumPercentage: ((price*100)/underlyingPrice).toFixed(3),
-            bidPremiumPercentage: ((bidPremium*100)/underlyingPrice).toFixed(3),
-            deltaShares: (deltaNumber * shares).toFixed(3),
-            deltaNotional: (deltaNumber * notionalShares).toFixed(3),
-            delta: deltaNumber.toFixed(3),
-            deltaPercent: ((deltaNumber*100)/underlyingPrice).toFixed(3),
-            gammaShares: (gammaNumber * shares).toFixed(3),
-            gammaNotional: (gammaNumber * notionalShares).toFixed(3),
-            gamma: gammaNumber.toFixed(3),
-            gammaPercent: ((gammaNumber*100)/underlyingPrice).toFixed(3),
-            thetaShares: (thetaNumber * shares).toFixed(3),
-            thetaNotional: (thetaNumber * notionalShares).toFixed(3),
-            theta: thetaNumber.toFixed(3),
-            thetaPercent: ((thetaNumber*100)/underlyingPrice).toFixed(3),
-            vegaShares: (vegaNumber * shares).toFixed(3),
-            vegaNotional: (vegaNumber * notionalShares).toFixed(3),
-            vega: vegaNumber.toFixed(3),
-            vegaPercent: ((vegaNumber*100)/underlyingPrice).toFixed(3),
-            rhoShares: (rhoNumber * shares).toFixed(3),
-            rhoNotional: (rhoNumber * notionalShares).toFixed(3),
-            rho: rhoNumber.toFixed(3),
-            rhoPercent: ((rhoNumber*100)/underlyingPrice).toFixed(3),
+            askImpliedVol: volatility || (config.defaultVolatility / 100),
+            impliedVol: volatility || (config.defaultVolatility / 100),
+            bidImpliedVol: volatility || (config.defaultVolatility / 100),
+            spread: config.defaultSpread,
+            askPremiumInLocal: askPremium.toFixed(config.decimalPrecision), premiumInUSD: (price / fxRate).toFixed(config.decimalPrecision),
+            premiumInLocal: price.toFixed(config.decimalPrecision),
+            bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
+            askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            deltaShares: (deltaNumber * shares).toFixed(config.decimalPrecision),
+            deltaNotional: (deltaNumber * notionalShares).toFixed(config.decimalPrecision),
+            delta: deltaNumber.toFixed(config.decimalPrecision),
+            deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            gammaShares: (gammaNumber * shares).toFixed(config.decimalPrecision),
+            gammaNotional: (gammaNumber * notionalShares).toFixed(config.decimalPrecision),
+            gamma: gammaNumber.toFixed(config.decimalPrecision),
+            gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            thetaShares: (thetaNumber * shares).toFixed(config.decimalPrecision),
+            thetaNotional: (thetaNumber * notionalShares).toFixed(config.decimalPrecision),
+            theta: thetaNumber.toFixed(config.decimalPrecision),
+            thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            vegaShares: (vegaNumber * shares).toFixed(config.decimalPrecision),
+            vegaNotional: (vegaNumber * notionalShares).toFixed(config.decimalPrecision),
+            vega: vegaNumber.toFixed(config.decimalPrecision),
+            vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            rhoShares: (rhoNumber * shares).toFixed(config.decimalPrecision),
+            rhoNotional: (rhoNumber * notionalShares).toFixed(config.decimalPrecision),
+            rho: rhoNumber.toFixed(config.decimalPrecision),
+            rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
             legs: parsedOptions
         };
-    }, [clients, exchangeRateService]);
+    }, [clients, exchangeRateService, config, optionRequestParserService, volatilityService, rateService, exerciseType]);
 
     const onGridReady = (params) =>
     {
@@ -707,7 +713,7 @@ export const RfqsApp = () =>
     };
 
     return (<>
-        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true}
+        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }} showChannel={true}
             showTools={false} showConfig={{ handler: openConfig }} snippetPrompt={"Enter RFQ snippet..."} onSnippetSubmit={handleSnippetSubmit}/>
 
         <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
@@ -724,6 +730,7 @@ export const RfqsApp = () =>
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
             <RfqsConfigPanel isOpen={isConfigOpen} config={config} onChange={(next) => setConfig(next)} onClose={closeConfig} onApply={applyConfig} />
+            <RfqCreationDialog closeHandler={handleRfqCreation} instruments={instruments} />
         </div>
     </>)
 

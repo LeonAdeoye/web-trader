@@ -1,0 +1,223 @@
+.rfq-creation-dialog
+{
+    .MuiDialog-paper
+    {
+        background-color: white;
+        color: #333;
+    }
+
+    .MuiDialogTitle-root
+    {
+        background-color: #404040;
+        color: white;
+        font-size: 15px;
+        height: 20px;
+        padding: 8px 16px;
+    }
+
+    .MuiDialogContent-root
+    {
+        background-color: white;
+        color: #333;
+        padding: 16px;
+    }
+
+    .MuiFormLabel-root
+    {
+        color: #404040;
+        font-size: 12px;
+    }
+
+    .MuiInputLabel-root
+    {
+        color: #404040;
+        font-size: 12px;
+    }
+
+    .MuiInputBase-input
+    {
+        color: #333;
+        font-size: 12px;
+        background-color: white;
+    }
+
+    .MuiOutlinedInput-root
+    {
+        background-color: white;
+        
+        .MuiOutlinedInput-notchedOutline
+        {
+            border-color: #404040;
+        }
+
+        &:hover .MuiOutlinedInput-notchedOutline
+        {
+            border-color: #656161;
+        }
+
+        &.Mui-focused .MuiOutlinedInput-notchedOutline
+        {
+            border-color: #2196f3;
+        }
+    }
+
+
+
+    .MuiSelect-select
+    {
+        color: #333;
+        font-size: 12px;
+        background-color: white;
+    }
+
+    .MuiMenuItem-root
+    {
+        color: #333;
+        font-size: 12px;
+        background-color: white;
+    }
+
+    .ag-theme-alpine
+    {
+        --ag-background-color: white;
+        --ag-foreground-color: #333;
+        --ag-header-background-color: #f5f5f5;
+        --ag-header-foreground-color: #333;
+        --ag-border-color: #ddd;
+        --ag-row-hover-color: #f0f0f0;
+        --ag-selected-row-background-color: #e3f2fd;
+        
+        .ag-cell
+        {
+            padding: 2px 4px;
+        }
+
+        // Style for editable cells
+        .ag-cell-edit-input
+        {
+            padding: 2px 4px;
+        }
+    }
+
+    .MuiButton-root
+    {
+        &.dialog-action-button
+        {
+            text-transform: none;
+            background-color: #404040;
+            color: white;
+            font-size: 12px;
+            padding: 6px 16px;
+
+            &:hover
+            {
+                background-color: #656161;
+            }
+
+            &.submit
+            {
+                margin-right: 15px;
+            }
+            
+            &:disabled
+            {
+                background-color: #cccccc !important;
+                color: #666666 !important;
+                cursor: not-allowed;
+                
+                &:hover
+                {
+                    background-color: #cccccc !important;
+                }
+            }
+        }
+    }
+
+    // ButtonGroup selection states - make unselected buttons lighter
+    .MuiButtonGroup-root
+    {
+        .MuiButton-root
+        {
+            transition: all 0.2s ease;
+            
+            &:hover
+            {
+                transform: scale(1.05);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+        }
+        
+        // Option Type buttons (Call/Put)
+        &:has(.MuiButton[onclick*="CALL"])
+        {
+            .MuiButton-root:first-of-type
+            {
+                // Selected Call button - keep dark red
+                background-color: #b71c1c !important;
+            }
+            
+            .MuiButton-root:last-of-type
+            {
+                // Unselected Put button - make very light
+                background-color: #fff3e0 !important; // Very light orange
+                color: #666 !important; // Darker text for contrast
+            }
+        }
+        
+        &:has(.MuiButton[onclick*="PUT"])
+        {
+            .MuiButton-root:first-of-type
+            {
+                // Unselected Call button - make very light
+                background-color: #ffebee !important; // Very light red
+                color: #666 !important; // Darker text for contrast
+            }
+            
+            .MuiButton-root:last-of-type
+            {
+                // Selected Put button - keep dark orange
+                background-color: #e65100 !important;
+            }
+        }
+        
+        // Side selection buttons (Buy/Sell)
+        &:has(.MuiButton[onclick*="BUY"])
+        {
+            .MuiButton-root:first-of-type
+            {
+                // Selected Buy button - keep dark blue
+                background-color: #0d47a1 !important;
+            }
+            
+            .MuiButton-root:last-of-type
+            {
+                // Unselected Sell button - make very light
+                background-color: #f1f8e9 !important; // Very light green
+                color: #666 !important; // Darker text for contrast
+            }
+        }
+        
+        &:has(.MuiButton[onclick*="SELL"])
+        {
+            .MuiButton-root:first-of-type
+            {
+                // Unselected Buy button - make very light
+                background-color: #e3f2fd !important; // Very light blue
+                color: #666 !important; // Darker text for contrast
+            }
+            
+            .MuiButton-root:last-of-type
+            {
+                // Selected Sell button - keep dark green
+                background-color: #1b5e20 !important;
+            }
+        }
+    }
+
+    .MuiDialogActions-root
+    {
+        background-color: white;
+        padding: 8px 16px;
+        height: 35px;
+    }
+}

@@ -81,17 +81,8 @@
 
   // Grid styling
   .ag-theme-alpine {
-    .ag-header-cell-label {
-      font-size: 9px !important;
-    }
-
-    .ag-cell {
-      font-size: 10px !important;
-    }
-
     // Style for editable cells
     .ag-cell-edit-input {
-      font-size: 10px !important;
       padding: 2px 4px;
     }
   }
