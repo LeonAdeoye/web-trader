@@ -507,6 +507,131 @@ export const RfqsApp = () =>
         }
     }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleSaveRfq, handleChartRfq, handleViewRfq, loggerService]);
 
+    const recalculateRFQ = useCallback(async (rfqData) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Recalculating RFQ: ${rfqData.rfqId}`);
+            
+            // Extract values from the RFQ data
+            const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, salesCreditPercentage, 
+                    premiumSettlementDaysOverride, spread, contracts, legs, underlyingPrice = 80 } = rfqData;
+            
+            // Calculate notional amounts
+            const totalQuantity = contracts;
+            const strike = legs?.[0]?.strike || 100;
+            const notionalInLocal = totalQuantity * multiplier * strike;
+            const notionalInUSD = (notionalInLocal / notionalFXRate).toFixed(config.decimalPrecision);
+            
+            // Get option type and exercise type from legs
+            const optionType = legs?.[0]?.optionType || 'CALL';
+            const isEuropean = rfqData.exerciseType === "EUROPEAN";
+            const isCall = (optionType === 'CALL');
+            
+            // Calculate days to expiry if maturity date exists
+            let daysToExpiry = rfqData.daysToExpiry;
+            if (rfqData.maturityDate && !daysToExpiry)
+            {
+                const maturityDate = new Date(rfqData.maturityDate);
+                const today = new Date();
+                daysToExpiry = Math.ceil((maturityDate - today) / (1000 * 60 * 60 * 24));
+            }
+            
+            // Calculate option price and Greeks
+            const {delta, gamma, theta, rho, vega, price} = await optionPricingService.calculateOptionPrice({
+                strike, volatility: volatility, underlyingPrice, daysToExpiry,
+                interestRate: interestRate, isCall, isEuropean, dayCountConvention
+            });
+            
+            // Convert to numbers
+            const deltaNumber = Number(delta);
+            const gammaNumber = Number(gamma);
+            const thetaNumber = Number(theta);
+            const vegaNumber = Number(vega);
+            const rhoNumber = Number(rho);
+            
+            // Calculate shares and notional values
+            const shares = totalQuantity * multiplier;
+            const notionalShares = shares * underlyingPrice;
+            
+            // Calculate premium amounts
+            const askPremium = (price + spread/2);
+            const bidPremium = (price - spread/2);
+            
+            // Calculate sales credit amount
+            const salesCreditAmount = (salesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision);
+            
+            // Calculate settlement date
+            const premiumSettlementDate = optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, premiumSettlementDaysOverride);
+            
+            // Update the RFQ with recalculated values
+            const updatedRFQ = {
+                ...rfqData,
+                notionalInUSD: notionalInUSD,
+                notionalInLocal: notionalInLocal,
+                salesCreditAmount: salesCreditAmount,
+                premiumSettlementDate: premiumSettlementDate,
+                askImpliedVol: (volatility / 100),
+                impliedVol: (volatility / 100),
+                bidImpliedVol: (volatility / 100),
+                askPremiumInLocal: askPremium.toFixed(config.decimalPrecision),
+                premiumInUSD: (price / notionalFXRate).toFixed(config.decimalPrecision),
+                premiumInLocal: price.toFixed(config.decimalPrecision),
+                bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
+                askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                deltaShares: (deltaNumber * shares).toFixed(config.decimalPrecision),
+                deltaNotional: (deltaNumber * notionalShares).toFixed(config.decimalPrecision),
+                delta: deltaNumber.toFixed(config.decimalPrecision),
+                deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                gammaShares: (gammaNumber * shares).toFixed(config.decimalPrecision),
+                gammaNotional: (gammaNumber * notionalShares).toFixed(config.decimalPrecision),
+                gamma: gammaNumber.toFixed(config.decimalPrecision),
+                gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                thetaShares: (thetaNumber * shares).toFixed(config.decimalPrecision),
+                thetaNotional: (thetaNumber * notionalShares).toFixed(config.decimalPrecision),
+                theta: thetaNumber.toFixed(config.decimalPrecision),
+                thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                vegaShares: (vegaNumber * shares).toFixed(config.decimalPrecision),
+                vegaNotional: (vegaNumber * notionalShares).toFixed(config.decimalPrecision),
+                vega: vegaNumber.toFixed(config.decimalPrecision),
+                vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+                rhoShares: (rhoNumber * shares).toFixed(config.decimalPrecision),
+                rhoNotional: (rhoNumber * notionalShares).toFixed(config.decimalPrecision),
+                rho: rhoNumber.toFixed(config.decimalPrecision),
+                rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision)
+            };
+            
+            // Update the RFQs state
+            setRfqs(prevRfqs => 
+                prevRfqs.map(rfq => 
+                    rfq.rfqId === rfqData.rfqId ? updatedRFQ : rfq
+                )
+            );
+            
+            loggerService.logInfo(`Successfully recalculated RFQ: ${rfqData.rfqId}`);
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to recalculate RFQ ${rfqData.rfqId}: ${error.message}`);
+        }
+    }, [config, optionPricingService, optionRequestParserService, loggerService, setRfqs]);
+
+    const handleCellValueChanged = useCallback((params) =>
+    {
+        const { data: rfqData, colDef, oldValue, newValue } = params;
+
+        const fieldsRequiringRecalculation =
+        [
+            'notionalFXRate', 'interestRate', 'volatility', 'dayCountConvention', 'multiplier',
+            'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'contracts'
+        ];
+        
+        if (fieldsRequiringRecalculation.includes(colDef.field))
+            recalculateRFQ(rfqData).then(() => loggerService.logInfo(`Field ${colDef.field} changed from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId} this will trigger a recalculation.`));
+    }, [recalculateRFQ, loggerService]);
+
     const handleSaveRequest = (isSave) =>
     {
         if (isSave)
@@ -637,7 +762,7 @@ export const RfqsApp = () =>
              editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
 
             // Premium Amounts
-            {headerName: "Spread", field: "spread", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Difference between the ask and bid premium amounts in local currency'},
+            {headerName: "Spread", field: "spread", sortable: false, minWidth: 100, width: 100, filter: true, editable: true, headerTooltip: 'Difference between the ask and bid premium amounts in local currency'},
             {headerName: "Fair Premium", field: "premiumInLocal", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theoretical price of the option based on the option model in local currency',
                 editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
             {headerName: "Fair Premium$", field: "premiumInUSD", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theoretical price of the option based on the option model in USD',
@@ -727,7 +852,17 @@ export const RfqsApp = () =>
                     headerHeight={22} 
                     getRowId={params => params.data.rfqId} 
                     onGridReady={onGridReady}
+                    onCellValueChanged={handleCellValueChanged}
                     context={{ handleRfqAction }}
+                    enableCellChangeFlash={true}
+                    cellFlashDelay={2000}
+                    animateRows={true}
+                    defaultColDef={{
+                        resizable: true,
+                        sortable: true,
+                        filter: true,
+                        floatingFilter: false
+                    }}
                 />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
