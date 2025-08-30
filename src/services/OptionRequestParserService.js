@@ -16,10 +16,11 @@ export class OptionRequestParserService
         this.#instrumentService = new InstrumentService();
         this.#instrumentService.loadInstruments();
 
-        this.#constants = {
+        this.#constants =
+        {
             DEFAULT_VOLATILITY: 0.25,
             DEFAULT_INTEREST_RATE: 0.05,
-            DEFAULT_DAY_COUNT_CONVENTION: 365,
+            DEFAULT_DAY_COUNT_CONVENTION: 250,
             DEFAULT_CURRENCY: 'USD'
         };
     }
