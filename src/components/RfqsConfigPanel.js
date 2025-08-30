@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Grid, IconButton, Typography, Divider, TextField, Button, Paper } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,8 +20,30 @@ const darkPanelTheme = createTheme({
     }
 });
 
-export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) =>
+export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
 {
+    // Local state for temporary changes
+    const [tempConfig, setTempConfig] = useState(config);
+
+    // Update temp config when main config changes (e.g., when panel opens)
+    useEffect(() => {
+        setTempConfig(config);
+    }, [config]);
+
+    const handleInputChange = (field, value) => {
+        setTempConfig(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleApply = () => {
+        onApply(tempConfig);
+    };
+
+    const handleClose = () => {
+        // Reset temp config to original values when closing without applying
+        setTempConfig(config);
+        onClose();
+    };
+
     return (
         <ThemeProvider theme={darkPanelTheme}>
             <Box
@@ -45,7 +67,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1.2, py: 0.6 }}>
                     <Typography variant="caption" sx={{ fontSize: '0.68rem' }}>RFQ Settings</Typography>
-                    <IconButton size="small" onClick={onClose} sx={{ color: 'white' }} aria-label="Close settings">
+                    <IconButton size="small" onClick={handleClose} sx={{ color: 'white' }} aria-label="Close settings">
                         <CloseIcon fontSize="small"/>
                     </IconButton>
                 </Box>
@@ -62,8 +84,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                         <TextField 
                                             size="small" 
                                             fullWidth 
-                                            value={config.defaultSettlementCurrency}
-                                            onChange={(e) => onChange({ ...config, defaultSettlementCurrency: e.target.value })}
+                                            value={tempConfig.defaultSettlementCurrency}
+                                            onChange={(e) => handleInputChange('defaultSettlementCurrency', e.target.value)}
                                             inputProps={{ style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -76,8 +98,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.defaultSettlementDays}
-                                            onChange={(e) => onChange({ ...config, defaultSettlementDays: parseInt(e.target.value) || 2 })}
+                                            value={tempConfig.defaultSettlementDays}
+                                            onChange={(e) => handleInputChange('defaultSettlementDays', parseInt(e.target.value) || 2)}
                                             inputProps={{ min: 0, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -98,8 +120,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.defaultSpread}
-                                            onChange={(e) => onChange({ ...config, defaultSpread: parseFloat(e.target.value) || 1 })}
+                                            value={tempConfig.defaultSpread}
+                                            onChange={(e) => handleInputChange('defaultSpread', parseFloat(e.target.value) || 1)}
                                             inputProps={{ min: 0, step: 0.1, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -112,8 +134,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.defaultSalesCreditPercentage}
-                                            onChange={(e) => onChange({ ...config, defaultSalesCreditPercentage: parseFloat(e.target.value) || 0.5 })}
+                                            value={tempConfig.defaultSalesCreditPercentage}
+                                            onChange={(e) => handleInputChange('defaultSalesCreditPercentage', parseFloat(e.target.value) || 0.5)}
                                             inputProps={{ min: 0, max: 100, step: 0.1, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -134,8 +156,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.defaultVolatility}
-                                            onChange={(e) => onChange({ ...config, defaultVolatility: parseFloat(e.target.value) || 20 })}
+                                            value={tempConfig.defaultVolatility}
+                                            onChange={(e) => handleInputChange('defaultVolatility', parseFloat(e.target.value) || 20)}
                                             inputProps={{ min: 0, max: 100, step: 0.1, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -148,8 +170,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.defaultDayConvention}
-                                            onChange={(e) => onChange({ ...config, defaultDayConvention: parseInt(e.target.value) || 250 })}
+                                            value={tempConfig.defaultDayConvention}
+                                            onChange={(e) => handleInputChange('defaultDayConvention', parseInt(e.target.value) || 250)}
                                             inputProps={{ min: 1, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -170,8 +192,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                                             size="small" 
                                             fullWidth 
                                             type="number"
-                                            value={config.decimalPrecision}
-                                            onChange={(e) => onChange({ ...config, decimalPrecision: parseInt(e.target.value) || 3 })}
+                                            value={tempConfig.decimalPrecision}
+                                            onChange={(e) => handleInputChange('decimalPrecision', parseInt(e.target.value) || 3)}
                                             inputProps={{ min: 0, max: 10, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
                                             sx={{ 
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
@@ -187,7 +209,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) 
                 <Divider sx={{ mt: 'auto', borderColor: 'rgba(255,255,255,0.12)' }} />
 
                 <Box sx={{ display: 'flex', p: 1, justifyContent: 'flex-end' }}>
-                    <Button size="small" variant="contained" onClick={onApply} sx={{ backgroundColor: '#ffffff', color: '#404040', textTransform: 'none', '&:hover': { backgroundColor: '#bdbdbd' } }}>Apply</Button>
+                    <Button size="small" variant="contained" onClick={handleApply} sx={{ backgroundColor: '#ffffff', color: '#404040', textTransform: 'none', '&:hover': { backgroundColor: '#bdbdbd' } }}>Apply</Button>
                 </Box>
             </Box>
         </ThemeProvider>

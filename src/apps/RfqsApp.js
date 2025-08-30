@@ -166,6 +166,8 @@ export const RfqsApp = () =>
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
     }, [exchangeRateService, bookService, clientService, loggerService, instrumentService, traderService, volatilityService, rateService]);
 
+
+
     useEffect(() =>
     {
         // const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
@@ -296,11 +298,100 @@ export const RfqsApp = () =>
 
     const closeConfig = useCallback(() => setIsConfigOpen(false), [setIsConfigOpen]);
 
-    const applyConfig = useCallback(() =>
+    const applyConfig = useCallback((newConfig) =>
     {
-        loggerService.logInfo('Applying RFQ configuration:', config);
+        setConfig(newConfig);
         setIsConfigOpen(false);
-    }, [config, loggerService, setIsConfigOpen]);
+    }, [setIsConfigOpen]);
+
+    const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
+    {
+        const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
+        const {currency, strike, underlying, maturityDate, daysToExpiry, optionType} = parsedOptions[0];
+        const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
+        const multiplier = 100;
+        const notionalInLocal = totalQuantity * multiplier * strike;
+        const notionalInUSD = (notionalInLocal / fxRate).toFixed(config.decimalPrecision);
+        const dayCountConvention = config.defaultDayConvention;
+        const volatility = volatilityService.getVolatility(underlying);
+        const interestRate = rateService.getInterestRate(currency);
+        const underlyingPrice = 80;
+        const isEuropean = (exerciseType === "EUROPEAN");
+        const isCall = (optionType === 'CALL');
+        const {delta, gamma, theta, rho, vega, price} = await optionPricingService.calculateOptionPrice({strike, volatility, underlyingPrice, daysToExpiry, interestRate, isCall, isEuropean, dayCountConvention});
+        const deltaNumber = Number(delta);
+        const gammaNumber = Number(gamma);
+        const thetaNumber = Number(theta);
+        const vegaNumber = Number(vega);
+        const rhoNumber = Number(rho);
+        const shares = totalQuantity * multiplier;
+        const notionalShares = shares * underlyingPrice;
+        const askPremium = (price + config.defaultSpread/2);
+        const bidPremium = (price - config.defaultSpread/2);
+
+        const rfq = {
+            arrivalTime: new Date().toLocaleTimeString(),
+            rfqId: crypto.randomUUID(),
+            request: snippet,
+            client:  'Select Client',
+            status: 'Pending',
+            bookCode: 'Select Book',
+            notionalInUSD: notionalInUSD,
+            notionalInLocal: notionalInLocal,
+            notionalCurrency: currency || config.defaultSettlementCurrency,
+            notionalFXRate: fxRate,
+            volatility: volatility,
+            interestRate: interestRate,
+            exerciseType: exerciseType,
+            dayCountConvention: dayCountConvention,
+            tradeDate: new Date().toLocaleDateString(),
+            maturityDate: maturityDate,
+            daysToExpiry: daysToExpiry,
+            multiplier: multiplier,
+            contracts: totalQuantity,
+            salesCreditPercentage: config.defaultSalesCreditPercentage,
+            salesCreditAmount: (config.defaultSalesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision),
+            premiumSettlementFXRate: 1.0,
+            premiumSettlementDaysOverride: config.defaultSettlementDays,
+            premiumSettlementCurrency: config.defaultSettlementCurrency,
+            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, config.defaultSettlementDays),
+            hedgeType: 'Full',
+            hedgePrice: strike || 100.0,
+            askImpliedVol: volatility || (config.defaultVolatility / 100),
+            impliedVol: volatility || (config.defaultVolatility / 100),
+            bidImpliedVol: volatility || (config.defaultVolatility / 100),
+            spread: config.defaultSpread,
+            askPremiumInLocal: askPremium.toFixed(config.decimalPrecision), premiumInUSD: (price / fxRate).toFixed(config.decimalPrecision),
+            premiumInLocal: price.toFixed(config.decimalPrecision),
+            bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
+            askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            deltaShares: (deltaNumber * shares).toFixed(config.decimalPrecision),
+            deltaNotional: (deltaNumber * notionalShares).toFixed(config.decimalPrecision),
+            delta: deltaNumber.toFixed(config.decimalPrecision),
+            deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            gammaShares: (gammaNumber * shares).toFixed(config.decimalPrecision),
+            gammaNotional: (gammaNumber * notionalShares).toFixed(config.decimalPrecision),
+            gamma: gammaNumber.toFixed(config.decimalPrecision),
+            gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            thetaShares: (thetaNumber * shares).toFixed(config.decimalPrecision),
+            thetaNotional: (thetaNumber * notionalShares).toFixed(config.decimalPrecision),
+            theta: thetaNumber.toFixed(config.decimalPrecision),
+            thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            vegaShares: (vegaNumber * shares).toFixed(config.decimalPrecision),
+            vegaNotional: (vegaNumber * notionalShares).toFixed(config.decimalPrecision),
+            vega: vegaNumber.toFixed(config.decimalPrecision),
+            vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            rhoShares: (rhoNumber * shares).toFixed(config.decimalPrecision),
+            rhoNotional: (rhoNumber * notionalShares).toFixed(config.decimalPrecision),
+            rho: rhoNumber.toFixed(config.decimalPrecision),
+            rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            legs: parsedOptions
+        };
+        
+        return rfq;
+    }, [config, optionRequestParserService, volatilityService, rateService, exerciseType, exchangeRateService]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
@@ -337,7 +428,7 @@ export const RfqsApp = () =>
             loggerService.logError(`Failed to parse snippet: ${error.message}`);
             return { success: false, error: `Failed to parse snippet: ${error.message}` };
         }
-    }, [optionRequestParserService, loggerService]);
+    }, [optionRequestParserService, loggerService, createRFQFromOptions]);
 
     const handleRfqCreation = useCallback((snippet) =>
     {
@@ -616,93 +707,6 @@ export const RfqsApp = () =>
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, getUniqueClientNames, getUniqueBookCodes]);
 
-    const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
-    {
-        const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
-        const {currency, strike, underlying, maturityDate, daysToExpiry, dayCountConvention, optionType} = parsedOptions[0];
-        const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
-        const multiplier = 100;
-        const notionalInLocal = totalQuantity * multiplier * strike;
-        const notionalInUSD = (notionalInLocal / fxRate).toFixed(config.decimalPrecision);
-
-        const volatility = volatilityService.getVolatility(underlying);
-        const interestRate = rateService.getInterestRate(currency);
-        const underlyingPrice = 80;
-        const isEuropean = (exerciseType === "EUROPEAN");
-        const isCall = (optionType === 'CALL');
-        const {delta, gamma, theta, rho, vega, price} = await optionPricingService.calculateOptionPrice({strike, volatility, underlyingPrice, daysToExpiry, interestRate, isCall, isEuropean, dayCountConvention});
-        const deltaNumber = Number(delta);
-        const gammaNumber = Number(gamma);
-        const thetaNumber = Number(theta);
-        const vegaNumber = Number(vega);
-        const rhoNumber = Number(rho);
-        const shares = totalQuantity * multiplier;
-        const notionalShares = shares * underlyingPrice;
-        const askPremium = (price + config.defaultSpread/2);
-        const bidPremium = (price - config.defaultSpread/2);
-
-        return {
-            arrivalTime: new Date().toLocaleTimeString(),
-            rfqId: crypto.randomUUID(),
-            request: snippet,
-            client:  'Select Client',
-            status: 'Pending',
-            bookCode: 'Select Book',
-            notionalInUSD: notionalInUSD,
-            notionalInLocal: notionalInLocal,
-            notionalCurrency: currency || config.defaultSettlementCurrency,
-            notionalFXRate: fxRate,
-            volatility: volatility,
-            interestRate: interestRate,
-            exerciseType: exerciseType,
-            dayCountConvention: dayCountConvention || config.defaultDayConvention,
-            tradeDate: new Date().toLocaleDateString(),
-            maturityDate: maturityDate,
-            daysToExpiry: daysToExpiry,
-            multiplier: multiplier,
-            contracts: totalQuantity,
-            salesCreditPercentage: config.defaultSalesCreditPercentage,
-            salesCreditAmount: (config.defaultSalesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision),
-            premiumSettlementFXRate: 1.0,
-            premiumSettlementDaysOverride: config.defaultSettlementDays,
-            premiumSettlementCurrency: config.defaultSettlementCurrency,
-            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, config.defaultSettlementDays),
-            hedgeType: 'Full',
-            hedgePrice: strike || 100.0,
-            askImpliedVol: volatility || (config.defaultVolatility / 100),
-            impliedVol: volatility || (config.defaultVolatility / 100),
-            bidImpliedVol: volatility || (config.defaultVolatility / 100),
-            spread: config.defaultSpread,
-            askPremiumInLocal: askPremium.toFixed(config.decimalPrecision), premiumInUSD: (price / fxRate).toFixed(config.decimalPrecision),
-            premiumInLocal: price.toFixed(config.decimalPrecision),
-            bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
-            askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            deltaShares: (deltaNumber * shares).toFixed(config.decimalPrecision),
-            deltaNotional: (deltaNumber * notionalShares).toFixed(config.decimalPrecision),
-            delta: deltaNumber.toFixed(config.decimalPrecision),
-            deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            gammaShares: (gammaNumber * shares).toFixed(config.decimalPrecision),
-            gammaNotional: (gammaNumber * notionalShares).toFixed(config.decimalPrecision),
-            gamma: gammaNumber.toFixed(config.decimalPrecision),
-            gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            thetaShares: (thetaNumber * shares).toFixed(config.decimalPrecision),
-            thetaNotional: (thetaNumber * notionalShares).toFixed(config.decimalPrecision),
-            theta: thetaNumber.toFixed(config.decimalPrecision),
-            thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            vegaShares: (vegaNumber * shares).toFixed(config.decimalPrecision),
-            vegaNotional: (vegaNumber * notionalShares).toFixed(config.decimalPrecision),
-            vega: vegaNumber.toFixed(config.decimalPrecision),
-            vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            rhoShares: (rhoNumber * shares).toFixed(config.decimalPrecision),
-            rhoNotional: (rhoNumber * notionalShares).toFixed(config.decimalPrecision),
-            rho: rhoNumber.toFixed(config.decimalPrecision),
-            rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            legs: parsedOptions
-        };
-    }, [clients, exchangeRateService, config, optionRequestParserService, volatilityService, rateService, exerciseType]);
-
     const onGridReady = (params) =>
     {
         const sortModel = { colId: 'arrivalTime', sort: 'desc' }
@@ -727,7 +731,7 @@ export const RfqsApp = () =>
                 />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
-            <RfqsConfigPanel isOpen={isConfigOpen} config={config} onChange={(next) => setConfig(next)} onClose={closeConfig} onApply={applyConfig} />
+            <RfqsConfigPanel isOpen={isConfigOpen} config={config} onClose={closeConfig} onApply={applyConfig} />
             <RfqCreationDialog closeHandler={handleRfqCreation} instruments={instruments} />
         </div>
     </>)
