@@ -68,6 +68,11 @@ export const insightsConfigPanelOpenState = atom({
     default: false
 });
 
+export const rfqsConfigPanelOpenState = atom({
+    key: 'rfqsConfigPanelOpenState',
+    default: false
+});
+
 
 
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {formatDate, numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
-import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
+import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState, rfqsConfigPanelOpenState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import {LoggerService} from "../services/LoggerService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
@@ -16,6 +16,8 @@ import {BookService} from "../services/BookService";
 import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
 import {TraderService} from "../services/TraderService";
+import RfqsConfigPanel from "../components/RfqsConfigPanel";
+import RfqActionIconsRenderer from "../components/RfqActionIconsRenderer";
 import {VolatilityService} from "../services/VolatilityService";
 import {RateService} from "../services/RateService";
 import {OptionPricingService} from "../services/OptionPricingService";
@@ -31,6 +33,7 @@ export const RfqsApp = () =>
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
+    const [isConfigOpen, setIsConfigOpen] = useRecoilState(rfqsConfigPanelOpenState);
     const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const orderService = useRef(new OrderService()).current;
@@ -106,6 +109,16 @@ export const RfqsApp = () =>
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
     const [exerciseType, setExerciseType] = useState('EUROPEAN');
+
+    const [config, setConfig] = useState({
+        defaultSettlementCurrency: 'USD',
+        defaultSettlementDays: 2,
+        decimalPrecision: 3,
+        defaultSpread: 1,
+        defaultSalesCreditPercentage: 0.5,
+        defaultVolatility: 20,
+        defaultDayConvention: 250
+    });
 
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
@@ -272,6 +285,94 @@ export const RfqsApp = () =>
 
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
 
+    const openConfig = useCallback(() =>
+    {
+        setIsConfigOpen(true);
+    }, [setIsConfigOpen]);
+
+    const closeConfig = useCallback(() => setIsConfigOpen(false), [setIsConfigOpen]);
+
+    const applyConfig = useCallback(() =>
+    {
+        loggerService.logInfo('Applying RFQ configuration:', config);
+        setIsConfigOpen(false);
+    }, [config, loggerService, setIsConfigOpen]);
+
+    const handleDeleteRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Deleting RFQ: ${rfqData.rfqId}`);
+        setRfqs(prevRfqs => prevRfqs.filter(rfq => rfq.rfqId !== rfqData.rfqId));
+        loggerService.logInfo(`Successfully deleted RFQ: ${rfqData.rfqId}`);
+    }, [loggerService, setRfqs]);
+
+    const handleCloneRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Cloning RFQ: ${rfqData.rfqId}`);
+        const clonedRfq = {
+            ...rfqData,
+            rfqId: crypto.randomUUID(),
+            arrivalTime: new Date().toLocaleTimeString(),
+            status: 'Pending'
+        };
+        setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
+        loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
+    }, [loggerService, setRfqs]);
+
+    const handleEditRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Opening RFQ for editing: ${rfqData.rfqId}`);
+        // TODO: Implement edit dialog
+        loggerService.logInfo(`Edit dialog for RFQ ${rfqData.rfqId} - to be implemented`);
+    }, [loggerService]);
+
+    const handleSaveRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Saving RFQ to OMS: ${rfqData.rfqId}`);
+        // TODO: Implement web worker to send to OMS
+        loggerService.logInfo(`Save to OMS for RFQ ${rfqData.rfqId} - to be implemented`);
+    }, [loggerService]);
+
+    const handleChartRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Opening chart dialog for RFQ: ${rfqData.rfqId}`);
+        // TODO: Implement option pricing scenario charting dialog
+        loggerService.logInfo(`Chart dialog for RFQ ${rfqData.rfqId} - to be implemented`);
+    }, [loggerService]);
+
+    const handleViewRfq = useCallback((rfqData) =>
+    {
+        loggerService.logInfo(`Opening view dialog for RFQ: ${rfqData.rfqId}`);
+        // TODO: Implement read-only view dialog
+        loggerService.logInfo(`View dialog for RFQ ${rfqData.rfqId} - to be implemented`);
+    }, [loggerService]);
+
+    const handleRfqAction = useCallback((action, rfqData) =>
+    {
+        switch (action)
+        {
+            case "delete":
+                handleDeleteRfq(rfqData);
+                break;
+            case "clone":
+                handleCloneRfq(rfqData);
+                break;
+            case "edit":
+                handleEditRfq(rfqData);
+                break;
+            case "save":
+                handleSaveRfq(rfqData);
+                break;
+            case "chart":
+                handleChartRfq(rfqData);
+                break;
+            case "view":
+                handleViewRfq(rfqData);
+                break;
+            default:
+                loggerService.logError(`Unknown RFQ action: ${action}`);
+        }
+    }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleSaveRfq, handleChartRfq, handleViewRfq, loggerService]);
+
     const handleSaveRequest = (isSave) =>
     {
         if (isSave)
@@ -324,6 +425,15 @@ export const RfqsApp = () =>
         const clientDropdownValues = getUniqueClientNames();
         
         return ([
+            // Actions Column
+            {
+                headerName: 'Actions',
+                field: 'actions',
+                sortable: false,
+                width: 140,
+                filter: false,
+                cellRenderer: RfqActionIconsRenderer
+            },
             // Basic RFQ Information
              {headerName: "Arrival Time", field: "arrivalTime", sortable: true, minWidth: 130, width: 130, filter: true, editable: false},
              {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
@@ -598,13 +708,22 @@ export const RfqsApp = () =>
 
     return (<>
         <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={undefined} showChannel={true}
-            showTools={false} snippetPrompt={"Enter RFQ snippet..."} onSnippetSubmit={handleSnippetSubmit}/>
+            showTools={false} showConfig={{ handler: openConfig }} snippetPrompt={"Enter RFQ snippet..."} onSnippetSubmit={handleSnippetSubmit}/>
 
-        <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+        <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
-                <AgGridReact rowData={rfqs} columnDefs={columnDefs} rowHeight={22} headerHeight={22} getRowId={params => params.data.rfqId} onGridReady={onGridReady}/>
+                <AgGridReact 
+                    rowData={rfqs} 
+                    columnDefs={columnDefs} 
+                    rowHeight={22} 
+                    headerHeight={22} 
+                    getRowId={params => params.data.rfqId} 
+                    onGridReady={onGridReady}
+                    context={{ handleRfqAction }}
+                />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
+            <RfqsConfigPanel isOpen={isConfigOpen} config={config} onChange={(next) => setConfig(next)} onClose={closeConfig} onApply={applyConfig} />
         </div>
     </>)
 

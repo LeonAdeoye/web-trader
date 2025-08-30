@@ -1,0 +1,98 @@
+@import './partials/tab-styles';
+
+.rfqs-app {
+  // Configuration panel styling
+  .rfqs-config-panel {
+    // Panel container
+    .MuiBox-root {
+      // Ensure proper z-index and positioning
+      z-index: 999;
+    }
+
+    // Panel header
+    .MuiTypography-caption {
+      font-size: 0.68rem !important;
+      line-height: 1;
+    }
+
+    // Paper containers
+    .MuiPaper-root {
+      background-color: #2f2f2f !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    // Text fields
+    .MuiTextField-root {
+      .MuiInputBase-input {
+        font-size: 0.6rem !important;
+        line-height: 16px !important;
+        padding: 0 4px !important;
+        height: 16px !important;
+      }
+
+      .MuiOutlinedInput-root {
+        height: 18px !important;
+        border-radius: 4px !important;
+      }
+    }
+
+    // Labels
+    .MuiTypography-caption {
+      font-size: 0.68rem !important;
+      opacity: 0.85;
+      line-height: 1;
+    }
+
+    // Group headers
+    .group-header {
+      font-size: 0.68rem !important;
+      opacity: 0.85;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    // Dividers
+    .MuiDivider-root {
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    // Apply button
+    .MuiButton-root {
+      background-color: #ffffff !important;
+      color: #404040 !important;
+      text-transform: none !important;
+
+      &:hover {
+        background-color: #bdbdbd !important;
+      }
+    }
+
+    // Close button
+    .MuiIconButton-root {
+      color: white !important;
+    }
+  }
+
+  // Main app content
+  .rfqs-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  // Grid styling
+  .ag-theme-alpine {
+    .ag-header-cell-label {
+      font-size: 9px !important;
+    }
+
+    .ag-cell {
+      font-size: 10px !important;
+    }
+
+    // Style for editable cells
+    .ag-cell-edit-input {
+      font-size: 10px !important;
+      padding: 2px 4px;
+    }
+  }
+}

@@ -1,13 +1,13 @@
 import { TextField, Tooltip, IconButton, Box, Alert, IconButton as MuiIconButton } from '@mui/material';
 import { useState, useEffect } from 'react';
-import {Build, Close, Remove, Lan} from "@mui/icons-material";
+import {Build, Close, Remove, Lan, Settings} from "@mui/icons-material";
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, snippetPrompt, onSnippetSubmit}) =>
+const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -50,8 +50,8 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
         setErrorMessage("");
     };
 
-    // Debug effect to monitor error state changes
-    useEffect(() => {
+    useEffect(() =>
+    {
         console.log('Error state changed:', { showError, errorMessage });
     }, [showError, errorMessage]);
 
@@ -142,6 +142,13 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                     <Tooltip title="Tools">
                         <IconButton className="title-bar-tools" onClick={handleTools}>
                             <Build />
+                        </IconButton>
+                    </Tooltip>
+                )}
+                {(showConfig !== undefined) && (
+                    <Tooltip title={"Click to change RFQ settings"}>
+                        <IconButton className="title-bar-tools" onClick={showConfig.handler}>
+                            <Settings/>
                         </IconButton>
                     </Tooltip>
                 )}
