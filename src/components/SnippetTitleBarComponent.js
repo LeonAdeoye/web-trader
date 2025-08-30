@@ -3,11 +3,17 @@ import { useState, useEffect } from 'react';
 import {Build, Close, Remove, Lan, Settings} from "@mui/icons-material";
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import SaveIcon from "@mui/icons-material/Save";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit}) =>
+const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit, actionButtonsProps}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -26,7 +32,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
         if (e.key === 'Enter' && onSnippetSubmit)
         {
             const result = onSnippetSubmit(inputValue);
-            console.log('Snippet submit result:', result); // Debug logging
+            console.log('Snippet submit result:', result);
             
             if (result && result.success)
             {
@@ -37,7 +43,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
             else
             {
                 const errorMsg = result?.error || "Invalid snippet format";
-                console.log('Setting error message:', errorMsg); // Debug logging
+                console.log('Setting error message:', errorMsg);
                 setErrorMessage(errorMsg);
                 setShowError(true);
             }
@@ -54,6 +60,16 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
     {
         console.log('Error state changed:', { showError, errorMessage });
     }, [showError, errorMessage]);
+
+    const handleActionClick = (action) =>
+    {
+        if (actionButtonsProps?.onAction && actionButtonsProps?.selectedRow)
+        {
+            actionButtonsProps.onAction(action);
+        }
+    };
+
+    const isActionDisabled = !actionButtonsProps?.selectedRow;
 
     return (
         <div className="snippet-title-bar">
@@ -127,6 +143,90 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                         </IconButton>
                     </Tooltip>
                 )}
+                
+                {actionButtonsProps && (
+                    <>
+                        <Tooltip title="Delete this RFQ request completely from the system. This action cannot be undone and will permanently remove the selected RFQ row.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('delete')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <DeleteIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Create a duplicate copy of this RFQ request. The new RFQ will have the same parameters but can be modified independently.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('clone')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <FileCopyIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Open this RFQ request in edit mode. All fields will be editable allowing you to modify the RFQ parameters, pricing, and other details.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('edit')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <EditIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). The RMS will trigger the corresponding RFQ internal workflow.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('save')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <SaveIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Open option pricing scenario charting dialog. This will allow you to analyze different pricing scenarios, volatility impacts, and Greeks calculations for this RFQ.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('chart')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <BarChartIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="View this RFQ request in read-only mode. All fields will be displayed but cannot be modified.">
+                            <IconButton 
+                                className="title-bar-action" 
+                                onClick={() => handleActionClick('view')}
+                                disabled={isActionDisabled}
+                                style={{ 
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}
+                            >
+                                <VisibilityIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                )}
+
                 {showChannel && (
                     <Tooltip
                         style={{ color: titleBarContextShareColour }}

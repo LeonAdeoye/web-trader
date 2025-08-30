@@ -40,7 +40,7 @@ const RfqActionIconsRenderer = ({data, context}) =>
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
                 />
             </Tooltip>
-            <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). ThE RMS will process the RFQ and create the corresponding order workfklow.">
+            <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). The RMS will trigger the corresponding internal RFQ workflow.">
                 <SaveIcon 
                     onClick={() => handleRfqAction(ACTIONS.SAVE, data)} 
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}

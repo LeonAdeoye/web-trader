@@ -68,67 +68,21 @@ export const RfqsApp = () =>
         defaultDayConvention: 250
     });
     const [selectedRFQ, setSelectedRFQ] = useState({
-        request: '',
-        client: null,
-        status: null,
-        bookCode: null,
-        notionalInUSD: 0.000,
-        notionalInLocal: 0.000,
-        notionalCurrency: null,
-        notionalFXRate: 0.000,
-        dayCountConvention: config.defaultDayConvention,
-        exerciseType: 'EUROPEAN',
-        tradeDate: null,
-        spread: config.defaultSpread,
-        multiplier: 100,
-        contracts: 1,
-        quantity: 1,
-        lotSize: 100,
-        salesCreditPercentage: config.defaultSalesCreditPercentage,
-        salesCreditAmount: 0.000,
-        salesCreditFXRate: '',
-        salesCreditCurrency: null,
-        premiumSettlementFXRate: '',
-        premiumSettlementDaysOverride: config.defaultSettlementDays,
-        premiumSettlementCurrency: config.defaultSettlementCurrency ,
-        premiumSettlementDate: null,
-        hedgeType: null,
-        askPremiumInLocal: 0.000,
-        premiumInUSD: 0.000,
-        premiumInLocal: 0.000,
-        bidPremiumInLocal: 0.000,
-        askPremiumPercentage: 0.000,
-        premiumPercentage: 0.000,
-        bidPremiumPercentage: 0.000,
-        deltaShares: 0.000,
-        deltaNotional: 0.000,
-        delta: 0.000,
-        deltaPercent: 0.000,
-        gammaShares: 0.000,
-        gammaNotional: 0.000,
-        gamma: 0.000,
-        gammaPercent: 0.000,
-        thetaShares: 0.000,
-        thetaNotional: 0.000,
-        theta: 0.000,
-        thetaPercent: 0.000,
-        vegaShares: 0.000,
-        vegaNotional: 0.000,
-        vega: 0.000,
-        vegaPercent: 0.000,
-        rhoShares: 0.000,
-        rhoNotional: 0.000,
-        rho: 0.000,
-        rhoPercent: 0.000,
-        legs: []
+        rfqId: '',
+        client: '',
+        bookCode: '',
+        notionalCurrency: '',
+        premiumSettlementCurrency: '',
+        premiumSettlementDate: '',
+        hedgeType: '',
+        hedgePrice: ''
     });
 
-
+    const [selectedRow, setSelectedRow] = useState(null);
     const [chatMessages, setChatMessages] = useState([]);
     const [messageToBeSent, setMessageToBeSent] = useState('');
     const [selectedInitiator, setSelectedInitiator] = useState(null);
     const [selectedTarget, setSelectedTarget] = useState(null);
-
     const [salesCommentary, setSalesCommentary] = useState('Sales\' comment...');
     const [tradersCommentary, setTradersCommentary] = useState('Trader\'s comment...');
     const [clientCommentary, setClientCommentary] = useState('Client\'s feedback...');
@@ -741,6 +695,7 @@ export const RfqsApp = () =>
                 sortable: false,
                 width: 140,
                 filter: false,
+                hide: true,
                 cellRenderer: RfqActionIconsRenderer
             },
             // Basic RFQ Information
@@ -889,9 +844,64 @@ export const RfqsApp = () =>
             params.columnApi.applyColumnState({state: [sortModel], applyOrder: true});
     };
 
+    const onRowSelected = (event) =>
+    {
+        console.log('onRowSelected event:', event);
+        if (event.node.isSelected())
+        {
+            console.log('Setting selectedRow to:', event.data);
+            setSelectedRow(event.data);
+        }
+        else
+        {
+            console.log('Clearing selectedRow');
+            setSelectedRow(null);
+        }
+    };
+
+    const onSelectionChanged = (event) =>
+    {
+        console.log('onSelectionChanged event:', event);
+        const selectedNodes = event.api.getSelectedNodes();
+        console.log('Selected nodes:', selectedNodes);
+        if (selectedNodes.length > 0)
+        {
+            console.log('Setting selectedRow to:', selectedNodes[0].data);
+            setSelectedRow(selectedNodes[0].data);
+        }
+        else
+        {
+            console.log('Clearing selectedRow');
+            setSelectedRow(null);
+        }
+    };
+
+    const handleTitleBarAction = useCallback((action) =>
+    {
+        console.log('handleTitleBarAction called with:', action, 'selectedRow:', selectedRow);
+        if (!selectedRow)
+        {
+            console.log('No selected row, action ignored');
+            return;
+        }
+        handleRfqAction(action, selectedRow);
+    }, [selectedRow, handleRfqAction]);
+
     return (<>
-        <SnippetTitleBarComponent title="Request For Quote" windowId={windowId} addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }} showChannel={true}
-            showTools={false} showConfig={{ handler: openConfig }} snippetPrompt={"Enter RFQ snippet..."} onSnippetSubmit={handleSnippetSubmit}/>
+        <SnippetTitleBarComponent 
+            title="Request For Quote" 
+            windowId={windowId} 
+            addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }} 
+            showChannel={true}
+            showTools={false} 
+            showConfig={{ handler: openConfig }} 
+            snippetPrompt={"Enter RFQ snippet..."} 
+            onSnippetSubmit={handleSnippetSubmit}
+            actionButtonsProps={{
+                selectedRow: selectedRow,
+                onAction: handleTitleBarAction
+            }}
+        />
 
         <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
@@ -903,6 +913,9 @@ export const RfqsApp = () =>
                     getRowId={params => params.data.rfqId} 
                     onGridReady={onGridReady}
                     onCellValueChanged={handleCellValueChanged}
+                    onRowSelected={onRowSelected}
+                    onSelectionChanged={onSelectionChanged}
+                    rowSelection="single"
                     context={{ handleRfqAction }}
                     enableCellChangeFlash={true}
                     cellFlashDelay={2000}

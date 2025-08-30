@@ -174,14 +174,21 @@
       margin-right: 0px;
     }
 
-    .title-bar-close {
-      color: white;
+    .title-bar-action {
       margin-top: 10px;
-      margin-right: 10px;
-    }
-
-    .title-bar-maximize {
-      margin-right: 0;
+      margin-right: 0px;
+      
+      &:disabled {
+        color: #222 !important;
+      }
+      
+      &:not(:disabled) {
+        color: white;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
     }
   }
 }
