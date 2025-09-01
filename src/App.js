@@ -30,6 +30,7 @@ import {InsightsApp} from "./apps/InsightsApp";
 import {ReferenceDataApp} from "./apps/ReferenceDataApp";
 import {LimitsApp} from "./apps/LimitsApp";
 import {ParametricsApp} from "./apps/ParametricsApp";
+import RfqDetailsApp from "./apps/RfqDetailsApp";
 
 const App = ({}) =>
 {
@@ -65,6 +66,7 @@ const App = ({}) =>
             { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
             { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
             { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
+            { name: 'RFQ Details', path: '/rfq-details', component: RfqDetailsApp },
             { name: 'Parametrics', path: '/parametrics', component: ParametricsApp }
         ];
 

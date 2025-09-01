@@ -532,10 +532,13 @@ export const RfqsApp = () =>
 
     const handleViewRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Opening view dialog for RFQ: ${rfqData.rfqId}`);
-        // TODO: Implement read-only view dialog
-        loggerService.logInfo(`View dialog for RFQ ${rfqData.rfqId} - to be implemented`);
-    }, [loggerService]);
+        loggerService.logInfo(`Opening RFQ details window for RFQ: ${rfqData.rfqId}`);
+
+        const launchRfqDetailsApp = () =>
+            window.launchPad.openApp({url: 'http://localhost:3000/rfq-details',title: `RFQ Details: ${rfqData.rfqId}`, modalFlag: true});
+
+        launchRfqDetailsApp();
+    }, []);
 
     const handleRfqAction = useCallback((action, rfqData) =>
     {
