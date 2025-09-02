@@ -6,10 +6,8 @@ import {selectedContextShareState, selectedGenericGridRowState, titleBarContextS
 import {FDC3Service} from "../services/FDC3Service";
 import {LoggerService} from "../services/LoggerService";
 import {ExchangeRateService} from "../services/ExchangeRateService";
-import {OrderService} from "../services/OrderService";
 import {OptionRequestParserService} from "../services/OptionRequestParserService";
 import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
-import {BankHolidayService} from "../services/BankHolidayService";
 import {ClientService} from "../services/ClientService";
 import {InstrumentService} from "../services/InstrumentService";
 import {BookService} from "../services/BookService";
@@ -39,13 +37,11 @@ export const RfqsApp = () =>
     const [, setRfqCreationDialogOpen] = useRecoilState(rfqCreationDialogDisplayState);
     const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
-    const orderService = useRef(new OrderService()).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const volatilityService = useRef(new VolatilityService()).current;
     const rateService = useRef(new RateService()).current;
     const traderService = useRef(new TraderService()).current;
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
-    const bankHolidayService = useRef(new BankHolidayService()).current;
     const clientService = useRef(new ClientService()).current;
     const bookService = useRef(new BookService()).current;
     const instrumentService = useRef(new InstrumentService()).current;
@@ -57,7 +53,7 @@ export const RfqsApp = () =>
     const [dayCountConventions, setDayCountConventions] = useState([]);
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
-    const [exerciseType, setExerciseType] = useState('EUROPEAN');
+    const [exerciseType] = useState('EUROPEAN');
     const [config, setConfig] = useState({
         defaultSettlementCurrency: 'USD',
         defaultSettlementDays: 2,
