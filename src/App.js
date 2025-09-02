@@ -31,6 +31,8 @@ import {ReferenceDataApp} from "./apps/ReferenceDataApp";
 import {LimitsApp} from "./apps/LimitsApp";
 import {ParametricsApp} from "./apps/ParametricsApp";
 import RfqDetailsApp from "./apps/RfqDetailsApp";
+import RfqWorkflowsApp from "./apps/RfqWorkflowsApp";
+import RfqChartsApp from "./apps/RfqChartsApp";
 
 const App = ({}) =>
 {
@@ -67,6 +69,8 @@ const App = ({}) =>
             { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
             { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
             { name: 'RFQ Details', path: '/rfq-details', component: RfqDetailsApp },
+            { name: 'RFQ Charts', path: '/rfq-charts', component: RfqChartsApp },
+            { name: 'RFQ Workflows', path: '/rfq-workflows', component: RfqWorkflowsApp },
             { name: 'Parametrics', path: '/parametrics', component: ParametricsApp }
         ];
 

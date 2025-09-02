@@ -489,53 +489,57 @@ export const RfqsApp = () =>
 
     const handleRfqCreation = useCallback((snippet) =>
     {
-        loggerService.logInfo('Creating RFQ from snippet:', snippet);
         if (snippet && snippet.trim() !== '')
             handleSnippetSubmit(snippet);
     }, [handleSnippetSubmit, loggerService]);
 
     const handleDeleteRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Deleting RFQ: ${rfqData.rfqId}`);
         setRfqs(prevRfqs => prevRfqs.filter(rfq => rfq.rfqId !== rfqData.rfqId));
         loggerService.logInfo(`Successfully deleted RFQ: ${rfqData.rfqId}`);
     }, [loggerService, setRfqs]);
 
     const handleCloneRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Cloning RFQ: ${rfqData.rfqId}`);
         const clonedRfq = {...rfqData, rfqId: crypto.randomUUID(), arrivalTime: new Date().toLocaleTimeString(), status: 'Pending' };
         setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
         loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
     }, [loggerService, setRfqs]);
 
-    const handleEditRfq = useCallback((rfqData) =>
-    {
-        loggerService.logInfo(`Opening RFQ for editing: ${rfqData.rfqId}`);
-        // TODO: Implement edit dialog
-        loggerService.logInfo(`Edit dialog for RFQ ${rfqData.rfqId} - to be implemented`);
-    }, [loggerService]);
-
     const handleSaveRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Saving RFQ to OMS: ${rfqData.rfqId}`);
         // TODO: Implement web worker to send to OMS
         loggerService.logInfo(`Save to OMS for RFQ ${rfqData.rfqId} - to be implemented`);
     }, [loggerService]);
 
     const handleChartRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Opening chart dialog for RFQ: ${rfqData.rfqId}`);
-        // TODO: Implement option pricing scenario charting dialog
-        loggerService.logInfo(`Chart dialog for RFQ ${rfqData.rfqId} - to be implemented`);
+        const launchRfqDetailsApp = () =>
+            window.launchPad.openApp({url: 'http://localhost:3000/rfq-charts',title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
+
+        launchRfqDetailsApp();
     }, [loggerService]);
 
     const handleViewRfq = useCallback((rfqData) =>
     {
-        loggerService.logInfo(`Opening RFQ details window for RFQ: ${rfqData.rfqId}`);
-
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: 'http://localhost:3000/rfq-details',title: `RFQ Details: ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: 'http://localhost:3000/rfq-details',title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
+
+        launchRfqDetailsApp();
+    }, []);
+
+    const handleEditRfq = useCallback((rfqData) =>
+    {
+        const launchRfqDetailsApp = () =>
+            window.launchPad.openApp({url: 'http://localhost:3000/rfq-details',title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
+
+        launchRfqDetailsApp();
+    }, []);
+
+    const handleWorkflowRfq = useCallback((rfqData) =>
+    {
+        const launchRfqDetailsApp = () =>
+            window.launchPad.openApp({url: 'http://localhost:3000/rfq-workflows',title: `RFQ Workflows : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);
@@ -561,6 +565,9 @@ export const RfqsApp = () =>
                 break;
             case "view":
                 handleViewRfq(rfqData);
+                break;
+            case "workflow":
+                handleWorkflowRfq(rfqData);
                 break;
             default:
                 loggerService.logError(`Unknown RFQ action: ${action}`);

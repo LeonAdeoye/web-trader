@@ -8,7 +8,7 @@ import TitleBarComponent from "../components/TitleBarComponent";
 const RfqDetailsApp = () =>
 {
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
-    const windowId = window.command.getWindowId("rfq-Details");
+    const windowId = window.command.getWindowId("rfq-details");
     const loggerService = useRef(new LoggerService(RfqDetailsApp.name)).current;
 
     const [optionLegs] = useState([
@@ -19,15 +19,9 @@ const RfqDetailsApp = () =>
 
     const [activeTab, setActiveTab] = useState(0);
 
-    useEffect(() =>
-    {
-        loggerService.logInfo("RFQ Details App loaded");
-    }, [loggerService]);
-
     const handleTabChange = (event, newValue) =>
     {
         setActiveTab(newValue);
-        loggerService.logInfo(`Switched to tab: ${newValue}`);
     };
 
     // Sample RFQ snippet text - in a real app, this would come from the RFQ data

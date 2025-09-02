@@ -9,6 +9,8 @@ import FileCopyIcon from "@mui/icons-material/FileCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
+import RepeatIcon from '@mui/icons-material/Repeat';
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
@@ -224,9 +226,20 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                 <VisibilityIcon style={{height: '24px'}} />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title="Click to participate in an RFQ workflow between desks.">
+                            <IconButton
+                                className="title-bar-action"
+                                onClick={() => handleActionClick('workflow')}
+                                disabled={isActionDisabled}
+                                style={{
+                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}>
+                                <RepeatIcon style={{height: '24px'}} />
+                            </IconButton>
+                        </Tooltip>
                     </>
                 )}
-
                 {showChannel && (
                     <Tooltip
                         style={{ color: titleBarContextShareColour }}
