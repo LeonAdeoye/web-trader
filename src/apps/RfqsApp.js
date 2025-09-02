@@ -79,13 +79,6 @@ export const RfqsApp = () =>
     });
 
     const [selectedRow, setSelectedRow] = useState(null);
-    const [chatMessages, setChatMessages] = useState([]);
-    const [messageToBeSent, setMessageToBeSent] = useState('');
-    const [selectedInitiator, setSelectedInitiator] = useState(null);
-    const [selectedTarget, setSelectedTarget] = useState(null);
-    const [salesCommentary, setSalesCommentary] = useState('Sales\' comment...');
-    const [tradersCommentary, setTradersCommentary] = useState('Trader\'s comment...');
-    const [clientCommentary, setClientCommentary] = useState('Client\'s feedback...');
 
     useEffect(() =>
     {
@@ -102,7 +95,6 @@ export const RfqsApp = () =>
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
             setInstruments(instrumentService.getInstruments());
-
             setCurrencies(exchangeRateService.getCurrencyCodes());
             setDayCountConventions([360, 365, 250]);
             setStatusEnums([
@@ -120,20 +112,30 @@ export const RfqsApp = () =>
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
     }, [exchangeRateService, bookService, clientService, loggerService, instrumentService, traderService, volatilityService, rateService]);
 
-
-
     useEffect(() =>
     {
-        // const webWorker = new Worker(new URL("../workers/order-reader.js", import.meta.url));
-        // setInboundWorker(webWorker);
-        // return () => webWorker.terminate();
+        const webWorker = new Worker(new URL("../workers/read-rfq.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
     }, []);
 
     useEffect(() =>
     {
-        // const webWorker = new Worker(new URL("../workers/manage-order.js", import.meta.url));
-        // setOutboundWorker(webWorker);
-        // return () => webWorker.terminate();
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/send-rfq.js", import.meta.url));
+        setOutboundWorker(webWorker);
+        return () => webWorker.terminate();
     }, []);
 
     useEffect(() =>
@@ -193,24 +195,22 @@ export const RfqsApp = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const incomingOrder = event.data.order;
+        const incomingRfq = event.data.rfq;
 
         setRfqs((prevData) =>
         {
-            //incomingOrder.executedNotionalValueInUSD = exchangeRateService.convert(incomingOrder.executedNotionalValueInLocal, incomingOrder.settlementCurrency, 'USD').toFixed(2);
-
-            const index = prevData.findIndex((element) => element.orderId === incomingOrder.orderId);
+            const index = prevData.findIndex((element) => element.rfqId === incomingRfq.rfqId);
             if (index !== -1)
             {
                 const updatedData = [...prevData];
-                updatedData[index] = incomingOrder;
+                updatedData[index] = incomingRfq;
                 return updatedData;
             }
             else
-                return [...prevData, incomingOrder];
+                return [...prevData, incomingRfq];
         });
 
-    }, [exchangeRateService, orderService]);
+    }, []);
 
     const handleSendSlice = (childOrders) =>
     {
@@ -220,28 +220,6 @@ export const RfqsApp = () =>
             outboundWorker.postMessage(childOrder);
         });
     }
-
-    const handleSendChatMessage = () =>
-    {
-        if (messageToBeSent.trim() && selectedInitiator)
-        {
-            const newMessage = {
-                sequenceId: chatMessages.length + 1,
-                owner: selectedInitiator.userId,
-                content: messageToBeSent,
-                timeStamp: new Date(),
-                isInitiator: true
-            };
-            setChatMessages([...chatMessages, newMessage]);
-            setMessageToBeSent('');
-        }
-    };
-
-    const handleKeyPress = (e) =>
-    {
-        if (e.key === 'Enter')
-            handleSendChatMessage();
-    };
 
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
 
@@ -508,8 +486,8 @@ export const RfqsApp = () =>
 
     const handleSaveRfq = useCallback((rfqData) =>
     {
-        // TODO: Implement web worker to send to OMS
-        loggerService.logInfo(`Save to OMS for RFQ ${rfqData.rfqId} - to be implemented`);
+        outboundWorker.postMessage(rfqData)
+        loggerService.logInfo(`Saving to RMS for RFQ ${JSON.stringify(rfqData)}`);
     }, [loggerService]);
 
     const handleChartRfq = useCallback((rfqData) =>
