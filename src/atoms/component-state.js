@@ -72,10 +72,3 @@ export const rfqsConfigPanelOpenState = atom({
     key: 'rfqsConfigPanelOpenState',
     default: false
 });
-
-
-
-
-
-
-

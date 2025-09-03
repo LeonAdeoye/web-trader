@@ -14,14 +14,14 @@ const main = async () => {
 
         onmessage = async function (event)
         {
-            const { order } = event.data;
+            const { rfq } = event.data;
 
-            switch (order.state) {
-                case "NEW_ORDER":
+            switch (rfq.state) {
+                case "PENDING":
                     try
                     {
-                        await client.publish(topicName, order);
-                        loggerService.logInfo(`Send RFQ web worker published message on topic '${topicName}': ${JSON.stringify(order)}`);
+                        await client.publish(topicName, rfq);
+                        loggerService.logInfo(`Send RFQ web worker published message on topic '${topicName}': ${JSON.stringify(rfq)}`);
                     }
                     catch (error)
                     {
@@ -29,7 +29,7 @@ const main = async () => {
                     }
                     break;
                 default:
-                    loggerService.logError(`Send RFQ web worker received an unknown message type: ${order.state}`);
+                    loggerService.logError(`Send RFQ web worker received an unknown message type: ${rfq.state}`);
             }
         };
     }
