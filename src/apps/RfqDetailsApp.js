@@ -13,11 +13,13 @@ const RfqDetailsApp = () =>
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
     const editable = urlParams.get('editable');
+    const configParam = urlParams.get('config');
 
     if (rfqDataParam)
     {
         try {
             const rfq = JSON.parse(decodeURIComponent(rfqDataParam));
+            const config = JSON.parse(decodeURIComponent(configParam));
             return (
                 <>
                     <TitleBarComponent
@@ -95,7 +97,7 @@ const RfqDetailsApp = () =>
                             {rfq.legs.map((leg, index) =>
                             (
                                 <div key={index} style={{ display: activeTab === index ? 'block' : 'none', height: '100%' }}>
-                                    <RfqDetailsComponent rfq={rfq} editable={editable} index={index}/>
+                                    <RfqDetailsComponent rfq={rfq} editable={editable} index={index} config={config}/>
                                 </div>
                             ))}
                         </div>

@@ -6,7 +6,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { OptionPricingService } from '../services/OptionPricingService';
 import {LoggerService} from "../services/LoggerService";
 
-export const RfqDetailsComponent = ({ rfq, editable, index}) =>
+export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 {
     const [legMetrics, setLegMetrics] = useState(null);
     const [legDerivedValues, setLegDerivedValues] = useState(null);
@@ -108,35 +108,35 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
     [
         { 
             field: 'Greek', 
-            delta: legMetrics.delta.toFixed(3),
-            gamma: legMetrics.gamma.toFixed(3),
-            theta: legMetrics.theta.toFixed(3),
-            vega: legMetrics.vega.toFixed(3),
-            rho: legMetrics.rho.toFixed(3)
+            delta: (legMetrics.delta * leg.quantity).toFixed(config.decimalPrecision),
+            gamma: (legMetrics.gamma * leg.quantity).toFixed(config.decimalPrecision),
+            theta: (legMetrics.theta * leg.quantity).toFixed(config.decimalPrecision),
+            vega: (legMetrics.vega * leg.quantity).toFixed(config.decimalPrecision),
+            rho: (legMetrics.rho * leg.quantity).toFixed(config.decimalPrecision)
         },
         { 
             field: 'Notional', 
-            delta: legDerivedValues.deltaNotional.toFixed(3),
-            gamma: legDerivedValues.gammaNotional.toFixed(3),
-            theta: legDerivedValues.thetaNotional.toFixed(3),
-            vega: legDerivedValues.vegaNotional.toFixed(3),
-            rho: legDerivedValues.rhoNotional.toFixed(3)
+            delta: legDerivedValues.deltaNotional.toFixed(config.decimalPrecision),
+            gamma: legDerivedValues.gammaNotional.toFixed(config.decimalPrecision),
+            theta: legDerivedValues.thetaNotional.toFixed(config.decimalPrecision),
+            vega: legDerivedValues.vegaNotional.toFixed(config.decimalPrecision),
+            rho: legDerivedValues.rhoNotional.toFixed(config.decimalPrecision)
         },
         { 
             field: 'Percent', 
-            delta: legDerivedValues.deltaPercent.toFixed(3),
-            gamma: legDerivedValues.gammaPercent.toFixed(3),
-            theta: legDerivedValues.thetaPercent.toFixed(3),
-            vega: legDerivedValues.vegaPercent.toFixed(3),
-            rho: legDerivedValues.rhoPercent.toFixed(3)
+            delta: (legDerivedValues.deltaPercent * leg.quantity).toFixed(config.decimalPrecision),
+            gamma: (legDerivedValues.gammaPercent * leg.quantity).toFixed(config.decimalPrecision),
+            theta: (legDerivedValues.thetaPercent * leg.quantity).toFixed(config.decimalPrecision),
+            vega: (legDerivedValues.vegaPercent * leg.quantity).toFixed(config.decimalPrecision),
+            rho: (legDerivedValues.rhoPercent * leg.quantity).toFixed(config.decimalPrecision)
         },
         { 
             field: 'Shares', 
-            delta: legDerivedValues.deltaShares.toFixed(0), 
-            gamma: legDerivedValues.gammaShares.toFixed(0), 
-            theta: legDerivedValues.thetaShares.toFixed(0), 
-            vega: legDerivedValues.vegaShares.toFixed(0), 
-            rho: legDerivedValues.rhoShares.toFixed(0) 
+            delta: legDerivedValues.deltaShares.toFixed(0),
+            gamma: legDerivedValues.gammaShares.toFixed(0),
+            theta: legDerivedValues.thetaShares.toFixed(0),
+            vega: legDerivedValues.vegaShares.toFixed(0),
+            rho: legDerivedValues.rhoShares.toFixed(0)
         }
     ];
 
@@ -160,7 +160,8 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
         { headerName: 'Rho', field: 'rho', width: 120 }
     ];
 
-    const textFields = [
+    const textFields =
+    [
         { label: "Arrival Time", value: rfq.arrivalTime || '' },
         { label: "Quantity", value: leg.quantity || '' },
         { label: "Maturity Date", value: leg.maturityDate || '' },
@@ -178,14 +179,14 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
         { label: "Notional FX Rate", value: rfq.notionalFXRate || '' },
         { label: "Notional In Local", value: rfq.notionalInLocal || '' },
         { label: "Notional In USD", value: rfq.notionalInUSD || '' },
-        { label: "Premium In Local", value: legDerivedValues.premiumInLocal.toFixed(4) || '' },
-        { label: "Premium In USD", value: legDerivedValues.premiumInUSD.toFixed(4) || '' },
-        { label: "Premium Percentage", value: legDerivedValues.premiumPercentage.toFixed(4) || '' },
+        { label: "Premium In Local", value: legDerivedValues.premiumInLocal.toFixed(config.decimalPrecision) || '' },
+        { label: "Premium In USD", value: legDerivedValues.premiumInUSD.toFixed(config.decimalPrecision) || '' },
+        { label: "Premium Percentage", value: legDerivedValues.premiumPercentage.toFixed(config.decimalPrecision) || '' },
         { label: "Premium Settlement Currency", value: rfq.premiumSettlementCurrency || '' },
         { label: "Premium Settlement Date", value: rfq.premiumSettlementDate || '' },
         { label: "Premium Settlement Days Override", value: rfq.premiumSettlementDaysOverride || '' },
         { label: "Premium Settlement FX Rate", value: rfq.premiumSettlementFXRate || '' },
-        { label: "Sales Credit Amount", value: legDerivedValues.salesCreditAmount.toFixed(2) || '' },
+        { label: "Sales Credit Amount", value: legDerivedValues.salesCreditAmount.toFixed(config.decimalPrecision) || '' },
         { label: "Sales Credit Percentage", value: rfq.salesCreditPercentage || '' }
     ];
 

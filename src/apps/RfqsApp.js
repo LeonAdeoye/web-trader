@@ -490,8 +490,9 @@ export const RfqsApp = () =>
     const handleChartRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-charts?rfqData=${encodedRfqData}`,title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-charts?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, [loggerService]);
@@ -499,8 +500,9 @@ export const RfqsApp = () =>
     const handleViewRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false&config=${encodedConfig}`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);
@@ -508,8 +510,9 @@ export const RfqsApp = () =>
     const handleEditRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true&config=${encodedConfig}`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);
@@ -517,8 +520,9 @@ export const RfqsApp = () =>
     const handleWorkflowRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}`,title: `RFQ Workflows : ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Workflows : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);
