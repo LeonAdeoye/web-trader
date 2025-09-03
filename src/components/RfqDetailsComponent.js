@@ -100,7 +100,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
         calculateLegMetrics().then(() => loggerService.logInfo("Successfully calculated option prices and greeks."))
     }, [rfq, index]);
 
-    if (!rfq || !rfq.legs || rfq.legs.length === 0)
+    if (!rfq || !rfq.legs || rfq.legs.length === 0 || legMetrics === null || legDerivedValues === null)
         return <div>No RFQ data available</div>;
 
     const leg = rfq.legs[index];
@@ -108,27 +108,27 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
     [
         { 
             field: 'Greek', 
-            delta: legMetrics.delta.toFixed(4), 
-            gamma: legMetrics.gamma.toFixed(4), 
-            theta: legMetrics.theta.toFixed(4), 
-            vega: legMetrics.vega.toFixed(4), 
-            rho: legMetrics.rho.toFixed(4) 
+            delta: legMetrics.delta.toFixed(3),
+            gamma: legMetrics.gamma.toFixed(3),
+            theta: legMetrics.theta.toFixed(3),
+            vega: legMetrics.vega.toFixed(3),
+            rho: legMetrics.rho.toFixed(3)
         },
         { 
             field: 'Notional', 
-            delta: legDerivedValues.deltaNotional.toFixed(2), 
-            gamma: legDerivedValues.gammaNotional.toFixed(2), 
-            theta: legDerivedValues.thetaNotional.toFixed(2), 
-            vega: legDerivedValues.vegaNotional.toFixed(2), 
-            rho: legDerivedValues.rhoNotional.toFixed(2) 
+            delta: legDerivedValues.deltaNotional.toFixed(3),
+            gamma: legDerivedValues.gammaNotional.toFixed(3),
+            theta: legDerivedValues.thetaNotional.toFixed(3),
+            vega: legDerivedValues.vegaNotional.toFixed(3),
+            rho: legDerivedValues.rhoNotional.toFixed(3)
         },
         { 
             field: 'Percent', 
-            delta: legDerivedValues.deltaPercent.toFixed(4), 
-            gamma: legDerivedValues.gammaPercent.toFixed(4), 
-            theta: legDerivedValues.thetaPercent.toFixed(4), 
-            vega: legDerivedValues.vegaPercent.toFixed(4), 
-            rho: legDerivedValues.rhoPercent.toFixed(4) 
+            delta: legDerivedValues.deltaPercent.toFixed(3),
+            gamma: legDerivedValues.gammaPercent.toFixed(3),
+            theta: legDerivedValues.thetaPercent.toFixed(3),
+            vega: legDerivedValues.vegaPercent.toFixed(3),
+            rho: legDerivedValues.rhoPercent.toFixed(3)
         },
         { 
             field: 'Shares', 
