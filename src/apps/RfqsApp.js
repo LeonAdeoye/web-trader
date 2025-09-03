@@ -558,7 +558,6 @@ export const RfqsApp = () =>
         try
         {
             loggerService.logInfo(`Recalculating RFQ: ${rfqData.rfqId}`);
-            
             const metrics = await calculateOptionMetrics(rfqData);
             const derivedValues = calculateDerivedValues(metrics, rfqData);
             

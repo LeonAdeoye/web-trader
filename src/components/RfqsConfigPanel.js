@@ -22,24 +22,25 @@ const darkPanelTheme = createTheme({
 
 export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
 {
-    // Local state for temporary changes
     const [tempConfig, setTempConfig] = useState(config);
 
-    // Update temp config when main config changes (e.g., when panel opens)
-    useEffect(() => {
+    useEffect(() =>
+    {
         setTempConfig(config);
     }, [config]);
 
-    const handleInputChange = (field, value) => {
+    const handleInputChange = (field, value) =>
+    {
         setTempConfig(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleApply = () => {
+    const handleApply = () =>
+    {
         onApply(tempConfig);
     };
 
-    const handleClose = () => {
-        // Reset temp config to original values when closing without applying
+    const handleClose = () =>
+    {
         setTempConfig(config);
         onClose();
     };
@@ -205,9 +206,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                         </Grid>
                     </Grid>
                 </Box>
-
                 <Divider sx={{ mt: 'auto', borderColor: 'rgba(255,255,255,0.12)' }} />
-
                 <Box sx={{ display: 'flex', p: 1, justifyContent: 'flex-end' }}>
                     <Button size="small" variant="contained" onClick={handleApply} sx={{ backgroundColor: '#ffffff', color: '#404040', textTransform: 'none', '&:hover': { backgroundColor: '#bdbdbd' } }}>Apply</Button>
                 </Box>
