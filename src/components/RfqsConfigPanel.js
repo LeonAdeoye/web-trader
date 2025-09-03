@@ -29,15 +29,8 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
         setTempConfig(config);
     }, [config]);
 
-    const handleInputChange = (field, value) =>
-    {
-        setTempConfig(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleApply = () =>
-    {
-        onApply(tempConfig);
-    };
+    const handleInputChange = (field, value) => setTempConfig(prev => ({ ...prev, [field]: value }));
+    const handleApply = () => onApply(tempConfig);
 
     const handleClose = () =>
     {
