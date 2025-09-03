@@ -500,7 +500,7 @@ export const RfqsApp = () =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&edit=false`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);
@@ -509,7 +509,7 @@ export const RfqsApp = () =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
         const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&edit=true`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
+            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
     }, []);

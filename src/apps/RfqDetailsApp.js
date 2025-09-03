@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LoggerService } from '../services/LoggerService';
 import { useRef } from 'react';
 import TitleBarComponent from "../components/TitleBarComponent";
+import {RfqDetailsComponent} from "../components/RfqDetailsComponent";
 
 const RfqDetailsApp = () =>
 {
@@ -16,7 +17,7 @@ const RfqDetailsApp = () =>
 
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
-    const canEdit = urlParams.get('edit');
+    const editable = urlParams.get('editable');
 
     if (rfqDataParam)
     {
@@ -110,7 +111,7 @@ const RfqDetailsApp = () =>
                                         display: activeTab === index ? 'block' : 'none',
                                         height: '100%'
                                     }}>
-                                    {/* Empty tab panel - add your components here later */}
+                                    <RfqDetailsComponent rfq={rfq} editable={editable} index={index}/>
                                 </div>
                             ))}
                         </div>
