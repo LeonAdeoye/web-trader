@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LoggerService } from '../services/LoggerService';
 import { useRef } from 'react';
 import TitleBarComponent from "../components/TitleBarComponent";
@@ -9,12 +9,7 @@ const RfqDetailsApp = () =>
     const windowId = window.command.getWindowId("rfq-details");
     const loggerService = useRef(new LoggerService(RfqDetailsApp.name)).current;
     const [activeTab, setActiveTab] = useState(0);
-
-    const handleTabChange = (event, newValue) =>
-    {
-        setActiveTab(newValue);
-    };
-
+    const handleTabChange = (event, newValue) => setActiveTab(newValue);
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
     const editable = urlParams.get('editable');
@@ -30,8 +25,7 @@ const RfqDetailsApp = () =>
                         windowId={windowId}
                         addButtonProps={undefined}
                         showChannel={false}
-                        showTools={false}
-                    />
+                        showTools={false}/>
 
                     <div style={{
                         width: '100%',
@@ -67,8 +61,7 @@ const RfqDetailsApp = () =>
                                             minWidth: '120px',
                                             textAlign: 'center'
                                         }}
-                                        title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}
-                                    >
+                                        title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                                             <span style={{ fontSize: '11px', opacity: 0.8 }}>{leg.legId}</span>
                                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
@@ -98,19 +91,10 @@ const RfqDetailsApp = () =>
                                 ))}
                             </div>
                         </div>
-
-                        <div style={{
-                            padding: '20px',
-                            height: 'calc(100% - 80px)',
-                            overflow: 'auto'
-                        }}>
-                            {rfq.legs.map((leg, index) => (
-                                <div
-                                    key={index}
-                                    style={{
-                                        display: activeTab === index ? 'block' : 'none',
-                                        height: '100%'
-                                    }}>
+                        <div style={{ padding: '20px', height: 'calc(100% - 80px)', overflow: 'auto' }}>
+                            {rfq.legs.map((leg, index) =>
+                            (
+                                <div key={index} style={{ display: activeTab === index ? 'block' : 'none', height: '100%' }}>
                                     <RfqDetailsComponent rfq={rfq} editable={editable} index={index}/>
                                 </div>
                             ))}

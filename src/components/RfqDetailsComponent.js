@@ -10,24 +10,19 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
 {
     const [legMetrics, setLegMetrics] = useState(null);
     const [legDerivedValues, setLegDerivedValues] = useState(null);
-    const [loading, setLoading] = useState(true);
     const optionPricingService = new OptionPricingService();
     const loggerService = useRef(new LoggerService(RfqDetailsComponent.name)).current;
 
     useEffect(() =>
     {
         if (!rfq || !rfq.legs || rfq.legs.length === 0)
-        {
-            setLoading(false);
             return;
-        }
 
         const leg = rfq.legs[index];
         const calculateLegMetrics = async () =>
         {
             try
             {
-                setLoading(true);
                 const { notionalFXRate = 1, interestRate = 0, volatility = 20, underlyingPrice = 80, multiplier = 1 } = rfq;
                 const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
                 const isCall = (optionType === 'CALL');
@@ -95,16 +90,14 @@ export const RfqDetailsComponent = ({ rfq, editable, index}) =>
                     salesCreditAmount
                 };
                 setLegDerivedValues(derivedValues);
-                setLoading(false);
             }
             catch (error)
             {
                 loggerService.logError('Error calculating leg metrics:', error);
-                setLoading(false);
             }
         };
 
-        calculateLegMetrics();
+        calculateLegMetrics().then(() => loggerService.logInfo("Successfully calculated option prices and greeks."))
     }, [rfq, index]);
 
     if (!rfq || !rfq.legs || rfq.legs.length === 0)
