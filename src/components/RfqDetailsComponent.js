@@ -28,16 +28,9 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                 const isCall = (optionType === 'CALL');
                 const isEuropean = rfq.exerciseType === "EUROPEAN";
                 const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} = await optionPricingService.calculateOptionPrice({
-                    strike, 
-                    volatility: volatility, 
-                    underlyingPrice, 
-                    daysToExpiry: rfq.daysToExpiry || 30,
-                    interestRate: interestRate, 
-                    isCall, 
-                    isEuropean, 
-                    dayCountConvention: rfq.dayCountConvention || 'ACT/365'
+                    strike, volatility: volatility/100, underlyingPrice, daysToExpiry: rfq.daysToExpiry || 30, interestRate: interestRate/100,
+                    isCall, isEuropean, dayCountConvention: rfq.dayCountConvention || '365'
                 });
-                
                 const deltaNumber = Number(rawDelta);
                 const gammaNumber = Number(rawGamma);
                 const thetaNumber = Number(rawTheta);
@@ -64,8 +57,6 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                 setLegMetrics(metrics);
                 const { underlyingPrice: underlying = 80, spread = 0, salesCreditPercentage = 0.5 } = rfq;
                 const { delta, gamma, theta, vega, rho, price: optionPrice, shares: legShares, notionalShares: legNotionalShares, notionalInUSD: legNotionalInUSD } = metrics;
-                const askPremium = (optionPrice + spread/2);
-                const bidPremium = (optionPrice - spread/2);
                 const salesCreditAmount = (salesCreditPercentage * legNotionalInUSD / 100);
                 const derivedValues =
                 {
@@ -84,6 +75,8 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                     rhoShares: rho * legShares,
                     rhoNotional: rho * legNotionalShares,
                     rhoPercent: (rho * 100) / underlying,
+                    askPremium: (optionPrice + spread/2),
+                    bidPremium: (optionPrice - spread/2),
                     premiumInUSD: optionPrice / notionalFXRate,
                     premiumInLocal: optionPrice,
                     premiumPercentage: (optionPrice * 100) / underlying,
@@ -171,6 +164,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         { label: "Multiplier", value: rfq.multiplier || '' },
         { label: "Volatility", value: leg.volatility || '' },
         { label: "Underlying", value: leg.underlying || '' },
+        { label: "Underlying Price", value: leg.underlyingPrice || '' },
         { label: "Exercise Type", value: rfq?.exerciseType || '' },
         { label: "Currency", value: leg.currency || '' },
         { label: "Strike", value: leg.strike || '' },
@@ -181,6 +175,8 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         { label: "Notional In USD", value: rfq.notionalInUSD || '' },
         { label: "Premium In Local", value: legDerivedValues.premiumInLocal.toFixed(config.decimalPrecision) || '' },
         { label: "Premium In USD", value: legDerivedValues.premiumInUSD.toFixed(config.decimalPrecision) || '' },
+        // { label: "Ask Premium", value: rfq.askPremium.toFixed(config.decimalPrecision) || '' },
+        // { label: "Bid Premium", value: rfq.bidPremium.toFixed(config.decimalPrecision) || '' },
         { label: "Premium Percentage", value: legDerivedValues.premiumPercentage.toFixed(config.decimalPrecision) || '' },
         { label: "Premium Settlement Currency", value: rfq.premiumSettlementCurrency || '' },
         { label: "Premium Settlement Date", value: rfq.premiumSettlementDate || '' },
@@ -219,7 +215,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 
     return (
         <div style={{ padding: '10px' }}>
-            <div className="ag-theme-alpine" style={{ height: '115px', width: '740px', marginBottom: '20px' }}>
+            <div className="ag-theme-alpine" style={{ height: '120px', width: '720px', marginBottom: '20px' }}>
                 <AgGridReact rowData={gridData} columnDefs={columnDefs}  suppressRowClickSelection={true} rowSelection="none"
                     headerHeight={22} rowHeight={22} suppressColumnVirtualisation={true} suppressRowVirtualisation={true}
                     defaultColDef={{ resizable: false, sortable: true, filter: true }}/>

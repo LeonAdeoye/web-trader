@@ -1,0 +1,194 @@
+@import './partials/tab-styles';
+
+.rfq-charts-app {
+  // Tab container styling
+  .rfq-charts-tab-container {
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+    padding: 0 20px;
+  }
+
+  .rfq-charts-tab-list {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    margin-top: 3px;
+  }
+
+  // Tab button styling
+  .rfq-charts-tab-button {
+    padding: 5px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    text-align: center;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    margin-right: 5px;
+    
+    // Default unselected state
+    background-color: #bdbaba;
+    color: white;
+    
+    // Selected state
+    &.selected {
+      background-color: #656161;
+      color: white;
+      font-weight: 600;
+    }
+    
+    // Hover state
+    &:hover:not(.selected) {
+      background-color: #a8a5a5;
+    }
+  }
+
+  // All Legs tab specific styling
+  .rfq-charts-all-legs-tab {
+    @extend .rfq-charts-tab-button;
+  }
+
+  // Individual leg tab styling
+  .rfq-charts-leg-tab {
+    @extend .rfq-charts-tab-button;
+    
+    .leg-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      
+      .leg-id {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+      
+      .leg-badges {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        
+        .option-type-badge {
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
+          
+          &.call {
+            background-color: #4caf50;
+            color: white;
+          }
+          
+          &.put {
+            background-color: #ff9800;
+            color: white;
+          }
+        }
+        
+        .side-badge {
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
+          
+          &.buy {
+            background-color: #2196f3;
+            color: white;
+          }
+          
+          &.sell {
+            background-color: #f44336;
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  // Material-UI FormControl and Select styling to match RFQ creation dialog
+  .MuiFormControl-root {
+    .MuiOutlinedInput-root {
+      background-color: white;
+      
+      .MuiOutlinedInput-notchedOutline {
+        border-color: #404040;
+      }
+
+      &:hover .MuiOutlinedInput-notchedOutline {
+        border-color: #656161;
+      }
+
+      &.Mui-focused .MuiOutlinedInput-notchedOutline {
+        border-color: #2196f3;
+      }
+
+      &.Mui-error .MuiOutlinedInput-notchedOutline {
+        border-color: #d32f2f;
+      }
+    }
+  }
+
+  .MuiSelect-select {
+    color: #333;
+    font-size: 12px;
+    background-color: white;
+  }
+
+  .MuiMenuItem-root {
+    color: #333;
+    font-size: 12px;
+    background-color: white;
+  }
+
+  .MuiInputLabel-root {
+    color: #404040;
+    font-size: 12px;
+  }
+
+  // Chart button styling to match RFQ creation dialog
+  .rfq-charts-chart-button {
+    text-transform: none;
+    background-color: #404040;
+    color: white;
+    font-size: 12px;
+    padding: 6px 16px;
+    border: 1px solid #404040;
+    border-radius: 3px;
+    font-weight: 500;
+    min-width: 60px;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #656161;
+      border-color: #656161;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #2c2c2c;
+      border-color: #2c2c2c;
+      transform: translateY(1px);
+    }
+
+    &:disabled {
+      background-color: #cccccc !important;
+      color: #666666 !important;
+      border-color: #cccccc !important;
+      cursor: not-allowed;
+      
+      &:hover {
+        background-color: #cccccc !important;
+        border-color: #cccccc !important;
+      }
+    }
+  }
+
+  // Chart section styling
+  .rfq-charts-content {
+    padding: 20px;
+    height: calc(100% - 160px);
+    overflow: auto;
+  }
+}

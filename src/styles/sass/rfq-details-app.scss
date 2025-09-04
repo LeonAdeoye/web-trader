@@ -1,0 +1,112 @@
+@import './partials/tab-styles';
+
+.rfq-details-app {
+  // Tab container styling
+  .rfq-details-tab-container {
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+    padding: 0 20px;
+  }
+
+  .rfq-details-tab-list {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    margin-top: 3px;
+  }
+
+  // Tab button styling
+  .rfq-details-tab-button {
+    padding: 5px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    text-align: center;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    margin-right: 5px;
+    
+    // Default unselected state
+    background-color: #bdbaba;
+    color: white;
+    
+    // Selected state
+    &.selected {
+      background-color: #656161;
+      color: white;
+      font-weight: 600;
+    }
+    
+    // Hover state
+    &:hover:not(.selected) {
+      background-color: #a8a5a5;
+    }
+  }
+
+  // Individual leg tab styling
+  .rfq-details-leg-tab {
+    @extend .rfq-details-tab-button;
+    
+    .leg-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      
+      .leg-id {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+      
+      .leg-badges {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        
+        .option-type-badge {
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
+          
+          &.call {
+            background-color: #4caf50;
+            color: white;
+          }
+          
+          &.put {
+            background-color: #ff9800;
+            color: white;
+          }
+        }
+        
+        .side-badge {
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-size: 10px;
+          font-weight: bold;
+          
+          &.buy {
+            background-color: #2196f3;
+            color: white;
+          }
+          
+          &.sell {
+            background-color: #f44336;
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  // Content area styling
+  .rfq-details-content {
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow: auto;
+  }
+}

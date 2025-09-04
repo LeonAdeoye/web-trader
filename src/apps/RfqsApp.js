@@ -236,14 +236,8 @@ export const RfqsApp = () =>
     {
         const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, contracts, legs, underlyingPrice = 80 } = rfqData;
         
-        const totalQuantity = contracts;
-        const strike = legs?.[0]?.strike || 100;
-        const notionalInLocal = totalQuantity * multiplier * strike;
-        const notionalInUSD = (notionalInLocal / notionalFXRate).toFixed(config.decimalPrecision);
-        
-        const optionType = legs?.[0]?.optionType || 'CALL';
-        const isEuropean = rfqData.exerciseType === "EUROPEAN";
-        const isCall = (optionType === 'CALL');
+        if (!legs || legs.length === 0)
+            return null;
         
         let daysToExpiry = rfqData.daysToExpiry;
         if (rfqData.maturityDate && !daysToExpiry)
@@ -253,39 +247,75 @@ export const RfqsApp = () =>
             daysToExpiry = Math.ceil((maturityDate - today) / (1000 * 60 * 60 * 24));
         }
         
-        const {delta, gamma, theta, rho, vega, price} = await optionPricingService.calculateOptionPrice({
-            strike, volatility: volatility, underlyingPrice, daysToExpiry,
-            interestRate: interestRate, isCall, isEuropean, dayCountConvention
-        });
+        const isEuropean = rfqData.exerciseType === "EUROPEAN";
         
-        const deltaNumber = Number(delta);
-        const gammaNumber = Number(gamma);
-        const thetaNumber = Number(theta);
-        const vegaNumber = Number(vega);
-        const rhoNumber = Number(rho);
+        let totalDelta = 0;
+        let totalGamma = 0;
+        let totalTheta = 0;
+        let totalVega = 0;
+        let totalRho = 0;
+        let totalPrice = 0;
+        let totalShares = 0;
+        let totalNotionalShares = 0;
+        let totalNotionalInLocal = 0;
         
-        const shares = totalQuantity * multiplier;
-        const notionalShares = shares * underlyingPrice;
+        for (const leg of legs)
+        {
+            const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
+            const isCall = (optionType === 'CALL');
+            
+            const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} = await optionPricingService.calculateOptionPrice({
+                strike, volatility: volatility/100, underlyingPrice, daysToExpiry,
+                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention
+            });
+            
+            const deltaNumber = Number(rawDelta);
+            const gammaNumber = Number(rawGamma);
+            const thetaNumber = Number(rawTheta);
+            const vegaNumber = Number(rawVega);
+            const rhoNumber = Number(rawRho);
+            const priceNumber = Number(rawPrice);
+            
+            const legShares = quantity * multiplier;
+            const legNotionalShares = legShares * underlyingPrice;
+            const legNotionalInLocal = quantity * multiplier * strike;
+            
+            const sideMultiplier = (leg.side === 'SELL' ? -1 : 1);
+            
+            totalDelta += deltaNumber * quantity * sideMultiplier;
+            totalGamma += gammaNumber * quantity * sideMultiplier;
+            totalTheta += thetaNumber * quantity * sideMultiplier;
+            totalVega += vegaNumber * quantity * sideMultiplier;
+            totalRho += rhoNumber * quantity * sideMultiplier;
+            totalPrice += priceNumber * quantity * sideMultiplier;
+            totalShares += legShares;
+            totalNotionalShares += legNotionalShares;
+            totalNotionalInLocal += legNotionalInLocal;
+        }
+        
+        const notionalInUSD = (totalNotionalInLocal / notionalFXRate).toFixed(config.decimalPrecision);
         
         return {
-            notionalInLocal,
+            notionalInLocal: totalNotionalInLocal,
             notionalInUSD,
             daysToExpiry,
-            price,
-            deltaNumber,
-            gammaNumber,
-            thetaNumber,
-            vegaNumber,
-            rhoNumber,
-            shares,
-            notionalShares
+            price: totalPrice,
+            deltaNumber: totalDelta,
+            gammaNumber: totalGamma,
+            thetaNumber: totalTheta,
+            vegaNumber: totalVega,
+            rhoNumber: totalRho,
+            shares: totalShares,
+            notionalShares: totalNotionalShares
         };
     }, [config, optionPricingService]);
 
     const calculateDerivedValues = useCallback((metrics, rfqData) =>
     {
         const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber, shares, notionalShares } = metrics;
-        const { underlyingPrice = 80, spread, salesCreditPercentage, notionalFXRate } = rfqData;
+        const { underlyingPrice = 80, spread, salesCreditPercentage, notionalFXRate, legs, multiplier = 100 } = rfqData;
+        
+        const totalQuantity = legs ? legs.reduce((sum, leg) => sum + (leg.quantity || 1), 0) : 1;
         
         const askPremium = (price + spread/2);
         const bidPremium = (price - spread/2);
@@ -305,24 +335,24 @@ export const RfqsApp = () =>
             askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
             premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
             bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            deltaShares: (deltaNumber * shares).toFixed(config.decimalPrecision),
-            deltaNotional: (deltaNumber * notionalShares).toFixed(config.decimalPrecision),
+            deltaShares: (deltaNumber * multiplier).toFixed(config.decimalPrecision),
+            deltaNotional: (deltaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
             delta: deltaNumber.toFixed(config.decimalPrecision),
             deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            gammaShares: (gammaNumber * shares).toFixed(config.decimalPrecision),
-            gammaNotional: (gammaNumber * notionalShares).toFixed(config.decimalPrecision),
+            gammaShares: (gammaNumber * multiplier).toFixed(config.decimalPrecision),
+            gammaNotional: (gammaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
             gamma: gammaNumber.toFixed(config.decimalPrecision),
             gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            thetaShares: (thetaNumber * shares).toFixed(config.decimalPrecision),
-            thetaNotional: (thetaNumber * notionalShares).toFixed(config.decimalPrecision),
+            thetaShares: (thetaNumber * multiplier).toFixed(config.decimalPrecision),
+            thetaNotional: (thetaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
             theta: thetaNumber.toFixed(config.decimalPrecision),
             thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            vegaShares: (vegaNumber * shares).toFixed(config.decimalPrecision),
-            vegaNotional: (vegaNumber * notionalShares).toFixed(config.decimalPrecision),
+            vegaShares: (vegaNumber * multiplier).toFixed(config.decimalPrecision),
+            vegaNotional: (vegaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
             vega: vegaNumber.toFixed(config.decimalPrecision),
             vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            rhoShares: (rhoNumber * shares).toFixed(config.decimalPrecision),
-            rhoNotional: (rhoNumber * notionalShares).toFixed(config.decimalPrecision),
+            rhoShares: (rhoNumber * multiplier).toFixed(config.decimalPrecision),
+            rhoNotional: (rhoNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
             rho: rhoNumber.toFixed(config.decimalPrecision),
             rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision)
         };
@@ -346,6 +376,7 @@ export const RfqsApp = () =>
             volatility: volatility,
             dayCountConvention: dayCountConvention,
             multiplier: multiplier,
+            underlying: underlying,
             contracts: totalQuantity,
             spread: config.defaultSpread,
             underlyingPrice: underlyingPrice,
@@ -356,12 +387,17 @@ export const RfqsApp = () =>
         };
         
         const metrics = await calculateOptionMetrics(rfqData);
+        if (!metrics)
+            throw new Error("Failed to calculate option metrics");
+        
         const derivedValues = calculateDerivedValues(metrics, rfqData);
         
         const rfq =
         {
             arrivalTime: new Date().toLocaleTimeString(),
             rfqId: crypto.randomUUID(),
+            underlying: underlying,
+            underlyingPrice: underlyingPrice,
             request: snippet,
             client:  'Select Client',
             status: 'Pending',
@@ -563,8 +599,10 @@ export const RfqsApp = () =>
         {
             loggerService.logInfo(`Recalculating RFQ: ${rfqData.rfqId}`);
             const metrics = await calculateOptionMetrics(rfqData);
-            const derivedValues = calculateDerivedValues(metrics, rfqData);
+            if (!metrics)
+                throw new Error("Failed to calculate option metrics");
             
+            const derivedValues = calculateDerivedValues(metrics, rfqData);
             const premiumSettlementDate = optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, rfqData.premiumSettlementDaysOverride);
             
             const updatedRFQ = {
@@ -621,7 +659,7 @@ export const RfqsApp = () =>
         const fieldsRequiringRecalculation =
         [
             'notionalFXRate', 'interestRate', 'volatility', 'dayCountConvention', 'multiplier',
-            'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'contracts'
+            'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'contracts', 'underlyingPrice'
         ];
         
         if (fieldsRequiringRecalculation.includes(colDef.field))
@@ -632,8 +670,6 @@ export const RfqsApp = () =>
     {
         if (isSave)
             loggerService.logInfo('Saving RFQ:', selectedRFQ);
-        else
-            loggerService.logInfo('Cancelling RFQ changes');
     };
 
     useEffect(() =>
@@ -680,26 +716,17 @@ export const RfqsApp = () =>
         const clientDropdownValues = getUniqueClientNames();
         
         return ([
-            // Actions Column
-            {
-                headerName: 'Actions',
-                field: 'actions',
-                sortable: false,
-                width: 140,
-                filter: false,
-                hide: true,
-                cellRenderer: RfqActionIconsRenderer
-            },
-            // Basic RFQ Information
+            {headerName: 'Actions', field: 'actions', sortable: false, width: 140, filter: false, hide: true, cellRenderer: RfqActionIconsRenderer },
              {headerName: "Arrival Time", field: "arrivalTime", sortable: true, minWidth: 130, width: 130, filter: true, editable: false},
              {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
              {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
+            {headerName: "Underlying Code", field: "underlying", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
+            {headerName: "Underlying Price", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
-
             {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in local currency',
@@ -832,50 +859,30 @@ export const RfqsApp = () =>
     const onGridReady = (params) =>
     {
         const sortModel = { colId: 'arrivalTime', sort: 'desc' }
-        if(sortModel !== undefined && sortModel !== null)
             params.columnApi.applyColumnState({state: [sortModel], applyOrder: true});
     };
 
     const onRowSelected = (event) =>
     {
-        console.log('onRowSelected event:', event);
         if (event.node.isSelected())
-        {
-            console.log('Setting selectedRow to:', event.data);
             setSelectedRow(event.data);
-        }
         else
-        {
-            console.log('Clearing selectedRow');
             setSelectedRow(null);
-        }
     };
 
     const onSelectionChanged = (event) =>
     {
-        console.log('onSelectionChanged event:', event);
         const selectedNodes = event.api.getSelectedNodes();
-        console.log('Selected nodes:', selectedNodes);
         if (selectedNodes.length > 0)
-        {
-            console.log('Setting selectedRow to:', selectedNodes[0].data);
             setSelectedRow(selectedNodes[0].data);
-        }
         else
-        {
-            console.log('Clearing selectedRow');
             setSelectedRow(null);
-        }
     };
 
     const handleTitleBarAction = useCallback((action) =>
     {
-        console.log('handleTitleBarAction called with:', action, 'selectedRow:', selectedRow);
         if (!selectedRow)
-        {
-            console.log('No selected row, action ignored');
             return;
-        }
         handleRfqAction(action, selectedRow);
     }, [selectedRow, handleRfqAction]);
 
@@ -892,8 +899,7 @@ export const RfqsApp = () =>
             actionButtonsProps={{
                 selectedRow: selectedRow,
                 onAction: handleTitleBarAction
-            }}
-        />
+            }} />
 
         <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
@@ -917,8 +923,7 @@ export const RfqsApp = () =>
                         sortable: true,
                         filter: true,
                         floatingFilter: false
-                    }}
-                />
+                    }} />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
             <RfqsConfigPanel isOpen={isConfigOpen} config={config} onClose={closeConfig} onApply={applyConfig} />
