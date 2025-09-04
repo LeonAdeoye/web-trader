@@ -21,6 +21,7 @@ import {RateService} from "../services/RateService";
 import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
+import {PriceService} from "../services/PriceService";
 
 export const RfqsApp = () =>
 {
@@ -39,6 +40,7 @@ export const RfqsApp = () =>
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const volatilityService = useRef(new VolatilityService()).current;
+    const priceService = useRef(new PriceService()).current;
     const rateService = useRef(new RateService()).current;
     const traderService = useRef(new TraderService()).current;
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
@@ -87,6 +89,7 @@ export const RfqsApp = () =>
             await traderService.loadTraders();
             await volatilityService.loadVolatilities();
             await rateService.loadRates();
+            await priceService.loadPrices();
 
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
@@ -234,7 +237,8 @@ export const RfqsApp = () =>
 
     const calculateOptionMetrics = useCallback(async (rfqData) =>
     {
-        const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, contracts, legs, underlyingPrice = 80 } = rfqData;
+        const underlyingPriceFromService = priceService.getLastTradePrice(rfqData.underlying);
+        const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, legs, underlyingPrice = underlyingPriceFromService } = rfqData;
         
         if (!legs || legs.length === 0)
             return null;
@@ -312,11 +316,10 @@ export const RfqsApp = () =>
 
     const calculateDerivedValues = useCallback((metrics, rfqData) =>
     {
-        const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber, shares, notionalShares } = metrics;
-        const { underlyingPrice = 80, spread, salesCreditPercentage, notionalFXRate, legs, multiplier = 100 } = rfqData;
-        
-        const totalQuantity = legs ? legs.reduce((sum, leg) => sum + (leg.quantity || 1), 0) : 1;
-        
+        const underPrice = priceService.getLastTradePrice(rfqData.underlying);
+        const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber} = metrics;
+        const { underlyingPrice = underPrice, spread, notionalFXRate, multiplier = 100 } = rfqData;
+        const salesCreditPercentage = rfqData.salesCreditPercentage || config.defaultSalesCreditPercentage;
         const askPremium = (price + spread/2);
         const bidPremium = (price - spread/2);
         const salesCreditAmount = (salesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision);
@@ -324,6 +327,7 @@ export const RfqsApp = () =>
         return {
             askPremium: askPremium.toFixed(config.decimalPrecision),
             bidPremium: bidPremium.toFixed(config.decimalPrecision),
+            salesCreditPercentage,
             salesCreditAmount,
             askImpliedVol: (rfqData.volatility / 100),
             impliedVol: (rfqData.volatility / 100),
@@ -367,8 +371,7 @@ export const RfqsApp = () =>
         const dayCountConvention = config.defaultDayConvention;
         const volatility = volatilityService.getVolatility(underlying);
         const interestRate = rateService.getInterestRate(currency);
-        const underlyingPrice = 80;
-        
+        const underlyingPrice = priceService.getLastTradePrice(underlying);
         const rfqData =
         {
             notionalFXRate: fxRate,

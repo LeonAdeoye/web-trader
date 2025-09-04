@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo} from 'react';
 import { TextField } from '@mui/material';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { OptionPricingService } from '../services/OptionPricingService';
 import {LoggerService} from "../services/LoggerService";
+import {formatDate} from "../utilities";
 
 export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 {
@@ -12,6 +13,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
     const [legDerivedValues, setLegDerivedValues] = useState(null);
     const optionPricingService = new OptionPricingService();
     const loggerService = useRef(new LoggerService(RfqDetailsComponent.name)).current;
+    const windowId = useMemo(() => window.command.getWindowId("RFQ Details"), []);
 
     useEffect(() =>
     {
@@ -23,7 +25,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         {
             try
             {
-                const { notionalFXRate = 1, interestRate = 0, volatility = 20, underlyingPrice = 80, multiplier = 1 } = rfq;
+                const { notionalFXRate = 1, interestRate, volatility, underlyingPrice, spread, multiplier, salesCreditPercentage } = rfq;
                 const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
                 const isCall = (optionType === 'CALL');
                 const isEuropean = rfq.exerciseType === "EUROPEAN";
@@ -42,6 +44,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                 const notionalInUSD = notionalInLocal / notionalFXRate;
                 const metrics =
                 {
+                    spread: spread,
                     delta: deltaNumber * (leg.side === 'SELL' ? -1 : 1),
                     gamma: gammaNumber * (leg.side === 'SELL' ? -1 : 1),
                     theta: thetaNumber * (leg.side === 'SELL' ? -1 : 1),
@@ -55,31 +58,28 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                 };
                 
                 setLegMetrics(metrics);
-                const { underlyingPrice: underlying = 80, spread = 0, salesCreditPercentage = 0.5 } = rfq;
                 const { delta, gamma, theta, vega, rho, price: optionPrice, shares: legShares, notionalShares: legNotionalShares, notionalInUSD: legNotionalInUSD } = metrics;
                 const salesCreditAmount = (salesCreditPercentage * legNotionalInUSD / 100);
                 const derivedValues =
                 {
                     deltaShares: delta * legShares,
                     deltaNotional: delta * legNotionalShares,
-                    deltaPercent: (delta * 100) / underlying,
+                    deltaPercent: (delta * 100) / underlyingPrice,
                     gammaShares: gamma * legShares,
                     gammaNotional: gamma * legNotionalShares,
-                    gammaPercent: (gamma * 100) / underlying,
+                    gammaPercent: (gamma * 100) / underlyingPrice,
                     thetaShares: theta * legShares,
                     thetaNotional: theta * legNotionalShares,
-                    thetaPercent: (theta * 100) / underlying,
+                    thetaPercent: (theta * 100) / underlyingPrice,
                     vegaShares: vega * legShares,
                     vegaNotional: vega * legNotionalShares,
-                    vegaPercent: (vega * 100) / underlying,
+                    vegaPercent: (vega * 100) / underlyingPrice,
                     rhoShares: rho * legShares,
                     rhoNotional: rho * legNotionalShares,
-                    rhoPercent: (rho * 100) / underlying,
-                    askPremium: (optionPrice + spread/2),
-                    bidPremium: (optionPrice - spread/2),
+                    rhoPercent: (rho * 100) / underlyingPrice,
                     premiumInUSD: optionPrice / notionalFXRate,
                     premiumInLocal: optionPrice,
-                    premiumPercentage: (optionPrice * 100) / underlying,
+                    premiumPercentage: (optionPrice * 100) / underlyingPrice,
                     salesCreditAmount
                 };
                 setLegDerivedValues(derivedValues);
@@ -157,29 +157,29 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
     [
         { label: "Arrival Time", value: rfq.arrivalTime || '' },
         { label: "Quantity", value: leg.quantity || '' },
-        { label: "Maturity Date", value: leg.maturityDate || '' },
+        { label: "Maturity Date", value: formatDate(new Date(leg.maturityDate).toLocaleDateString()) },
         { label: "Days To Expiry", value: leg.daysToExpiry || '' },
         { label: "RFQ ID", value: rfq.rfqId || '' },
         { label: "Status", value: rfq.status || '' },
         { label: "Multiplier", value: rfq.multiplier || '' },
-        { label: "Volatility", value: leg.volatility || '' },
+        { label: "Volatility", value: rfq.volatility || '' },
         { label: "Underlying", value: leg.underlying || '' },
-        { label: "Underlying Price", value: leg.underlyingPrice || '' },
+        { label: "Underlying Price", value: rfq.underlyingPrice || '' },
         { label: "Exercise Type", value: rfq?.exerciseType || '' },
         { label: "Currency", value: leg.currency || '' },
         { label: "Strike", value: leg.strike || '' },
-        { label: "Interest Rate", value: leg.interestRate || '' },
+        { label: "Interest Rate", value: rfq.interestRate || '' },
         { label: "Notional Currency", value: rfq.notionalCurrency || '' },
         { label: "Notional FX Rate", value: rfq.notionalFXRate || '' },
         { label: "Notional In Local", value: rfq.notionalInLocal || '' },
         { label: "Notional In USD", value: rfq.notionalInUSD || '' },
         { label: "Premium In Local", value: legDerivedValues.premiumInLocal.toFixed(config.decimalPrecision) || '' },
         { label: "Premium In USD", value: legDerivedValues.premiumInUSD.toFixed(config.decimalPrecision) || '' },
-        // { label: "Ask Premium", value: rfq.askPremium.toFixed(config.decimalPrecision) || '' },
-        // { label: "Bid Premium", value: rfq.bidPremium.toFixed(config.decimalPrecision) || '' },
+        { label: "Ask Premium", value: (legMetrics.price + legMetrics.spread/2).toFixed(config.decimalPrecision) || '' },
+        { label: "Bid Premium", value: (legMetrics.price - legMetrics.spread/2).toFixed(config.decimalPrecision) || '' },
         { label: "Premium Percentage", value: legDerivedValues.premiumPercentage.toFixed(config.decimalPrecision) || '' },
         { label: "Premium Settlement Currency", value: rfq.premiumSettlementCurrency || '' },
-        { label: "Premium Settlement Date", value: rfq.premiumSettlementDate || '' },
+        { label: "Premium Settlement Date", value: formatDate(new Date(rfq.premiumSettlementDate).toLocaleDateString())},
         { label: "Premium Settlement Days Override", value: rfq.premiumSettlementDaysOverride || '' },
         { label: "Premium Settlement FX Rate", value: rfq.premiumSettlementFXRate || '' },
         { label: "Sales Credit Amount", value: legDerivedValues.salesCreditAmount.toFixed(config.decimalPrecision) || '' },

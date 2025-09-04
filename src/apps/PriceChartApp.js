@@ -11,7 +11,6 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
     const [newlySelectedSymbol, setNewlySelectedSymbol] = useState(null);
     const [connectionId, setConnectionId] = useState(null);
     const cacheService = useRef(new CacheService()).current;
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("Price Chart"), []);
     const [options, setOptions] = useState({
         data: [],

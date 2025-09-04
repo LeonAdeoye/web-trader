@@ -1,12 +1,18 @@
 import {LoggerService} from "./LoggerService";
 import {BankHolidayService} from "../services/BankHolidayService";
 import {InstrumentService} from "./InstrumentService";
+import {VolatilityService} from "./VolatilityService";
+import {RateService} from "./RateService";
+import {PriceService} from "./PriceService";
 
 export class OptionRequestParserService
 {
     #loggerService;
     #bankHolidayService;
     #instrumentService;
+    #volatilityService;
+    #interestRateService;
+    #priceService;
     #constants;
 
     constructor()
@@ -14,7 +20,14 @@ export class OptionRequestParserService
         this.#loggerService = new LoggerService(this.constructor.name);
         this.#bankHolidayService = new BankHolidayService();
         this.#instrumentService = new InstrumentService();
-        this.#instrumentService.loadInstruments();
+        this.#volatilityService = new VolatilityService();
+        this.#interestRateService = new RateService();
+        this.#priceService = new PriceService();
+        this.#instrumentService.loadInstruments().then(() => this.#loggerService.logInfo(`Instruments loaded: ${this.#instrumentService.getInstruments().length}`));
+        this.#volatilityService.loadVolatilities().then(() => this.#loggerService.logInfo(`Volatilities loaded: ${this.#volatilityService.getVolatilities().length}`));
+        this.#interestRateService.loadRates().then(() => this.#loggerService.logInfo(`Interest rates loaded: ${this.#interestRateService.getRates().length}`));
+        this.#bankHolidayService.loadBankHolidays().then(() => this.#loggerService.logInfo(`Bank holidays loaded: ${this.#bankHolidayService.getBankHolidays().length}`));
+        this.#priceService.loadPrices().then(() => this.#loggerService.logInfo(`Prices loaded: ${this.#priceService.getPrices().length}`));
 
         this.#constants =
         {
@@ -94,14 +107,15 @@ export class OptionRequestParserService
     setOptionLegUnderlying = (optionLeg, underlying) =>
     {
         optionLeg.underlying = underlying;
-        optionLeg.volatility = this.#constants.DEFAULT_VOLATILITY;
-        optionLeg.interestRate = this.#constants.DEFAULT_INTEREST_RATE;
+        optionLeg.volatility = this.#volatilityService.getVolatility(underlying) || this.#constants.DEFAULT_VOLATILITY;
         optionLeg.dayCountConvention = this.#constants.DEFAULT_DAY_COUNT_CONVENTION;
+        optionLeg.underlyingPrice = this.#priceService.getLastTradePrice(underlying);
         const instrument = this.#instrumentService.getInstrumentByCode(underlying);
         if (instrument?.settlementCurrency)
             optionLeg.currency = instrument.settlementCurrency;
         else
             optionLeg.currency = this.#constants.DEFAULT_CURRENCY;
+        optionLeg.interestRate = this.#interestRateService.getInterestRate(optionLeg.currency) || this.#constants.DEFAULT_INTEREST_RATE;
     }
 
     parseRequest = (request, parent) =>

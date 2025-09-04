@@ -4,6 +4,7 @@ import {TabContext, TabList, TabPanel} from "@mui/lab";
 import {Box, Tab} from "@mui/material";
 import {InterestRateParametricComponent} from "../components/InterestRateParametricComponent";
 import {VolatilityParametricComponent} from "../components/VolatilityParametricComponent";
+import {PriceParametricComponent} from "../components/PriceParametricComponent";
 
 export const ParametricsApp = () =>
 {
@@ -20,6 +21,7 @@ export const ParametricsApp = () =>
                             <TabList className="parametric-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
                                 <Tab className="volatility-parametric-tab" label={"Volatility"} value="1"/>
                                 <Tab className="interest-rate-parametric-tab" label={"Interest Rate"} value="2"/>
+                                <Tab className="price-parametric-tab" label={"Prices"} value="3"/>
                             </TabList>
                         </Box>
                         <TabPanel value='1' className="volatility-parametric">
@@ -27,6 +29,9 @@ export const ParametricsApp = () =>
                         </TabPanel>
                         <TabPanel value='2' className="interest-rate-parametric">
                             <InterestRateParametricComponent/>
+                        </TabPanel>
+                        <TabPanel value='3' className="price-parametric">
+                            <PriceParametricComponent/>
                         </TabPanel>
                     </TabContext>
                 </div>

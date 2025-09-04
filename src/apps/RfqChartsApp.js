@@ -14,12 +14,8 @@ const RfqChartsApp = () =>
     const windowId = window.command.getWindowId("rfq-charts");
     const loggerService = useRef(new LoggerService(RfqChartsApp.name)).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
-    
-    // URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
-    
-    // State for controls
     const [rangeKey, setRangeKey] = useState('VOLATILITY');
     const [startValue, setStartValue] = useState(0.1);
     const [endValue, setEndValue] = useState(0.5);
@@ -27,11 +23,8 @@ const RfqChartsApp = () =>
     const [activeTab, setActiveTab] = useState(0);
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    
-    // Validation states
     const [validationErrors, setValidationErrors] = useState({});
     const [hasCalculated, setHasCalculated] = useState(false);
-    
     const rangeKeyOptions = [
         { value: 'VOLATILITY', label: 'Volatility' },
         { value: 'UNDERLYING_PRICE', label: 'Underlying Price' },
@@ -40,11 +33,12 @@ const RfqChartsApp = () =>
     ];
 
     let rfq = null;
-    let rfqSnippetText = "+c 100 25Oct25 0001.HK";
+    let rfqSnippetText = "";
 
     if (rfqDataParam)
     {
-        try {
+        try
+        {
             rfq = JSON.parse(decodeURIComponent(rfqDataParam));
             rfqSnippetText = rfq.request;
         }
@@ -56,12 +50,9 @@ const RfqChartsApp = () =>
 
     const handleTabChange = (event, newValue) => setActiveTab(newValue);
 
-    // Validation functions
     const validateInputs = () =>
     {
         const errors = {};
-        
-        // Validate start value
         if (isNaN(startValue) || startValue === null || startValue === undefined)
         {
             errors.startValue = 'Start value is required';
@@ -70,8 +61,6 @@ const RfqChartsApp = () =>
         {
             errors.startValue = 'Start value must be non-negative';
         }
-        
-        // Validate end value
         if (isNaN(endValue) || endValue === null || endValue === undefined)
         {
             errors.endValue = 'End value is required';
@@ -98,8 +87,6 @@ const RfqChartsApp = () =>
         {
             errors.increment = 'Increment must be smaller than the range';
         }
-        
-        // Validate range key
         if (!rangeKey || !rangeKeyOptions.find(opt => opt.value === rangeKey))
         {
             errors.rangeKey = 'Valid range key is required';
@@ -114,11 +101,8 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setStartValue(isNaN(numValue) ? 0 : numValue);
         setHasCalculated(false);
-        // Clear validation error when user starts typing
         if (validationErrors.startValue)
-        {
             setValidationErrors(prev => ({ ...prev, startValue: undefined }));
-        }
     };
 
     const handleEndValueChange = (value) =>
@@ -126,11 +110,8 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setEndValue(isNaN(numValue) ? 0 : numValue);
         setHasCalculated(false);
-        // Clear validation error when user starts typing
         if (validationErrors.endValue)
-        {
             setValidationErrors(prev => ({ ...prev, endValue: undefined }));
-        }
     };
 
     const handleIncrementChange = (value) =>
@@ -138,29 +119,22 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setIncrement(isNaN(numValue) ? 0.01 : numValue);
         setHasCalculated(false);
-        // Clear validation error when user starts typing
         if (validationErrors.increment)
-        {
             setValidationErrors(prev => ({ ...prev, increment: undefined }));
-        }
     };
 
     const handleRangeKeyChange = (value) =>
     {
         setRangeKey(value);
         setHasCalculated(false);
-        // Clear validation error when user changes selection
         if (validationErrors.rangeKey)
-        {
             setValidationErrors(prev => ({ ...prev, rangeKey: undefined }));
-        }
     };
 
     const calculateRange = async () =>
     {
         if (!rfq || !rfq.legs || rfq.legs.length === 0) return;
-        
-        // Validate inputs before calculation
+
         if (!validateInputs())
         {
             loggerService.logError('Validation failed, cannot calculate range');
@@ -174,16 +148,17 @@ const RfqChartsApp = () =>
             
             const baseRequest = {
                 strike: leg.strike,
-                volatility: leg.volatility || 0.2,
-                underlyingPrice: leg.underlyingPrice || 80,
+                volatility: leg.volatility,
+                underlyingPrice: leg.underlyingPrice,
                 daysToExpiry: leg.daysToExpiry || 30,
-                interestRate: leg.interestRate || 0.05,
+                interestRate: leg.interestRate,
                 isCall: leg.optionType === 'CALL',
                 isEuropean: true,
                 dayCountConvention: leg.dayCountConvention || 365
             };
 
-            const rangeRequest = {
+            const rangeRequest =
+            {
                 baseRequest,
                 rangeKey,
                 startValue,
@@ -192,8 +167,6 @@ const RfqChartsApp = () =>
             };
 
             const result = await optionPricingService.calculateRange(rangeRequest);
-            
-            // Transform data for ag-charts
             const chartData = result.results.map(item => ({
                 rangeVariable: item.rangeVariable,
                 delta: item.delta,
@@ -218,9 +191,9 @@ const RfqChartsApp = () =>
         }
     };
 
-    const handleChartClick = () =>
+    const handleChartClick = async () =>
     {
-        calculateRange();
+        await calculateRange();
     };
 
     const chartOptions = {
@@ -412,7 +385,7 @@ const RfqChartsApp = () =>
                         <Tooltip 
                             title={
                                 <Typography fontSize={12}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Generate Greeks Analysis Chart</div>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Click To Generate Greeks Analysis Chart</div>
                                     <div style={{ marginBottom: '2px' }}>• Calculates option Greeks (Delta, Gamma, Rho, Theta, Vega) and premium</div>
                                     <div style={{ marginBottom: '2px' }}>• Varies the selected range parameter from start to end value</div>
                                     <div style={{ marginBottom: '2px' }}>• Uses the specified increment to create data points</div>
