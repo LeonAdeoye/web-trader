@@ -63,7 +63,8 @@ export const RfqsApp = () =>
         defaultSpread: 1,
         defaultSalesCreditPercentage: 0.5,
         defaultVolatility: 20,
-        defaultDayConvention: 250
+        defaultDayConvention: 250,
+        defaultOptionModel: 'european'
     });
     const [selectedRFQ, setSelectedRFQ] = useState({
         rfqId: '',
@@ -270,7 +271,8 @@ export const RfqsApp = () =>
             
             const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} = await optionPricingService.calculateOptionPrice({
                 strike, volatility: volatility/100, underlyingPrice, daysToExpiry,
-                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention
+                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention,
+                modelType: config.defaultOptionModel
             });
             
             const deltaNumber = Number(rawDelta);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, IconButton, Typography, Divider, TextField, Button, Paper } from '@mui/material';
+import { Box, Grid, IconButton, Typography, Divider, TextField, Button, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -193,6 +193,61 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                                                 '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
                                                 '& .MuiOutlinedInput-root': { height: 18, borderRadius: 1 } 
                                             }}/>
+                                    </Box>
+                                </Box>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
+                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Option Pricing</Typography>
+                                <Box sx={{ px: 1.8 }}>
+                                    <Box sx={{ mb: 1 }}>
+                                        <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Default Option Model</Typography>
+                                        <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                                            <Select
+                                                value={tempConfig.defaultOptionModel || 'european'}
+                                                onChange={(e) => handleInputChange('defaultOptionModel', e.target.value)}
+                                                sx={{
+                                                    height: 18,
+                                                    fontSize: '0.6rem',
+                                                    '& .MuiSelect-select': { 
+                                                        padding: '0 4px', 
+                                                        fontSize: '0.6rem',
+                                                        lineHeight: '16px'
+                                                    },
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'rgba(255,255,255,0.23)'
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: 'rgba(255,255,255,0.5)'
+                                                    },
+                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                        borderColor: '#1976d2'
+                                                    }
+                                                }}
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        sx: {
+                                                            backgroundColor: '#2f2f2f',
+                                                            color: 'white',
+                                                            '& .MuiMenuItem-root': {
+                                                                fontSize: '0.6rem',
+                                                                padding: '4px 8px',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'rgba(255,255,255,0.1)'
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <MenuItem value="european">European Black-Scholes</MenuItem>
+                                                <MenuItem value="monte_carlo">Monte Carlo Simulation</MenuItem>
+                                                <MenuItem value="binomial">Binomial Tree</MenuItem>
+                                                <MenuItem value="american">American Black-Scholes</MenuItem>
+                                            </Select>
+                                        </FormControl>
                                     </Box>
                                 </Box>
                             </Paper>

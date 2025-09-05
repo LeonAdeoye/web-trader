@@ -16,6 +16,7 @@ const RfqChartsApp = () =>
     const optionPricingService = useRef(new OptionPricingService()).current;
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
+    const configParam = urlParams.get('config');
     const [rangeKey, setRangeKey] = useState('VOLATILITY');
     const [startValue, setStartValue] = useState(0.1);
     const [endValue, setEndValue] = useState(0.5);
@@ -25,6 +26,7 @@ const RfqChartsApp = () =>
     const [isLoading, setIsLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const [hasCalculated, setHasCalculated] = useState(false);
+    const [config, setConfig] = useState({ defaultOptionModel: 'european' });
     const rangeKeyOptions = [
         { value: 'VOLATILITY', label: 'Volatility' },
         { value: 'UNDERLYING_PRICE', label: 'Underlying Price' },
@@ -34,6 +36,17 @@ const RfqChartsApp = () =>
 
     let rfq = null;
     let rfqSnippetText = "";
+
+    useEffect(() => {
+        if (configParam) {
+            try {
+                const parsedConfig = JSON.parse(decodeURIComponent(configParam));
+                setConfig(parsedConfig);
+            } catch (error) {
+                loggerService.logError("Failed to parse config parameter: " + error.message);
+            }
+        }
+    }, [configParam]);
 
     if (rfqDataParam)
     {
@@ -148,13 +161,14 @@ const RfqChartsApp = () =>
             
             const baseRequest = {
                 strike: leg.strike,
-                volatility: leg.volatility,
+                volatility: leg.volatility/100,
                 underlyingPrice: leg.underlyingPrice,
                 daysToExpiry: leg.daysToExpiry || 30,
-                interestRate: leg.interestRate,
+                interestRate: leg.interestRate/100,
                 isCall: leg.optionType === 'CALL',
                 isEuropean: true,
-                dayCountConvention: leg.dayCountConvention || 365
+                dayCountConvention: leg.dayCountConvention || 365,
+                modelType: config.defaultOptionModel
             };
 
             const rangeRequest =

@@ -18,8 +18,9 @@ export class OptionPricingService
      * @param {number} optionPricingRequest.daysToExpiry - Days until option expiration
      * @param {number} optionPricingRequest.interestRate - Interest rate percentage (0-100)
      * @param {boolean} optionPricingRequest.isCall - True for call option, false for put option
-     // * @param {boolean} optionPricingRequest.isEuropean - True for European option, false for American option
+     * @param {boolean} optionPricingRequest.isEuropean - True for European option, false for American option
      * @param {number} optionPricingRequest.dayCountConvention - Day count convention (e.g., 360, 250, 365)
+     * @param {string} [optionPricingRequest.modelType] - Option pricing model type (e.g., "european", "monte_carlo", "binomial", "american")
      * @returns {Promise<Object>} Promise resolving to OptionPriceResult object
      */
     async calculateOptionPrice(optionPricingRequest)
@@ -56,7 +57,7 @@ export class OptionPricingService
     /**
      * Calculate option price range using REST pricing service
      * @param {Object} rangeRequest - The range calculation request object
-     * @param {Object} rangeRequest.baseRequest - The base option pricing request
+     * @param {Object} rangeRequest.baseRequest - The base option pricing request (includes modelType)
      * @param {string} rangeRequest.rangeKey - The variable to range over (VOLATILITY, UNDERLYING_PRICE, TIME_TO_EXPIRY, INTEREST_RATE)
      * @param {number} rangeRequest.startValue - Starting value for the range
      * @param {number} rangeRequest.endValue - Ending value for the range
