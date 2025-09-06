@@ -11,6 +11,7 @@ import {defaultIfBlank, getDateMinusDays, safeDouble} from "../utilities";
 import { useRecoilState } from 'recoil';
 import { insightsConfigPanelOpenState } from '../atoms/component-state';
 import InsightsConfigPanel from "../components/InsightsConfigPanel";
+import { ServiceRegistry } from '../services/ServiceRegistry';
 
 export const InsightsApp = () =>
 {
@@ -26,6 +27,8 @@ export const InsightsApp = () =>
     const [insightsData, setInsightsData] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
     const [orders, setOrders] = useState([]);
+    const [ownerId, setOwnerId] = useState(null);
+    const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
 
     const [config, setConfig] = useState({
         metric: 'shares',
@@ -49,6 +52,54 @@ export const InsightsApp = () =>
         workingBuyColor: '#66a7bb',
         workingSellColor: '#d9a9a7'
     });
+
+    useEffect(() =>
+    {
+        const loadOwner = async () => setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner();
+    }, []);
+
+    const loadConfiguration = useCallback(async () => 
+    {
+        try 
+        {
+            if (!ownerId)
+                return;
+
+            await configurationService.loadConfigurations(ownerId);
+            const configs = configurationService.getConfigsBelongingToOwner(ownerId);
+            
+            if (configs && configs.length > 0) 
+            {
+                const loadedConfig = {};
+                configs.forEach(config => 
+                {
+                    if (config.key && config.value !== null) 
+                    {
+                        if (['dateRangeDays', 'maxBars'].includes(config.key)) 
+                            loadedConfig[config.key] = parseInt(config.value);
+                        else if (config.key === 'showWorkingTotals')
+                            loadedConfig[config.key] = config.value === 'true';
+                        else 
+                            loadedConfig[config.key] = config.value;
+                    }
+                });
+                
+                setConfig(prevConfig => ({
+                    ...prevConfig,
+                    ...loadedConfig
+                }));
+                
+                loggerService.logInfo(`Loaded configuration for owner: ${ownerId}`, loadedConfig);
+            } 
+            else
+                loggerService.logInfo(`No configuration found for owner: ${ownerId}, using defaults`);
+        } 
+        catch (error) 
+        {
+            loggerService.logError(`Failed to load configuration: ${error.message}`);
+        }
+    }, [configurationService, ownerId, loggerService]);
 
     const currentInsightType = useMemo(() => {
         if (selectedTab === '1') return 'client';
@@ -166,23 +217,37 @@ export const InsightsApp = () =>
 
     const closeConfig = useCallback(() => setIsConfigOpen(false), []);
 
-    const applyConfig = useCallback(() =>
+    const applyConfig = useCallback(async (newConfig) =>
     {
-        setAppliedColors({
-            orderSellColor: config.orderSellColor,
-            executedSellColor: config.executedSellColor,
-            orderBuyColor: config.orderBuyColor,
-            executedBuyColor: config.executedBuyColor,
-            workingBuyColor: config.workingBuyColor,
-            workingSellColor: config.workingSellColor
-        });
-        setAppliedShowWorkingTotals(config.showWorkingTotals === true);
-        setAppliedMetric(config.metric);
-        setAppliedDateMode(config.dateMode);
-        setAppliedDateRangeDays(config.dateRangeDays);
-        setAppliedMaxBars(Math.max(1, parseInt(config.maxBars, 10) || 1));
-        setIsConfigOpen(false);
-    }, [config]);
+        try 
+        {
+            // Update local state with new config
+            setConfig(newConfig);
+            setAppliedColors({
+                orderSellColor: newConfig.orderSellColor,
+                executedSellColor: newConfig.executedSellColor,
+                orderBuyColor: newConfig.orderBuyColor,
+                executedBuyColor: newConfig.executedBuyColor,
+                workingBuyColor: newConfig.workingBuyColor,
+                workingSellColor: newConfig.workingSellColor
+            });
+            setAppliedShowWorkingTotals(newConfig.showWorkingTotals === true);
+            setAppliedMetric(newConfig.metric);
+            setAppliedDateMode(newConfig.dateMode);
+            setAppliedDateRangeDays(newConfig.dateRangeDays);
+            setAppliedMaxBars(Math.max(1, parseInt(newConfig.maxBars, 10) || 1));
+            setIsConfigOpen(false);
+            
+            // Persist configurations using the service method
+            await configurationService.saveOrUpdateConfigurations(ownerId, newConfig);
+            
+            loggerService.logInfo(`Successfully applied configuration for owner: ${ownerId}`);
+        } 
+        catch (error) 
+        {
+            loggerService.logError(`Failed to apply configuration: ${error.message}`);
+        }
+    }, [configurationService, ownerId, loggerService]);
 
     useEffect(() =>
     {
@@ -190,6 +255,8 @@ export const InsightsApp = () =>
         {
             try
             {
+                await loadConfiguration(); // Load configuration from service
+                
                 if (appliedDateMode === 'today')
                 {
                     setInsightsData([]);
@@ -219,7 +286,7 @@ export const InsightsApp = () =>
         };
 
         loadData().then(() => loggerService.logInfo("Insights data loaded successfully."));
-    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService]);
+    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService, loadConfiguration]);
 
     const displayedInsightsData = useMemo(() =>
     {
@@ -271,7 +338,7 @@ export const InsightsApp = () =>
                         </TabPanel>
                     )}
                 </TabContext>
-                <InsightsConfigPanel isOpen={isConfigOpen} config={config} onChange={(next) => setConfig(next)} onClose={closeConfig} onApply={applyConfig} />
+                <InsightsConfigPanel isOpen={isConfigOpen} config={config} onClose={closeConfig} onApply={applyConfig} />
             </div>
         </>
     );

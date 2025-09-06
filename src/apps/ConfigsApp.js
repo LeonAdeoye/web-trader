@@ -15,15 +15,12 @@ import TitleBarComponent from "../components/TitleBarComponent";
 
 export const ConfigsApp = () =>
 {
-    const [loggedInUser, setLoggedInUser] = useState('');
+    const [loggedInUser, setLoggedInUser] = useState('system');
     const [gridData, setGridData] = useState([]);
-
     const configurationService = useRef(new ConfigurationService()).current;
     const loggerService = useRef(new LoggerService(ConfigsApp.name)).current;
-
     const [, setConfigDialogOpenFlag] = useRecoilState(configDialogDisplayState);
     const [selectedGenericGridRow, setSelectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
-
     const windowId = useMemo(() => window.command.getWindowId("Configs"), []);
     const columnDefs = useMemo(() => ([
         { headerName: "Id", field: 'id', hide: true },
@@ -40,11 +37,15 @@ export const ConfigsApp = () =>
     useEffect(() =>
     {
         const loadOwner = async () =>  setLoggedInUser(await window.configurations.getLoggedInUserId());
-    }, [])
+        loadOwner();
+    }, []);
 
     useEffect(() =>
     {
-        async function loadAllConfigurations()
+        if(loggedInUser === '' || loggedInUser === null)
+            return;
+
+        const loadAllConfigurations = async () =>
         {
             await configurationService.loadConfigurations("system");
 
@@ -56,7 +57,7 @@ export const ConfigsApp = () =>
             .then(() => setGridData(configurationService.getCachedConfigs()))
             .catch((error) => loggerService.logError(error));
 
-    }, [loggedInUser])
+    }, [configurationService, loggedInUser])
 
     const addConfiguration = async () => setConfigDialogOpenFlag(true);
 

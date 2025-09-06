@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Box, Grid, IconButton, Typography, Divider, FormControlLabel, Switch, RadioGroup, Radio, TextField, Button, Paper, Slider } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,7 +20,22 @@ const darkPanelTheme = createTheme({
     }
 });
 
-export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply }) => {
+export const InsightsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
+{
+    const [tempConfig, setTempConfig] = useState(config);
+    useEffect(() =>
+    {
+        setTempConfig(config);
+    }, [config]);
+
+    const handleInputChange = (field, value) => setTempConfig(prev => ({ ...prev, [field]: value }));
+    const handleApply = () => onApply(tempConfig);
+    const handleClose = () =>
+    {
+        setTempConfig(config);
+        onClose();
+    };
+
     return (
         <ThemeProvider theme={darkPanelTheme}>
             <Box
@@ -43,7 +58,7 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1.2, py: 0.6 }}>
                     <Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Chart Settings</Typography>
-                    <IconButton size="small" onClick={onClose} sx={{ color: 'white' }} aria-label="Close settings">
+                    <IconButton size="small" onClick={handleClose} sx={{ color: 'white' }} aria-label="Close settings">
                         <CloseIcon fontSize="small"/>
                     </IconButton>
                 </Box>
@@ -54,8 +69,8 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                         <Grid item xs={12}>
                             <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
                                 <Box sx={{ pl: 1.8 }}>
-                                    <RadioGroup value={config.metric}
-                                        onChange={(e) => onChange({ ...config, metric: e.target.value })}
+                                    <RadioGroup value={tempConfig.metric}
+                                        onChange={(e) => handleInputChange('metric', e.target.value)}
                                         sx={{ '& .MuiFormControlLabel-root': { my: 0, py: 0, minHeight: 12 }, '& .MuiRadio-root': { p: 0 }, '& .MuiFormControlLabel-label': { lineHeight: 1 } }}>
                                         <FormControlLabel value="shares" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Shares</Typography>} />
                                         <FormControlLabel value="notionalUSD" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Notional (USD)</Typography>} />
@@ -64,11 +79,11 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
 
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mt: 0.6 }}>
                                         <Typography variant="caption" sx={{ fontSize: '0.68rem', whiteSpace: 'nowrap' }}>Max bars</Typography>
-                                        <TextField size="small" type="number" value={config.maxBars ?? 5}
+                                        <TextField size="small" type="number" value={tempConfig.maxBars ?? 5}
                                                    onChange={(e) => {
                                                        const raw = e.target.value;
                                                        const num = Math.max(1, Number(raw) || 1);
-                                                       onChange({ ...config, maxBars: num });
+                                                       handleInputChange('maxBars', num);
                                                    }}
                                                    inputProps={{ min: 1, style: { padding: '0 4px', height: 16 } }}
                                                    sx={{ width: 60, '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', textAlign: 'center', padding: '0 4px', height: 16 }, '& .MuiOutlinedInput-root': { height: 18, borderRadius: 1 } }} />
@@ -77,8 +92,8 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                     <FormControlLabel
                                         sx={{ my: 0, py: 0, minHeight: 20 }}
                                         control={
-                                            <Switch size="small" checked={config.showWorkingTotals}
-                                                onChange={(e) => onChange({ ...config, showWorkingTotals: e.target.checked })} />
+                                            <Switch size="small" checked={tempConfig.showWorkingTotals}
+                                                onChange={(e) => handleInputChange('showWorkingTotals', e.target.checked)} />
                                         }
                                         label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Show working totals only</Typography>}/>
                                 </Box>
@@ -87,13 +102,13 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
 
                         <Grid item xs={12}>
                             <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <RadioGroup value={config.dateMode} onChange={(e) => onChange({ ...config, dateMode: e.target.value })}
+                                <RadioGroup value={tempConfig.dateMode} onChange={(e) => handleInputChange('dateMode', e.target.value)}
                                     sx={{ '& .MuiFormControlLabel-root': { my: 0, py: 0, minHeight: 12, pl: 1.8 }, '& .MuiRadio-root': { p: 0 }, '& .MuiFormControlLabel-label': { lineHeight: 1 }, mb: 0 }}>
                                     <FormControlLabel value="today" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Today</Typography>} />
-                                    <FormControlLabel value="range" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Date range ( {config.dateRangeDays} days prior )</Typography>} />
+                                    <FormControlLabel value="range" control={<Radio size="small" />} label={<Typography variant="caption" sx={{ fontSize: '0.68rem' }}>Date range ( {tempConfig.dateRangeDays} days prior )</Typography>} />
                                 </RadioGroup>
                                 <Box sx={{ px: 1.8, pt: 0, pb: 0.6 }}>
-                                    <Slider size="small" value={config.dateRangeDays} step={null}
+                                    <Slider size="small" value={tempConfig.dateRangeDays} step={null}
                                         marks={[
                                             { value: 5, label: '5' },
                                             { value: 10, label: '10' },
@@ -101,8 +116,8 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                             { value: 30, label: '30' },
                                             { value: 60, label: '60' }
                                         ]}
-                                        min={5} max={60} disabled={config.dateMode !== 'range'}
-                                        onChange={(_, v) => onChange({ ...config, dateRangeDays: v })}
+                                        min={5} max={60} disabled={tempConfig.dateMode !== 'range'}
+                                        onChange={(_, v) => handleInputChange('dateRangeDays', v)}
                                         sx={{ height: 6, my: 0, '& .MuiSlider-markLabel': { fontSize: '0.68rem' }, '& .MuiSlider-markLabelActive': { fontSize: '0.68rem' } }}/>
                                 </Box>
                             </Paper>
@@ -113,38 +128,38 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                                       alignItems="center" sx={{ px: 1.8 }}>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Order Buy colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.orderBuyColor}
-                                            onChange={(e) => onChange({ ...config, orderBuyColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.orderBuyColor}
+                                            onChange={(e) => handleInputChange('orderBuyColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Order Sell colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.orderSellColor}
-                                            onChange={(e) => onChange({ ...config, orderSellColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.orderSellColor}
+                                            onChange={(e) => handleInputChange('orderSellColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Executed Buy colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.executedBuyColor}
-                                            onChange={(e) => onChange({ ...config, executedBuyColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.executedBuyColor}
+                                            onChange={(e) => handleInputChange('executedBuyColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Executed Sell colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.executedSellColor}
-                                            onChange={(e) => onChange({ ...config, executedSellColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.executedSellColor}
+                                            onChange={(e) => handleInputChange('executedSellColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Working Buy colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.workingBuyColor}
-                                            onChange={(e) => onChange({ ...config, workingBuyColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.workingBuyColor}
+                                            onChange={(e) => handleInputChange('workingBuyColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                     <Grid item xs={6}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Working Sell colour</Typography>
-                                        <TextField size="small" fullWidth type="color" value={config.workingSellColor}
-                                            onChange={(e) => onChange({ ...config, workingSellColor: e.target.value })}
+                                        <TextField size="small" fullWidth type="color" value={tempConfig.workingSellColor}
+                                            onChange={(e) => handleInputChange('workingSellColor', e.target.value)}
                                             inputProps={{ style: { padding: 0, height: 22 } }} />
                                     </Grid>
                                 </Grid>
@@ -156,7 +171,7 @@ export const InsightsConfigPanel = ({ isOpen, config, onChange, onClose, onApply
                 <Divider sx={{ mt: 'auto', borderColor: 'rgba(255,255,255,0.12)' }} />
 
             <Box sx={{ display: 'flex', p: 1, justifyContent: 'flex-end' }}>
-                <Button size="small" variant="contained" onClick={onApply} sx={{ backgroundColor: '#ffffff', color: '#404040', textTransform: 'none', '&:hover': { backgroundColor: '#bdbdbd' } }}>Apply</Button>
+                <Button size="small" variant="contained" onClick={handleApply} sx={{ backgroundColor: '#ffffff', color: '#404040', textTransform: 'none', '&:hover': { backgroundColor: '#bdbdbd' } }}>Apply</Button>
             </Box>
             </Box>
         </ThemeProvider>

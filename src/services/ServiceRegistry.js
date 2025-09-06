@@ -70,7 +70,7 @@ class ServiceRegistry
     }
 
     // Method to preload all services
-    static async preloadAllServices()
+    static async preloadAllServices(ownerId = null)
     {
         const services = [
             this.getVolatilityService(),
@@ -80,10 +80,11 @@ class ServiceRegistry
             this.getBankHolidayService(),
             this.getClientService(),
             this.getTraderService(),
-            this.getExchangeRateService()
+            this.getExchangeRateService(),
+            this.getConfigurationService()
         ];
 
-        await Promise.all([
+        const loadPromises = [
             services[0].loadVolatilities(),
             services[1].loadPrices(),
             services[2].loadRates(),
@@ -92,7 +93,15 @@ class ServiceRegistry
             services[5].loadClients(),
             services[6].loadTraders(),
             services[7].loadExchangeRates()
-        ]);
+        ];
+
+        // Only load configurations if ownerId is provided
+        if (ownerId)
+        {
+            loadPromises.push(services[8].loadConfigurations(ownerId));
+        }
+
+        await Promise.all(loadPromises);
     }
 }
 
