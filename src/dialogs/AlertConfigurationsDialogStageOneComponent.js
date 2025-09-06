@@ -3,11 +3,11 @@ import React from "react";
 import {useRecoilState} from "recoil";
 import {alertConfigurationState} from "../atoms/component-state";
 import {useEffect, useRef} from "react";
-import {ClientService} from "../services/ClientService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 
 export const AlertConfigurationsDialogStageOneComponent = ({handleInputChange}) =>
 {
-    const clientService = useRef(new ClientService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
     const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
 
     useEffect(() =>

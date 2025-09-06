@@ -10,7 +10,6 @@ import { FormControl, Select, MenuItem, InputLabel, Tooltip, Typography } from '
 
 const RfqChartsApp = () =>
 {
-    const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const windowId = window.command.getWindowId("rfq-charts");
     const loggerService = useRef(new LoggerService(RfqChartsApp.name)).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
@@ -37,12 +36,17 @@ const RfqChartsApp = () =>
     let rfq = null;
     let rfqSnippetText = "";
 
-    useEffect(() => {
-        if (configParam) {
-            try {
+    useEffect(() =>
+    {
+        if (configParam)
+        {
+            try
+            {
                 const parsedConfig = JSON.parse(decodeURIComponent(configParam));
                 setConfig(parsedConfig);
-            } catch (error) {
+            }
+            catch (error)
+            {
                 loggerService.logError("Failed to parse config parameter: " + error.message);
             }
         }
@@ -159,7 +163,8 @@ const RfqChartsApp = () =>
         {
             const leg = activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1];
             
-            const baseRequest = {
+            const baseRequest =
+            {
                 strike: leg.strike,
                 volatility: leg.volatility/100,
                 underlyingPrice: leg.underlyingPrice,

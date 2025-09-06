@@ -4,6 +4,7 @@ import {InstrumentService} from "./InstrumentService";
 import {VolatilityService} from "./VolatilityService";
 import {RateService} from "./RateService";
 import {PriceService} from "./PriceService";
+import { ServiceRegistry } from './ServiceRegistry';
 
 export class OptionRequestParserService
 {
@@ -18,17 +19,17 @@ export class OptionRequestParserService
     constructor()
     {
         this.#loggerService = new LoggerService(this.constructor.name);
-        this.#bankHolidayService = new BankHolidayService();
-        this.#instrumentService = new InstrumentService();
-        this.#volatilityService = new VolatilityService();
-        this.#interestRateService = new RateService();
-        this.#priceService = new PriceService();
-        this.#instrumentService.loadInstruments().then(() => this.#loggerService.logInfo(`Instruments loaded: ${this.#instrumentService.getInstruments().length}`));
-        this.#volatilityService.loadVolatilities().then(() => this.#loggerService.logInfo(`Volatilities loaded: ${this.#volatilityService.getVolatilities().length}`));
-        this.#interestRateService.loadRates().then(() => this.#loggerService.logInfo(`Interest rates loaded: ${this.#interestRateService.getRates().length}`));
-        this.#bankHolidayService.loadBankHolidays().then(() => this.#loggerService.logInfo(`Bank holidays loaded: ${this.#bankHolidayService.getBankHolidays().length}`));
-        this.#priceService.loadPrices().then(() => this.#loggerService.logInfo(`Prices loaded: ${this.#priceService.getPrices().length}`));
-
+        
+        // Use singleton instances from registry
+        this.#bankHolidayService = ServiceRegistry.getBankHolidayService();
+        this.#instrumentService = ServiceRegistry.getInstrumentService();
+        this.#volatilityService = ServiceRegistry.getVolatilityService();
+        this.#interestRateService = ServiceRegistry.getRateService();
+        this.#priceService = ServiceRegistry.getPriceService();
+        
+        // Load data only once
+        this.#loadReferenceData();
+        
         this.#constants =
         {
             DEFAULT_VOLATILITY: 0.25,
@@ -36,6 +37,26 @@ export class OptionRequestParserService
             DEFAULT_DAY_COUNT_CONVENTION: 250,
             DEFAULT_CURRENCY: 'USD'
         };
+    }
+
+    async #loadReferenceData()
+    {
+        try
+        {
+            await Promise.all([
+                this.#instrumentService.loadInstruments(),
+                this.#volatilityService.loadVolatilities(),
+                this.#interestRateService.loadRates(),
+                this.#bankHolidayService.loadBankHolidays(),
+                this.#priceService.loadPrices()
+            ]);
+            
+            this.#loggerService.logInfo(`Reference data loaded successfully`);
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Error loading reference data: ${error.message}`);
+        }
     }
 
     isValidOptionRequest = (request) =>

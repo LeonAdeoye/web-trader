@@ -13,6 +13,13 @@ export class ClientService
 
     loadClients = async () =>
     {
+        // Check if we already have cached data
+        if (this.#clients && this.#clients.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached client data (${this.#clients.length} records)`);
+            return this.#clients;
+        }
+
         await fetch(`http://localhost:20009/client`)
             .then(response => response.json())
             .then(data =>
@@ -27,6 +34,8 @@ export class ClientService
 
             })
             .catch(err => this.#loggerService.logError(err));
+
+        return this.#clients;
     }
 
     addNewClient = async (newClient) =>

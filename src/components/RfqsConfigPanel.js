@@ -240,8 +240,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                                                             }
                                                         }
                                                     }
-                                                }}
-                                            >
+                                                }}>
                                                 <MenuItem value="european">European Black-Scholes</MenuItem>
                                                 <MenuItem value="monte_carlo">Monte Carlo Simulation</MenuItem>
                                                 <MenuItem value="binomial">Binomial Tree</MenuItem>

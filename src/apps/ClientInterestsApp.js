@@ -3,7 +3,6 @@ import {Grid, Divider} from "@mui/material";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import {ClientInterestService} from "../services/ClientInterestService";
-import {InstrumentService} from "../services/InstrumentService";
 import {useRecoilState} from "recoil";
 import {clientInterestDialogDisplayState} from "../atoms/dialog-state";
 import {ClientInterestsComponent} from "../components/ClientInterestsComponent";
@@ -11,7 +10,7 @@ import ClientInterestDialog from "../dialogs/ClientInterestDialog";
 import '../styles/css/main.css';
 import {Resizable} from "re-resizable";
 import {clientInterestsChangedState, selectedClientState, titleBarContextShareColourState} from "../atoms/component-state";
-import {ClientService} from "../services/ClientService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import {ClientListComponent} from "../components/ClientListComponent";
 
 export const ClientInterestsApp = () =>
@@ -22,8 +21,8 @@ export const ClientInterestsApp = () =>
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
 
     const clientInterestService = useRef(new ClientInterestService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
-    const clientService = useRef(new ClientService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
     const loggerService = useRef(new LoggerService(ClientInterestsApp.name)).current;
 
     const [ownerId, setOwnerId] = useState('');

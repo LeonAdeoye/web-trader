@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {AgGridReact} from "ag-grid-react";
-import {VolatilityService} from "../services/VolatilityService";
-import {InstrumentService} from "../services/InstrumentService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import {formatDate, numberFormatter} from "../utilities";
 
@@ -10,8 +9,8 @@ export const VolatilityParametricComponent = () =>
     const [volatilities, setVolatilities] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [ownerId, setOwnerId] = useState('');
-    const volatilityService = useRef(new VolatilityService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
+    const volatilityService = useRef(ServiceRegistry.getVolatilityService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const loggerService = useRef(new LoggerService(VolatilityParametricComponent.name)).current;
 
     useEffect(() =>

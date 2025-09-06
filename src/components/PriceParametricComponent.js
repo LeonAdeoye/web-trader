@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {AgGridReact} from "ag-grid-react";
-import {PriceService} from "../services/PriceService";
-import {InstrumentService} from "../services/InstrumentService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import {formatDate, numberFormatter} from "../utilities";
 
@@ -10,8 +9,8 @@ export const PriceParametricComponent = () =>
     const [prices, setPrices] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [ownerId, setOwnerId] = useState('');
-    const priceService = useRef(new PriceService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
+    const priceService = useRef(ServiceRegistry.getPriceService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const loggerService = useRef(new LoggerService(PriceParametricComponent.name)).current;
 
     useEffect(() =>

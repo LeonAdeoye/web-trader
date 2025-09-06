@@ -12,6 +12,13 @@ export class TraderService
 
     loadTraders = async () =>
     {
+        // Check if we already have cached data
+        if (this.#traders && this.#traders.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached trader data (${this.#traders.length} records)`);
+            return this.#traders;
+        }
+
         await fetch('http://localhost:20009/trader')
             .then(response => response.json())
             .then(data =>
@@ -25,6 +32,8 @@ export class TraderService
                     this.#loggerService.logInfo(`Loaded zero traders.`);
             })
             .catch(err => this.#loggerService.logError(err));
+
+        return this.#traders;
     }
 
     getTraders = () =>

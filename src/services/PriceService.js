@@ -31,6 +31,13 @@ export class PriceService
 
     loadPrices = async () =>
     {
+        // Check if we already have cached data
+        if (this.#prices && this.#prices.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached price data (${this.#prices.length} records)`);
+            return this.#prices;
+        }
+
         try
         {
             const response = await fetch(`http://localhost:20015/price`);
@@ -61,6 +68,8 @@ export class PriceService
             // Set empty array if service fails
             this.#prices = [];
         }
+
+        return this.#prices;
     }
 
     updatePrice = async (instrumentCode, closePrice, openPrice, lastUpdatedBy) =>

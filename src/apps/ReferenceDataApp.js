@@ -12,13 +12,10 @@ import BookDialog from "../dialogs/BookDialog";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 import {BrokerService} from "../services/BrokerService";
 import {AccountService} from "../services/AccountService";
-import {TraderService} from "../services/TraderService";
-import {ClientService} from "../services/ClientService";
 import {DeskService} from "../services/DeskService";
-import {InstrumentService} from "../services/InstrumentService";
 import {ExchangeService} from "../services/ExchangeService";
-import {BankHolidayService} from "../services/BankHolidayService";
 import {BookService} from "../services/BookService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 
 export const ReferenceDataApp = () =>
@@ -44,12 +41,12 @@ export const ReferenceDataApp = () =>
     const [dataToDelete, setDataToDelete] = useState(null);
     const brokerService = useRef(new BrokerService()).current;
     const accountService = useRef(new AccountService()).current;
-    const traderService = useRef(new TraderService()).current;
-    const clientService = useRef(new ClientService()).current;
+    const traderService = useRef(ServiceRegistry.getTraderService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
     const deskService = useRef(new DeskService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const exchangeService = useRef(new ExchangeService()).current;
-    const bankHolidayService = useRef(new BankHolidayService()).current;
+    const bankHolidayService = useRef(ServiceRegistry.getBankHolidayService()).current;
     const bookService = useRef(new BookService()).current;
 
     const clientColumnDefs = useMemo(() => 

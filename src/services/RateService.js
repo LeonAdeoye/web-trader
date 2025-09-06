@@ -28,6 +28,13 @@ export class RateService
 
     loadRates = async () =>
     {
+        // Check if we already have cached data
+        if (this.#rates && this.#rates.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached interest rate data (${this.#rates.length} records)`);
+            return this.#rates;
+        }
+
         try
         {
             const response = await fetch(`http://localhost:20015/rate`);
@@ -50,6 +57,8 @@ export class RateService
         {
             this.#loggerService.logError(`Error loading interest rates: ${error}`);
         }
+
+        return this.#rates;
     }
 
     getRates = () =>

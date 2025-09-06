@@ -10,9 +10,7 @@ import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
 import {LoggerService} from "../services/LoggerService";
 import {AccountService} from "../services/AccountService";
 import {BrokerService} from "../services/BrokerService";
-import {InstrumentService} from "../services/InstrumentService";
-import {ClientService} from "../services/ClientService";
-import {ExchangeRateService} from "../services/ExchangeRateService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import '../styles/css/main.css';
 import {assetTypeConverter, settlementTypeConverter} from "../utilities";
 import StrategyComponent from "../components/StrategyComponent";
@@ -26,9 +24,9 @@ export const NewOrderApp = () =>
     const loggerService = useRef(new LoggerService(NewOrderApp.name)).current;
     const accountService = useRef(new AccountService()).current;
     const brokerService = useRef(new BrokerService()).current;
-    const clientService = useRef(new ClientService()).current;
-    const exchangeRateService = useRef(new ExchangeRateService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
+    const exchangeRateService = useRef(ServiceRegistry.getExchangeRateService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const windowId = useMemo(() => window.command.getWindowId("New Order"), []);
 
     const [accounts, setAccounts] = useState([]);

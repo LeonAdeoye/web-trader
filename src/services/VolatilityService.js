@@ -18,6 +18,13 @@ export class VolatilityService
 
     loadVolatilities = async () =>
     {
+        // Check if we already have cached data
+        if (this.#volatilities && this.#volatilities.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached volatility data (${this.#volatilities.length} records)`);
+            return this.#volatilities;
+        }
+
         try
         {
             const response = await fetch(`http://localhost:20015/volatility`);
@@ -39,6 +46,8 @@ export class VolatilityService
         {
             this.#loggerService.logError(`Error loading volatilities: ${error}`);
         }
+
+        return this.#volatilities;
     }
 
     updateVolatility = async (instrumentCode, volatilityPercentage, lastUpdatedBy) =>

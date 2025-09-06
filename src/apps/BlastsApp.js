@@ -12,13 +12,13 @@ import BlastConfigurationDialog from "../dialogs/BlastConfigurationDialog";
 import {selectedGenericGridRowState} from "../atoms/component-state";
 import {isEmptyString} from "../utilities";
 import {BlastService} from "../services/BlastService";
-import {ClientService} from "../services/ClientService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import TitleBarComponent from "../components/TitleBarComponent";
 
 export const BlastsApp = () =>
 {
     const blastService = useRef(new BlastService()).current;
-    const clientService = useRef(new ClientService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
     const loggerService = useRef(new LoggerService(BlastsApp.name)).current;
 
     const [, setBlastPlayDialogOpenFlag ] = useRecoilState(blastPlayDialogDisplayState);

@@ -182,6 +182,13 @@ export class BankHolidayService
 
     loadBankHolidays = async () =>
     {
+        // Check if we already have cached data
+        if (this.#bankHolidays && this.#bankHolidays.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached bank holiday data (${this.#bankHolidays.length} records)`);
+            return this.#bankHolidays;
+        }
+
         try
         {
             // Simulate API call
@@ -196,6 +203,8 @@ export class BankHolidayService
         {
             this.#loggerService.logError(`Failed to load bank holidays: ${error}`);
         }
+
+        return this.#bankHolidays;
     }
 
     cleanupFutureHolidays = () =>

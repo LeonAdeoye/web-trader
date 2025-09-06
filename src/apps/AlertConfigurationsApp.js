@@ -6,7 +6,7 @@ import ActionIconsRenderer from "../components/ActionIconsRenderer";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {alertConfigurationState, selectedGenericGridRowState} from "../atoms/component-state";
 import {LoggerService} from "../services/LoggerService";
-import {ClientService} from "../services/ClientService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import CheckboxRenderer from "../components/CheckboxRenderer";
 import cronstrue from 'cronstrue';
 import SideRenderer from "../components/SideRenderer";
@@ -22,7 +22,7 @@ export const AlertConfigurationsApp = () =>
 
     const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
     const loggerService = useRef(new LoggerService(AlertConfigurationsApp.name)).current;
-    const clientService = useRef(new ClientService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
 
     const windowId = useMemo(() => window.command.getWindowId("Alert Configurations"), []);
     const columnDefs = useMemo(() =>

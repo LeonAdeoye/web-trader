@@ -13,6 +13,13 @@ export class InstrumentService
 
     loadInstruments = async () =>
     {
+        // Check if we already have cached data
+        if (this.#instruments && this.#instruments.length > 0)
+        {
+            this.#loggerService.logInfo(`Using cached instrument data (${this.#instruments.length} records)`);
+            return this.#instruments;
+        }
+
         await fetch(`http://localhost:20009/instrument`)
             .then(response => response.json())
             .then(data =>
@@ -26,6 +33,8 @@ export class InstrumentService
                     this.#loggerService.logInfo(`Loaded zero instruments.`);
             })
             .catch(err => this.#loggerService.logError(err));
+
+        return this.#instruments;
     }
 
     getInstruments = () =>

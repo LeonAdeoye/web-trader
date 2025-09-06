@@ -5,23 +5,17 @@ import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState, rfqsConfigPanelOpenState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
 import {LoggerService} from "../services/LoggerService";
-import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OptionRequestParserService} from "../services/OptionRequestParserService";
 import SnippetTitleBarComponent from "../components/SnippetTitleBarComponent";
-import {ClientService} from "../services/ClientService";
-import {InstrumentService} from "../services/InstrumentService";
 import {BookService} from "../services/BookService";
 import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
-import {TraderService} from "../services/TraderService";
 import RfqsConfigPanel from "../components/RfqsConfigPanel";
 import RfqActionIconsRenderer from "../components/RfqActionIconsRenderer";
-import {VolatilityService} from "../services/VolatilityService";
-import {RateService} from "../services/RateService";
 import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
-import {PriceService} from "../services/PriceService";
+import { ServiceRegistry } from '../services/ServiceRegistry';
 
 export const RfqsApp = () =>
 {
@@ -38,16 +32,20 @@ export const RfqsApp = () =>
     const [, setRfqCreationDialogOpen] = useRecoilState(rfqCreationDialogDisplayState);
     const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
-    const exchangeRateService = useRef(new ExchangeRateService()).current;
-    const volatilityService = useRef(new VolatilityService()).current;
-    const priceService = useRef(new PriceService()).current;
-    const rateService = useRef(new RateService()).current;
-    const traderService = useRef(new TraderService()).current;
+    // Use ServiceRegistry for singleton services
+    const exchangeRateService = useRef(ServiceRegistry.getExchangeRateService()).current;
+    const volatilityService = useRef(ServiceRegistry.getVolatilityService()).current;
+    const priceService = useRef(ServiceRegistry.getPriceService()).current;
+    const rateService = useRef(ServiceRegistry.getRateService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
+    const bankHolidayService = useRef(ServiceRegistry.getBankHolidayService()).current;
+    const traderService = useRef(ServiceRegistry.getTraderService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
+    
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
-    const clientService = useRef(new ClientService()).current;
     const bookService = useRef(new BookService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
+    
     const [clients, setClients] = useState([]);
     const [books, setBooks] = useState([]);
     const [instruments, setInstruments] = useState([]);
@@ -536,7 +534,7 @@ export const RfqsApp = () =>
             window.launchPad.openApp({url: `http://localhost:3000/rfq-charts?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
-    }, [loggerService]);
+    }, [config]);
 
     const handleViewRfq = useCallback((rfqData) =>
     {
@@ -546,7 +544,7 @@ export const RfqsApp = () =>
             window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false&config=${encodedConfig}`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
-    }, []);
+    }, [config]);
 
     const handleEditRfq = useCallback((rfqData) =>
     {
@@ -556,7 +554,7 @@ export const RfqsApp = () =>
             window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true&config=${encodedConfig}`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
-    }, []);
+    }, [config]);
 
     const handleWorkflowRfq = useCallback((rfqData) =>
     {
@@ -566,7 +564,7 @@ export const RfqsApp = () =>
             window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Workflows : ${rfqData.rfqId}`, modalFlag: true});
 
         launchRfqDetailsApp();
-    }, []);
+    }, [config]);
 
     const handleRfqAction = useCallback((action, rfqData) =>
     {

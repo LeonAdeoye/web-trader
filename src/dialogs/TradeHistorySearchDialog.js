@@ -1,9 +1,7 @@
 import React, {useState, useCallback, useRef, useEffect} from "react";
 import {Button, Grid, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
 import {LoggerService} from "../services/LoggerService";
-import {ClientService} from "../services/ClientService";
-import {TraderService} from "../services/TraderService";
-import {InstrumentService} from "../services/InstrumentService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import {useRecoilState} from "recoil";
 import {tradeHistoryDialogDisplayState} from "../atoms/dialog-state";
 import {ClientAutoCompleteWidget} from "../widgets/ClientAutoCompleteWidget";
@@ -14,9 +12,9 @@ import '../styles/css/main.css';
 const TradeHistorySearchDialog = ({ onSearch }) =>
 {
     const [tradeHistoryDialogDisplay, setTradeHistoryDialogDisplay] = useRecoilState(tradeHistoryDialogDisplayState);
-    const clientService = useRef(new ClientService()).current;
-    const traderService = useRef(new TraderService()).current;
-    const instrumentService = useRef(new InstrumentService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
+    const traderService = useRef(ServiceRegistry.getTraderService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const [traders, setTraders] = useState([]);
     const [instruments, setInstruments] = useState([]);
     const [clients, setClients] = useState([]);
