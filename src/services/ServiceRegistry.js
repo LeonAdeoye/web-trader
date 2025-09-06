@@ -6,6 +6,7 @@ import { BankHolidayService } from './BankHolidayService';
 import { ClientService } from './ClientService';
 import { TraderService } from './TraderService';
 import { ExchangeRateService } from './ExchangeRateService';
+import { ConfigurationService } from './ConfigurationService';
 
 class ServiceRegistry
 {
@@ -61,6 +62,11 @@ class ServiceRegistry
     static getExchangeRateService()
     {
         return this.getService(ExchangeRateService);
+    }
+
+    static getConfigurationService()
+    {
+        return this.getService(ConfigurationService);
     }
 
     // Method to preload all services

@@ -45,6 +45,7 @@ export const RfqsApp = () =>
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bookService = useRef(new BookService()).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
+    const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
     
     const [clients, setClients] = useState([]);
     const [books, setBooks] = useState([]);
@@ -76,6 +77,53 @@ export const RfqsApp = () =>
     });
 
     const [selectedRow, setSelectedRow] = useState(null);
+    const [ownerId, setOwnerId] = useState(null);
+
+    useEffect(() =>
+    {
+        const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner();
+    }, []);
+
+    // Load configuration from service
+    const loadConfiguration = useCallback(async () => 
+    {
+        try 
+        {
+            if (!ownerId)
+                return;
+
+            await configurationService.loadConfigurations(ownerId);
+            const configs = configurationService.getConfigsBelongingToOwner(ownerId);
+            if (configs && configs.length > 0) 
+            {
+                const loadedConfig = {};
+                configs.forEach(config => 
+                {
+                    if (config.key && config.value !== null) 
+                    {
+                        if (['defaultSettlementDays', 'decimalPrecision', 'defaultSpread', 'defaultSalesCreditPercentage', 'defaultVolatility', 'defaultDayConvention'].includes(config.key)) 
+                            loadedConfig[config.key] = parseFloat(config.value);
+                        else 
+                            loadedConfig[config.key] = config.value;
+                    }
+                });
+
+                setConfig(prevConfig => ({
+                    ...prevConfig,
+                    ...loadedConfig
+                }));
+                
+                loggerService.logInfo(`Loaded configuration for owner: ${ownerId}`, loadedConfig);
+            } 
+            else
+                loggerService.logInfo(`No configuration found for owner: ${ownerId}, using defaults`);
+        } 
+        catch (error) 
+        {
+            loggerService.logError(`Failed to load configuration: ${error.message}`);
+        }
+    }, [configurationService, ownerId, loggerService]);
 
     useEffect(() =>
     {
@@ -89,6 +137,7 @@ export const RfqsApp = () =>
             await volatilityService.loadVolatilities();
             await rateService.loadRates();
             await priceService.loadPrices();
+            await loadConfiguration(); // Load configuration from service
 
             setClients(clientService.getClients());
             setBooks(bookService.getBooks());
@@ -108,7 +157,7 @@ export const RfqsApp = () =>
             ]);
         };
         loadData().then(() => loggerService.logInfo("Reference loaded in RfqsApp"));
-    }, [exchangeRateService, bookService, clientService, loggerService, instrumentService, traderService, volatilityService, rateService]);
+    }, [exchangeRateService, bookService, clientService, loggerService, instrumentService, traderService, volatilityService, rateService, loadConfiguration]);
 
     useEffect(() =>
     {
@@ -228,11 +277,20 @@ export const RfqsApp = () =>
 
     const closeConfig = useCallback(() => setIsConfigOpen(false), [setIsConfigOpen]);
 
-    const applyConfig = useCallback((newConfig) =>
+    const applyConfig = useCallback(async (newConfig) =>
     {
-        setConfig(newConfig);
-        setIsConfigOpen(false);
-    }, [setIsConfigOpen]);
+        try 
+        {
+            setConfig(newConfig);
+            setIsConfigOpen(false);
+            await configurationService.saveOrUpdateConfigurations(ownerId, newConfig);
+            loggerService.logInfo(`Successfully applied configuration for owner: ${ownerId}`);
+        } 
+        catch (error) 
+        {
+            loggerService.logError(`Failed to apply configuration: ${error.message}`);
+        }
+    }, [setIsConfigOpen, configurationService, ownerId, loggerService]);
 
     const calculateOptionMetrics = useCallback(async (rfqData) =>
     {
