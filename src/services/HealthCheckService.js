@@ -14,8 +14,8 @@ export class HealthCheckService
     // Check health of a single service
     checkServiceHealth = async (serviceName, port) => 
     {
-        const actuatorUrl = `http://localhost:${port}/actuator/health`;
-        this.#loggerService.logInfo(`Checking health for ${serviceName} at ${actuatorUrl}`);
+        const healthUrl = `http://localhost:${port}/health`;
+        this.#loggerService.logInfo(`Checking health for ${serviceName} at ${healthUrl}`);
         
         try 
         {
@@ -23,13 +23,12 @@ export class HealthCheckService
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-            this.#loggerService.logInfo(`Making fetch request to: ${actuatorUrl}`);
+            this.#loggerService.logInfo(`Making fetch request to: ${healthUrl}`);
             
-            const response = await fetch(actuatorUrl, {
+            const response = await fetch(healthUrl, {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Accept': 'text/plain'
                 },
                 signal: controller.signal
             });
@@ -40,14 +39,14 @@ export class HealthCheckService
 
             if (response.ok) 
             {
-                const healthData = await response.json();
-                this.#loggerService.logInfo(`Health data received: ${JSON.stringify(healthData)}`);
-                const isHealthy = healthData.status === 'UP';
+                const healthText = await response.text();
+                this.#loggerService.logInfo(`Health response received: "${healthText}"`);
+                const isHealthy = healthText.trim() === 'Up';
                 return {
                     isHealthy,
                     statusText: isHealthy ? 'Healthy' : 'Unhealthy',
                     lastChecked: new Date().toISOString(),
-                    details: healthData
+                    details: { response: healthText }
                 };
             } 
             else 

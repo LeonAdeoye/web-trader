@@ -4,6 +4,7 @@ import { AgGridReact } from "ag-grid-react";
 import { useRecoilState } from "recoil";
 import { selectedGenericGridRowState } from "../atoms/component-state";
 import { LoggerService } from "../services/LoggerService";
+import { ServiceRegistry } from "../services/ServiceRegistry";
 import TitleBarComponent from "../components/TitleBarComponent";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -16,18 +17,15 @@ export const ServicesApp = () =>
     const loggerService = useRef(new LoggerService(ServicesApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("Services"), []);
 
-    const servicesConfig = useMemo(() => [
-        { name: 'Configuration Service', port: 20001, actuatorUrl: 'http://localhost:20001/health', status: 'Unknown', lastChecked: null },
-        { name: 'Logging Service', port: 20002, actuatorUrl: 'http://localhost:20002/health', status: 'Unknown', lastChecked: null },
-        { name: 'Users Service', port: 20003, actuatorUrl: 'http://localhost:20003/health', status: 'Unknown', lastChecked: null },
-        { name: 'Domain Service', port: 20009, actuatorUrl: 'http://localhost:20009/health', status: 'Unknown', lastChecked: null },
-        { name: 'Alert Service', port: 20012, actuatorUrl: 'http://localhost:20012/health', status: 'Unknown', lastChecked: null },
-        { name: 'Order Service', port: 20013, actuatorUrl: 'http://localhost:20013/health', status: 'Unknown', lastChecked: null },
-        { name: 'Exchange Service', port: 20014, actuatorUrl: 'http://localhost:20014/health', status: 'Unknown', lastChecked: null },
-        { name: 'Limits Service', port: 20017, actuatorUrl: 'http://localhost:20017/health', status: 'Unknown', lastChecked: null },
-        { name: 'Pricing Service', port: 20015, actuatorUrl: 'http://localhost:20015/health', status: 'Unknown', lastChecked: null },
-        { name: 'IOI Service', port: 20018, actuatorUrl: 'http://localhost:20018/health', status: 'Unknown', lastChecked: null }
-    ], []);
+    const servicesConfig = useMemo(() => 
+    {
+        const config = ServiceRegistry.getServicesConfig();
+        return config.map(service => ({
+            ...service,
+            status: 'Unknown',
+            lastChecked: null
+        }));
+    }, []);
 
     // Column definitions for the ag-grid
     const columnDefs = useMemo(() => [
@@ -36,7 +34,7 @@ export const ServicesApp = () =>
             field: 'name', 
             sortable: true, 
             minWidth: 200, 
-            width: 250, 
+            width: 200,
             filter: true,
             pinned: 'left'
         },
@@ -44,7 +42,7 @@ export const ServicesApp = () =>
             headerName: 'Port', 
             field: 'port', 
             sortable: true, 
-            minWidth: 80, 
+            minWidth: 100,
             width: 100, 
             filter: true,
             type: 'numericColumn'
@@ -53,19 +51,15 @@ export const ServicesApp = () =>
             headerName: 'Health URL',
             field: 'actuatorUrl', 
             sortable: true, 
-            minWidth: 300, 
-            width: 400, 
+            minWidth: 200,
+            width: 200,
             filter: true,
             cellRenderer: (params) => 
             {
                 return (
-                    <a 
-                        href={params.value} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        style={{ color: '#1976d2', textDecoration: 'none' }}>
+                    <span style={{ color: '#666' }}>
                         {params.value}
-                    </a>
+                    </span>
                 );
             }
         },
@@ -91,8 +85,8 @@ export const ServicesApp = () =>
             headerName: 'Last Checked', 
             field: 'lastChecked', 
             sortable: true, 
-            minWidth: 150, 
-            width: 180, 
+            minWidth: 130,
+            width: 130,
             filter: true,
             cellRenderer: (params) => 
             {
@@ -221,21 +215,16 @@ export const ServicesApp = () =>
         return () => clearInterval(healthCheckInterval);
     }, []);
 
-    const refreshServices = () => 
-    {
-        checkAllServicesHealth();
-        loggerService.logInfo(`Manual refresh triggered`);
-    };
 
     return(
         <>
             <TitleBarComponent 
                 title="Services" 
                 windowId={windowId} 
-                addButtonProps={{ handler: refreshServices, tooltipText: "Refresh Services" }} 
+                addButtonProps={undefined} 
                 showChannel={false} 
                 showTools={false}/>
-            <div className="services-app" style={{width: '100%', height: 'calc(100vh - 72px)', float: 'left', padding: '0px', margin:'35px 0px 0px 0px'}}>
+            <div className="services-app" style={{width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
                     <AgGridReact
                         columnDefs={columnDefs}
@@ -250,8 +239,8 @@ export const ServicesApp = () =>
                             filter: true,
                             sortable: true
                         }}
-                        rowHeight={32}
-                        headerHeight={32}/>
+                        rowHeight={22}
+                        headerHeight={22}/>
                 </div>
             </div>
         </>

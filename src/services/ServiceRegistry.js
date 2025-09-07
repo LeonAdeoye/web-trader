@@ -7,6 +7,7 @@ import { ClientService } from './ClientService';
 import { TraderService } from './TraderService';
 import { ExchangeRateService } from './ExchangeRateService';
 import { ConfigurationService } from './ConfigurationService';
+import { HealthCheckService } from './HealthCheckService';
 
 class ServiceRegistry
 {
@@ -69,6 +70,11 @@ class ServiceRegistry
         return this.getService(ConfigurationService);
     }
 
+    static getHealthCheckService()
+    {
+        return this.getService(HealthCheckService);
+    }
+
     // Method to preload all services
     static async preloadAllServices(ownerId = null)
     {
@@ -102,6 +108,32 @@ class ServiceRegistry
         }
 
         await Promise.all(loadPromises);
+    }
+
+    // Service configuration for health monitoring
+    static getServicesConfig()
+    {
+        return [
+            { name: 'Configuration Service', port: 20001, actuatorUrl: 'http://localhost:20001/health' },
+            { name: 'Logging Service', port: 20002, actuatorUrl: 'http://localhost:20002/health' },
+            { name: 'Users Service', port: 20003, actuatorUrl: 'http://localhost:20003/health' },
+            { name: 'Domain Service', port: 20009, actuatorUrl: 'http://localhost:20009/health' },
+            { name: 'Alert Service', port: 20012, actuatorUrl: 'http://localhost:20012/health' },
+            { name: 'Order Service', port: 20013, actuatorUrl: 'http://localhost:20013/health' },
+            { name: 'Exchange Service', port: 20014, actuatorUrl: 'http://localhost:20014/health' },
+            { name: 'Limits Service', port: 20017, actuatorUrl: 'http://localhost:20017/health' },
+            { name: 'Pricing Service', port: 20015, actuatorUrl: 'http://localhost:20015/health' },
+            { name: 'IOI Service', port: 20018, actuatorUrl: 'http://localhost:20018/health' }
+        ];
+    }
+
+    // Health check method for all services
+    static async checkAllServicesHealth()
+    {
+        const healthCheckService = this.getHealthCheckService();
+        const servicesConfig = this.getServicesConfig();
+        
+        return await healthCheckService.checkAllServicesHealth(servicesConfig);
     }
 }
 

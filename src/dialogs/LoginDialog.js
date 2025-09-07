@@ -2,7 +2,7 @@ import React, {useState, useCallback} from 'react';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
 import '../styles/css/main.css';
 
-const LoginDialog = () =>
+const LoginDialog = ({ onLoginSuccess }) =>
 {
     const [loginDialogDisplay, setLoginDialogDisplay] = useState(true);
     const [userId, setUserId] = useState('');
@@ -13,7 +13,13 @@ const LoginDialog = () =>
     {
         window.configurations.setLoggedInUserId(userId);
         setLoginDialogDisplay(false);
-    }, [userId]);
+        
+        // Call the login success callback if provided
+        if (onLoginSuccess) 
+        {
+            onLoginSuccess();
+        }
+    }, [userId, onLoginSuccess]);
 
     const handleKeyDown = (event) =>
     {
