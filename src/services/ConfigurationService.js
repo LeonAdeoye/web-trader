@@ -160,6 +160,9 @@ export class ConfigurationService
     {
         try 
         {
+            // Ensure we have the latest configs loaded
+            await this.loadConfigurations(owner);
+            
             const configKeys = Object.keys(configObject);
             
             for (const key of configKeys)
@@ -208,4 +211,6 @@ export class ConfigurationService
             this.#loggerService.logError(`Failed to save configurations: ${error.message}`);
         }
     }
+
+
 }

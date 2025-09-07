@@ -33,6 +33,7 @@ import {ParametricsApp} from "./apps/ParametricsApp";
 import RfqDetailsApp from "./apps/RfqDetailsApp";
 import RfqWorkflowsApp from "./apps/RfqWorkflowsApp";
 import RfqChartsApp from "./apps/RfqChartsApp";
+import {ServicesApp} from "./apps/ServicesApp";
 
 const App = ({}) =>
 {
@@ -71,7 +72,8 @@ const App = ({}) =>
             { name: 'RFQ Details', path: '/rfq-details', component: RfqDetailsApp },
             { name: 'RFQ Charts', path: '/rfq-charts', component: RfqChartsApp },
             { name: 'RFQ Workflows', path: '/rfq-workflows', component: RfqWorkflowsApp },
-            { name: 'Parametrics', path: '/parametrics', component: ParametricsApp }
+            { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
+            { name: 'Services', path: '/services', component: ServicesApp }
         ];
 
     useEffect( () =>

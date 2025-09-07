@@ -1,5 +1,7 @@
 # Leon's Coding Style Guide for Cursor AI
 
+FOR ALL LANGUAGES: JavaScript, Java, Kotlin DONT ADD TO MANY OBVIOUS COMMENTS. Only comment if really complicated code.
+
 This document defines the coding style standards that Cursor AI should follow for JavaScript, Java, and Kotlin applications.
 
 ## General Principles
@@ -66,6 +68,11 @@ if (condition) {
 ```java
 if (condition)
     return value;
+
+    if(condition)
+        doSomething();
+    else
+        doSomethingElse();
 
 if (value > endValue) 
     break;
@@ -136,12 +143,27 @@ CompletableFuture<OptionPriceResult> future = CompletableFuture.supplyAsync(() -
 
 ### JavaScript Arrow Functions
 
+#### don't have braces if on single line for if statement
+if(condition)
+    doSomething();
+else
+    doSomethingElse();
+
+
+####TRY to FIT all JSX or HTML tags on the same line if possible. Fo example.
+            <TitleBarComponent title="New Basket" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+
+##### all other arrow functions should have braces on new line if multi-line
+
 **Single-line arrow functions:**
 ```javascript
 const result = items.map(item => item.value);
 const filtered = items.filter(x => x > 0);
 ```
 
+
+
+##### all other arrow functions should have braces on new line if multi-line
 **Multi-line arrow functions with braces on new line:**
 ```javascript
 const processData = (data) => 

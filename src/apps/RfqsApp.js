@@ -79,11 +79,27 @@ export const RfqsApp = () =>
     const [selectedRow, setSelectedRow] = useState(null);
     const [ownerId, setOwnerId] = useState(null);
 
+    // Define RFQ-specific config keys with prefix
+    const RFQ_CONFIG_KEYS = [
+        'rfq_defaultSettlementCurrency',
+        'rfq_defaultSettlementDays',
+        'rfq_decimalPrecision',
+        'rfq_defaultSpread',
+        'rfq_defaultSalesCreditPercentage',
+        'rfq_defaultVolatility',
+        'rfq_defaultDayConvention',
+        'rfq_defaultOptionModel'
+    ];
+
+
+
     useEffect(() =>
     {
         const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
         loadOwner();
     }, []);
+
+
 
     // Load configuration from service
     const loadConfiguration = useCallback(async () => 
@@ -94,18 +110,27 @@ export const RfqsApp = () =>
                 return;
 
             await configurationService.loadConfigurations(ownerId);
-            const configs = configurationService.getConfigsBelongingToOwner(ownerId);
-            if (configs && configs.length > 0) 
+            const allConfigs = configurationService.getConfigsBelongingToOwner(ownerId);
+            
+            // Filter only RFQ configs
+            const rfqConfigs = allConfigs.filter(config => 
+                RFQ_CONFIG_KEYS.includes(config.key)
+            );
+            
+            if (rfqConfigs && rfqConfigs.length > 0) 
             {
                 const loadedConfig = {};
-                configs.forEach(config => 
+                rfqConfigs.forEach(config => 
                 {
                     if (config.key && config.value !== null) 
                     {
-                        if (['defaultSettlementDays', 'decimalPrecision', 'defaultSpread', 'defaultSalesCreditPercentage', 'defaultVolatility', 'defaultDayConvention'].includes(config.key)) 
-                            loadedConfig[config.key] = parseFloat(config.value);
+                        // Remove prefix for local config object
+                        const localKey = config.key.replace('rfq_', '');
+                        
+                        if (['defaultSettlementDays', 'decimalPrecision', 'defaultSpread', 'defaultSalesCreditPercentage', 'defaultVolatility', 'defaultDayConvention'].includes(localKey)) 
+                            loadedConfig[localKey] = parseFloat(config.value);
                         else 
-                            loadedConfig[config.key] = config.value;
+                            loadedConfig[localKey] = config.value;
                     }
                 });
 
@@ -114,10 +139,12 @@ export const RfqsApp = () =>
                     ...loadedConfig
                 }));
                 
-                loggerService.logInfo(`Loaded configuration for owner: ${ownerId}`, loadedConfig);
+                loggerService.logInfo(`Loaded RFQ configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
-                loggerService.logInfo(`No configuration found for owner: ${ownerId}, using defaults`);
+            {
+                loggerService.logInfo(`No RFQ configuration found for owner: ${ownerId}, using defaults`);
+            }
         } 
         catch (error) 
         {
@@ -283,8 +310,20 @@ export const RfqsApp = () =>
         {
             setConfig(newConfig);
             setIsConfigOpen(false);
-            await configurationService.saveOrUpdateConfigurations(ownerId, newConfig);
-            loggerService.logInfo(`Successfully applied configuration for owner: ${ownerId}`);
+            
+            // Filter only RFQ configs for saving (add prefix)
+            const rfqConfigToSave = {};
+            RFQ_CONFIG_KEYS.forEach(key => {
+                const localKey = key.replace('rfq_', '');
+                if (newConfig[localKey] !== undefined) {
+                    rfqConfigToSave[key] = newConfig[localKey];
+                }
+            });
+            
+            // Persist only RFQ configurations
+            await configurationService.saveOrUpdateConfigurations(ownerId, rfqConfigToSave);
+            
+            loggerService.logInfo(`Successfully applied RFQ configuration for owner: ${ownerId}`, rfqConfigToSave);
         } 
         catch (error) 
         {

@@ -30,6 +30,22 @@ export const InsightsApp = () =>
     const [ownerId, setOwnerId] = useState(null);
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
 
+    // Define insights-specific config keys with prefix
+    const INSIGHTS_CONFIG_KEYS = [
+        'insights_metric',
+        'insights_showWorkingTotals',
+        'insights_orderSellColor',
+        'insights_executedSellColor',
+        'insights_orderBuyColor',
+        'insights_executedBuyColor',
+        'insights_workingBuyColor',
+        'insights_workingSellColor',
+        'insights_dateMode',
+        'insights_dateRangeDays',
+        'insights_maxBars'
+    ];
+
+
     const [config, setConfig] = useState({
         metric: 'shares',
         showWorkingTotals: false,
@@ -59,6 +75,24 @@ export const InsightsApp = () =>
         loadOwner();
     }, []);
 
+    // Helper function to update applied states from config
+    const updateAppliedStates = useCallback((config) => {
+        setAppliedColors({
+            orderSellColor: config.orderSellColor,
+            executedSellColor: config.executedSellColor,
+            orderBuyColor: config.orderBuyColor,
+            executedBuyColor: config.executedBuyColor,
+            workingBuyColor: config.workingBuyColor,
+            workingSellColor: config.workingSellColor
+        });
+        setAppliedShowWorkingTotals(config.showWorkingTotals === true);
+        setAppliedMetric(config.metric);
+        setAppliedDateMode(config.dateMode);
+        setAppliedDateRangeDays(config.dateRangeDays);
+        setAppliedMaxBars(Math.max(1, parseInt(config.maxBars, 10) || 1));
+    }, []);
+
+
     const loadConfiguration = useCallback(async () => 
     {
         try 
@@ -67,21 +101,26 @@ export const InsightsApp = () =>
                 return;
 
             await configurationService.loadConfigurations(ownerId);
-            const configs = configurationService.getConfigsBelongingToOwner(ownerId);
+            const allConfigs = configurationService.getConfigsBelongingToOwner(ownerId);
+            const insightsConfigs = allConfigs.filter(config => 
+                INSIGHTS_CONFIG_KEYS.includes(config.key)
+            );
             
-            if (configs && configs.length > 0) 
+            if (insightsConfigs && insightsConfigs.length > 0) 
             {
                 const loadedConfig = {};
-                configs.forEach(config => 
+                insightsConfigs.forEach(config => 
                 {
                     if (config.key && config.value !== null) 
                     {
-                        if (['dateRangeDays', 'maxBars'].includes(config.key)) 
-                            loadedConfig[config.key] = parseInt(config.value);
-                        else if (config.key === 'showWorkingTotals')
-                            loadedConfig[config.key] = config.value === 'true';
+                        const localKey = config.key.replace('insights_', '');
+                        
+                        if (['dateRangeDays', 'maxBars'].includes(localKey)) 
+                            loadedConfig[localKey] = parseInt(config.value);
+                        else if (localKey === 'showWorkingTotals')
+                            loadedConfig[localKey] = config.value === 'true';
                         else 
-                            loadedConfig[config.key] = config.value;
+                            loadedConfig[localKey] = config.value;
                     }
                 });
                 
@@ -89,19 +128,24 @@ export const InsightsApp = () =>
                     ...prevConfig,
                     ...loadedConfig
                 }));
-                
-                loggerService.logInfo(`Loaded configuration for owner: ${ownerId}`, loadedConfig);
+
+                updateAppliedStates(loadedConfig);
+                loggerService.logInfo(`Loaded insights configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
-                loggerService.logInfo(`No configuration found for owner: ${ownerId}, using defaults`);
+            {
+                loggerService.logInfo(`No insights configuration found for owner: ${ownerId}, using defaults`);
+                updateAppliedStates(config);
+            }
         } 
         catch (error) 
         {
             loggerService.logError(`Failed to load configuration: ${error.message}`);
         }
-    }, [configurationService, ownerId, loggerService]);
+    }, [configurationService, ownerId, loggerService, updateAppliedStates, config]);
 
-    const currentInsightType = useMemo(() => {
+    const currentInsightType = useMemo(() =>
+    {
         if (selectedTab === '1') return 'client';
         if (selectedTab === '2') return 'sector';
         if (selectedTab === '3') return 'country';
@@ -221,33 +265,27 @@ export const InsightsApp = () =>
     {
         try 
         {
-            // Update local state with new config
             setConfig(newConfig);
-            setAppliedColors({
-                orderSellColor: newConfig.orderSellColor,
-                executedSellColor: newConfig.executedSellColor,
-                orderBuyColor: newConfig.orderBuyColor,
-                executedBuyColor: newConfig.executedBuyColor,
-                workingBuyColor: newConfig.workingBuyColor,
-                workingSellColor: newConfig.workingSellColor
-            });
-            setAppliedShowWorkingTotals(newConfig.showWorkingTotals === true);
-            setAppliedMetric(newConfig.metric);
-            setAppliedDateMode(newConfig.dateMode);
-            setAppliedDateRangeDays(newConfig.dateRangeDays);
-            setAppliedMaxBars(Math.max(1, parseInt(newConfig.maxBars, 10) || 1));
+            updateAppliedStates(newConfig);
             setIsConfigOpen(false);
-            
-            // Persist configurations using the service method
-            await configurationService.saveOrUpdateConfigurations(ownerId, newConfig);
-            
-            loggerService.logInfo(`Successfully applied configuration for owner: ${ownerId}`);
+            const insightsConfigToSave = {};
+
+            INSIGHTS_CONFIG_KEYS.forEach(key =>
+            {
+                const localKey = key.replace('insights_', '');
+                if (newConfig[localKey] !== undefined) {
+                    insightsConfigToSave[key] = newConfig[localKey];
+                }
+            });
+
+            await configurationService.saveOrUpdateConfigurations(ownerId, insightsConfigToSave);
+            loggerService.logInfo(`Successfully applied insights configuration for owner: ${ownerId}`, insightsConfigToSave);
         } 
         catch (error) 
         {
             loggerService.logError(`Failed to apply configuration: ${error.message}`);
         }
-    }, [configurationService, ownerId, loggerService]);
+    }, [configurationService, ownerId, loggerService, updateAppliedStates]);
 
     useEffect(() =>
     {
@@ -255,7 +293,7 @@ export const InsightsApp = () =>
         {
             try
             {
-                await loadConfiguration(); // Load configuration from service
+                await loadConfiguration();
                 
                 if (appliedDateMode === 'today')
                 {
