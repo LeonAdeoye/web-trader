@@ -1071,7 +1071,7 @@ export const ReferenceDataApp = () =>
                 else
                     setReferenceDataDialogOpenFlag(true);
             }}}/>
-        <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 131px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+        <div className="reference-app" style={{width: '100%', height: 'calc(100vh - 95px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <TabContext value={selectedTab}>
                 <TabList className="reference-tab-list" onChange={(event, newValue) => { selectedTabRef.current = newValue; setSelectedTab(newValue);}}>
                     <Tab className="clients-tab" label={"Clients"} value="1"/>
