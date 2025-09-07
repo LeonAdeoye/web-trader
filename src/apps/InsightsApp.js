@@ -106,9 +106,10 @@ export const InsightsApp = () =>
                 INSIGHTS_CONFIG_KEYS.includes(config.key)
             );
             
+            const loadedConfig = {};
+            
             if (insightsConfigs && insightsConfigs.length > 0) 
             {
-                const loadedConfig = {};
                 insightsConfigs.forEach(config => 
                 {
                     if (config.key && config.value !== null) 
@@ -129,20 +130,34 @@ export const InsightsApp = () =>
                     ...loadedConfig
                 }));
 
-                updateAppliedStates(loadedConfig);
                 loggerService.logInfo(`Loaded insights configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
             {
                 loggerService.logInfo(`No insights configuration found for owner: ${ownerId}, using defaults`);
-                updateAppliedStates(config);
             }
+            
+            // Use default config as base, then apply loaded config
+            const defaultConfig = {
+                metric: 'shares',
+                showWorkingTotals: false,
+                orderSellColor: '#f44336',
+                executedSellColor: '#e57373',
+                orderBuyColor: '#528c74',
+                executedBuyColor: '#81c784',
+                workingBuyColor: '#66a7bb',
+                workingSellColor: '#d9a9a7',
+                dateMode: 'today',
+                dateRangeDays: 10,
+                maxBars: 5
+            };
+            updateAppliedStates({...defaultConfig, ...loadedConfig});
         } 
         catch (error) 
         {
             loggerService.logError(`Failed to load configuration: ${error.message}`);
         }
-    }, [configurationService, ownerId, loggerService, updateAppliedStates, config]);
+    }, [configurationService, ownerId, loggerService, updateAppliedStates]);
 
     const currentInsightType = useMemo(() =>
     {
@@ -287,14 +302,22 @@ export const InsightsApp = () =>
         }
     }, [configurationService, ownerId, loggerService, updateAppliedStates]);
 
+    // Separate useEffect for configuration loading (like RfqsApp)
+    useEffect(() =>
+    {
+        const loadData = async () =>
+        {
+            await loadConfiguration();
+        };
+        loadData().then(() => loggerService.logInfo("Configuration loaded in InsightsApp"));
+    }, [loadConfiguration, loggerService]);
+
     useEffect(() =>
     {
         const loadData = async () =>
         {
             try
             {
-                await loadConfiguration();
-                
                 if (appliedDateMode === 'today')
                 {
                     setInsightsData([]);
@@ -324,7 +347,7 @@ export const InsightsApp = () =>
         };
 
         loadData().then(() => loggerService.logInfo("Insights data loaded successfully."));
-    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService, loadConfiguration]);
+    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService]);
 
     const displayedInsightsData = useMemo(() =>
     {

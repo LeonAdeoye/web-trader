@@ -130,7 +130,7 @@ export class ConfigurationService
 
     updateConfiguration = async (id, owner, key, value) =>
     {
-        const updatedConfig = {owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
+        const updatedConfig = {id: id, owner: owner, key: key, value: value, lastUpdatedBy: owner, lastUpdatedOn: Date.now()};
         this.#loggerService.logInfo(`Updating configuration with id: ${id} for owner: ${owner} and key: ${key} with value: ${value}`);
         return await fetch("http://localhost:20001/configuration", {
             method: "PUT",
