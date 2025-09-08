@@ -1,35 +1,355 @@
 .alert-config-stage-one
 {
-  .alert-configurations-name,
+  display: block;
+  text-align: left;
+  
+  .alert-configurations-name
   {
+    display: block;
     margin-top: 10px;
-    margin-bottom: 5px;
-    width: 500px;
+    margin-bottom: 10px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
   }
+  
+  .alert-configurations-client
+  {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiAutocomplete-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormControl-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+    
+    .MuiSelect-select
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+    
+    .MuiMenuItem-root
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+  }
+  
   .alert-configurations-desk,
   .alert-configurations-side,
   .alert-configurations-market,
-  .alert-configurations-client,
-  .alert-configurations-type,
+  .alert-configurations-type
+  {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormControl-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+    
+    .MuiSelect-select
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+    
+    .MuiMenuItem-root
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+  }
+  
   .alert-configurations-priority
   {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    width: 500px;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormControl-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+    
+    .MuiSelect-select
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+    
+    .MuiMenuItem-root
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
   }
 }
 
 .alert-config-stage-two
 {
+  display: block;
+  text-align: left;
+  
   .alert-configurations-adv-min,
   .alert-configurations-adv-max,
   .alert-configurations-notional-min,
   .alert-configurations-notional-max
   {
+    display: inline-block;
     margin-top: 10px;
     margin-bottom: 10px;
     width: 150px;
     margin-right: 10px;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 150px !important;
+      max-width: 150px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 150px !important;
+      max-width: 150px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+  }
+
+  .MuiFormControl-root
+  {
+    .MuiFormGroup-root
+    {
+      .MuiFormControlLabel-root
+      {
+        .MuiFormControlLabel-label
+        {
+          font-size: 12px;
+          color: #404040;
+        }
+      }
+    }
   }
 
   .dialog-action-button
@@ -43,11 +363,60 @@
 
 .alert-config-stage-three
 {
+  display: block;
+  text-align: left;
+  margin-bottom: 40px;
+  
   .alert-configurations-type
   {
+    display: block;
     margin-top: 10px;
-    margin-bottom: 10px;
-    width: 600px
+    margin-bottom: 0px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
   }
 
   .alert-configurations-classification,
@@ -76,14 +445,223 @@
 
 .alert-config-stage-four
 {
+  display: block;
+  text-align: left;
+  margin-bottom: 120px;
+  
   .alert-configurations-message-template
   {
-    margin: 10px;
-    width: 400px;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 0px;
+    width: 600px !important;
+    min-width: 600px !important;
+    max-width: 600px !important;
     height: 200px;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 600px !important;
+      max-width: 600px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
     .MuiInputBase-input
     {
-      font-size: 14px;
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 600px !important;
+      max-width: 600px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+  }
+}
+
+.alert-config-stage-five
+{
+  display: block;
+  text-align: left;
+  margin-bottom: 40px;
+  
+  .alert-configurations-email-address
+  {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 0px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+  }
+}
+
+.alert-config-stage-six
+{
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+  
+  .alert-configurations-start-time,
+  .alert-configurations-end-time,
+  .alert-configurations-frequency
+  {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    
+    .MuiTextField-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiSelect-root
+    {
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+    }
+    
+    .MuiFormLabel-root
+    {
+      font-size: 12px;
+      color: #404040;
+    }
+    
+    .MuiInputBase-input
+    {
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .MuiOutlinedInput-root
+    {
+      background-color: white;
+      width: 100% !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      
+      .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #404040;
+      }
+      
+      &:hover .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #656161;
+      }
+      
+      &.Mui-focused .MuiOutlinedInput-notchedOutline
+      {
+        border-color: #2196f3;
+      }
+    }
+    
+    .MuiSelect-select
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+    
+    .MuiMenuItem-root
+    {
+      color: #333;
+      font-size: 12px;
+      background-color: white;
+    }
+  }
+  
+  .alert-configurations-days
+  {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    
+    .MuiFormControl-root
+    {
+      .MuiFormGroup-root
+      {
+        .MuiFormControlLabel-root
+        {
+          .MuiFormControlLabel-label
+          {
+            font-size: 12px;
+            color: #404040;
+          }
+        }
+      }
     }
   }
 }

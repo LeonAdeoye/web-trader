@@ -7,8 +7,11 @@ export const AlertConfigurationsDialogStageFourComponent = ({handleInputChange})
 {
     const [alertConfiguration] = useRecoilState(alertConfigurationState);
 
-    return (<div className={"alert-config-stage-four"}>
-                <TextField className="alert-configurations-message-template" size='small' multiline rows='12' value={alertConfiguration.messageTemplate}
+    return (
+        <div className={"alert-config-stage-four"}>
+            <div className="alert-configurations-message-template">
+                <TextField size='small' multiline rows='12' value={alertConfiguration.messageTemplate}
                            onChange={(e) => handleInputChange('messageTemplate', e.target.value)} margin='normal' label='Message Template'/>
-            </div>);
+            </div>
+        </div>);
 };

@@ -77,22 +77,24 @@ export const AlertConfigurationsDialogStageSixComponent = ({handleInputChange}) 
     }
 
     return (
-        <div className="app-parent-with-action-button">
-            <div>
-                <TextField label="Start Time" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} style={{ margin: "4px" }}/>
-                <TextField label="End Time" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} style={{ margin: "4px" }}/>
+        <div className="alert-config-stage-six">
+            <div className="alert-configurations-start-time">
+                <TextField size='small' label="Start Time" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} margin='normal'/>
             </div>
-
-            <Select value={frequency} onChange={(e) => handleFrequencyChange(e.target.value)} className="dropdown" style={{ margin: "4px", width: "274px"}}>
-                <MenuItem value="everyMinute">Every Minute</MenuItem>
-                <MenuItem value="every5Minutes">Every 5 Minutes</MenuItem>
-                <MenuItem value="every10Minutes">Every 10 Minutes</MenuItem>
-                <MenuItem value="every15Minutes">Every 15 Minutes</MenuItem>
-                <MenuItem value="every30Minutes">Every 30 Minutes</MenuItem>
-                <MenuItem value="everyHour">Every Hour</MenuItem>
-            </Select>
-
-            <div>
+            <div className="alert-configurations-end-time">
+                <TextField size='small' label="End Time" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} margin='normal'/>
+            </div>
+            <div className="alert-configurations-frequency">
+                <Select size='small' value={frequency} onChange={(e) => handleFrequencyChange(e.target.value)}>
+                    <MenuItem value="everyMinute">Every Minute</MenuItem>
+                    <MenuItem value="every5Minutes">Every 5 Minutes</MenuItem>
+                    <MenuItem value="every10Minutes">Every 10 Minutes</MenuItem>
+                    <MenuItem value="every15Minutes">Every 15 Minutes</MenuItem>
+                    <MenuItem value="every30Minutes">Every 30 Minutes</MenuItem>
+                    <MenuItem value="everyHour">Every Hour</MenuItem>
+                </Select>
+            </div>
+            <div className="alert-configurations-days">
                 <FormControl component="fieldset">
                     <FormGroup>
                         {Object.keys(daysMap).map((day) =>

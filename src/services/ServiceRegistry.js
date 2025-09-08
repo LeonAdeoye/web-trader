@@ -8,6 +8,7 @@ import { TraderService } from './TraderService';
 import { ExchangeRateService } from './ExchangeRateService';
 import { ConfigurationService } from './ConfigurationService';
 import { HealthCheckService } from './HealthCheckService';
+import { AlertConfigurationsService } from './AlertConfigurationsService';
 
 class ServiceRegistry
 {
@@ -18,9 +19,7 @@ class ServiceRegistry
         const serviceName = serviceClass.name;
         
         if (!this.#services.has(serviceName))
-        {
             this.#services.set(serviceName, new serviceClass());
-        }
         
         return this.#services.get(serviceName);
     }
@@ -75,6 +74,11 @@ class ServiceRegistry
         return this.getService(HealthCheckService);
     }
 
+    static getAlertConfigurationsService()
+    {
+        return this.getService(AlertConfigurationsService);
+    }
+
     // Method to preload all services
     static async preloadAllServices(ownerId = null)
     {
@@ -87,7 +91,8 @@ class ServiceRegistry
             this.getClientService(),
             this.getTraderService(),
             this.getExchangeRateService(),
-            this.getConfigurationService()
+            this.getConfigurationService(),
+            this.getAlertConfigurationsService()
         ];
 
         const loadPromises = [
@@ -98,7 +103,9 @@ class ServiceRegistry
             services[4].loadBankHolidays(),
             services[5].loadClients(),
             services[6].loadTraders(),
-            services[7].loadExchangeRates()
+            services[7].loadExchangeRates(),
+            services[9].loadAlertTypes(),
+            services[9].loadAlertConfigurations()
         ];
 
         // Only load configurations if ownerId is provided

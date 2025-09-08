@@ -13,7 +13,8 @@ contextBridge.exposeInMainWorld('command', {
     setChannel: (windowTitle, channel) => ipcRenderer.send('open-channels', windowTitle, channel),
     openTools: () => ipcRenderer.send('open-tools'),
     getWindowId: (windowTitle) => ipcRenderer.sendSync('get-child-window-id', windowTitle),
-    getMainWindowId: (windowTitle) => ipcRenderer.sendSync('get-main-window-id', windowTitle)
+    getMainWindowId: (windowTitle) => ipcRenderer.sendSync('get-main-window-id', windowTitle),
+    sendMessageToMain: (message) => ipcRenderer.send(message)
 
 });
 
@@ -21,6 +22,11 @@ contextBridge.exposeInMainWorld('messenger', {
     sendMessageToMain: (fdc3Message, destination, source) => ipcRenderer.send('message-to-main-from-renderer', fdc3Message, destination, source),
     handleMessageFromMain: (callback) => ipcRenderer.on('message-to-renderer-from-main', (_, fdc3Message, destination, source) => callback(fdc3Message, destination, source)),
     removeHandlerForMessageFromMain: () => ipcRenderer.removeAllListeners('message-to-renderer-from-main')
+});
+
+// Listen for refresh messages from main process
+ipcRenderer.on('refresh-alert-configurations', () => {
+    window.dispatchEvent(new CustomEvent('refresh-alert-configurations'));
 });
 
 contextBridge.exposeInMainWorld('configurations', {

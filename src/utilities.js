@@ -73,6 +73,55 @@ export const formatDate = (date) =>
     return `${day} ${month} ${year}`;
 }
 
+export const formatTime = (timeValue) =>
+{
+    if (!timeValue) return 'N/A';
+    
+    // If it's already a time string (HH:MM or HH:MM:SS), return as is
+    const timeStr = timeValue.toString();
+    if (timeStr.includes(':')) return timeStr;
+    
+    // If it's a Date object or timestamp, format to time
+    const date = new Date(timeValue);
+    if (isNaN(date)) return 'N/A';
+    
+    return date.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+}
+
+// Additional function to handle ISO datetime strings and extract just the time part
+export const formatTimeFromISO = (isoString) =>
+{
+    if (!isoString) return 'N/A';
+    
+    // If it's already a time string (HH:MM or HH:MM:SS), return as is
+    const timeStr = isoString.toString();
+    if (timeStr.includes(':') && !timeStr.includes('T')) return timeStr;
+    
+    // If it's an ISO datetime string, extract just the time part
+    if (timeStr.includes('T')) {
+        const timePart = timeStr.split('T')[1];
+        // Remove any timezone info (Z or +HH:MM)
+        const cleanTime = timePart.split('Z')[0].split('+')[0].split('-')[0];
+        return cleanTime;
+    }
+    
+    // If it's a Date object or timestamp, format to time
+    const date = new Date(isoString);
+    if (isNaN(date)) return 'N/A';
+    
+    return date.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+}
+
 
 export const orderStateStyling = (orderState) =>
 {

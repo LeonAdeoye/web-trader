@@ -22,8 +22,10 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
 
     return (
         <div className={"alert-config-stage-three"}>
-            <TextField className="alert-configurations-name" size='small' label='Enter the type of the alert...' value={selectedAlertType} style={{width: '400px'}}
-               onFocus={() => setIsAlertTypeVisible(true)} margin='normal' onChange={(e) => setSelectedAlertType(e.target.value)} />
+            <div className="alert-configurations-type">
+                <TextField size='small' label='Enter the type of the alert...' value={selectedAlertType}
+                   onFocus={() => setIsAlertTypeVisible(true)} margin='normal' onChange={(e) => setSelectedAlertType(e.target.value)} />
+            </div>
             {isAlertTypeVisible ? <Card style={{width:'800px', height: '320px', marginBottom:'10px'}}>
                 <CardContent>
                     <List>
@@ -37,9 +39,7 @@ export const AlertConfigurationsDialogStageThreeComponent = ({handleInputChange,
                     </List>
                 </CardContent>
             </Card>: ""}
-            <br/>
             {!isAlertTypeVisible && selectedAlertType ? <AlertTypeDetailsCardComponent alertSelection={selectedAlert}/>: ""}
-            <br/>
         </div>
     );
 };

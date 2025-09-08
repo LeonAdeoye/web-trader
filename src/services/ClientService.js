@@ -100,9 +100,15 @@ export class ClientService
 
     clear = () => this.#clients.clear();
 
-    getClientId = (clientName) => this.#clients.find(client => client.clientName === clientName).clientId;
+    getClientId = (clientName) => {
+        const client = this.#clients.find(client => client.clientName === clientName);
+        return client ? client.clientId : null;
+    }
 
-    getClientName = (clientId) => this.#clients.find(client => client.clientId === clientId).clientName;
+    getClientName = (clientId) => {
+        const client = this.#clients.find(client => client.clientId === clientId);
+        return client ? client.clientName : null;
+    }
 
     getClients = () => this.#clients;
 }

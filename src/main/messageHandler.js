@@ -35,6 +35,16 @@ const handleOpenChannelsMessage = (_, windowId) =>
     // TODO
 }
 
+const handleRefreshAlertConfigurationsMessage = () => {
+    // Broadcast refresh message to all windows
+    const allWindows = BrowserWindow.getAllWindows();
+    allWindows.forEach(window => {
+        if (window.webContents) {
+            window.webContents.send('refresh-alert-configurations');
+        }
+    });
+}
+
 const handleMessageFromRenderer = (_, fdc3Message, destination, source) => {
     handleFDC3Message(fdc3Message, destination, source);
 };
@@ -70,6 +80,7 @@ const setupMessageHandlers = async () =>
     ipcMain.handle("get-strategy-xml", getAllFIXATDLContent);
     ipcMain.on('open-tools', handleOpenToolsMessage);
     ipcMain.on('open-channel', handleOpenChannelsMessage);
+    ipcMain.on('refresh-alert-configurations', handleRefreshAlertConfigurationsMessage);
 };
 
 const removeAllListeners = async () =>
@@ -84,6 +95,7 @@ const removeAllListeners = async () =>
     ipcMain.removeListener('minimize', handleMinimizeMessage);
     ipcMain.removeListener('open-tools', handleOpenToolsMessage);
     ipcMain.removeListener('open-channel', handleOpenChannelsMessage);
+    ipcMain.removeListener('refresh-alert-configurations', handleRefreshAlertConfigurationsMessage);
 };
 
 module.exports = {

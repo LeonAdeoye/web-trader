@@ -8,6 +8,7 @@ import {AlertConfigurationsDialogStageSixComponent} from "./AlertConfigurationsD
 import React, {useCallback, useRef, useState, useMemo, useEffect} from "react";
 import {AlertConfigurationsService} from "../services/AlertConfigurationsService";
 import {LoggerService} from "../services/LoggerService";
+import {ServiceRegistry} from "../services/ServiceRegistry";
 import TitleBarComponent from "../components/TitleBarComponent";
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
@@ -19,7 +20,9 @@ export const AlertWizardApp = () =>
     const maxStage = 6;
     const [currentStage, setCurrentStage] = useState(1);
     const [alertConfiguration, setAlertConfiguration] = useRecoilState(alertConfigurationState);
-    const alertConfigurationsService = useRef(new AlertConfigurationsService()).current;
+    const alertConfigurationsService = useRef(ServiceRegistry.getAlertConfigurationsService()).current;
+    const clientService = useRef(ServiceRegistry.getClientService()).current;
+    const traderService = useRef(ServiceRegistry.getTraderService()).current;
     const loggerService = useRef(new LoggerService(AlertWizardApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("Alert Wizard"), []);
 
@@ -29,14 +32,94 @@ export const AlertWizardApp = () =>
         window.command.close(windowId);
     };
 
-    const handleSubmit = () =>
+    const handleSubmit = async () =>
     {
-        loggerService.logInfo(`Updated alert configuration: ${JSON.stringify(alertConfiguration)}.`);
-        window.command.close(windowId);
+        try
+        {
+            // Get logged in user ID
+            const loggedInUserId = await window.configurations.getLoggedInUserId();
+            
+            // Load services data if needed
+            await clientService.loadClients();
+            await traderService.loadTraders();
+            
+            // Get IDs from names
+            const clientId = clientService.getClientId(alertConfiguration.clientName);
+            const deskId = traderService.getDeskId(alertConfiguration.desk);
+            
+            // Prepare alert configuration data for the service
+            const alertConfigData = {
+                ownerId: loggedInUserId,
+                alertName: alertConfiguration.alertName || '',
+                clientId: clientId || null,
+                clientName: alertConfiguration.clientName || '', // Keep for backward compatibility
+                deskId: deskId || null,
+                desk: alertConfiguration.desk || '', // Keep for backward compatibility
+                side: alertConfiguration.side || '',
+                market: alertConfiguration.market || '',
+                exchanges: [alertConfiguration.market].filter(Boolean), // Convert market to exchanges array
+                priority: alertConfiguration.priority || '',
+                advMin: alertConfiguration.advMin || '',
+                advMax: alertConfiguration.advMax || '',
+                notionalOrADV: alertConfiguration.notionalOrADV || false,
+                notionalAndADV: alertConfiguration.notionalAndADV || false,
+                notionalMin: alertConfiguration.notionalMin || '',
+                notionalMax: alertConfiguration.notionalMax || '',
+                alertType: alertConfiguration.alertType || '',
+                messageTemplate: alertConfiguration.messageTemplate || '',
+                emailAddress: alertConfiguration.emailAddress || '',
+                startTime: alertConfiguration.frequency?.startTime || '',
+                endTime: alertConfiguration.frequency?.endTime || '',
+                frequency: alertConfiguration.frequency?.cronExpression || '',
+                isActive: true, // Default to active
+                customizations: '', // Default empty
+                createdOn: new Date().toISOString(),
+                lastUpdatedOn: new Date().toISOString()
+            };
+
+            // Save the alert configuration using the service
+            const savedConfig = await alertConfigurationsService.addNewAlertConfiguration(alertConfigData);
+            
+            if (savedConfig)
+            {
+                // Show success message with the saved configuration
+                const jsonMessage = JSON.stringify(savedConfig, null, 2);
+                alert(`Alert Configuration Successfully Saved!\n\n${jsonMessage}`);
+                
+                // Trigger refresh of Alert Configuration app via IPC
+                window.command.sendMessageToMain('refresh-alert-configurations');
+                
+                loggerService.logInfo(`Successfully saved alert configuration: ${JSON.stringify(savedConfig)}.`);
+            }
+            else
+            {
+                alert('Failed to save alert configuration. Please try again.');
+                loggerService.logError('Failed to save alert configuration');
+            }
+        }
+        catch (error)
+        {
+            loggerService.logError(`Error saving alert configuration: ${error.message}`);
+            alert(`Error saving alert configuration: ${error.message}`);
+        }
+        finally
+        {
+            window.command.close(windowId);
+        }
     };
 
     const handleNext = () =>
     {
+        // Validate email on Stage 5 before proceeding
+        if (currentStage === 5 && alertConfiguration.emailAddress)
+        {
+            if (!alertConfiguration.emailAddress.includes('@') || !alertConfiguration.emailAddress.includes('.'))
+            {
+                alert('Please enter a valid email address (must contain @ and .)');
+                return;
+            }
+        }
+        
         setCurrentStage(prevStage => prevStage + 1);
     };
 

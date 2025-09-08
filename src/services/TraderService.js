@@ -110,4 +110,18 @@ export class TraderService
             })
             .catch(error => this.#loggerService.logError(error));
     }
+
+    getDeskId = (deskName) => 
+    {
+        if (!deskName) return null;
+        const trader = this.#traders.find(trader => trader.desk === deskName);
+        return trader ? trader.traderId : null;
+    }
+
+    getDeskName = (deskId) => 
+    {
+        if (!deskId) return null;
+        const trader = this.#traders.find(trader => trader.traderId === deskId);
+        return trader ? trader.desk : null;
+    }
 } 
