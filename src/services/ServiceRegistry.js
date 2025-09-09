@@ -130,7 +130,8 @@ class ServiceRegistry
             { name: 'Exchange Service', port: 20014, actuatorUrl: 'http://localhost:20014/health' },
             { name: 'Limits Service', port: 20017, actuatorUrl: 'http://localhost:20017/health' },
             { name: 'Pricing Service', port: 20015, actuatorUrl: 'http://localhost:20015/health' },
-            { name: 'IOI Service', port: 20018, actuatorUrl: 'http://localhost:20018/health' }
+            { name: 'IOI Service', port: 20018, actuatorUrl: 'http://localhost:20018/health' },
+            { name: 'Market Data Service', port: 20019, actuatorUrl: 'http://localhost:20019/health' }
         ];
     }
 
