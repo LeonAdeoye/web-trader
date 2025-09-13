@@ -2,10 +2,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { FDC3Service } from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
-import { useRecoilState } from "recoil";
-import { titleBarContextShareColourState } from "../atoms/component-state";
 import { ServiceRegistry } from '../services/ServiceRegistry';
 import MarketDataActionsRenderer from '../components/MarketDataActionsRenderer';
 import { LoggerService } from '../services/LoggerService';
@@ -13,16 +10,13 @@ import { LoggerService } from '../services/LoggerService';
 export const StockTickerApp = () =>
 {
     const [instruments, setInstruments] = useState([]);
-    const [marketData, setMarketData] = useState(new Map());
+    const [, setMarketData] = useState(new Map());
     const [subscribedRics, setSubscribedRics] = useState(new Set());
-    const [worker, setWorker] = useState(null);
-    const [stockCode, setStockCode] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
     const loggerService = useRef(new LoggerService(StockTickerApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("Stock Ticker"), []);
-    const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [inboundWorker, setInboundWorker] = useState(null);
 
     const gridApiRef = useRef();
@@ -36,7 +30,7 @@ export const StockTickerApp = () =>
           valueGetter: (params) => params.data?.isSubscribed ? 'Subscribed' : 'Not Subscribed' },
         { headerName: 'Actions', field: 'actions', sortable: false, minWidth: 120, width: 120, filter: false,
           cellRenderer: MarketDataActionsRenderer }
-    ]), []);
+    ]), [instruments, subscribedRics]);
 
     useEffect(() =>
     {
@@ -89,46 +83,6 @@ export const StockTickerApp = () =>
         };
     }, [inboundWorker]);
 
-    const instrumentsWithData = useMemo(() =>
-    {
-        return instruments.map(instrument => ({...instrument, price: marketData.get(instrument.ric) || null }));
-    }, [instruments, marketData]);
-
-    const filteredInstruments = useMemo(() =>
-    {
-        if (stockCode)
-            return instrumentsWithData.filter(instrument => instrument.ric === stockCode);
-        else
-            return instrumentsWithData;
-    }, [stockCode, instrumentsWithData]);
-
-    useEffect(() =>
-    {
-        const handler = (fdc3Message, _, __) =>
-        {
-            if (fdc3Message.type === "fdc3.context")
-            {
-                if (fdc3Message.contextShareColour)
-                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
-
-                if (fdc3Message.instruments?.[0]?.id.ticker)
-                    setStockCode(fdc3Message.instruments[0].id.ticker);
-                else
-                    setStockCode(null);
-            }
-        };
-
-        window.messenger.handleMessageFromMain(handler);
-        return () => window.messenger.removeHandlerForMessageFromMain(handler);
-    }, [setTitleBarContextShareColour]);
-
-    const onSelectionChanged = useCallback(() =>
-    {
-        const selectedRows = gridApiRef.current.api.getSelectedRows();
-        const selectedRic = selectedRows.length === 0 ? null : selectedRows[0].ric;
-        window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedRic, null), null, windowId);
-    }, [windowId]);
-
     const handleSubscribe = useCallback(async (ric) =>
     {
         try
@@ -143,7 +97,7 @@ export const StockTickerApp = () =>
             loggerService.logError(`Failed to subscribe to ${ric}: ${error.message}`);
             setErrorMessage(`Failed to subscribe to ${ric}: ${error.message}`);
         }
-    }, [marketDataService, worker]);
+    }, [marketDataService]);
 
     const handleUnsubscribe = useCallback(async (ric) =>
     {
@@ -164,7 +118,7 @@ export const StockTickerApp = () =>
             loggerService.logError(`Failed to unsubscribe from ${ric}: ${error.message}`);
             setErrorMessage(`Failed to unsubscribe from ${ric}: ${error.message}`);
         }
-    }, [marketDataService, worker]);
+    }, [marketDataService]);
 
     useEffect(() =>
     {
@@ -172,11 +126,8 @@ export const StockTickerApp = () =>
         {
             if (subscribedRics.size > 0)
                 marketDataService.unsubscribeAll([...subscribedRics]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
-
-            if (worker)
-                worker.postMessage({ type: 'disconnect' });
         };
-    }, [subscribedRics, marketDataService, worker]);
+    }, [subscribedRics]);
 
     const gridContext = useMemo(() =>
     ({
@@ -191,8 +142,7 @@ export const StockTickerApp = () =>
                 windowId={windowId} 
                 addButtonProps={undefined} 
                 showChannel={true} 
-                showTools={false}
-            />
+                showTools={false}/>
             
             {errorMessage && (
                 <div style={{ 
@@ -217,19 +167,12 @@ export const StockTickerApp = () =>
                     columnDefs={columnDefs}
                     ref={gridApiRef}
                     rowSelection={'single'}
-                    onSelectionChanged={onSelectionChanged}
                     rowHeight={25}
-                    rowData={filteredInstruments}
+                    rowData={instruments}
                     getRowId={({ data: { ric } }) => ric}
                     onGridSizeChanged={({ api }) => api.sizeColumnsToFit()}
                     context={gridContext}
-                    defaultColDef={{
-                        resizable: true,
-                        sortable: true,
-                        filter: true,
-                        floatingFilter: false
-                    }}
-                />
+                    defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: false }}/>
             </div>
         </div>
     );

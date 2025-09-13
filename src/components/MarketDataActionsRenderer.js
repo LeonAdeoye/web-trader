@@ -30,11 +30,7 @@ const MarketDataActionsRenderer = (params) =>
                         onClick={handleSubscribe}
                         disabled={isSubscribed}
                         color="primary"
-                        style={{ 
-                            padding: '4px',
-                            opacity: isSubscribed ? 0.5 : 1
-                        }}
-                    >
+                        style={{ padding: '4px', opacity: isSubscribed ? 0.5 : 1 }}>
                         <PlayArrowIcon fontSize="small" />
                     </IconButton>
                 </span>
@@ -46,11 +42,7 @@ const MarketDataActionsRenderer = (params) =>
                         onClick={handleUnsubscribe}
                         disabled={!isSubscribed}
                         color="secondary"
-                        style={{ 
-                            padding: '4px',
-                            opacity: !isSubscribed ? 0.5 : 1
-                        }}
-                    >
+                        style={{ padding: '4px', opacity: !isSubscribed ? 0.5 : 1 }}>
                         <StopIcon fontSize="small" />
                     </IconButton>
                 </span>
