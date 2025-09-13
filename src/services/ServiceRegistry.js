@@ -98,7 +98,8 @@ class ServiceRegistry
             this.getTraderService(),
             this.getExchangeRateService(),
             this.getConfigurationService(),
-            this.getAlertConfigurationsService()
+            this.getAlertConfigurationsService(),
+            this.getMarketDataService()
         ];
 
         const loadPromises = [

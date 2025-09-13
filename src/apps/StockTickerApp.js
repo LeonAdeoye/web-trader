@@ -91,10 +91,7 @@ export const StockTickerApp = () =>
 
     const instrumentsWithData = useMemo(() =>
     {
-        return instruments.map(instrument => ({
-            ...instrument,
-            price: marketData.get(instrument.ric) || null
-        }));
+        return instruments.map(instrument => ({...instrument, price: marketData.get(instrument.ric) || null }));
     }, [instruments, marketData]);
 
     const filteredInstruments = useMemo(() =>
@@ -137,20 +134,9 @@ export const StockTickerApp = () =>
         try
         {
             setErrorMessage(null);
-
             await marketDataService.subscribe([ric]);
-
-            if (worker)
-            {
-                worker.postMessage({ type: 'subscribe', data: { rics: [ric] } });
-            }
-
             setSubscribedRics(prev => new Set([...prev, ric]));
-            setInstruments(prev => prev.map(instrument => 
-                instrument.ric === ric 
-                    ? { ...instrument, isSubscribed: true }
-                    : instrument
-            ));
+            setInstruments(prev => prev.map(instrument => instrument.ric === ric ? { ...instrument, isSubscribed: true } : instrument ));
         }
         catch (error)
         {
@@ -164,28 +150,14 @@ export const StockTickerApp = () =>
         try
         {
             setErrorMessage(null);
-            
-            // Unsubscribe via market service
             await marketDataService.unsubscribe(ric);
-            
-            // Unsubscribe via web worker
-            if (worker)
+            setSubscribedRics(prev =>
             {
-                worker.postMessage({ type: 'unsubscribe', data: { ric } });
-            }
-            
-            // Update subscription state
-            setSubscribedRics(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(ric);
                 return newSet;
             });
-            
-            setInstruments(prev => prev.map(instrument => 
-                instrument.ric === ric 
-                    ? { ...instrument, isSubscribed: false }
-                    : instrument
-            ));
+            setInstruments(prev => prev.map(instrument => instrument.ric === ric ? { ...instrument, isSubscribed: false } : instrument));
         }
         catch (error)
         {
@@ -199,11 +171,7 @@ export const StockTickerApp = () =>
         return () =>
         {
             if (subscribedRics.size > 0)
-            {
-                marketDataService.unsubscribeAll([...subscribedRics]).catch(error =>
-                    loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`)
-                );
-            }
+                marketDataService.unsubscribeAll([...subscribedRics]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
 
             if (worker)
                 worker.postMessage({ type: 'disconnect' });

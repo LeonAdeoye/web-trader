@@ -3,21 +3,22 @@ import { IconButton, Tooltip } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 
-const MarketDataActionsRenderer = (params) => {
+const MarketDataActionsRenderer = (params) =>
+{
     const { data, context } = params;
     const { ric, isSubscribed } = data;
     const { onSubscribe, onUnsubscribe } = context;
 
-    const handleSubscribe = () => {
-        if (onSubscribe) {
+    const handleSubscribe = () =>
+    {
+        if (onSubscribe)
             onSubscribe(ric);
-        }
     };
 
-    const handleUnsubscribe = () => {
-        if (onUnsubscribe) {
+    const handleUnsubscribe = () =>
+    {
+        if (onUnsubscribe)
             onUnsubscribe(ric);
-        }
     };
 
     return (
