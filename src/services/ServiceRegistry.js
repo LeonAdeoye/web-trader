@@ -9,6 +9,7 @@ import { ExchangeRateService } from './ExchangeRateService';
 import { ConfigurationService } from './ConfigurationService';
 import { HealthCheckService } from './HealthCheckService';
 import { AlertConfigurationsService } from './AlertConfigurationsService';
+import { MarketDataService } from './MarketDataService';
 
 class ServiceRegistry
 {
@@ -77,6 +78,11 @@ class ServiceRegistry
     static getAlertConfigurationsService()
     {
         return this.getService(AlertConfigurationsService);
+    }
+
+    static getMarketDataService()
+    {
+        return this.getService(MarketDataService);
     }
 
     // Method to preload all services

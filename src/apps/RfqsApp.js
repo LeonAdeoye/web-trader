@@ -12,6 +12,7 @@ import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
 import RfqsConfigPanel from "../components/RfqsConfigPanel";
 import RfqActionIconsRenderer from "../components/RfqActionIconsRenderer";
+import StatusRenderer from "../components/StatusRenderer";
 import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
@@ -32,7 +33,6 @@ export const RfqsApp = () =>
     const [, setRfqCreationDialogOpen] = useRecoilState(rfqCreationDialogDisplayState);
     const windowId = useMemo(() => window.command.getWindowId("RFQs"), []);
     const loggerService = useRef(new LoggerService(RfqsApp.name)).current;
-    // Use ServiceRegistry for singleton services
     const exchangeRateService = useRef(ServiceRegistry.getExchangeRateService()).current;
     const volatilityService = useRef(ServiceRegistry.getVolatilityService()).current;
     const priceService = useRef(ServiceRegistry.getPriceService()).current;
@@ -173,9 +173,12 @@ export const RfqsApp = () =>
             setDayCountConventions([360, 365, 250]);
             setStatusEnums([
                 { value: 'PENDING', description: 'Pending' },
-                { value: 'APPROVED', description: 'Approved' },
+                { value: 'ACCEPTED', description: 'Accepted' },
                 { value: 'REJECTED', description: 'Rejected' },
-                { value: 'COMPLETED', description: 'Completed' }
+                { value: 'PRICING', description: 'Pricing' },
+                { value: 'PRICED', description: 'Priced' },
+                { value: 'TRADED_AWAY', description: 'Traded Away' },
+                { value: 'TRADE_COMPLETED', description: 'Trade Completed' }
             ]);
             setHedgeTypeEnums([
                 { value: 'NONE', description: 'None' },
@@ -824,7 +827,8 @@ export const RfqsApp = () =>
             {headerName: "Underlying Code", field: "underlying", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
             {headerName: "Underlying Price", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }},
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }, 
+              cellRenderer: StatusRenderer},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',

@@ -88,3 +88,18 @@ export const onAmpsOrderMessage = (message) =>
             break;
     }
 }
+
+export const onAmpsMarketDataMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", marketData: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", marketData: message.data});
+            break;
+        default:
+            break;
+    }
+}

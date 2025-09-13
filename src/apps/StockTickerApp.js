@@ -1,178 +1,265 @@
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import React,{useEffect, useState, useRef, useCallback, useMemo} from "react";
-import {Command} from "amps";
-import {FDC3Service} from "../services/FDC3Service";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { FDC3Service } from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
-import {useRecoilState} from "recoil";
-import {titleBarContextShareColourState} from "../atoms/component-state";
+import { useRecoilState } from "recoil";
+import { titleBarContextShareColourState } from "../atoms/component-state";
+import { ServiceRegistry } from '../services/ServiceRegistry';
+import MarketDataActionsRenderer from '../components/MarketDataActionsRenderer';
+import { LoggerService } from '../services/LoggerService';
 
-// In both cases we try to find the index of the existing row by using a matcher:
-const matcher = ({ header }) => ({ key }) => key === header.sowKey();
-
-// When AMPS notifies us that a message is no longer relevant, we remove that message from the grid.
-// The processOOF function is declared outside the Grid component.
-// Its main purpose to take an OOF message with current row data, and return new, adjusted row data:
-const processOOF = (message, rowData) =>
+export const StockTickerApp = () =>
 {
-    const rowIndex = rowData.findIndex(matcher(message));
-    if(rowIndex >= 0)
-    {
-        const rows = rowData.filter(({ key }) => key !== message.header.sowKey());
-        return rows;
-    }
-    return rowData;
-}
-
-// On the other side, when AMPS notifies us that new information has arrived,
-// we use the data in that message to update the grid. Similar to processOOF,
-// the processPublish function is declared outside the Grid component,
-// takes a message and current row data and returns new row data:
-const processPublish = (message, rowData) =>
-{
-    const rowIndex = rowData.findIndex(matcher(message));
-    const rows = rowData.slice();
-    if(rowIndex >= 0)
-    {
-        rows[rowIndex] = { ...rows[rowIndex], ...message.data };
-    }
-    else
-    {
-        message.data.key = message.header.sowKey();
-        rows.push(message.data);
-    }
-    return rows;
-}
-
-export const StockTickerApp = ({client}) =>
-{
-    const columnDefs = useMemo(() => ([
-        {headerName: 'Stock Code', field: 'stockCode'},
-        {headerName: 'Bid', field: 'bid',sort: 'desc'},
-        {headerName: 'Ask', field: 'ask'}
-    ]), []);
-
-    const [rowData, setRowData] = useState([]);
-    const [, setWorker] = useState(null);
+    const [instruments, setInstruments] = useState([]);
+    const [marketData, setMarketData] = useState(new Map());
+    const [subscribedRics, setSubscribedRics] = useState(new Set());
+    const [worker, setWorker] = useState(null);
     const [stockCode, setStockCode] = useState(null);
-
-    // Used for context sharing between child windows.
+    const [errorMessage, setErrorMessage] = useState(null);
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
+    const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
+    const loggerService = useRef(new LoggerService(StockTickerApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("Stock Ticker"), []);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const [inboundWorker, setInboundWorker] = useState(null);
 
-    // Keep a reference to the subscription ID.
-    const subIdTef = useRef();
     const gridApiRef = useRef();
+
+    const columnDefs = useMemo(() =>
+    ([
+        { headerName: 'RIC', field: 'ric', sortable: true, minWidth: 120, width: 120, filter: true },
+        { headerName: 'Price', field: 'price', sortable: true, minWidth: 100, width: 100, filter: true, 
+          valueFormatter: (params) => params.value ? params.value.toFixed(2) : '--' },
+        { headerName: 'Status', field: 'isSubscribed', sortable: true, minWidth: 100, width: 100, filter: true,
+          valueGetter: (params) => params.data?.isSubscribed ? 'Subscribed' : 'Not Subscribed' },
+        { headerName: 'Actions', field: 'actions', sortable: false, minWidth: 120, width: 120, filter: false,
+          cellRenderer: MarketDataActionsRenderer }
+    ]), []);
+
+    useEffect(() =>
+    {
+        const loadInstruments = async () =>
+        {
+            try
+            {
+                await instrumentService.loadInstruments();
+                const instrumentsData = instrumentService.getInstruments();
+                const initialData = instrumentsData.map(instrument => ({ ric: instrument.instrumentCode, price: null, isSubscribed: false }));
+                setInstruments(initialData);
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load instruments: ${error.message}`);
+                setErrorMessage('Failed to load instruments');
+            }
+        };
+
+        loadInstruments().then(() => loggerService.logInfo("Instruments loaded successfully."));
+    }, [instrumentService]);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/market-data-reader.js", import.meta.url));
+        setInboundWorker(webWorker);
+        return () => webWorker.terminate();
+    }, []);
+
+    const handleWorkerMessage = useCallback((event) =>
+    {
+        const { ric, price } = event.data.marketData;
+        setMarketData(prev =>
+        {
+            const newMap = new Map(prev);
+            newMap.set(ric, price);
+            return newMap;
+        });
+    } , []);
+
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker]);
+
+    const instrumentsWithData = useMemo(() =>
+    {
+        return instruments.map(instrument => ({
+            ...instrument,
+            price: marketData.get(instrument.ric) || null
+        }));
+    }, [instruments, marketData]);
+
+    const filteredInstruments = useMemo(() =>
+    {
+        if (stockCode)
+            return instrumentsWithData.filter(instrument => instrument.ric === stockCode);
+        else
+            return instrumentsWithData;
+    }, [stockCode, instrumentsWithData]);
+
+    useEffect(() =>
+    {
+        const handler = (fdc3Message, _, __) =>
+        {
+            if (fdc3Message.type === "fdc3.context")
+            {
+                if (fdc3Message.contextShareColour)
+                    setTitleBarContextShareColour(fdc3Message.contextShareColour);
+
+                if (fdc3Message.instruments?.[0]?.id.ticker)
+                    setStockCode(fdc3Message.instruments[0].id.ticker);
+                else
+                    setStockCode(null);
+            }
+        };
+
+        window.messenger.handleMessageFromMain(handler);
+        return () => window.messenger.removeHandlerForMessageFromMain(handler);
+    }, [setTitleBarContextShareColour]);
+
+    const onSelectionChanged = useCallback(() =>
+    {
+        const selectedRows = gridApiRef.current.api.getSelectedRows();
+        const selectedRic = selectedRows.length === 0 ? null : selectedRows[0].ric;
+        window.messenger.sendMessageToMain(FDC3Service.createContextShare(selectedRic, null), null, windowId);
+    }, [windowId]);
+
+    const handleSubscribe = useCallback(async (ric) =>
+    {
+        try
+        {
+            setErrorMessage(null);
+
+            await marketDataService.subscribe([ric]);
+
+            if (worker)
+            {
+                worker.postMessage({ type: 'subscribe', data: { rics: [ric] } });
+            }
+
+            setSubscribedRics(prev => new Set([...prev, ric]));
+            setInstruments(prev => prev.map(instrument => 
+                instrument.ric === ric 
+                    ? { ...instrument, isSubscribed: true }
+                    : instrument
+            ));
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to subscribe to ${ric}: ${error.message}`);
+            setErrorMessage(`Failed to subscribe to ${ric}: ${error.message}`);
+        }
+    }, [marketDataService, worker]);
+
+    const handleUnsubscribe = useCallback(async (ric) =>
+    {
+        try
+        {
+            setErrorMessage(null);
+            
+            // Unsubscribe via market service
+            await marketDataService.unsubscribe(ric);
+            
+            // Unsubscribe via web worker
+            if (worker)
+            {
+                worker.postMessage({ type: 'unsubscribe', data: { ric } });
+            }
+            
+            // Update subscription state
+            setSubscribedRics(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(ric);
+                return newSet;
+            });
+            
+            setInstruments(prev => prev.map(instrument => 
+                instrument.ric === ric 
+                    ? { ...instrument, isSubscribed: false }
+                    : instrument
+            ));
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to unsubscribe from ${ric}: ${error.message}`);
+            setErrorMessage(`Failed to unsubscribe from ${ric}: ${error.message}`);
+        }
+    }, [marketDataService, worker]);
 
     useEffect(() =>
     {
         return () =>
         {
-            // If there is an active subscription at the time of subscription then remove it.
-            if(subIdTef.current)
-                client.unsubscribe(subIdTef.current);
-        }
-    }, [client]);
+            if (subscribedRics.size > 0)
+            {
+                marketDataService.unsubscribeAll([...subscribedRics]).catch(error =>
+                    loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`)
+                );
+            }
 
-    window.messenger.handleMessageFromMain((fdc3Message, _, __) =>
-    {
-        if(fdc3Message.type === "fdc3.context")
-        {
-            if(fdc3Message.contextShareColour)
-                setTitleBarContextShareColour(fdc3Message.contextShareColour);
+            if (worker)
+                worker.postMessage({ type: 'disconnect' });
+        };
+    }, [subscribedRics, marketDataService, worker]);
 
-            if(fdc3Message.instruments?.[0]?.id.ticker)
-                setStockCode(fdc3Message.instruments[0].id.ticker);
-            else
-                setStockCode(null);
-        }
-    });
-
-    useEffect(() =>
-    {
-        const web_worker = new Worker(new URL("../workers/market-data.js", import.meta.url));
-        setWorker(web_worker);
-        return () => web_worker.terminate();
-    }, []);
-
-    const filterTicksUsingContext = useMemo(() =>
-    {
-        if(stockCode)
-            return rowData.filter(tick => tick.stockCode === stockCode);
-        else
-            return rowData;
-
-    }, [stockCode, rowData]);
-
-    const onSelectionChanged = useCallback(() =>
-    {
-        const selectedRows = gridApiRef.current.api.getSelectedRows();
-        let stockCode = selectedRows.length === 0 ? null : selectedRows[0].stockCode;
-        window.messenger.sendMessageToMain(FDC3Service.createContextShare(stockCode, null), null, windowId);
-    }, []);
+    const gridContext = useMemo(() =>
+    ({
+        onSubscribe: handleSubscribe,
+        onUnsubscribe: handleUnsubscribe
+    }), [handleSubscribe, handleUnsubscribe]);
 
     return (
         <div>
-            <TitleBarComponent title="Stock Ticker" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-            <div className="ag-theme-alpine" style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+            <TitleBarComponent 
+                title="Stock Ticker" 
+                windowId={windowId} 
+                addButtonProps={undefined} 
+                showChannel={true} 
+                showTools={false}
+            />
+            
+            {errorMessage && (
+                <div style={{ 
+                    color: 'red', 
+                    padding: '10px', 
+                    backgroundColor: '#ffebee',
+                    margin: '10px',
+                    borderRadius: '4px'
+                }}>
+                    {errorMessage}
+                </div>
+            )}
+            
+            <div className="ag-theme-alpine" style={{ 
+                width: '100%', 
+                height: 'calc(100vh - 65px)', 
+                float: 'left', 
+                padding: '0px', 
+                margin: '45px 0px 0px 0px'
+            }}>
                 <AgGridReact
                     columnDefs={columnDefs}
                     ref={gridApiRef}
                     rowSelection={'single'}
                     onSelectionChanged={onSelectionChanged}
                     rowHeight={25}
-                    // we now use state to track row data changes
-                    rowData={filterTicksUsingContext}
-                    // unique identification of the row based on the SowKey
-                    getRowId={({data: { key }}) => key}
-                    // resize columns on grid resize
+                    rowData={filteredInstruments}
+                    getRowId={({ data: { ric } }) => ric}
                     onGridSizeChanged={({ api }) => api.sizeColumnsToFit()}
-                    // provide callback to invoke once grid is initialised.
-                    onGridReady={ async (api) =>
-                    {
-                        const command = new Command('sow_and_subscribe');
-                        command.topic('market_data');
-                        command.orderBy('/bid DESC');
-                        command.options('oof, conflation=3000ms, top_n=20, skip_n=0');
-
-                        try
-                        {
-                            let rows;
-                            subIdTef.current = await client.execute(command, message =>
-                            {
-                                switch(message.header.command())
-                                {
-                                    // Begin receiving the initial dataset.
-                                    case 'group_begin':
-                                        rows = [];
-                                        break;
-                                    // This message is part of the initial snapshot.
-                                    case 'sow':
-                                        message.data.key = message.header.sowKey();
-                                        rows.push(message.data);
-                                        break;
-                                    // Thr initial snapshot has been delivered.
-                                    case 'group_end':
-                                        setRowData(rows);
-                                        break;
-                                    // Out-of-focus -- a message should no longer be in the group.
-                                    case 'oof':
-                                        rows = processOOF(message, rows);
-                                        setRowData(rows);
-                                        break;
-                                    // Either a new message or an update.
-                                    default:
-                                        rows = processPublish(message, rows);
-                                        setRowData(rows);
-                                }
-                            });
-                        }
-                        catch(err)
-                        {
-                            setRowData([]);
-                            console.error(err);
-                        }
+                    context={gridContext}
+                    defaultColDef={{
+                        resizable: true,
+                        sortable: true,
+                        filter: true,
+                        floatingFilter: false
                     }}
                 />
             </div>
