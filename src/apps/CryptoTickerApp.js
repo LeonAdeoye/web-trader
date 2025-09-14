@@ -72,17 +72,41 @@ export const CryptoTickerApp = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
+        loggerService.logInfo("Received worker message:", event.data);
+        
         const { messageType, cryptoPrice: eventPrice } = event.data;
+        
+        if (!eventPrice)
+        {
+            loggerService.logError("No cryptoPrice in worker message:", event.data);
+            return;
+        }
+        
+        if (!eventPrice.symbol)
+        {
+            loggerService.logError("No symbol in cryptoPrice:", eventPrice);
+            return;
+        }
+        
         setPrices(prevPrices =>
         {
-            if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
+            const existingIndex = prevPrices.findIndex((price) => price.symbol === eventPrice.symbol);
+            
+            if (existingIndex !== -1)
             {
+                // Update existing row
+                const updatedPrices = [...prevPrices];
+                updatedPrices[existingIndex] = { ...updatedPrices[existingIndex], ...eventPrice };
                 updateRows(eventPrice);
-                return prevPrices;
+                return updatedPrices;
             }
-            return [...prevPrices, eventPrice];
+            else
+            {
+                // Add new row
+                return [...prevPrices, eventPrice];
+            }
         });
-    }, []);
+    }, [loggerService]);
 
     useEffect(() =>
     {

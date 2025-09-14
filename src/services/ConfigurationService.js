@@ -254,4 +254,35 @@ export class ConfigurationService
             return defaultInstruments;
         }
     }
+
+    getCryptoChartInterval = async () =>
+    {
+        this.#loggerService.logInfo("Received request for crypto chart interval.");
+        try
+        {
+            await this.loadConfigurations("system");
+            const intervalConfig = this.getConfigValue("system", "crypto-chart-interval");
+            
+            if (intervalConfig)
+            {
+                const interval = parseInt(intervalConfig);
+                if (!isNaN(interval) && interval > 0)
+                {
+                    this.#loggerService.logInfo(`Retrieved crypto chart interval from configuration: ${interval} seconds`);
+                    return interval;
+                }
+            }
+            
+            const defaultInterval = 30;
+            this.#loggerService.logInfo(`No valid interval configuration found, using default: ${defaultInterval} seconds`);
+            return defaultInterval;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to get crypto chart interval: ${error.message}`);
+            const defaultInterval = 30;
+            this.#loggerService.logInfo(`Using default crypto chart interval due to error: ${defaultInterval} seconds`);
+            return defaultInterval;
+        }
+    }
 }
