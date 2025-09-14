@@ -82,29 +82,6 @@ const App = ({}) =>
             .then(() => loggerService.logInfo("Successfully Loaded all configurations."));
     }, []);
 
-    // TODO move this inside the component.
-    useEffect(() =>
-    {
-        const chooser = new DefaultServerChooser();
-        chooser.add(`ws://localhost:9008/amps/json`);
-        const client = new Client('web-trader-market-data-subscriber');
-        client.serverChooser(chooser);
-        client.subscriptionManager(new DefaultSubscriptionManager());
-        client.connect().then(() =>
-        {
-            setClient(client);
-            loggerService.logInfo("connected to ws://localhost:9008/amps/json");
-        });
-
-        return () =>
-        {
-            client.disconnect().then(() => loggerService.logInfo('disconnected from AMPS'));
-        };
-    }, []);
-
-    if (!client)
-        return (<div id="loading">Loading...</div>);
-
   // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
   return (
     <div className="App">

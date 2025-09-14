@@ -17,14 +17,12 @@ export class ConfigurationService
         if(isEmptyString(owner) || owner === null)
             return;
 
-        // Check if configurations are already cached
         if(this.#configurations.has(owner))
         {
             this.#loggerService.logInfo(`Using cached configurations for owner: ${owner}`);
             return;
         }
 
-        // Only load from backend if cache is empty
         await fetch(`http://localhost:20001/configurationByOwner?owner=${owner}`)
             .then(response => response.json())
             .then(data =>
@@ -155,12 +153,10 @@ export class ConfigurationService
             .catch(error => this.#loggerService.logError(error));
     }
 
-    // High-level method to save or update multiple configurations
     saveOrUpdateConfigurations = async (owner, configObject) =>
     {
         try 
         {
-            // Ensure we have the latest configs loaded
             await this.loadConfigurations(owner);
             
             const configKeys = Object.keys(configObject);
@@ -171,13 +167,11 @@ export class ConfigurationService
                 {
                     try
                     {
-                        // Check if config already exists
                         const existingConfigs = this.getConfigsBelongingToOwner(owner);
                         const existingConfig = existingConfigs.find(config => config.key === key);
                         
                         if (existingConfig)
                         {
-                            // Update existing configuration
                             await this.updateConfiguration(
                                 existingConfig.id,
                                 owner,
@@ -188,7 +182,6 @@ export class ConfigurationService
                         }
                         else
                         {
-                            // Add new configuration
                             await this.addNewConfiguration(
                                 owner,
                                 key,
@@ -212,5 +205,23 @@ export class ConfigurationService
         }
     }
 
-
+    getAllApps = async () =>
+    {
+        this.#loggerService.logInfo("Received request for all apps.");
+        try
+        {
+            const response = await fetch("http://localhost:20001/apps");
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const apps = await response.json();
+            this.#loggerService.logInfo(`Retrieved ${apps.length} apps`);
+            return apps;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to get all apps: ${error.message}`);
+            return [];
+        }
+    }
 }

@@ -6,19 +6,15 @@ const LoginDialog = ({ onLoginSuccess }) =>
 {
     const [loginDialogDisplay, setLoginDialogDisplay] = useState(true);
     const [userId, setUserId] = useState('');
-
     const handleUserIdChange = (event) => setUserId(event.target.value);
 
     const handleSubmit = useCallback(() =>
     {
         window.configurations.setLoggedInUserId(userId);
         setLoginDialogDisplay(false);
-        
-        // Call the login success callback if provided
-        if (onLoginSuccess) 
-        {
+        if (onLoginSuccess)
             onLoginSuccess();
-        }
+
     }, [userId, onLoginSuccess]);
 
     const handleKeyDown = (event) =>

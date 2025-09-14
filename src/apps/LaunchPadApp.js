@@ -1,44 +1,57 @@
 import * as React from 'react';
 import '../styles/css/main.css';
-import {useCallback, useEffect, useState, useRef} from "react";
+import {useCallback, useEffect, useState, useRef, useMemo} from "react";
 import {LoggerService} from "../services/LoggerService";
 import {ConfigurationService} from "../services/ConfigurationService";
 import {ServiceRegistry} from "../services/ServiceRegistry";
 import LoginDialog from "../dialogs/LoginDialog";
 import TitleBarComponent from "../components/TitleBarComponent";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
-import {useMemo} from "react";
 
 const LaunchPadApp = () =>
 {
     const [apps, setApps] = useState([]);
     const [errorMessage, setErrorMessage] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [, setIsLoggedIn] = useState(false);
     const loggerService = useRef(new LoggerService(LaunchPadApp.name)).current;
     const configurationService = useRef(new ConfigurationService()).current;
     const windowId = useMemo(() => window.command.getMainWindowId("Launch Pad"), []);
 
+    const createDefaultApps = useCallback(() =>
+    {
+        return [
+            { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
+            { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' },
+            { title: 'Services', icon: 'file:///assets/services.png', url: 'http://localhost:3000/services' }
+        ];
+    }, []);
+
     useEffect(() =>
     {
-        configurationService.loadConfigurations('system')
-            .then(() =>
+        const loadApps = async () =>
+        {
+            try
             {
-                try
+                const listOfApps = await configurationService.getAllApps();
+                if (listOfApps && listOfApps.length > 0)
                 {
-                    const appList = JSON.parse(configurationService.getConfigValue("system", "app-list-with-display-properties")) ??
-                        [
-                            { title: 'Users', icon: 'file:///assets/users.png', url: 'http://localhost:3000/users' },
-                            { title: 'Configs', icon: 'file:///assets/configurations.png', url: 'http://localhost:3000/configs' },
-                            { title: 'Services', icon: 'file:///assets/services.png', url: 'http://localhost:3000/services' }
-                        ];
+                    setApps(listOfApps);
+                    loggerService.logInfo(`Loaded ${listOfApps.length} apps from service`);
+                }
+                else
+                {
+                    setApps(createDefaultApps());
+                    loggerService.logInfo("No apps found from service, using default apps");
+                }
+            }
+            catch (error)
+            {
+                setApps(createDefaultApps());
+                loggerService.logError("Failed to load apps from service, using default apps: " + error.message);
+            }
+        };
 
-                    setApps(appList);
-                }
-                catch(err)
-                {
-                    loggerService.logError("While loading and parsing configurations in the launch pad, the following errors occurred: " + err);
-                }
-            });
+        loadApps().then(() => loggerService.logInfo("Launch Pad initialized with list of apps."));
     }, [])
 
     const launchApp = useCallback((url, title) =>
@@ -50,8 +63,7 @@ const LaunchPadApp = () =>
     {
         loggerService.logInfo('Login successful, starting health check...');
         setIsLoggedIn(true);
-        
-        // Check services health after successful login
+
         const checkServicesHealth = async () =>
         {
             try
@@ -80,7 +92,6 @@ const LaunchPadApp = () =>
             }
         };
 
-        // Add a small delay to ensure services are ready after login
         setTimeout(() => 
         {
             checkServicesHealth();
