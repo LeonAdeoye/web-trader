@@ -29,6 +29,7 @@ export const InsightsApp = () =>
     const [orders, setOrders] = useState([]);
     const [ownerId, setOwnerId] = useState(null);
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
+    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
 
     // Define insights-specific config keys with prefix
     const INSIGHTS_CONFIG_KEYS = [
@@ -74,6 +75,15 @@ export const InsightsApp = () =>
         const loadOwner = async () => setOwnerId(await window.configurations.getLoggedInUserId());
         loadOwner();
     }, []);
+
+    useEffect(() =>
+    {
+        const loadInstruments = async () =>
+        {
+            await instrumentService.loadInstruments();
+        };
+        loadInstruments().then(() => loggerService.logInfo("Instruments loaded successfully."));
+    }, [instrumentService, loggerService]);
 
     // Helper function to update applied states from config
     const updateAppliedStates = useCallback((config) => {
@@ -133,11 +143,8 @@ export const InsightsApp = () =>
                 loggerService.logInfo(`Loaded insights configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
-            {
                 loggerService.logInfo(`No insights configuration found for owner: ${ownerId}, using defaults`);
-            }
-            
-            // Use default config as base, then apply loaded config
+
             const defaultConfig = {
                 metric: 'shares',
                 showWorkingTotals: false,
@@ -194,10 +201,12 @@ export const InsightsApp = () =>
                     name = defaultIfBlank(order.clientCode || order.clientDescription, order.clientDescription);
                     break;
                 case 'sector':
-                    name = defaultIfBlank(order.instrumentCode, 'Unknown');
+                    const sectorInstrument = instrumentService.getInstrumentByCode(order.instrumentCode);
+                    name = defaultIfBlank(sectorInstrument?.sector, 'Unknown Sector');
                     break;
                 case 'country':
-                    name = defaultIfBlank(order.settlementCurrency, 'Unknown');
+                    const countryInstrument = instrumentService.getInstrumentByCode(order.instrumentCode);
+                    name = defaultIfBlank(countryInstrument?.country, 'Unknown Country');
                     break;
                 case 'instrument':
                     name = defaultIfBlank(order.instrumentCode || order.instrumentDescription, order.instrumentDescription);
@@ -228,7 +237,48 @@ export const InsightsApp = () =>
         }
 
         return Array.from(grouping.values());
-    }, [loggerService]);
+    }, [instrumentService]);
+
+    const convertApiDataToInsightItems = useCallback((apiData, insightType) =>
+    {
+        const grouping = new Map();
+        for (const item of apiData)
+        {
+            let name;
+            switch (insightType.toLowerCase())
+            {
+                case 'client':
+                    name = defaultIfBlank(item.name, 'Unknown Client');
+                    break;
+                case 'sector':
+                    // API returns instrumentCode in name field, lookup sector
+                    const sectorInstrument = instrumentService.getInstrumentByCode(item.name);
+                    name = defaultIfBlank(sectorInstrument?.sector, 'Unknown Sector');
+                    break;
+                case 'country':
+                    // API returns settlementCurrency in name field, lookup country by currency
+                    const countryInstrument = instrumentService.getInstruments().find(inst => inst.settlementCurrency === item.name);
+                    name = defaultIfBlank(countryInstrument?.country, 'Unknown Country');
+                    break;
+                case 'instrument':
+                    name = defaultIfBlank(item.name, 'Unknown Instrument');
+                    break;
+                default:
+                    name = 'Unknown';
+            }
+
+            if (!grouping.has(name))
+                grouping.set(name, {name: name, orderBuy: 0, executedBuy: 0, orderSell: 0, executedSell: 0});
+
+            const aggregated = grouping.get(name);
+            aggregated.orderBuy += item.orderBuy || 0;
+            aggregated.executedBuy += item.executedBuy || 0;
+            aggregated.orderSell += item.orderSell || 0;
+            aggregated.executedSell += item.executedSell || 0;
+        }
+
+        return Array.from(grouping.values());
+    }, [instrumentService]);
 
     useEffect(() =>
     {
@@ -337,7 +387,8 @@ export const InsightsApp = () =>
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
-                setInsightsData(Array.isArray(data) ? data : []);
+                const processedData = Array.isArray(data) ? convertApiDataToInsightItems(data, currentInsightType) : [];
+                setInsightsData(processedData);
             }
             catch (error)
             {
@@ -347,7 +398,7 @@ export const InsightsApp = () =>
         };
 
         loadData().then(() => loggerService.logInfo("Insights data loaded successfully."));
-    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService]);
+    }, [currentInsightType, appliedDateMode, appliedMetric, appliedDateRangeDays, orders, loggerService, convertApiDataToInsightItems]);
 
     const displayedInsightsData = useMemo(() =>
     {
