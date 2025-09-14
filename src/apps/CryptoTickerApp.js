@@ -27,6 +27,7 @@ export const CryptoTickerApp = () =>
 
     const columnDefs = useMemo(() => ([
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
+        {headerName: "Timestamp", field: "timestamp", cellDataType: "dateTime", valueFormatter: (params) => params.value ? new Date(params.value).toLocaleTimeString() : '', maxWidth: 140, width: 140 },
         {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
         {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
         {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 150, width: 150},
