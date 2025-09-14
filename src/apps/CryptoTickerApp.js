@@ -9,6 +9,7 @@ import {ServiceRegistry} from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import TitleBarComponent from "../components/TitleBarComponent";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
+import {GenericGridComponent} from "../components/GenericGridComponent";
 
 export const CryptoTickerApp = () =>
 {
@@ -28,18 +29,8 @@ export const CryptoTickerApp = () =>
     const columnDefs = useMemo(() => ([
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
         {headerName: "Timestamp", field: "timestamp", cellDataType: "dateTime", valueFormatter: (params) => params.value ? new Date(params.value).toLocaleTimeString() : '', maxWidth: 140, width: 140 },
-        {headerName: "Best Ask", field: "best_ask", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "Best Bid", field: "best_bid", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "VWAP", field: "vwap_today", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 150, width: 150},
-        {headerName: "VWAP Last 24h", field: "vwap_24h", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 150, width: 150},
-        {headerName: "Low", field: "low", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "High", field: "high", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "Open", field: "open", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "Close", field: "close", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "Volume", field: "vol_today", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 150, width: 150},
-        {headerName: "Volume Last 24h", field: "vol_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 160, width: 160},
-        {headerName: "Trades", field: "num_trades", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 130, width: 130},
-        {headerName: "Trades Last 24h" , field: "num_trades_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 150, width: 150}]), []);
+        {headerName: "Price", field: "price", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
+        {headerName: "Volume Last 24h", field: "volume_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 160, width: 160}]), []);
 
     useEffect(() =>
     {
@@ -130,20 +121,22 @@ export const CryptoTickerApp = () =>
     return (
         <>
             <TitleBarComponent title="Crypto Ticker" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
-            <div className={"ag-theme-alpine"} style={gridDimensions}>
-                <AgGridReact
-                    ref={gridApiRef}
-                    columnDefs={columnDefs}
-                    rowData={prices}
-                    defaultColDef={defaultColDef}
-                    enableCellChangeFlash={true}
-                    rowSelection={'single'}
-                    onSelectionChanged={onSelectionChanged}
-                    animateRows={true}
-                    getRowId={getRowId}
-                    rowHeight={22}
-                    headerHeight={22}
-                />
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+                <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' , padding: '0px', margin:'0px'}}>
+                    <AgGridReact
+                        ref={gridApiRef}
+                        columnDefs={columnDefs}
+                        rowData={prices}
+                        defaultColDef={defaultColDef}
+                        enableCellChangeFlash={true}
+                        rowSelection={'single'}
+                        onSelectionChanged={onSelectionChanged}
+                        animateRows={true}
+                        getRowId={getRowId}
+                        rowHeight={22}
+                        headerHeight={22}
+                    />
+                </div>
             </div>
             {errorMessage && (
                 <ErrorMessageComponent
