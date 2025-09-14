@@ -9,7 +9,6 @@ import {ServiceRegistry} from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import TitleBarComponent from "../components/TitleBarComponent";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
-import {GenericGridComponent} from "../components/GenericGridComponent";
 
 export const CryptoTickerApp = () =>
 {
