@@ -28,7 +28,7 @@ export const CryptoTickerApp = () =>
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
         {headerName: "Timestamp", field: "timestamp", cellDataType: "dateTime", valueFormatter: (params) => params.value ? new Date(params.value).toLocaleTimeString() : '', maxWidth: 140, width: 140 },
         {headerName: "Price", field: "price", cellDataType: "number", valueFormatter: currencyFormatter, maxWidth: 140, width: 140},
-        {headerName: "Volume Last 24h", field: "volume_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 160, width: 160}]), []);
+        {headerName: "Volume Last 24h", field: "vol_24h", cellDataType: "number", valueFormatter: numberFormatter, maxWidth: 160, width: 160}]), []);
 
     useEffect(() =>
     {
@@ -114,7 +114,7 @@ export const CryptoTickerApp = () =>
             if (subscribedInstruments.size > 0)
                 marketDataService.unsubscribeAllCrypto([...subscribedInstruments]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
         };
-    }, [subscribedInstruments, marketDataService, loggerService]);
+    }, [subscribedInstruments]);
 
     return (
         <>
