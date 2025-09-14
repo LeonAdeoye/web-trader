@@ -106,14 +106,14 @@ export const onAmpsMarketDataMessage = (message) =>
 
 export const onAmpsCryptoPriceMessage = (message) =>
 {
-    const dateTime = new Date(message.data.timestamp);
+    //const dateTime = new Date(message.data.timestamp);
     switch (message.header.command())
     {
         case 'sow':
-            postMessage({messageType: "snapshot", cryptoPrice: {...message.data, timestamp: dateTime}});
+            postMessage({messageType: "snapshot", cryptoPrice: {...message.data}});
             break;
         case 'p':
-            postMessage({messageType: "update", cryptoPrice: {...message.data, timestamp: dateTime}});
+            postMessage({messageType: "update", cryptoPrice: {...message.data}});
             break;
         default:
             break;

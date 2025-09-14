@@ -7,12 +7,13 @@ import {FDC3Service} from "../services/FDC3Service";
 import {currencyFormatter, numberFormatter} from "../utilities";
 import {ServiceRegistry} from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
+import TitleBarComponent from "../components/TitleBarComponent";
+import ErrorMessageComponent from "../components/ErrorMessageComponent";
 
 export const CryptoTickerApp = () =>
 {
     const [prices, setPrices] = useState([]);
     const [subscribedInstruments, setSubscribedInstruments] = useState(new Set());
-    const [errorMessage, setErrorMessage] = useState(null);
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
@@ -22,6 +23,7 @@ export const CryptoTickerApp = () =>
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
     const windowId = useMemo(() => window.command.getWindowId("Crypto Ticker"), []);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -125,18 +127,8 @@ export const CryptoTickerApp = () =>
     }, [subscribedInstruments, marketDataService, loggerService]);
 
     return (
-        <div>
-            {errorMessage && (
-                <div style={{ 
-                    color: 'red', 
-                    padding: '10px', 
-                    backgroundColor: '#ffebee',
-                    margin: '10px',
-                    borderRadius: '4px'
-                }}>
-                    {errorMessage}
-                </div>
-            )}
+        <>
+            <TitleBarComponent title="Crypto Ticker" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div className={"ag-theme-alpine"} style={gridDimensions}>
                 <AgGridReact
                     ref={gridApiRef}
@@ -152,6 +144,14 @@ export const CryptoTickerApp = () =>
                     headerHeight={22}
                 />
             </div>
-        </div>
+            {errorMessage && (
+                <ErrorMessageComponent
+                    message={errorMessage}
+                    duration={10000}
+                    onDismiss={() => setErrorMessage(null)}
+                    position="bottom-right"
+                />
+            )}
+        </>
     );
 };
