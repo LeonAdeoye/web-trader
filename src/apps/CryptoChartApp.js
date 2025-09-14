@@ -7,7 +7,7 @@ import {LoggerService} from "../services/LoggerService";
 import TitleBarComponent from "../components/TitleBarComponent";
 import ErrorMessageComponent from "../components/ErrorMessageComponent";
 
-export const CryptoPriceChartApp = () =>
+export const CryptoChartApp = () =>
 {
     const [worker, setWorker] = useState(null);
     const [cryptoData, setCryptoData] = useState(new Map());
@@ -16,9 +16,8 @@ export const CryptoPriceChartApp = () =>
     const [interval, setInterval] = useState(30);
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
     const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
-    const loggerService = useRef(new LoggerService(CryptoPriceChartApp.name)).current;
-    const windowId = useMemo(() => window.command.getWindowId("Crypto Price Chart"), []);
-
+    const loggerService = useRef(new LoggerService(CryptoChartApp.name)).current;
+    const windowId = useMemo(() => window.command.getWindowId("Crypto Chart"), []);
     const [options, setOptions] = useState({
         data: [],
         series: [],
@@ -282,7 +281,7 @@ export const CryptoPriceChartApp = () =>
             ...prevOptions,
             data: [],
             series: series,
-            title: { text: `Crypto Price Chart - ${instruments.length} coins` },
+            title: { text: `Crypto Chart - ${instruments.length} coins` },
             axes: [
                 {
                     type: 'time',
@@ -320,7 +319,7 @@ export const CryptoPriceChartApp = () =>
 
     return (
         <>
-            <TitleBarComponent title="Crypto Price Chart" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <TitleBarComponent title="Crypto Chart" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{ width: '95%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <AgChartsReact options={options} />
             </div>

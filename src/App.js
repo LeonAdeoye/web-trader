@@ -33,7 +33,7 @@ import RfqDetailsApp from "./apps/RfqDetailsApp";
 import RfqWorkflowsApp from "./apps/RfqWorkflowsApp";
 import RfqChartsApp from "./apps/RfqChartsApp";
 import {ServicesApp} from "./apps/ServicesApp";
-import {CryptoPriceChartApp} from "./apps/CryptoPriceChartApp";
+import {CryptoChartApp} from "./apps/CryptoChartApp";
 
 const App = ({}) =>
 {
@@ -42,7 +42,7 @@ const App = ({}) =>
     const apps =
         [
             { name: 'Launch Pad', path: '/', component: LaunchPadApp },
-            { name: 'Crypto Chart', path: '/crypto-chart', component: CryptoPriceChartApp },
+            { name: 'Crypto Chart', path: '/crypto-chart', component: CryptoChartApp },
             { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
             { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp },
             { name: 'Insights', path: '/insights', component: InsightsApp },
