@@ -71,9 +71,7 @@ const LaunchPadApp = () =>
                 loggerService.logInfo('Checking services health...');
                 const healthResults = await ServiceRegistry.checkAllServicesHealth();
                 loggerService.logInfo(`Health check results: ${JSON.stringify(healthResults)}`);
-                
                 const unhealthyServices = healthResults.filter(service => !service.isHealthy);
-                
                 if (unhealthyServices.length > 0)
                 {
                     const serviceNames = unhealthyServices.map(s => s.name).join(', ');
@@ -81,9 +79,7 @@ const LaunchPadApp = () =>
                     loggerService.logError(`Unhealthy services detected: ${serviceNames}`);
                 }
                 else
-                {
                     loggerService.logInfo('All services are healthy');
-                }
             }
             catch (error)
             {

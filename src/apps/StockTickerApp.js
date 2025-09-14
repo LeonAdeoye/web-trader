@@ -26,7 +26,7 @@ export const StockTickerApp = () =>
         { headerName: 'RIC', field: 'ric', sortable: true, minWidth: 120, width: 120, filter: true },
         { headerName: 'Price', field: 'price', sortable: true, minWidth: 100, width: 100, filter: true, 
           valueFormatter: (params) => params.value ? params.value.toFixed(2) : '--' },
-        { headerName: 'Status', field: 'isSubscribed', sortable: true, minWidth: 100, width: 100, filter: true,
+        { headerName: 'Status', field: 'isSubscribed', sortable: true, minWidth: 140, width: 140, filter: true,
           valueGetter: (params) => params.data?.isSubscribed ? 'Subscribed' : 'Not Subscribed' },
         { headerName: 'Actions', field: 'actions', sortable: false, minWidth: 120, width: 120, filter: false,
           cellRenderer: MarketDataActionsRenderer }
@@ -141,7 +141,7 @@ export const StockTickerApp = () =>
                 title="Stock Ticker" 
                 windowId={windowId} 
                 addButtonProps={undefined} 
-                showChannel={true} 
+                showChannel={false}
                 showTools={false}/>
             
             {errorMessage && (
@@ -170,7 +170,6 @@ export const StockTickerApp = () =>
                     rowHeight={25}
                     rowData={instruments}
                     getRowId={({ data: { ric } }) => ric}
-                    onGridSizeChanged={({ api }) => api.sizeColumnsToFit()}
                     context={gridContext}
                     defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: false }}/>
             </div>

@@ -1,13 +1,13 @@
-import {GridTickerApp} from "./apps/GridTickerApp";
-import {PriceChartApp} from "./apps/PriceChartApp";
-import {StockTickerApp} from "./apps/StockTickerApp";
-import React, {useEffect, useState, useRef} from "react";
-import LaunchPadApp from "./apps/LaunchPadApp";
+import React, {useEffect, useRef} from "react";
 import {Route, Routes} from "react-router-dom";
-import {UsersApp} from "./apps/UsersApp";
-import {ConfigsApp} from "./apps/ConfigsApp";
 import {ConfigurationService} from "./services/ConfigurationService";
 import {LoggerService} from "./services/LoggerService";
+import LaunchPadApp from "./apps/LaunchPadApp";
+import {UsersApp} from "./apps/UsersApp";
+import {ConfigsApp} from "./apps/ConfigsApp";
+import {CryptoTickerApp} from "./apps/CryptoTickerApp";
+import {PriceChartApp} from "./apps/PriceChartApp";
+import {StockTickerApp} from "./apps/StockTickerApp";
 import CrossesApp from "./apps/CrossesApp";
 import {FxRatesApp} from "./apps/FxRatesApp";
 import TradeHistoryApp from "./apps/TradeHistoryApp";
@@ -36,16 +36,14 @@ import {ServicesApp} from "./apps/ServicesApp";
 
 const App = ({}) =>
 {
-    const [client, setClient] = useState(null);
     const configurationService = useRef(new ConfigurationService()).current;
     const loggerService = useRef(new LoggerService(App.name)).current;
-
     const apps =
         [
             { name: 'Launch Pad', path: '/', component: LaunchPadApp },
-            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp, props: {webWorkerUrl: "./price-chart-reader.js", interval: 10, chartTheme: 'ag-default'} },
-            { name: 'Crypto Ticker', path: '/crypto-ticker', component: GridTickerApp, props: {webWorkerUrl: "./price-ticker-reader.js"} },
-            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp, props: {client: client} },
+            { name: 'Crypto Chart', path: '/crypto-chart', component: PriceChartApp },
+            { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
+            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp },
             { name: 'Insights', path: '/insights', component: InsightsApp },
             { name: 'Users', path: '/users', component: UsersApp },
             { name: 'Reference Data', path: '/reference-data', component: ReferenceDataApp },
@@ -81,19 +79,18 @@ const App = ({}) =>
             .then(() => loggerService.logInfo("Successfully Loaded all configurations."));
     }, []);
 
-  // TODO refactor into generic ticker and chart apps so can have one for crypto and one for stocks
-  return (
-    <div className="App">
-        {<Routes>
-            {apps.map((app, index) =>
-                (<Route
-                    key={index}
-                    path={app.path}
-                    element={React.createElement(app.component, app.props ?? {})}
-                />))}
-        </Routes>}
-    </div>
-  );
+    return (
+        <div className="App">
+            {<Routes>
+                {apps.map((app, index) =>
+                    (<Route
+                        key={index}
+                        path={app.path}
+                        element={React.createElement(app.component, app.props ?? {})}
+                    />))}
+            </Routes>}
+        </div>
+    );
 }
 
 export default App;

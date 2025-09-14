@@ -6,7 +6,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {FDC3Service} from "../services/FDC3Service";
 import {currencyFormatter, numberFormatter} from "../utilities";
 
-export const GridTickerApp = ({webWorkerUrl}) =>
+export const CryptoTickerApp = ({webWorkerUrl}) =>
 {
     const [prices, setPrices]  = useState([]);
     const [worker, setWorker] = useState(null);
@@ -14,7 +14,6 @@ export const GridTickerApp = ({webWorkerUrl}) =>
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
-    // Used for context sharing between child windows.
     const windowId = useMemo(() => window.command.getWindowId("Grid Ticker"), []);
 
     const columnDefs = useMemo(() => ([
