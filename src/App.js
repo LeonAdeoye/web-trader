@@ -2,7 +2,6 @@ import {GridTickerApp} from "./apps/GridTickerApp";
 import {PriceChartApp} from "./apps/PriceChartApp";
 import {StockTickerApp} from "./apps/StockTickerApp";
 import React, {useEffect, useState, useRef} from "react";
-import {Client, DefaultServerChooser, DefaultSubscriptionManager} from "amps";
 import LaunchPadApp from "./apps/LaunchPadApp";
 import {Route, Routes} from "react-router-dom";
 import {UsersApp} from "./apps/UsersApp";
