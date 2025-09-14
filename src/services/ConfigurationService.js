@@ -224,4 +224,34 @@ export class ConfigurationService
             return [];
         }
     }
+
+    getCryptoInstruments = async () =>
+    {
+        this.#loggerService.logInfo("Received request for crypto instruments.");
+        try
+        {
+            await this.loadConfigurations("system");
+            const cryptoInstruments = this.getConfigValue("system", "crypto-instruments");
+            
+            if (cryptoInstruments)
+            {
+                const instruments = JSON.parse(cryptoInstruments);
+                this.#loggerService.logInfo(`Retrieved ${instruments.length} crypto instruments from configuration`);
+                return instruments;
+            }
+            else
+            {
+                const defaultInstruments = ["BTC", "ETH", "XRP", "SOL", "ADA"];
+                this.#loggerService.logInfo(`No crypto instruments found in configuration, using defaults: ${JSON.stringify(defaultInstruments)}`);
+                return defaultInstruments;
+            }
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to get crypto instruments: ${error.message}`);
+            const defaultInstruments = ["BTC", "ETH", "XRP", "SOL", "ADA"];
+            this.#loggerService.logInfo(`Using default crypto instruments due to error: ${JSON.stringify(defaultInstruments)}`);
+            return defaultInstruments;
+        }
+    }
 }

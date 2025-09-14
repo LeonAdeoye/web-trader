@@ -52,7 +52,7 @@ const LaunchPadApp = () =>
         };
 
         loadApps().then(() => loggerService.logInfo("Launch Pad initialized with list of apps."));
-    }, [])
+    }, [configurationService])
 
     const launchApp = useCallback((url, title) =>
     {
@@ -92,7 +92,7 @@ const LaunchPadApp = () =>
         {
             checkServicesHealth();
         }, 500);
-    }, []);
+    }, [loggerService]);
 
     return (
         <>

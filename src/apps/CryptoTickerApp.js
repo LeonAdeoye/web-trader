@@ -5,16 +5,23 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {FDC3Service} from "../services/FDC3Service";
 import {currencyFormatter, numberFormatter} from "../utilities";
+import {ServiceRegistry} from "../services/ServiceRegistry";
+import {LoggerService} from "../services/LoggerService";
 
-export const CryptoTickerApp = ({webWorkerUrl}) =>
+export const CryptoTickerApp = () =>
 {
-    const [prices, setPrices]  = useState([]);
+    const [prices, setPrices] = useState([]);
+    const [subscribedInstruments, setSubscribedInstruments] = useState(new Set());
+    const [errorMessage, setErrorMessage] = useState(null);
     const [worker, setWorker] = useState(null);
     const gridApiRef = useRef();
+    const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
+    const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
+    const loggerService = useRef(new LoggerService(CryptoTickerApp.name)).current;
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
-    const windowId = useMemo(() => window.command.getWindowId("Grid Ticker"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Crypto Ticker"), []);
 
     const columnDefs = useMemo(() => ([
         {headerName: "Symbol", field: "symbol", maxWidth: 150, width: 150, pinned: "left", cellDataType: "text"},
@@ -33,10 +40,33 @@ export const CryptoTickerApp = ({webWorkerUrl}) =>
 
     useEffect(() =>
     {
-        // TODO: More refactoring required here.
-        //  Use webWorkerUrl props instead of hard-coded URL. If I use props I'm getting an Uncaught DOMException:
-        //  Failed to construct 'Worker': Script at 'file:///C:/Users/Leon%20Adeoye/development/web-trader/src/components/price-ticker-reader.js' cannot be accessed from origin 'http://localhost:3000'.
-        const webWorker = new Worker(new URL("../workers/price-ticker-reader.js", import.meta.url));
+        const loadCryptoInstruments = async () =>
+        {
+            try
+            {
+                const instruments = await configurationService.getCryptoInstruments();
+                loggerService.logInfo(`Loaded crypto instruments: ${JSON.stringify(instruments)}`);
+                
+                if (instruments && instruments.length > 0)
+                {
+                    await marketDataService.subscribeToCrypto(instruments);
+                    setSubscribedInstruments(new Set(instruments));
+                    loggerService.logInfo(`Successfully subscribed to ${instruments.length} crypto instruments`);
+                }
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load and subscribe to crypto instruments: ${error.message}`);
+                setErrorMessage(`Failed to load crypto instruments: ${error.message}`);
+            }
+        };
+
+        loadCryptoInstruments();
+    }, [configurationService, marketDataService, loggerService]);
+
+    useEffect(() =>
+    {
+        const webWorker = new Worker(new URL("../workers/crypto-price-reader.js", import.meta.url));
         setWorker(webWorker);
         return () => webWorker.terminate();
     }, []);
@@ -50,15 +80,15 @@ export const CryptoTickerApp = ({webWorkerUrl}) =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const { messageType, price: eventPrice } = event.data;
+        const { messageType, cryptoPrice: eventPrice } = event.data;
         setPrices(prevPrices =>
         {
             if (messageType === "update" && prevPrices.findIndex((price) => price.symbol === eventPrice.symbol) !== -1)
             {
                 updateRows(eventPrice);
-                return prevPrices; // No need to update prices state as updates are made to the grid directly. Updating the prices state will cause the grid to re-render.
+                return prevPrices;
             }
-            return [...prevPrices, eventPrice]; // Update prices state only when a snapshot or new symbol update is received.
+            return [...prevPrices, eventPrice];
         });
     }, []);
 
@@ -85,21 +115,43 @@ export const CryptoTickerApp = ({webWorkerUrl}) =>
         });
     }, []);
 
+    useEffect(() =>
+    {
+        return () =>
+        {
+            if (subscribedInstruments.size > 0)
+                marketDataService.unsubscribeAllCrypto([...subscribedInstruments]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
+        };
+    }, [subscribedInstruments, marketDataService, loggerService]);
+
     return (
-        <div className={"ag-theme-alpine"} style={gridDimensions}>
-            <AgGridReact
-                ref={gridApiRef}
-                columnDefs={columnDefs}
-                rowData={prices}
-                defaultColDef={defaultColDef}
-                enableCellChangeFlash={true}
-                rowSelection={'single'}
-                onSelectionChanged={onSelectionChanged}
-                animateRows={true}
-                getRowId={getRowId}
-                rowHeight={22}
-                headerHeight={22}
-            />
+        <div>
+            {errorMessage && (
+                <div style={{ 
+                    color: 'red', 
+                    padding: '10px', 
+                    backgroundColor: '#ffebee',
+                    margin: '10px',
+                    borderRadius: '4px'
+                }}>
+                    {errorMessage}
+                </div>
+            )}
+            <div className={"ag-theme-alpine"} style={gridDimensions}>
+                <AgGridReact
+                    ref={gridApiRef}
+                    columnDefs={columnDefs}
+                    rowData={prices}
+                    defaultColDef={defaultColDef}
+                    enableCellChangeFlash={true}
+                    rowSelection={'single'}
+                    onSelectionChanged={onSelectionChanged}
+                    animateRows={true}
+                    getRowId={getRowId}
+                    rowHeight={22}
+                    headerHeight={22}
+                />
+            </div>
         </div>
     );
 };

@@ -86,4 +86,79 @@ export class MarketDataService
             throw error;
         }
     }
+
+    subscribeToCrypto = async (instrumentCodes) =>
+    {
+        try
+        {
+            this.#loggerService.logInfo(`Subscribing to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+            
+            const response = await fetch(`${this.#baseUrl}/crypto/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    instrumentCodes: instrumentCodes
+                })
+            });
+
+            if (!response.ok)
+            {
+                const errorData = await response.json();
+                throw new Error(`Crypto subscription failed: ${errorData.message || response.statusText}`);
+            }
+
+            const result = await response.json();
+            this.#loggerService.logInfo(`Successfully subscribed to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+            return result;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to subscribe to crypto instruments ${JSON.stringify(instrumentCodes)}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    unsubscribeFromCrypto = async (instrumentCode) =>
+    {
+        try
+        {
+            this.#loggerService.logInfo(`Unsubscribing from crypto instrument: ${instrumentCode}`);
+            
+            const response = await fetch(`${this.#baseUrl}/crypto/unsubscribe/${instrumentCode}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok)
+            {
+                const errorData = await response.json();
+                throw new Error(`Crypto unsubscription failed: ${errorData.error || response.statusText}`);
+            }
+
+            const result = await response.json();
+            this.#loggerService.logInfo(`Successfully unsubscribed from crypto instrument: ${instrumentCode}`);
+            return result;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to unsubscribe from crypto instrument ${instrumentCode}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    unsubscribeAllCrypto = async (instrumentCodes) =>
+    {
+        const unsubscribePromises = instrumentCodes.map(code => this.unsubscribeFromCrypto(code));
+        try
+        {
+            await Promise.all(unsubscribePromises);
+            this.#loggerService.logInfo(`Successfully unsubscribed from all crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(`Failed to unsubscribe from some crypto instruments: ${error.message}`);
+            throw error;
+        }
+    }
 }
