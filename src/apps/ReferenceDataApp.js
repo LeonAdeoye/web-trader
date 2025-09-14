@@ -342,7 +342,7 @@ export const ReferenceDataApp = () =>
         {
             headerName: 'Instrument Description',
             field: 'instrumentDescription',
-            width: 260,
+            width: 240,
             headerTooltip: 'Instrument Description',
             sortable: true,
             filter: true,
@@ -352,6 +352,22 @@ export const ReferenceDataApp = () =>
             field: 'assetType',
             width: 100,
             headerTooltip: 'Asset Type',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Sector',
+            field: 'sector',
+            width: 120,
+            headerTooltip: 'Sector',
+            sortable: true,
+            filter: true,
+        },
+        {
+            headerName: 'Country',
+            field: 'country',
+            width: 100,
+            headerTooltip: 'Country',
             sortable: true,
             filter: true,
         },
@@ -914,6 +930,7 @@ export const ReferenceDataApp = () =>
         delete clonedData.instrumentId;
         delete clonedData.traderId;
         delete clonedData.bookId;
+        delete clonedData.id;
         await handleAdd(clonedData);
     }, []);
 

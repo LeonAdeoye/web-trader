@@ -122,6 +122,8 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             delete clonedData.deskId;
             delete clonedData.instrumentId;
             delete clonedData.traderId;
+            delete clonedData.bookId;
+            delete clonedData.id;
             setFormData(clonedData);
         }
     }, [mode, editingData]);

@@ -8,6 +8,8 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
         instrumentCode: '',
         instrumentDescription: '',
         assetType: '',
+        sector: '',
+        country: '',
         blgCode: '',
         ric: '',
         settlementCurrency: '',
@@ -30,6 +32,8 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
                 instrumentCode: '',
                 instrumentDescription: '',
                 assetType: '',
+                sector: '',
+                country: '',
                 blgCode: '',
                 ric: '',
                 settlementCurrency: '',
@@ -65,6 +69,20 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
             <Grid item xs={5}>
                 <TextField size="small" label="Asset Type" value={instrumentData.assetType || ''}
                     onChange={(e) => handleInputChange('assetType', e.target.value)}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
+                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}/>
+            </Grid>
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Sector" value={instrumentData.sector || ''}
+                    onChange={(e) => handleInputChange('sector', e.target.value)}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
+                    InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}/>
+            </Grid>
+            <Grid item xs={5} style={{ paddingTop: '10px' }}>
+                <TextField size="small" label="Country" value={instrumentData.country || ''}
+                    onChange={(e) => handleInputChange('country', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                     style={{ width: '200px' }}/>
