@@ -4,13 +4,15 @@ import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {numberFormatter, orderSideStyling, orderStateStyling, replaceUnderscoresWithSpace} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState} from "../atoms/component-state";
-import {sliceDialogDisplayState} from "../atoms/dialog-state";
+import {sliceDialogDisplayState, batchOrderUploadDialogDisplayState} from "../atoms/dialog-state";
 import {FDC3Service} from "../services/FDC3Service";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {LoggerService} from "../services/LoggerService";
 import SliceDialog from "../dialogs/SliceDialog";
+import BatchOrderUploadDialog from "../dialogs/BatchOrderUploadDialog";
 import {ExchangeRateService} from "../services/ExchangeRateService";
 import {OrderService} from "../services/OrderService";
+import {ServiceRegistry} from "../services/ServiceRegistry";
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Tab } from '@mui/material';
 import '../styles/sass/orders-app.scss';
@@ -26,6 +28,7 @@ export const OrdersApp = () =>
     const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const [, setTitleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
     const [, setSliceDialogOpenFlag ] = useRecoilState(sliceDialogDisplayState);
+    const [, setBatchOrderUploadDialogOpenFlag] = useRecoilState(batchOrderUploadDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const windowId = useMemo(() => window.command.getWindowId("Orders"), []);
     const loggerService = useRef(new LoggerService(OrdersApp.name)).current;
@@ -298,8 +301,112 @@ export const OrdersApp = () =>
         {headerName: "Perf IVWAP (bps)", field: "performanceVsIVWAPBPS", headerTooltip: 'Performance versus interval VWAP in bps', hide: true, sortable: false, minWidth: 100, width: 120, filter: false},
     ]), []);
 
+    const launchBatchUpload = useCallback(() =>
+    {
+        setBatchOrderUploadDialogOpenFlag({open: true, clear: false});
+    }, [setBatchOrderUploadDialogOpenFlag]);
+
+    const handleBatchOrderSubmit = useCallback(async (orders) =>
+    {
+        try
+        {
+            loggerService.logInfo(`Submitting ${orders.length} batch orders`);
+            
+            // Get current time for arrival time
+            const currentTime = new Date().toISOString();
+            
+            // Process each order
+            for (const orderData of orders)
+            {
+                // Get instrument details for additional fields
+                const instrumentService = ServiceRegistry.getInstrumentService();
+                const instrument = instrumentService.getInstrumentByCode(orderData.instrumentCode);
+                
+                // Get client details
+                const clientService = ServiceRegistry.getClientService();
+                const client = clientService.getClientByCode(orderData.clientCode);
+                
+                // Calculate notional values
+                const quantity = parseFloat(orderData.quantity);
+                const price = parseFloat(orderData.price);
+                const notionalValueInLocal = quantity * price;
+                const notionalValueInUSD = exchangeRateService.convert(notionalValueInLocal, instrument?.settlementCurrency || 'USD', 'USD');
+
+                // Create order object with all required fields
+                const order = {
+                    // Basic order fields
+                    orderId: crypto.randomUUID(),
+                    parentOrderId: crypto.randomUUID(),
+                    instrumentCode: orderData.instrumentCode,
+                    instrumentDescription: instrument?.instrumentDescription || '',
+                    side: orderData.side,
+                    clientCode: orderData.clientCode,
+                    clientDescription: client?.clientDescription || client?.clientName || '',
+                    
+                    // Quantity and price fields
+                    quantity: quantity,
+                    price: price,
+                    sliced: 0,
+                    pending: quantity,
+                    executed: 0,
+                    
+                    // Arrival and state fields
+                    arrivalTime: currentTime,
+                    arrivalPrice: price,
+                    state: 'NEW_ORDER',
+                    ownerId: ownerId,
+                    
+                    // Currency and settlement
+                    settlementCurrency: instrument?.settlementCurrency || 'USD',
+                    settlementType: instrument?.settlementType || 'CASH',
+                    
+                    // Destination and instructions
+                    destination: orderData.destination || 'DMA',
+                    traderInstruction: orderData.traderInstruction || '',
+                    
+                    // Order type and timing
+                    priceType: '2', // Limit order
+                    tif: '0', // Day order
+                    
+                    // Notional values
+                    orderNotionalValueInLocal: notionalValueInLocal,
+                    orderNotionalValueInUSD: notionalValueInUSD,
+                    executedNotionalValueInLocal: 0,
+                    executedNotionalValueInUSD: 0,
+                    residualNotionalValueInLocal: notionalValueInLocal,
+                    residualNotionalValueInUSD: notionalValueInUSD,
+                    
+                    // Additional instrument fields
+                    assetType: instrument?.assetType || '',
+                    blgCode: instrument?.blgCode || '',
+                    ric: instrument?.ric || '',
+                    exchangeAcronym: instrument?.exchangeAcronym || '',
+                    lotSize: instrument?.lotSize || 1,
+                    
+                    // System fields
+                    originalSource: "WEB_TRADER",
+                    currentSource: "WEB_TRADER",
+                    targetSource: "ORDER_MANAGEMENT_SERVICE",
+                    messageType: 'PARENT_ORDER',
+                    version: 1,
+                    executedTime: '',
+                    percentageOfParentOrder: 100.0
+                };
+
+                // Send order via outbound worker
+                outboundWorker.postMessage(order);
+            }
+
+            loggerService.logInfo(`Successfully submitted ${orders.length} batch orders`);
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to submit batch orders: ${error.message}`);
+        }
+    }, [loggerService, outboundWorker, exchangeRateService, ownerId]);
+
     return (<>
-            <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <TitleBarComponent title="Orders" windowId={windowId} addButtonProps={{ handler: () => launchBatchUpload(), tooltipText: "Upload batch orders..." }}  showChannel={true} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <div className="orders-app">
                     <TabContext value={selectedTab}>
@@ -400,6 +507,7 @@ export const OrdersApp = () =>
                 </div>
             </div>
             <SliceDialog handleSendSlice={handleSendSlice}/>
+            <BatchOrderUploadDialog closeHandler={handleBatchOrderSubmit}/>
         </>)
 
 }

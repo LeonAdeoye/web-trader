@@ -59,3 +59,8 @@ export const rfqCreationDialogDisplayState = atom({
     key: 'rfqCreationDialogDisplayState',
     default: {open: false, clear: true}
 });
+
+export const batchOrderUploadDialogDisplayState = atom({
+    key: 'batchOrderUploadDialogDisplayState',
+    default: {open: false, clear: true}
+});
