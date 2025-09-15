@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState, useRef} from "react";
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Tooltip, Typography, Box, Alert} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Tooltip, Typography, Box, Alert, IconButton} from "@mui/material";
+import {Close} from "@mui/icons-material";
 import {AgGridReact} from "ag-grid-react";
 import {useRecoilState} from "recoil";
 import {batchOrderUploadDialogDisplayState} from "../atoms/dialog-state";
@@ -293,23 +294,46 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
                             sx={{ '& .MuiOutlinedInput-root': { padding: '4px' } }} />
                     </Grid>
                     {validationErrors.length > 0 && (
-                        <Grid item style={{ marginTop: '5px' }}>
-                            <Alert severity="error" style={{ maxHeight: '80px', overflow: 'auto', padding: '8px' }}>
-                                <Typography variant="body2">
-                                    <strong>Validation Errors:</strong>
-                                </Typography>
-                                {validationErrors.slice(0, 10).map((error, index) => (
-                                    <Typography key={index} variant="body2" style={{ fontSize: '11px' }}>
-                                        • {error}
-                                    </Typography>
-                                ))}
-                                {validationErrors.length > 10 && (
-                                    <Typography variant="body2" style={{ fontSize: '11px', fontStyle: 'italic' }}>
-                                        ... and {validationErrors.length - 10} more errors
-                                    </Typography>
-                                )}
+                        <div style={{ 
+                            position: 'fixed',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: 9999,
+                            marginTop: '5px'
+                        }}>
+                            <Alert
+                                severity="error"
+                                style={{
+                                    backgroundColor: '#8B0000',
+                                    color: 'white',
+                                    border: '1px solid #DC143C',
+                                    borderRadius: '4px',
+                                    padding: '12px',
+                                    minWidth: '300px',
+                                    maxWidth: '500px',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+                                }}
+                                action={
+                                    <IconButton
+                                        aria-label="close"
+                                        color="inherit"
+                                        size="small"
+                                        onClick={() => setValidationErrors([])}
+                                        style={{ color: 'white' }}
+                                    >
+                                        <Close fontSize="inherit" />
+                                    </IconButton>
+                                }>
+                                <div>
+                                    {validationErrors.map((error, index) => (
+                                        <div key={index} style={{ color: 'white', fontSize: '12px', marginBottom: '4px' }}>
+                                            • {error}
+                                        </div>
+                                    ))}
+                                </div>
                             </Alert>
-                        </Grid>
+                        </div>
                     )}
                     <Grid item style={{ marginTop: '5px' }}>
                         <div 
