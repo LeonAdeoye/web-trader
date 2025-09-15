@@ -31,7 +31,6 @@ export const InsightsApp = () =>
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
 
-    // Define insights-specific config keys with prefix
     const INSIGHTS_CONFIG_KEYS = [
         'insights_metric',
         'insights_showWorkingTotals',
@@ -85,7 +84,6 @@ export const InsightsApp = () =>
         loadInstruments().then(() => loggerService.logInfo("Instruments loaded successfully."));
     }, [instrumentService, loggerService]);
 
-    // Helper function to update applied states from config
     const updateAppliedStates = useCallback((config) => {
         setAppliedColors({
             orderSellColor: config.orderSellColor,
@@ -251,14 +249,10 @@ export const InsightsApp = () =>
                     name = defaultIfBlank(item.name, 'Unknown Client');
                     break;
                 case 'sector':
-                    // API returns instrumentCode in name field, lookup sector
-                    const sectorInstrument = instrumentService.getInstrumentByCode(item.name);
-                    name = defaultIfBlank(sectorInstrument?.sector, 'Unknown Sector');
+                    name = defaultIfBlank(item.name, 'Unknown Sector');
                     break;
                 case 'country':
-                    // API returns settlementCurrency in name field, lookup country by currency
-                    const countryInstrument = instrumentService.getInstruments().find(inst => inst.settlementCurrency === item.name);
-                    name = defaultIfBlank(countryInstrument?.country, 'Unknown Country');
+                    name = defaultIfBlank(item.name, 'Unknown Country');
                     break;
                 case 'instrument':
                     name = defaultIfBlank(item.name, 'Unknown Instrument');
@@ -352,7 +346,6 @@ export const InsightsApp = () =>
         }
     }, [configurationService, ownerId, loggerService, updateAppliedStates]);
 
-    // Separate useEffect for configuration loading (like RfqsApp)
     useEffect(() =>
     {
         const loadData = async () =>
