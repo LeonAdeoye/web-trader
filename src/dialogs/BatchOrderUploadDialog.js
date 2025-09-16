@@ -9,6 +9,7 @@ import {ServiceRegistry} from "../services/ServiceRegistry";
 import Papa from 'papaparse';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import {LoggerService} from "../services/LoggerService";
 
 const BatchOrderUploadDialog = ({ closeHandler }) =>
 {
@@ -20,8 +21,8 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
     const fileInputRef = useRef(null);
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const clientService = useRef(ServiceRegistry.getClientService()).current;
+    const loggerService = useRef(new LoggerService(BatchOrderUploadDialog.name)).current;
 
-    // Load services on component mount
     useEffect(() =>
     {
         const loadServices = async () =>
@@ -73,14 +74,25 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
         const errors = [];
         const processedData = data.map((row, index) => 
         {
-            const rowErrors = validateRow(row, index);
+            // Convert array to object with column names
+            const rowObj = {
+                instrumentCode: row[0] || '',
+                side: row[1] || '',
+                clientCode: row[2] || '',
+                qty: row[3] || '',
+                price: row[4] || '',
+                destination: row[5] || '',
+                instruction: row[6] || ''
+            };
+
+            const rowErrors = validateRow(rowObj, index);
             errors.push(...rowErrors);
             
             return {
-                ...row,
-                side: row.side ? row.side.toUpperCase() : row.side,
-                qty: row.qty ? parseFloat(row.qty) : row.qty,
-                price: row.price ? parseFloat(row.price) : row.price,
+                ...rowObj,
+                side: rowObj.side ? rowObj.side.toUpperCase() : rowObj.side,
+                qty: rowObj.qty ? parseFloat(rowObj.qty) : rowObj.qty,
+                price: rowObj.price ? parseFloat(rowObj.price) : rowObj.price,
                 hasErrors: rowErrors.length > 0
             };
         });
@@ -95,7 +107,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
         if (!pasteData.trim()) return;
 
         Papa.parse(pasteData, {
-            header: true,
+            header: false,
             skipEmptyLines: true,
             complete: (results) =>
             {
@@ -103,7 +115,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             },
             error: (error) =>
             {
-                console.error('CSV parsing error:', error);
+                loggerService.logError('CSV parsing error:', error);
                 setValidationErrors([`CSV parsing error: ${error.message}`]);
             }
         });
@@ -115,7 +127,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
         if (!file) return;
 
         Papa.parse(file, {
-            header: true,
+            header: false,
             skipEmptyLines: true,
             complete: (results) =>
             {
@@ -123,12 +135,11 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             },
             error: (error) =>
             {
-                console.error('File parsing error:', error);
+                loggerService.logError('File parsing error:', error);
                 setValidationErrors([`File parsing error: ${error.message}`]);
             }
         });
 
-        // Reset file input
         if (fileInputRef.current)
             fileInputRef.current.value = '';
     }, [processData]);
@@ -149,19 +160,6 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
 
     const handleSubmit = useCallback(() =>
     {
-        if (validationErrors.length > 0)
-        {
-            alert('Please fix validation errors before submitting');
-            return;
-        }
-
-        if (gridData.length === 0)
-        {
-            alert('No data to submit');
-            return;
-        }
-
-        // Convert grid data to order format and submit
         const orders = gridData.map(row => ({
             instrumentCode: row.instrumentCode,
             side: row.side,

@@ -92,7 +92,6 @@ export class ClientService
                         break;
                     }
                 }
-
                 this.#loggerService.logInfo(`Updated client: ${JSON.stringify(clientResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
@@ -100,14 +99,21 @@ export class ClientService
 
     clear = () => this.#clients.clear();
 
-    getClientId = (clientName) => {
+    getClientId = (clientName) =>
+    {
         const client = this.#clients.find(client => client.clientName === clientName);
         return client ? client.clientId : null;
     }
 
-    getClientName = (clientId) => {
+    getClientName = (clientId) =>
+    {
         const client = this.#clients.find(client => client.clientId === clientId);
         return client ? client.clientName : null;
+    }
+
+    getClientByCode = (clientCode) =>
+    {
+        return this.#clients.find(client => client.clientCode === clientCode);
     }
 
     getClients = () => this.#clients;
