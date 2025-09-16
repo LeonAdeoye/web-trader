@@ -35,46 +35,153 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
 
     const requiredColumns = ['instrumentCode', 'side', 'clientCode', 'qty', 'price', 'destination', 'instruction'];
 
+    const convertSideToStandard = useCallback((side) =>
+    {
+        if (!side) return side;
+        const upperSide = side.toUpperCase();
+        if (upperSide === 'B') return 'BUY';
+        if (upperSide === 'S') return 'SELL';
+        if (upperSide === 'SS' || upperSide === 'SHORT_SELL' || upperSide === 'SHORT SELL') return 'SHORT_SELL';
+        return upperSide;
+    }, []);
+
+    const calculateLevenshteinDistance = useCallback((str1, str2) =>
+    {
+        const matrix = [];
+        const len1 = str1.length;
+        const len2 = str2.length;
+
+        for (let i = 0; i <= len2; i++)
+        {
+            matrix[i] = [i];
+        }
+
+        for (let j = 0; j <= len1; j++)
+        {
+            matrix[0][j] = j;
+        }
+
+        for (let i = 1; i <= len2; i++)
+        {
+            for (let j = 1; j <= len1; j++)
+            {
+                if (str2.charAt(i - 1) === str1.charAt(j - 1))
+                {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                }
+                else
+                {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j] + 1
+                    );
+                }
+            }
+        }
+
+        return matrix[len2][len1];
+    }, []);
+
+    const findBestMatch = useCallback((searchTerm, candidates, maxResults = 1) =>
+    {
+        if (!searchTerm || !candidates || candidates.length === 0) return null;
+
+        const searchUpper = searchTerm.toUpperCase();
+        const results = [];
+
+        candidates.forEach(candidate =>
+        {
+            const candidateUpper = candidate.toUpperCase();
+            
+            // Exact match gets highest priority
+            if (candidateUpper === searchUpper)
+            {
+                results.push({ value: candidate, score: 0, type: 'exact' });
+                return;
+            }
+
+            // Starts with match
+            if (candidateUpper.startsWith(searchUpper))
+            {
+                results.push({ value: candidate, score: 1, type: 'starts_with' });
+                return;
+            }
+
+            // Contains match
+            if (candidateUpper.includes(searchUpper))
+            {
+                results.push({ value: candidate, score: 2, type: 'contains' });
+                return;
+            }
+
+            // Levenshtein distance for fuzzy matching
+            const distance = calculateLevenshteinDistance(searchUpper, candidateUpper);
+            const maxLength = Math.max(searchUpper.length, candidateUpper.length);
+            const similarity = 1 - (distance / maxLength);
+            
+            if (similarity > 0.3) // Only consider matches with >30% similarity
+            {
+                results.push({ value: candidate, score: 3 + distance, type: 'fuzzy' });
+            }
+        });
+
+        // Sort by score (lower is better) and return the best match
+        results.sort((a, b) => a.score - b.score);
+        return results.length > 0 ? results[0] : null;
+    }, [calculateLevenshteinDistance]);
+
     const validateRow = useCallback((row, index) =>
     {
         const errors = [];
-        
-        // Check required fields
         requiredColumns.forEach(col => 
         {
-            if (!row[col] || row[col].toString().trim() === '')
+            if ((!row[col] || row[col].toString().trim() === '') && col !== 'instruction')
                 errors.push(`Row ${index + 1}: ${col} is required`);
         });
 
-        // Validate side
-        if (row.side && !['BUY', 'SELL'].includes(row.side.toUpperCase()))
-            errors.push(`Row ${index + 1}: side must be BUY or SELL`);
+        if (row.side && !['BUY', 'SELL', 'SHORT_SELL', 'B', 'S', 'SS', 'SHORT SELL'].includes(row.side.toUpperCase()))
+            errors.push(`Row ${index + 1}: side must be BUY, SELL, SHORT_SELL, B, S, SS, or SHORT SELL`);
 
-        // Validate numeric fields
         if (row.qty && (isNaN(row.qty) || parseFloat(row.qty) <= 0))
             errors.push(`Row ${index + 1}: qty must be a positive number`);
 
         if (row.price && (isNaN(row.price) || parseFloat(row.price) <= 0))
             errors.push(`Row ${index + 1}: price must be a positive number`);
 
-        // Validate instrument code exists
         if (row.instrumentCode && !instrumentService.getInstrumentByCode(row.instrumentCode))
-            errors.push(`Row ${index + 1}: instrumentCode '${row.instrumentCode}' not found`);
+        {
+            const instruments = instrumentService.getInstruments();
+            const instrumentCodes = instruments.map(inst => inst.instrumentCode);
+            const bestMatch = findBestMatch(row.instrumentCode, instrumentCodes);
+            const errorMsg = bestMatch ? 
+                `Row ${index + 1}: instrumentCode '${row.instrumentCode}' not found. Do you mean '${bestMatch.value}'?` :
+                `Row ${index + 1}: instrumentCode '${row.instrumentCode}' not found`;
+            errors.push(errorMsg);
+        }
 
-        // Validate client code exists
         if (row.clientCode && !clientService.getClients().find(client => client.clientCode === row.clientCode))
-            errors.push(`Row ${index + 1}: clientCode '${row.clientCode}' not found`);
+        {
+            const clients = clientService.getClients();
+            const clientCodes = clients.map(client => client.clientCode);
+            const bestMatch = findBestMatch(row.clientCode, clientCodes);
+            const errorMsg = bestMatch ? 
+                `Row ${index + 1}: clientCode '${row.clientCode}' not found. Do you mean '${bestMatch.value}'?` :
+                `Row ${index + 1}: clientCode '${row.clientCode}' not found`;
+            errors.push(errorMsg);
+        }
 
         return errors;
-    }, [instrumentService, clientService]);
+    }, [instrumentService, clientService, findBestMatch]);
 
     const processData = useCallback((data) =>
     {
         setIsProcessing(true);
         const errors = [];
-        const processedData = data.map((row, index) => 
+        const processedData = [];
+        
+        data.forEach((row, index) => 
         {
-            // Convert array to object with column names
             const rowObj = {
                 instrumentCode: row[0] || '',
                 side: row[1] || '',
@@ -88,19 +195,23 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             const rowErrors = validateRow(rowObj, index);
             errors.push(...rowErrors);
             
-            return {
-                ...rowObj,
-                side: rowObj.side ? rowObj.side.toUpperCase() : rowObj.side,
-                qty: rowObj.qty ? parseFloat(rowObj.qty) : rowObj.qty,
-                price: rowObj.price ? parseFloat(rowObj.price) : rowObj.price,
-                hasErrors: rowErrors.length > 0
-            };
+            // Only add rows without validation errors to the grid
+            if (rowErrors.length === 0)
+            {
+                processedData.push({
+                    ...rowObj,
+                    side: convertSideToStandard(rowObj.side),
+                    qty: rowObj.qty ? parseFloat(rowObj.qty) : rowObj.qty,
+                    price: rowObj.price ? parseFloat(rowObj.price) : rowObj.price,
+                    hasErrors: false
+                });
+            }
         });
 
         setGridData(processedData);
         setValidationErrors(errors);
         setIsProcessing(false);
-    }, [validateRow]);
+    }, [validateRow, convertSideToStandard]);
 
     const handlePasteData = useCallback(() =>
     {
@@ -183,11 +294,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             field: 'instrumentCode',
             width: 120,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         },
         {
             headerName: 'Side',
@@ -195,66 +302,42 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             width: 80,
             sortable: false,
             filter: false,
-            cellStyle: (params) => 
-            {
-                const baseStyle = orderSideStyling(params.value);
-                return params.data.hasErrors ? { ...baseStyle, backgroundColor: '#ffebee' } : baseStyle;
-            }
+            cellStyle: (params) => orderSideStyling(params.value)
         },
         {
             headerName: 'Client Code',
             field: 'clientCode',
             width: 120,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         },
         {
             headerName: 'Qty',
             field: 'qty',
             width: 80,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         },
         {
             headerName: 'Price',
             field: 'price',
             width: 80,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         },
         {
             headerName: 'Destination',
             field: 'destination',
             width: 120,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         },
         {
             headerName: 'Instruction',
             field: 'instruction',
             width: 150,
             sortable: false,
-            filter: false,
-            cellStyle: (params) => 
-            {
-                return params.data.hasErrors ? { backgroundColor: '#ffebee' } : {};
-            }
+            filter: false
         }
     ];
 
@@ -286,7 +369,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
                             label="Paste Excel/CSV Data"
                             value={pasteData}
                             onChange={(e) => setPasteData(e.target.value)}
-                            placeholder="Paste Excel data or upload a CSV/Excel file. Required columns: instrumentCode, side, clientCode, qty, price, destination, instruction. Side must be BUY or SELL. Qty and Price must be positive numbers."
+                            placeholder="Paste Excel data or upload a CSV/Excel file. Required columns: instrumentCode, side, clientCode, qty, price, destination, instruction. Side must be BUY, SELL, SHORT_SELL, B, S, SS, or SHORT SELL. Qty and Price must be positive numbers."
                             InputLabelProps={{ shrink: true, style: { fontSize: '12px' } }}
                             inputProps={{ style: { fontSize: '12px', padding: '8px' } }}
                             sx={{ '& .MuiOutlinedInput-root': { padding: '4px' } }} />
