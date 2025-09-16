@@ -17,7 +17,6 @@ import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Tab } from '@mui/material';
 import '../styles/sass/orders-app.scss';
 
-
 export const OrdersApp = () =>
 {
     const [orders, setOrders] = useState([]);
@@ -56,17 +55,17 @@ export const OrdersApp = () =>
         let tabFilteredOrders;
         switch (selectedTab)
         {
-            case '0': // Incoming Orders
+            case '0':
                 tabFilteredOrders = orders.filter(order =>
                     order.state === 'NEW_ORDER' || order.state === 'PENDING_NEW'
                     || order.state === 'ACCEPTED_BY_OMS' || order.state === 'REJECTED_BY_OMS');
                 break;
-            case '1': // My Orders
+            case '1':
                 tabFilteredOrders = orders.filter(order => order.ownerId === ownerId
                     && order.state !== 'NEW_ORDER' && order.state !== 'PENDING_NEW'
                     && order.state !== 'ACCEPTED_BY_OMS' && order.state !== 'REJECTED_BY_OMS');
                 break;
-            case '2': // Desk's Orders
+            case '2':
                 tabFilteredOrders = orders.filter(order => order.ownerId !== ownerId
                     && order.state !== 'NEW_ORDER' && order.state !== 'PENDING_NEW'
                     && order.state !== 'ACCEPTED_BY_OMS' && order.state !== 'REJECTED_BY_OMS');
@@ -311,31 +310,19 @@ export const OrdersApp = () =>
         try
         {
             loggerService.logInfo(`Submitting ${orders.length} batch orders`);
-            
-            // Get current time for arrival time
-            const currentTime = new Date().toISOString();
-            
-            // Process each order
             for (const orderData of orders)
             {
-                // Get instrument details for additional fields
                 const instrumentService = ServiceRegistry.getInstrumentService();
                 const instrument = instrumentService.getInstrumentByCode(orderData.instrumentCode);
-                
-                // Get client details
                 const clientService = ServiceRegistry.getClientService();
                 const client = clientService.getClientByCode(orderData.clientCode);
-                
-                // Calculate notional values
                 const quantity = parseFloat(orderData.quantity);
                 const price = parseFloat(orderData.price);
                 const notionalValueInLocal = quantity * price;
                 const notionalValueInUSD = exchangeRateService.convert(notionalValueInLocal, instrument?.settlementCurrency || 'USD', 'USD');
-
-                // Create order object with all required fields
                 const parentOrderId = crypto.randomUUID();
-                const order = {
-                    // Basic order fields
+                const order =
+                {
                     orderId: parentOrderId,
                     parentOrderId: parentOrderId,
                     instrumentCode: orderData.instrumentCode,
@@ -343,48 +330,32 @@ export const OrdersApp = () =>
                     side: orderData.side,
                     clientCode: orderData.clientCode,
                     clientDescription: client?.clientDescription || client?.clientName || '',
-                    
-                    // Quantity and price fields
                     quantity: quantity,
                     price: price,
                     sliced: 0,
                     pending: quantity,
                     executed: 0,
-                    
-                    // Arrival and state fields
                     arrivalTime: new Date().toLocaleTimeString(),
                     arrivalPrice: price,
                     state: 'NEW_ORDER',
                     ownerId: ownerId,
-                    
-                    // Currency and settlement
                     settlementCurrency: instrument?.settlementCurrency || 'USD',
                     settlementType: instrument?.settlementType || 'CASH',
-                    
-                    // Destination and instructions
                     destination: orderData.destination || 'DMA',
                     traderInstruction: orderData.traderInstruction || '',
-                    
-                    // Order type and timing
-                    priceType: 2, // Limit order
-                    tif: 0, // Day order
-                    
-                    // Notional values
+                    priceType: 2,
+                    tif: 0,
                     orderNotionalValueInLocal: notionalValueInLocal,
                     orderNotionalValueInUSD: notionalValueInUSD,
                     executedNotionalValueInLocal: 0,
                     executedNotionalValueInUSD: 0,
                     residualNotionalValueInLocal: notionalValueInLocal,
                     residualNotionalValueInUSD: notionalValueInUSD,
-                    
-                    // Additional instrument fields
                     assetType: instrument?.assetType || '',
                     blgCode: instrument?.blgCode || '',
                     ric: instrument?.ric || '',
                     exchangeAcronym: instrument?.exchangeAcronym || '',
                     lotSize: instrument?.lotSize || 1,
-                    
-                    // System fields
                     originalSource: "WEB_TRADER",
                     currentSource: "WEB_TRADER",
                     targetSource: "ORDER_MANAGEMENT_SERVICE",
@@ -392,8 +363,6 @@ export const OrdersApp = () =>
                     version: 1,
                     executedTime: '',
                     percentageOfParentOrder: 100.0,
-                    
-                    // Additional fields to match manual order format
                     tradeDate: new Date().toLocaleDateString(),
                     qualifier: 'C:2',
                     accountMnemonic: '',
@@ -410,15 +379,10 @@ export const OrdersApp = () =>
                     facilConsentDetails: '',
                     facilInstructions: '',
                     averagePrice: 0,
-                    
-                    // Action event for backend processing
                     actionEvent: 'SUBMIT_TO_OMS'
                 };
-
-                // Send order via outbound worker
                 outboundWorker.postMessage(order);
             }
-
             loggerService.logInfo(`Successfully submitted ${orders.length} batch orders`);
         }
         catch (error)
@@ -432,10 +396,7 @@ export const OrdersApp = () =>
             <div style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
                 <div className="orders-app">
                     <TabContext value={selectedTab}>
-                        <TabList 
-                            onChange={handleTabChange} 
-                            className="orders-tab-list"
-                        >
+                        <TabList onChange={handleTabChange} className="orders-tab-list">
                             <Tab 
                                 label="Incoming Orders" 
                                 value="0" 
@@ -450,8 +411,7 @@ export const OrdersApp = () =>
                                         backgroundColor: '#656161', 
                                         color: "white"
                                     }
-                                }}
-                            />
+                                }}/>
                             <Tab 
                                 label="My Orders" 
                                 value="1" 
@@ -465,8 +425,7 @@ export const OrdersApp = () =>
                                         backgroundColor: '#656161', 
                                         color: "white"
                                     }
-                                }}
-                            />
+                                }}/>
                             <Tab 
                                 label="Desk's Orders" 
                                 value="2" 
@@ -480,10 +439,8 @@ export const OrdersApp = () =>
                                         backgroundColor: '#656161', 
                                         color: "white"
                                     }
-                                }}
-                            />
+                                }}/>
                         </TabList>
-                        
                         <TabPanel value="0" className="incoming-orders">
                             <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 120px)', width: '100%' , padding: '0px', margin:'0px'}}>
                                 <GenericGridComponent 
@@ -493,8 +450,7 @@ export const OrdersApp = () =>
                                     columnDefs={columnDefs} 
                                     gridData={filteredOrders} 
                                     handleAction={null} 
-                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
-                                />
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
                             </div>
                         </TabPanel>
                         
@@ -507,8 +463,7 @@ export const OrdersApp = () =>
                                     columnDefs={columnDefs} 
                                     gridData={filteredOrders} 
                                     handleAction={null} 
-                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
-                                />
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
                             </div>
                         </TabPanel>
                         
@@ -521,8 +476,7 @@ export const OrdersApp = () =>
                                     columnDefs={columnDefs} 
                                     gridData={filteredOrders} 
                                     handleAction={null} 
-                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}
-                                />
+                                    sortModel={{ colId: 'arrivalTime', sort: 'desc' }}/>
                             </div>
                         </TabPanel>
                     </TabContext>
@@ -531,5 +485,4 @@ export const OrdersApp = () =>
             <SliceDialog handleSendSlice={handleSendSlice}/>
             <BatchOrderUploadDialog closeHandler={handleBatchOrderSubmit}/>
         </>)
-
 }
