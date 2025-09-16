@@ -143,11 +143,17 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
         if (row.side && !['BUY', 'SELL', 'SHORT_SELL', 'B', 'S', 'SS', 'SHORT SELL'].includes(row.side.toUpperCase()))
             errors.push(`Row ${index + 1}: side must be BUY, SELL, SHORT_SELL, B, S, SS, or SHORT SELL`);
 
-        if (row.qty && (isNaN(row.qty) || parseFloat(row.qty) <= 0))
-            errors.push(`Row ${index + 1}: qty must be a positive number`);
+        if (row.qty !== undefined && row.qty !== null && row.qty !== '')
+        {
+            if (isNaN(row.qty) || parseFloat(row.qty) <= 0)
+                errors.push(`Row ${index + 1}: qty must be a positive number`);
+        }
 
-        if (row.price && (isNaN(row.price) || parseFloat(row.price) <= 0))
-            errors.push(`Row ${index + 1}: price must be a positive number`);
+        if (row.price !== undefined && row.price !== null && row.price !== '')
+        {
+            if (isNaN(row.price) || parseFloat(row.price) <= 0)
+                errors.push(`Row ${index + 1}: price must be a positive number`);
+        }
 
         if (row.instrumentCode && !instrumentService.getInstrumentByCode(row.instrumentCode))
         {
