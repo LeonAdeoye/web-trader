@@ -62,7 +62,7 @@ const BatchOrderUploadDialog = ({ closeHandler }) =>
             errors.push(`Row ${index + 1}: instrumentCode '${row.instrumentCode}' not found`);
 
         // Validate client code exists
-        if (row.clientCode && !clientService.getClientByCode(row.clientCode))
+        if (row.clientCode && !clientService.getClients().find(client => client.clientCode === row.clientCode))
             errors.push(`Row ${index + 1}: clientCode '${row.clientCode}' not found`);
 
         return errors;

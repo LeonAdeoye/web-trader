@@ -35,7 +35,7 @@ export const OrdersApp = () =>
     const exchangeRateService = useRef(new ExchangeRateService()).current;
     const orderService = useRef(new OrderService()).current;
     const [ownerId, setOwnerId] = useState('');
-    const [selectedTab, setSelectedTab] = useState('0'); // 0: Incoming Orders, 1: My Orders, 2: Desk's Orders
+    const [selectedTab, setSelectedTab] = useState('0');
 
     const handleTabChange = useCallback((event, newValue) =>
     {
@@ -333,10 +333,11 @@ export const OrdersApp = () =>
                 const notionalValueInUSD = exchangeRateService.convert(notionalValueInLocal, instrument?.settlementCurrency || 'USD', 'USD');
 
                 // Create order object with all required fields
+                const parentOrderId = crypto.randomUUID();
                 const order = {
                     // Basic order fields
-                    orderId: crypto.randomUUID(),
-                    parentOrderId: crypto.randomUUID(),
+                    orderId: parentOrderId,
+                    parentOrderId: parentOrderId,
                     instrumentCode: orderData.instrumentCode,
                     instrumentDescription: instrument?.instrumentDescription || '',
                     side: orderData.side,
@@ -351,7 +352,7 @@ export const OrdersApp = () =>
                     executed: 0,
                     
                     // Arrival and state fields
-                    arrivalTime: currentTime,
+                    arrivalTime: new Date().toLocaleTimeString(),
                     arrivalPrice: price,
                     state: 'NEW_ORDER',
                     ownerId: ownerId,
@@ -365,8 +366,8 @@ export const OrdersApp = () =>
                     traderInstruction: orderData.traderInstruction || '',
                     
                     // Order type and timing
-                    priceType: '2', // Limit order
-                    tif: '0', // Day order
+                    priceType: 2, // Limit order
+                    tif: 0, // Day order
                     
                     // Notional values
                     orderNotionalValueInLocal: notionalValueInLocal,
@@ -390,7 +391,28 @@ export const OrdersApp = () =>
                     messageType: 'PARENT_ORDER',
                     version: 1,
                     executedTime: '',
-                    percentageOfParentOrder: 100.0
+                    percentageOfParentOrder: 100.0,
+                    
+                    // Additional fields to match manual order format
+                    tradeDate: new Date().toLocaleDateString(),
+                    qualifier: 'C:2',
+                    accountMnemonic: '',
+                    accountName: '',
+                    legalEntity: '',
+                    isFirmAccount: false,
+                    isRiskAccount: false,
+                    customFlags: '',
+                    brokerAcronym: '',
+                    brokerDescription: '',
+                    handlingInstruction: '',
+                    algoType: '',
+                    facilConsent: false,
+                    facilConsentDetails: '',
+                    facilInstructions: '',
+                    averagePrice: 0,
+                    
+                    // Action event for backend processing
+                    actionEvent: 'SUBMIT_TO_OMS'
                 };
 
                 // Send order via outbound worker
