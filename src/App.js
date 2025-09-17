@@ -1,12 +1,9 @@
-import React, {useEffect, useRef} from "react";
+import React from "react";
 import {Route, Routes} from "react-router-dom";
-import {ConfigurationService} from "./services/ConfigurationService";
-import {LoggerService} from "./services/LoggerService";
 import LaunchPadApp from "./apps/LaunchPadApp";
 import {UsersApp} from "./apps/UsersApp";
 import {ConfigsApp} from "./apps/ConfigsApp";
 import {CryptoTickerApp} from "./apps/CryptoTickerApp";
-import {PriceChartApp} from "./apps/PriceChartApp";
 import {StockTickerApp} from "./apps/StockTickerApp";
 import CrossesApp from "./apps/CrossesApp";
 import {FxRatesApp} from "./apps/FxRatesApp";
@@ -35,50 +32,42 @@ import RfqChartsApp from "./apps/RfqChartsApp";
 import {ServicesApp} from "./apps/ServicesApp";
 import {CryptoChartApp} from "./apps/CryptoChartApp";
 
-const App = ({}) =>
+const App = () =>
 {
-    const configurationService = useRef(new ConfigurationService()).current;
-    const loggerService = useRef(new LoggerService(App.name)).current;
     const apps =
-        [
-            { name: 'Launch Pad', path: '/', component: LaunchPadApp },
-            { name: 'Crypto Chart', path: '/crypto-chart', component: CryptoChartApp },
-            { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
-            { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp },
-            { name: 'Insights', path: '/insights', component: InsightsApp },
-            { name: 'Users', path: '/users', component: UsersApp },
-            { name: 'Reference Data', path: '/reference-data', component: ReferenceDataApp },
-            { name: 'Limits', path: '/limits', component: LimitsApp },
-            { name: 'Orders', path: '/orders', component: OrdersApp},
-            { name: 'Alerts', path: '/alerts', component: AlertsApp },
-            { name: 'Crosses', path: '/crosses', component: CrossesApp },
-            { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
-            { name: 'Holdings', path: '/holdings', component: HoldingsApp },
-            { name: 'Tasks', path: '/tasks', component: TaskListApp },
-            { name: 'New Order', path: '/new-order', component: NewOrderApp },
-            { name: 'New Basket', path: '/new-basket', component: NewBasketApp },
-            { name: 'Child Orders', path: '/child-orders', component: ChildOrdersApp},
-            { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
-            { name: 'Configs', path: '/configs', component: ConfigsApp},
-            { name: 'Baskets', path: '/baskets', component: BasketsApp},
-            { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp},
-            { name: 'Client Interests', path: '/client-interests', component: ClientInterestsApp},
-            { name: 'Blasts', path: '/blasts', component: BlastsApp},
-            { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
-            { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
-            { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
-            { name: 'RFQ Details', path: '/rfq-details', component: RfqDetailsApp },
-            { name: 'RFQ Charts', path: '/rfq-charts', component: RfqChartsApp },
-            { name: 'RFQ Workflows', path: '/rfq-workflows', component: RfqWorkflowsApp },
-            { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
-            { name: 'Services', path: '/services', component: ServicesApp }
-        ];
-
-    useEffect( () =>
-    {
-        configurationService.loadConfigurations('system')
-            .then(() => loggerService.logInfo("Successfully Loaded all configurations."));
-    }, []);
+    [
+        { name: 'Launch Pad', path: '/', component: LaunchPadApp },
+        { name: 'Crypto Chart', path: '/crypto-chart', component: CryptoChartApp },
+        { name: 'Crypto Ticker', path: '/crypto-ticker', component: CryptoTickerApp },
+        { name: 'Stock Ticker', path: '/stock-ticker', component: StockTickerApp },
+        { name: 'Insights', path: '/insights', component: InsightsApp },
+        { name: 'Users', path: '/users', component: UsersApp },
+        { name: 'Reference Data', path: '/reference-data', component: ReferenceDataApp },
+        { name: 'Limits', path: '/limits', component: LimitsApp },
+        { name: 'Orders', path: '/orders', component: OrdersApp},
+        { name: 'Alerts', path: '/alerts', component: AlertsApp },
+        { name: 'Crosses', path: '/crosses', component: CrossesApp },
+        { name: 'Fx Rates', path: '/fx-rates', component: FxRatesApp },
+        { name: 'Holdings', path: '/holdings', component: HoldingsApp },
+        { name: 'Tasks', path: '/tasks', component: TaskListApp },
+        { name: 'New Order', path: '/new-order', component: NewOrderApp },
+        { name: 'New Basket', path: '/new-basket', component: NewBasketApp },
+        { name: 'Child Orders', path: '/child-orders', component: ChildOrdersApp},
+        { name: 'Trade History', path: '/trade-history', component: TradeHistoryApp },
+        { name: 'Configs', path: '/configs', component: ConfigsApp},
+        { name: 'Baskets', path: '/baskets', component: BasketsApp},
+        { name: 'Basket Chart', path: '/basket-chart', component: BasketChartApp},
+        { name: 'Client Interests', path: '/client-interests', component: ClientInterestsApp},
+        { name: 'Blasts', path: '/blasts', component: BlastsApp},
+        { name: 'Alert Configurations', path: '/alert-configurations', component: AlertConfigurationsApp},
+        { name: 'Alert Wizard', path: '/alert-wizard', component: AlertWizardApp},
+        { name: 'Request For Quote', path: '/rfq', component: RfqsApp },
+        { name: 'RFQ Details', path: '/rfq-details', component: RfqDetailsApp },
+        { name: 'RFQ Charts', path: '/rfq-charts', component: RfqChartsApp },
+        { name: 'RFQ Workflows', path: '/rfq-workflows', component: RfqWorkflowsApp },
+        { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
+        { name: 'Services', path: '/services', component: ServicesApp }
+    ];
 
     return (
         <div className="App">
