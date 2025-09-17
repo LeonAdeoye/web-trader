@@ -111,8 +111,6 @@ export const RfqsApp = () =>
 
             await configurationService.loadConfigurations(ownerId);
             const allConfigs = configurationService.getConfigsBelongingToOwner(ownerId);
-            
-            // Filter only RFQ configs
             const rfqConfigs = allConfigs.filter(config => 
                 RFQ_CONFIG_KEYS.includes(config.key)
             );
@@ -124,9 +122,7 @@ export const RfqsApp = () =>
                 {
                     if (config.key && config.value !== null) 
                     {
-                        // Remove prefix for local config object
                         const localKey = config.key.replace('rfq_', '');
-                        
                         if (['defaultSettlementDays', 'decimalPrecision', 'defaultSpread', 'defaultSalesCreditPercentage', 'defaultVolatility', 'defaultDayConvention'].includes(localKey)) 
                             loadedConfig[localKey] = parseFloat(config.value);
                         else 
@@ -134,17 +130,11 @@ export const RfqsApp = () =>
                     }
                 });
 
-                setConfig(prevConfig => ({
-                    ...prevConfig,
-                    ...loadedConfig
-                }));
-                
+                setConfig(prevConfig => ({...prevConfig, ...loadedConfig}));
                 loggerService.logInfo(`Loaded RFQ configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
-            {
                 loggerService.logInfo(`No RFQ configuration found for owner: ${ownerId}, using defaults`);
-            }
         } 
         catch (error) 
         {
@@ -244,7 +234,6 @@ export const RfqsApp = () =>
          });
 
         window.messenger.handleMessageFromMain(handler);
-
         return () => window.messenger.removeHandlerForMessageFromMain(handler);
 
     }, [selectedGenericGridRow]);
@@ -273,7 +262,6 @@ export const RfqsApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const incomingRfq = event.data.rfq;
-
         setRfqs((prevData) =>
         {
             const index = prevData.findIndex((element) => element.rfqId === incomingRfq.rfqId);
@@ -299,22 +287,18 @@ export const RfqsApp = () =>
     }
 
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
-
     const openConfig = useCallback(() =>
     {
         setIsConfigOpen(true);
     }, [setIsConfigOpen]);
 
     const closeConfig = useCallback(() => setIsConfigOpen(false), [setIsConfigOpen]);
-
     const applyConfig = useCallback(async (newConfig) =>
     {
         try 
         {
             setConfig(newConfig);
             setIsConfigOpen(false);
-            
-            // Filter only RFQ configs for saving (add prefix)
             const rfqConfigToSave = {};
             RFQ_CONFIG_KEYS.forEach(key => {
                 const localKey = key.replace('rfq_', '');
@@ -322,10 +306,8 @@ export const RfqsApp = () =>
                     rfqConfigToSave[key] = newConfig[localKey];
                 }
             });
-            
-            // Persist only RFQ configurations
+
             await configurationService.saveOrUpdateConfigurations(ownerId, rfqConfigToSave);
-            
             loggerService.logInfo(`Successfully applied RFQ configuration for owner: ${ownerId}`, rfqConfigToSave);
         } 
         catch (error) 
@@ -379,11 +361,9 @@ export const RfqsApp = () =>
             const vegaNumber = Number(rawVega);
             const rhoNumber = Number(rawRho);
             const priceNumber = Number(rawPrice);
-            
             const legShares = quantity * multiplier;
             const legNotionalShares = legShares * underlyingPrice;
             const legNotionalInLocal = quantity * multiplier * strike;
-            
             const sideMultiplier = (leg.side === 'SELL' ? -1 : 1);
             
             totalDelta += deltaNumber * quantity * sideMultiplier;
@@ -494,7 +474,6 @@ export const RfqsApp = () =>
             throw new Error("Failed to calculate option metrics");
         
         const derivedValues = calculateDerivedValues(metrics, rfqData);
-        
         const rfq =
         {
             arrivalTime: new Date().toLocaleTimeString(),
@@ -569,9 +548,7 @@ export const RfqsApp = () =>
         {
             const snippet = snippetInput.toUpperCase().trim();
             if(!snippet || snippet === '')
-            {
                 return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
-            }
 
             if(!optionRequestParserService.isValidOptionRequest(snippet))
             {
@@ -708,7 +685,8 @@ export const RfqsApp = () =>
             const derivedValues = calculateDerivedValues(metrics, rfqData);
             const premiumSettlementDate = optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, rfqData.premiumSettlementDaysOverride);
             
-            const updatedRFQ = {
+            const updatedRFQ =
+            {
                 ...rfqData,
                 notionalInUSD: metrics.notionalInUSD,
                 notionalInLocal: metrics.notionalInLocal,
@@ -1000,10 +978,7 @@ export const RfqsApp = () =>
             showConfig={{ handler: openConfig }} 
             snippetPrompt={"Enter RFQ snippet..."} 
             onSnippetSubmit={handleSnippetSubmit}
-            actionButtonsProps={{
-                selectedRow: selectedRow,
-                onAction: handleTitleBarAction
-            }} />
+            actionButtonsProps={{ selectedRow: selectedRow, onAction: handleTitleBarAction }} />
 
         <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
@@ -1022,12 +997,7 @@ export const RfqsApp = () =>
                     enableCellChangeFlash={true}
                     cellFlashDelay={2000}
                     animateRows={true}
-                    defaultColDef={{
-                        resizable: true,
-                        sortable: true,
-                        filter: true,
-                        floatingFilter: false
-                    }} />
+                    defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: false }} />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}
             <RfqsConfigPanel isOpen={isConfigOpen} config={config} onClose={closeConfig} onApply={applyConfig} />
