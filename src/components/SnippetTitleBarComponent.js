@@ -149,94 +149,108 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                 {actionButtonsProps && (
                     <>
                         <Tooltip title="Delete this RFQ request completely from the system. This action cannot be undone and will permanently remove the selected RFQ row.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('delete')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <DeleteIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('delete')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <DeleteIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Create a duplicate copy of this RFQ request. The new RFQ will have the same parameters but can be modified independently.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('clone')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <FileCopyIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('clone')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <FileCopyIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Open this RFQ request in edit mode. All fields will be editable allowing you to modify the RFQ parameters, pricing, and other details.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('edit')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <EditIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('edit')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <EditIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). The RMS will trigger the corresponding RFQ internal workflow.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('save')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <SaveIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('save')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <SaveIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Open option pricing scenario charting dialog. This will allow you to analyze different pricing scenarios, volatility impacts, and Greeks calculations for this RFQ.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('chart')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <BarChartIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('chart')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <BarChartIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="View this RFQ request in read-only mode. All fields will be displayed but cannot be modified.">
-                            <IconButton 
-                                className="title-bar-action" 
-                                onClick={() => handleActionClick('view')}
-                                disabled={isActionDisabled}
-                                style={{ 
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}
-                            >
-                                <VisibilityIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton 
+                                    className="title-bar-action" 
+                                    onClick={() => handleActionClick('view')}
+                                    disabled={isActionDisabled}
+                                    style={{ 
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}
+                                >
+                                    <VisibilityIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Click to participate in an RFQ workflow between desks.">
-                            <IconButton
-                                className="title-bar-action"
-                                onClick={() => handleActionClick('workflow')}
-                                disabled={isActionDisabled}
-                                style={{
-                                    cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                    WebkitAppRegion: 'no-drag'
-                                }}>
-                                <RepeatIcon style={{height: '24px'}} />
-                            </IconButton>
+                            <span>
+                                <IconButton
+                                    className="title-bar-action"
+                                    onClick={() => handleActionClick('workflow')}
+                                    disabled={isActionDisabled}
+                                    style={{
+                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
+                                        WebkitAppRegion: 'no-drag'
+                                    }}>
+                                    <RepeatIcon style={{height: '24px'}} />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </>
                 )}

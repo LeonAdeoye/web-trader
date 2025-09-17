@@ -1,9 +1,4 @@
 import {LoggerService} from "./LoggerService";
-import {BankHolidayService} from "../services/BankHolidayService";
-import {InstrumentService} from "./InstrumentService";
-import {VolatilityService} from "./VolatilityService";
-import {RateService} from "./RateService";
-import {PriceService} from "./PriceService";
 import { ServiceRegistry } from './ServiceRegistry';
 
 export class OptionRequestParserService
@@ -19,15 +14,11 @@ export class OptionRequestParserService
     constructor()
     {
         this.#loggerService = new LoggerService(this.constructor.name);
-        
-        // Use singleton instances from registry
         this.#bankHolidayService = ServiceRegistry.getBankHolidayService();
         this.#instrumentService = ServiceRegistry.getInstrumentService();
         this.#volatilityService = ServiceRegistry.getVolatilityService();
         this.#interestRateService = ServiceRegistry.getRateService();
         this.#priceService = ServiceRegistry.getPriceService();
-        
-        // Load data only once
         this.#loadReferenceData();
         
         this.#constants =
@@ -71,7 +62,6 @@ export class OptionRequestParserService
             return;
 
         const strikes = delimitedStrikes.split(',').map(s => parseFloat(s.trim()));
-        
         if (strikes.length === 1 && optionLegs.length > 1)
             optionLegs.forEach(leg => leg.strike = strikes[0]);
         else if (strikes.length === optionLegs.length)
@@ -86,7 +76,6 @@ export class OptionRequestParserService
             return;
 
         const dates = delimitedDates.split(',').map(d => d.trim());
-        
         if (dates.length === 1 && optionLegs.length > 1)
         {
             const maturityDate = this.parseDate(dates[0]);
@@ -107,7 +96,6 @@ export class OptionRequestParserService
         }
         else
             this.#loggerService.logError(`Mismatch between dates (${dates.length}) and option legs (${optionLegs.length})`);
-
     }
 
     parseOptionUnderlyings = (delimitedUnderlyings, optionLegs) =>
@@ -116,7 +104,6 @@ export class OptionRequestParserService
             return;
 
         const underlyings = delimitedUnderlyings.split(',').map(u => u.trim());
-        
         if (underlyings.length === 1 && optionLegs.length > 1)
             optionLegs.forEach(leg => this.setOptionLegUnderlying(leg, underlyings[0]));
         else if (underlyings.length === optionLegs.length)
@@ -149,7 +136,6 @@ export class OptionRequestParserService
         }
 
         const [optionTypes, strikes, dates, underlyings] = parts;
-
         const optionLegs = this.parseOptionTypes(optionTypes, parent);
         if (!optionLegs || optionLegs.length === 0)
             return null;
@@ -164,10 +150,11 @@ export class OptionRequestParserService
     {
         const optionLegs = [];
         const legStrings = request.split(',');
-
-        legStrings.forEach(legString => {
+        legStrings.forEach(legString =>
+        {
             const match = legString.match(/^([+-])(?:(\d+))?([CP])$/);
-            if (match) {
+            if (match)
+            {
                 const [, side, quantity, optionType] = match;
                 const parsedQuantity = quantity ? parseInt(quantity) : 1;
 
@@ -184,9 +171,9 @@ export class OptionRequestParserService
                     currency: null,
                     daysToExpiry: null
                 });
-            } else {
-                this.#loggerService.logError(`Invalid option leg format: ${legString}`);
             }
+            else
+                this.#loggerService.logError(`Invalid option leg format: ${legString}`);
         });
 
         return optionLegs;

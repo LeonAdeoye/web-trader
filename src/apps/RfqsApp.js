@@ -287,6 +287,7 @@ export const RfqsApp = () =>
     }
 
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
+
     const openConfig = useCallback(() =>
     {
         setIsConfigOpen(true);
@@ -320,7 +321,6 @@ export const RfqsApp = () =>
     {
         const underlyingPriceFromService = priceService.getLastTradePrice(rfqData.underlying);
         const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, legs, underlyingPrice = underlyingPriceFromService } = rfqData;
-        
         if (!legs || legs.length === 0)
             return null;
         
@@ -333,7 +333,6 @@ export const RfqsApp = () =>
         }
         
         const isEuropean = rfqData.exerciseType === "EUROPEAN";
-        
         let totalDelta = 0;
         let totalGamma = 0;
         let totalTheta = 0;
@@ -343,7 +342,6 @@ export const RfqsApp = () =>
         let totalShares = 0;
         let totalNotionalShares = 0;
         let totalNotionalInLocal = 0;
-        
         for (const leg of legs)
         {
             const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
@@ -355,12 +353,12 @@ export const RfqsApp = () =>
                 modelType: config.defaultOptionModel
             });
             
-            const deltaNumber = Number(rawDelta);
-            const gammaNumber = Number(rawGamma);
-            const thetaNumber = Number(rawTheta);
-            const vegaNumber = Number(rawVega);
-            const rhoNumber = Number(rawRho);
-            const priceNumber = Number(rawPrice);
+            const deltaNumber = rawDelta;
+            const gammaNumber = rawGamma;
+            const thetaNumber = rawTheta;
+            const vegaNumber = rawVega;
+            const rhoNumber = rawRho;
+            const priceNumber = rawPrice;
             const legShares = quantity * multiplier;
             const legNotionalShares = legShares * underlyingPrice;
             const legNotionalInLocal = quantity * multiplier * strike;
@@ -445,6 +443,7 @@ export const RfqsApp = () =>
     const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
+        // TODO - handle multiple underlyings. For now just use the first one.
         const {currency, strike, underlying, maturityDate, daysToExpiry} = parsedOptions[0];
         const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
         const multiplier = 100;
