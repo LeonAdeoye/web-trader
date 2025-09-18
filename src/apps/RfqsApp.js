@@ -40,12 +40,10 @@ export const RfqsApp = () =>
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const traderService = useRef(ServiceRegistry.getTraderService()).current;
     const clientService = useRef(ServiceRegistry.getClientService()).current;
-    
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bookService = useRef(new BookService()).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
-    
     const [clients, setClients] = useState([]);
     const [books, setBooks] = useState([]);
     const [instruments, setInstruments] = useState([]);
@@ -300,11 +298,11 @@ export const RfqsApp = () =>
             setConfig(newConfig);
             setIsConfigOpen(false);
             const rfqConfigToSave = {};
-            RFQ_CONFIG_KEYS.forEach(key => {
+            RFQ_CONFIG_KEYS.forEach(key =>
+            {
                 const localKey = key.replace('rfq_', '');
-                if (newConfig[localKey] !== undefined) {
+                if (newConfig[localKey] !== undefined)
                     rfqConfigToSave[key] = newConfig[localKey];
-                }
             });
 
             await configurationService.saveOrUpdateConfigurations(ownerId, rfqConfigToSave);
@@ -337,9 +335,9 @@ export const RfqsApp = () =>
 
         for (const leg of legs)
         {
-            const {quantity, strike, optionType, underlying, volatility, interestRate} = leg;
+            const {quantity, strike, optionType, } = leg;
+            const {volatility, interestRate, underlyingPrice} = rfqData;
             const isCall = (optionType === 'CALL');
-            const underlyingPrice = priceService.getLastTradePrice(underlying);
 
             const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} =
                 await optionPricingService.calculateOptionPrice({strike , volatility: volatility/100, underlyingPrice, daysToExpiry,
@@ -393,6 +391,7 @@ export const RfqsApp = () =>
         let weightedVolatility = 0;
         let weightedInterestRate = 0;
         let totalWeight = 0;
+
         for (const leg of legs)
         {
             const legWeight = leg.quantity * multiplier;
@@ -448,7 +447,6 @@ export const RfqsApp = () =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
         let strikeArray = new Array(parsedOptions.length);
-
         for(let i = 0; i < parsedOptions.length; i++)
             strikeArray[i] = parsedOptions[i].strike;
 
