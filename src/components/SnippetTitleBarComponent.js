@@ -1,4 +1,4 @@
-import { TextField, Tooltip, IconButton, Box, Alert, IconButton as MuiIconButton } from '@mui/material';
+import { TextField, Tooltip, IconButton, Alert, IconButton as MuiIconButton } from '@mui/material';
 import { useState, useEffect } from 'react';
 import {Build, Close, Remove, Lan, Settings} from "@mui/icons-material";
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
@@ -9,7 +9,6 @@ import FileCopyIcon from "@mui/icons-material/FileCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';

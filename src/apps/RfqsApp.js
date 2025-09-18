@@ -38,7 +38,6 @@ export const RfqsApp = () =>
     const priceService = useRef(ServiceRegistry.getPriceService()).current;
     const rateService = useRef(ServiceRegistry.getRateService()).current;
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
-    const bankHolidayService = useRef(ServiceRegistry.getBankHolidayService()).current;
     const traderService = useRef(ServiceRegistry.getTraderService()).current;
     const clientService = useRef(ServiceRegistry.getClientService()).current;
     
@@ -319,19 +318,11 @@ export const RfqsApp = () =>
 
     const calculateOptionMetrics = useCallback(async (rfqData) =>
     {
-        const underlyingPriceFromService = priceService.getLastTradePrice(rfqData.underlying);
-        const { notionalFXRate, interestRate, volatility, dayCountConvention, multiplier, legs, underlyingPrice = underlyingPriceFromService } = rfqData;
+        const { dayCountConvention, multiplier, legs } = rfqData;
         if (!legs || legs.length === 0)
             return null;
         
-        let daysToExpiry = rfqData.daysToExpiry;
-        if (rfqData.maturityDate && !daysToExpiry)
-        {
-            const maturityDate = new Date(rfqData.maturityDate);
-            const today = new Date();
-            daysToExpiry = Math.ceil((maturityDate - today) / (1000 * 60 * 60 * 24));
-        }
-        
+        let daysToExpiry = optionRequestParserService.calculateBusinessDaysToExpiry(new Date(), new Date(rfqData.maturityDate));
         const isEuropean = rfqData.exerciseType === "EUROPEAN";
         let totalDelta = 0;
         let totalGamma = 0;
@@ -342,16 +333,17 @@ export const RfqsApp = () =>
         let totalShares = 0;
         let totalNotionalShares = 0;
         let totalNotionalInLocal = 0;
+        let totalNotionalInUSD = 0.0;
+
         for (const leg of legs)
         {
-            const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
+            const {quantity, strike, optionType, underlying, volatility, interestRate} = leg;
             const isCall = (optionType === 'CALL');
-            
-            const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} = await optionPricingService.calculateOptionPrice({
-                strike, volatility: volatility/100, underlyingPrice, daysToExpiry,
-                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention,
-                modelType: config.defaultOptionModel
-            });
+            const underlyingPrice = priceService.getLastTradePrice(underlying);
+
+            const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} =
+                await optionPricingService.calculateOptionPrice({strike , volatility: volatility/100, underlyingPrice, daysToExpiry,
+                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention, modelType: config.defaultOptionModel });
             
             const deltaNumber = rawDelta;
             const gammaNumber = rawGamma;
@@ -373,13 +365,12 @@ export const RfqsApp = () =>
             totalShares += legShares;
             totalNotionalShares += legNotionalShares;
             totalNotionalInLocal += legNotionalInLocal;
+            totalNotionalInUSD += Number(getValueInUSD(legNotionalInLocal, leg.currency || config.defaultSettlementCurrency));
         }
-        
-        const notionalInUSD = (totalNotionalInLocal / notionalFXRate).toFixed(config.decimalPrecision);
         
         return {
             notionalInLocal: totalNotionalInLocal,
-            notionalInUSD,
+            notionalInUSD: totalNotionalInUSD,
             daysToExpiry,
             price: totalPrice,
             deltaNumber: totalDelta,
@@ -394,10 +385,29 @@ export const RfqsApp = () =>
 
     const calculateDerivedValues = useCallback((metrics, rfqData) =>
     {
-        const underPrice = priceService.getLastTradePrice(rfqData.underlying);
         const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber} = metrics;
-        const { underlyingPrice = underPrice, spread, notionalFXRate, multiplier = 100 } = rfqData;
+        const { spread, notionalFXRate, multiplier = 100, legs } = rfqData;
         const salesCreditPercentage = rfqData.salesCreditPercentage || config.defaultSalesCreditPercentage;
+
+        let totalUnderlyingPrice = 0;
+        for (const leg of legs)
+        {
+            const legUnderlyingPrice = priceService.getLastTradePrice(leg.underlying);
+            totalUnderlyingPrice += legUnderlyingPrice;
+        }
+
+        let weightedVolatility = 0;
+        let weightedInterestRate = 0;
+        let totalWeight = 0;
+        for (const leg of legs)
+        {
+            const legWeight = leg.quantity * multiplier;
+            weightedVolatility += leg.volatility * legWeight;
+            weightedInterestRate += leg.interestRate * legWeight;
+            totalWeight += legWeight;
+        }
+        
+        const avgVolatility = totalWeight > 0 ? weightedVolatility / totalWeight : 0;
         const askPremium = (price + spread/2);
         const bidPremium = (price - spread/2);
         const salesCreditAmount = (salesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision);
@@ -407,64 +417,61 @@ export const RfqsApp = () =>
             bidPremium: bidPremium.toFixed(config.decimalPrecision),
             salesCreditPercentage,
             salesCreditAmount,
-            askImpliedVol: (rfqData.volatility / 100),
-            impliedVol: (rfqData.volatility / 100),
-            bidImpliedVol: (rfqData.volatility / 100),
+            askImpliedVol: (avgVolatility / 100),
+            impliedVol: (avgVolatility / 100),
+            bidImpliedVol: (avgVolatility / 100),
             premiumInUSD: (price / notionalFXRate).toFixed(config.decimalPrecision),
             premiumInLocal: price.toFixed(config.decimalPrecision),
             askPremiumInLocal: askPremium.toFixed(config.decimalPrecision),
             bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
-            askPremiumPercentage: ((askPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            premiumPercentage: ((price * 100) / underlyingPrice).toFixed(config.decimalPrecision),
-            bidPremiumPercentage: ((bidPremium * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            askPremiumPercentage: ((askPremium * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            premiumPercentage: ((price * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            bidPremiumPercentage: ((bidPremium * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
             deltaShares: (deltaNumber * multiplier).toFixed(config.decimalPrecision),
-            deltaNotional: (deltaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
+            deltaNotional: (deltaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
             delta: deltaNumber.toFixed(config.decimalPrecision),
-            deltaPercent: ((deltaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            deltaPercent: ((deltaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
             gammaShares: (gammaNumber * multiplier).toFixed(config.decimalPrecision),
-            gammaNotional: (gammaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
+            gammaNotional: (gammaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
             gamma: gammaNumber.toFixed(config.decimalPrecision),
-            gammaPercent: ((gammaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            gammaPercent: ((gammaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
             thetaShares: (thetaNumber * multiplier).toFixed(config.decimalPrecision),
-            thetaNotional: (thetaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
+            thetaNotional: (thetaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
             theta: thetaNumber.toFixed(config.decimalPrecision),
-            thetaPercent: ((thetaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            thetaPercent: ((thetaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
             vegaShares: (vegaNumber * multiplier).toFixed(config.decimalPrecision),
-            vegaNotional: (vegaNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
+            vegaNotional: (vegaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
             vega: vegaNumber.toFixed(config.decimalPrecision),
-            vegaPercent: ((vegaNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision),
+            vegaPercent: ((vegaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
             rhoShares: (rhoNumber * multiplier).toFixed(config.decimalPrecision),
-            rhoNotional: (rhoNumber * multiplier * underlyingPrice).toFixed(config.decimalPrecision),
+            rhoNotional: (rhoNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
             rho: rhoNumber.toFixed(config.decimalPrecision),
-            rhoPercent: ((rhoNumber * 100) / underlyingPrice).toFixed(config.decimalPrecision)
+            rhoPercent: ((rhoNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision)
         };
-    }, [config]);
+    }, [config, priceService]);
 
     const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
     {
         const totalQuantity = parsedOptions.reduce((sum, option) => sum + option.quantity, 0);
-        // TODO - handle multiple underlyings. For now just use the first one.
-        const {currency, strike, underlying, maturityDate, daysToExpiry} = parsedOptions[0];
-        const fxRate = exchangeRateService.getExchangeRate(currency || 'USD');
-        const multiplier = 100;
-        const dayCountConvention = config.defaultDayConvention;
-        const volatility = volatilityService.getVolatility(underlying);
-        const interestRate = rateService.getInterestRate(currency);
-        const underlyingPrice = priceService.getLastTradePrice(underlying);
+        let strikeArray = new Array(parsedOptions.length);
+
+        for(let i = 0; i < parsedOptions.length; i++)
+            strikeArray[i] = parsedOptions[i].strike;
+
         const rfqData =
         {
-            notionalFXRate: fxRate,
-            interestRate: interestRate,
-            volatility: volatility,
-            dayCountConvention: dayCountConvention,
-            multiplier: multiplier,
-            underlying: underlying,
+            dayCountConvention: config.defaultDayConvention,
+            multiplier: 100,
+            underlying: parsedOptions[0].underlying,
+            underlyingPrice: priceService.getLastTradePrice(parsedOptions[0].underlying),
+            currency: parsedOptions[0].currency || config.defaultSettlementCurrency,
+            interestRate: parsedOptions[0].interestRate,
+            volatility: parsedOptions[0].volatility || config.defaultVolatility,
+            notionalFXRate: exchangeRateService.getExchangeRate(parsedOptions[0].currency || config.defaultSettlementCurrency),
             contracts: totalQuantity,
             spread: config.defaultSpread,
-            underlyingPrice: underlyingPrice,
             exerciseType: exerciseType,
-            maturityDate: maturityDate,
-            daysToExpiry: daysToExpiry,
+            maturityDate: parsedOptions[0].maturityDate,
             legs: parsedOptions
         };
         
@@ -473,37 +480,39 @@ export const RfqsApp = () =>
             throw new Error("Failed to calculate option metrics");
         
         const derivedValues = calculateDerivedValues(metrics, rfqData);
+        if (!derivedValues)
+            throw new Error("Failed to calculate derived values");
+
         const rfq =
         {
             arrivalTime: new Date().toLocaleTimeString(),
             rfqId: crypto.randomUUID(),
-            underlying: underlying,
-            underlyingPrice: underlyingPrice,
+            underlying: rfqData.underlying,
+            strike: [...new Set(strikeArray)].length === 1 ? strikeArray[0] : strikeArray.join(', '),
+            underlyingPrice: rfqData.underlyingPrice,
             request: snippet,
             client:  'Select Client',
             status: 'Pending',
             bookCode: 'Select Book',
-            notionalInUSD: metrics.notionalInUSD,
+            notionalInUSD: metrics.notionalInUSD.toFixed(config.decimalPrecision),
             notionalInLocal: metrics.notionalInLocal,
-            notionalCurrency: currency || config.defaultSettlementCurrency,
-            notionalFXRate: fxRate,
-            volatility: volatility,
-            interestRate: interestRate,
+            notionalCurrency: rfqData.currency,
+            notionalFXRate: rfqData.notionalFXRate,
+            volatility: rfqData.volatility,
+            interestRate:  rfqData.interestRate,
             exerciseType: exerciseType,
-            dayCountConvention: dayCountConvention,
+            dayCountConvention: config.defaultDayConvention,
             tradeDate: new Date().toLocaleDateString(),
-            maturityDate: maturityDate,
+            maturityDate: rfqData.maturityDate,
             daysToExpiry: metrics.daysToExpiry,
-            multiplier: multiplier,
+            multiplier: 100,
             contracts: totalQuantity,
             salesCreditPercentage: config.defaultSalesCreditPercentage,
             salesCreditAmount: derivedValues.salesCreditAmount,
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: config.defaultSettlementDays,
             premiumSettlementCurrency: config.defaultSettlementCurrency,
-            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(maturityDate, config.defaultSettlementDays),
-            hedgeType: 'Full',
-            hedgePrice: strike || 100.0,
+            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, config.defaultSettlementDays),
             askImpliedVol: derivedValues.askImpliedVol,
             impliedVol: derivedValues.impliedVol,
             bidImpliedVol: derivedValues.bidImpliedVol,
@@ -547,19 +556,19 @@ export const RfqsApp = () =>
         {
             const snippet = snippetInput.toUpperCase().trim();
             if(!snippet || snippet === '')
-                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]"};
+                return {success: false, error: "Snippet cannot be empty!\n\nExamples of valid formats:\n\n1. +1C 100 15AUG2025 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2p 50 20Dec24 9988.hk\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date: Jan 10 2026, the same underlying Toyota]"};
 
             if(!optionRequestParserService.isValidOptionRequest(snippet))
             {
                 loggerService.logError(`Invalid RFQ snippet format: ${snippet}`);
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15ayg2025 0700.hk\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC24 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15ayg2025 0700.hk\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC24 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date: Jan 10 2026, the same underlying Toyota]" };
             }
 
             const parsedOptions = optionRequestParserService.parseRequest(snippet);
             loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
             
             if (!parsedOptions || parsedOptions.length === 0)
-                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150 10jan2026 7203.TK\n   [Buy 1 call + 1 put option, strike ¥150, expiry Jan 10 2026, underlying Toyota]" };
+                return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date Jan 10 2026, and the same underlying Toyota]" };
 
             createRFQFromOptions(snippet, parsedOptions).then(newRFQ =>
             {
@@ -581,6 +590,7 @@ export const RfqsApp = () =>
     {
         if (snippet && snippet.trim() !== '')
             handleSnippetSubmit(snippet);
+
     }, [handleSnippetSubmit, loggerService]);
 
     const handleDeleteRfq = useCallback((rfqData) =>
@@ -687,7 +697,7 @@ export const RfqsApp = () =>
             const updatedRFQ =
             {
                 ...rfqData,
-                notionalInUSD: metrics.notionalInUSD,
+                notionalInUSD: metrics.notionalInUSD.toFixed(config.decimalPrecision),
                 notionalInLocal: metrics.notionalInLocal,
                 salesCreditAmount: derivedValues.salesCreditAmount,
                 premiumSettlementDate: premiumSettlementDate,
@@ -744,6 +754,7 @@ export const RfqsApp = () =>
         
         if (fieldsRequiringRecalculation.includes(colDef.field))
             recalculateRFQ(rfqData).then(() => loggerService.logInfo(`Field ${colDef.field} changed from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId} this will trigger a recalculation.`));
+
     }, [recalculateRFQ, loggerService]);
 
     const handleSaveRequest = (isSave) =>
@@ -801,24 +812,24 @@ export const RfqsApp = () =>
              {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
              {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
-            {headerName: "Underlying Code", field: "underlying", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
-            {headerName: "Underlying Price", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
+            {headerName: "Underlying Codes", field: "underlying", sortable: true, minWidth: 160, width: 160, filter: true, editable: false},
+                {headerName: "Strikes", field: "strike", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
+            {headerName: "Underlying Prices", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }, 
-              cellRenderer: StatusRenderer},
+              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }, cellRenderer: StatusRenderer},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in local currency',
                 editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Currencies", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-            {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "FX Rates", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Interest Rate%", field: "interestRate", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Risk free interest rate for the option currency',
+            {headerName: "Interest Rates%", field: "interestRate", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Risk free interest rate for the option currency',
                 editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Volatility%", field: "volatility", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Annualized volatility of the underlying asset',
+            {headerName: "Volatilities%", field: "volatility", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Annualized volatility of the underlying asset',
                 editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
@@ -851,12 +862,6 @@ export const RfqsApp = () =>
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
             {headerName: "Stt.Date", field: "premiumSettlementDate", sortable: true, minWidth: 120, width: 120, filter: true, valueFormatter: (params) => formatDate(params.value), headerTooltip: 'Date on which the option premium is settled',
               editable: true, cellEditor: 'agDateInputCellEditor'},
-
-            // Hedge
-            {headerName: "Hedge Type", field: "hedgeType", sortable: true, minWidth: 120, width: 120, filter: true,
-             cellEditor: 'agSelectCellEditor', cellEditorParams: { values: hedgeTypeEnums.map(h => h.description) }},
-            {headerName: "Hedge Price", field: "hedgePrice", sortable: true, minWidth: 120, width: 120, filter: true,
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Implied Volatility
             {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the ask price of the option',

@@ -52,7 +52,7 @@ export class OptionRequestParserService
 
     isValidOptionRequest = (request) =>
     {
-        const optionRequestPattern = /^[+-](?:1)?\d*[CP](?:,[+-](?:1)?\d*[CP])*\s+\d+(?:,\d+)*\s+\d{1,2}[A-Z]{3}\d{2,4}(?:,\d{1,2}[A-Z]{3}\d{2,4})*\s+[A-Z0-9]+(?:\.[A-Z]+)?(?:,[A-Z0-9]+(?:\.[A-Z]+)?)*$/;
+        const optionRequestPattern = /^[+-](?:1)?\d*[CP](?:,[+-](?:1)?\d*[CP])*\s+\d+(?:,\d+)*\s+\d{1,2}[A-Z]{3}\d{2,4}(?:,\d{1,2}[A-Z]{3}\d{2,4})*\s+[A-Z0-9]+(?:\.[A-Z]+)?$/;
         return optionRequestPattern.test(request);
     };
 
@@ -70,47 +70,17 @@ export class OptionRequestParserService
             this.#loggerService.logError(`Mismatch between strikes (${strikes.length}) and option legs (${optionLegs.length})`);
     }
 
-    parseOptionMaturityDates = (delimitedDates, optionLegs) =>
+    parseOptionMaturityDate = (matDate, optionLegs) =>
     {
-        if (!delimitedDates || !optionLegs || optionLegs.length === 0)
-            return;
-
-        const dates = delimitedDates.split(',').map(d => d.trim());
-        if (dates.length === 1 && optionLegs.length > 1)
+        const maturityDate = this.parseDate(matDate);
+        optionLegs.forEach(leg =>
         {
-            const maturityDate = this.parseDate(dates[0]);
-            optionLegs.forEach(leg =>
-            {
-                leg.maturityDate = maturityDate;
-                leg.daysToExpiry = this.calculateBusinessDaysToExpiry(new Date(), maturityDate);
-            });
-        }
-        else if (dates.length === optionLegs.length)
-        {
-            optionLegs.forEach((leg, index) =>
-            {
-                const maturityDate = this.parseDate(dates[index]);
-                leg.maturityDate = maturityDate;
-                leg.daysToExpiry = this.calculateBusinessDaysToExpiry(new Date(), maturityDate);
-            });
-        }
-        else
-            this.#loggerService.logError(`Mismatch between dates (${dates.length}) and option legs (${optionLegs.length})`);
+            leg.maturityDate = maturityDate;
+            leg.daysToExpiry = this.calculateBusinessDaysToExpiry(new Date(), maturityDate);
+        });
     }
 
-    parseOptionUnderlyings = (delimitedUnderlyings, optionLegs) =>
-    {
-        if (!delimitedUnderlyings || !optionLegs || optionLegs.length === 0)
-            return;
-
-        const underlyings = delimitedUnderlyings.split(',').map(u => u.trim());
-        if (underlyings.length === 1 && optionLegs.length > 1)
-            optionLegs.forEach(leg => this.setOptionLegUnderlying(leg, underlyings[0]));
-        else if (underlyings.length === optionLegs.length)
-            optionLegs.forEach((leg, index) => this.setOptionLegUnderlying(leg, underlyings[index]));
-        else
-            this.#loggerService.logError(`Mismatch between underlyings (${underlyings.length}) and option legs (${optionLegs.length})`);
-    }
+    parseOptionUnderlying = (underlying, optionLegs) => optionLegs.forEach(leg => this.setOptionLegUnderlying(leg, underlying));
 
     setOptionLegUnderlying = (optionLeg, underlying) =>
     {
@@ -126,7 +96,7 @@ export class OptionRequestParserService
         optionLeg.interestRate = this.#interestRateService.getInterestRate(optionLeg.currency) || this.#constants.DEFAULT_INTEREST_RATE;
     }
 
-    parseRequest = (request, parent) =>
+    parseRequest = (request) =>
     {
         const parts = request.trim().split(/\s+/);
         if (parts.length !== 4)
@@ -135,14 +105,14 @@ export class OptionRequestParserService
             return null;
         }
 
-        const [optionTypes, strikes, dates, underlyings] = parts;
-        const optionLegs = this.parseOptionTypes(optionTypes, parent);
+        const [optionTypes, strikes, maturityDate, underlying] = parts;
+        const optionLegs = this.parseOptionTypes(optionTypes);
         if (!optionLegs || optionLegs.length === 0)
             return null;
 
         this.parseOptionStrikes(strikes, optionLegs);
-        this.parseOptionUnderlyings(underlyings, optionLegs);
-        this.parseOptionMaturityDates(dates, optionLegs);
+        this.parseOptionUnderlying(underlying, optionLegs);
+        this.parseOptionMaturityDate(maturityDate, optionLegs);
         return optionLegs;
     }
 
