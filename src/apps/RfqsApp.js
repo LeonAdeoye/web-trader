@@ -365,7 +365,7 @@ export const RfqsApp = () =>
             totalShares += legShares;
             totalNotionalShares += legNotionalShares;
             totalNotionalInLocal += legNotionalInLocal;
-            totalNotionalInUSD += Number(getValueInUSD(legNotionalInLocal, leg.currency || config.defaultSettlementCurrency));
+            totalNotionalInUSD += getValueInUSD(legNotionalInLocal, leg.currency || config.defaultSettlementCurrency);
         }
         
         return {
@@ -386,15 +386,9 @@ export const RfqsApp = () =>
     const calculateDerivedValues = useCallback((metrics, rfqData) =>
     {
         const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber} = metrics;
-        const { spread, notionalFXRate, multiplier = 100, legs } = rfqData;
+        const { underlying, spread, notionalFXRate, multiplier = 100, legs } = rfqData;
         const salesCreditPercentage = rfqData.salesCreditPercentage || config.defaultSalesCreditPercentage;
-
-        let totalUnderlyingPrice = 0;
-        for (const leg of legs)
-        {
-            const legUnderlyingPrice = priceService.getLastTradePrice(leg.underlying);
-            totalUnderlyingPrice += legUnderlyingPrice;
-        }
+        const legUnderlyingPrice = priceService.getLastTradePrice(underlying);
 
         let weightedVolatility = 0;
         let weightedInterestRate = 0;
@@ -424,29 +418,29 @@ export const RfqsApp = () =>
             premiumInLocal: price.toFixed(config.decimalPrecision),
             askPremiumInLocal: askPremium.toFixed(config.decimalPrecision),
             bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
-            askPremiumPercentage: ((askPremium * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
-            premiumPercentage: ((price * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
-            bidPremiumPercentage: ((bidPremium * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            askPremiumPercentage: ((askPremium * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
+            premiumPercentage: ((price * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
+            bidPremiumPercentage: ((bidPremium * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
             deltaShares: (deltaNumber * multiplier).toFixed(config.decimalPrecision),
-            deltaNotional: (deltaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            deltaNotional: (deltaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
             delta: deltaNumber.toFixed(config.decimalPrecision),
-            deltaPercent: ((deltaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            deltaPercent: ((deltaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
             gammaShares: (gammaNumber * multiplier).toFixed(config.decimalPrecision),
-            gammaNotional: (gammaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            gammaNotional: (gammaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
             gamma: gammaNumber.toFixed(config.decimalPrecision),
-            gammaPercent: ((gammaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            gammaPercent: ((gammaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
             thetaShares: (thetaNumber * multiplier).toFixed(config.decimalPrecision),
-            thetaNotional: (thetaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            thetaNotional: (thetaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
             theta: thetaNumber.toFixed(config.decimalPrecision),
-            thetaPercent: ((thetaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            thetaPercent: ((thetaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
             vegaShares: (vegaNumber * multiplier).toFixed(config.decimalPrecision),
-            vegaNotional: (vegaNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            vegaNotional: (vegaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
             vega: vegaNumber.toFixed(config.decimalPrecision),
-            vegaPercent: ((vegaNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            vegaPercent: ((vegaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
             rhoShares: (rhoNumber * multiplier).toFixed(config.decimalPrecision),
-            rhoNotional: (rhoNumber * multiplier * totalUnderlyingPrice).toFixed(config.decimalPrecision),
+            rhoNotional: (rhoNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
             rho: rhoNumber.toFixed(config.decimalPrecision),
-            rhoPercent: ((rhoNumber * 100) / totalUnderlyingPrice).toFixed(config.decimalPrecision)
+            rhoPercent: ((rhoNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision)
         };
     }, [config, priceService]);
 
@@ -686,12 +680,14 @@ export const RfqsApp = () =>
     {
         try
         {
-            loggerService.logInfo(`Recalculating RFQ: ${rfqData.rfqId}`);
             const metrics = await calculateOptionMetrics(rfqData);
             if (!metrics)
                 throw new Error("Failed to calculate option metrics");
             
             const derivedValues = calculateDerivedValues(metrics, rfqData);
+            if (!derivedValues)
+                throw new Error("Failed to calculate derived values");
+
             const premiumSettlementDate = optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, rfqData.premiumSettlementDaysOverride);
             
             const updatedRFQ =
@@ -812,8 +808,8 @@ export const RfqsApp = () =>
              {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
              {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
-            {headerName: "Underlying Codes", field: "underlying", sortable: true, minWidth: 160, width: 160, filter: true, editable: false},
-                {headerName: "Strikes", field: "strike", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
+            {headerName: "Underlying Code", field: "underlying", sortable: true, minWidth: 160, width: 160, filter: true, editable: false},
+            {headerName: "Strikes", cellDataType: 'text' , field: "strike", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
             {headerName: "Underlying Prices", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
              {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }, cellRenderer: StatusRenderer},
@@ -823,13 +819,13 @@ export const RfqsApp = () =>
              editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in local currency',
                 editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Currencies", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: currencies }},
-            {headerName: "FX Rates", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
+            {headerName: "FX Rate", field: "notionalFXRate", sortable: true, minWidth: 100, width: 100, filter: true,
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Interest Rates%", field: "interestRate", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Risk free interest rate for the option currency',
+            {headerName: "Interest Rate%", field: "interestRate", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Risk free interest rate for the option currency',
                 editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
-            {headerName: "Volatilities%", field: "volatility", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Annualized volatility of the underlying asset',
+            {headerName: "Volatility%", field: "volatility", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Annualized volatility of the underlying asset',
                 editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             
             // Trading Details
@@ -865,80 +861,80 @@ export const RfqsApp = () =>
 
             // Implied Volatility
             {headerName: "Ask Impl Vol%", field: "askImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the ask price of the option',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Fair Impl Vol%", field: "impliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the theoretical (model-driven) value of the option',
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Bid Impl Vol%", field: "bidImpliedVol", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Volatility implied by the bid price of the option',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Premium Amounts
             {headerName: "Spread", field: "spread", sortable: false, minWidth: 100, width: 100, filter: true, editable: true, headerTooltip: 'Difference between the ask and bid premium amounts in local currency'},
             {headerName: "Fair Premium", field: "premiumInLocal", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theoretical price of the option based on the option model in local currency',
-                editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Fair Premium$", field: "premiumInUSD", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theoretical price of the option based on the option model in USD',
-                editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Ask Premium", field: "askPremiumInLocal", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Price at which sellers are willing to sell the option in local currency',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Bid Premium", field: "bidPremiumInLocal", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Price at which buyers are willing to buy the option in local currency',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Premium Percentages
             {headerName: "Ask Premium%", field: "askPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Ask premium as a percentage of the underlying price in local currency',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Fair Premium%", field: "premiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Fair premium as a percentage of the underlying price in local currency',
-             editable: true, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Bid Premium%", field: "bidPremiumPercentage", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Bid premium as a percentage of the underlying price in local currency',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Greeks - Delta
             {headerName: "Option Delta", field: "delta", sortable: true, minWidth: 115, width: 115, filter: true, headerTooltip: 'Option delta (rate of change of option price with respect to changes in the underlying price)',
-                editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Delta Shares", field: "deltaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option delta × number of contracts × contract multiplier',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Delta Notional", field: "deltaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Delta shares × underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Delta %", field: "deltaPercent", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option delta expressed a percentage of the underlying price.',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Greeks - Gamma
             {headerName: "Option Gamma", field: "gamma", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option gamma (rate of change of option delta with respect to changes in the underlying price)',
-                editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Gamma Shares", field: "gammaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option gamma × number of contracts × contract multiplier',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Gamma Notional", field: "gammaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Gamma shares × underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Gamma %", field: "gammaPercent", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option gamma expressed a percentage of the underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Greeks - Theta
             {headerName: "Option Theta", field: "theta", sortable: true, minWidth: 115, width: 115, filter: true, headerTooltip: 'Option theta (rate of change of option price with respect to time decay)',
-                editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Theta Shares", field: "thetaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option theta × number of contracts × contract multiplier',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Theta Notional", field: "thetaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Theta shares × underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Theta %", field: "thetaPercent", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option theta expressed a percentage of the underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Greeks - Vega
             {headerName: "Option Vega", field: "vega", sortable: true, minWidth: 115, width: 115, filter: true, headerTooltip: 'Option vega (rate of change of option price with respect to changes in volatility)',
-                editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Vega Shares", field: "vegaShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option vega × number of contracts × contract multiplier',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Vega Notional", field: "vegaNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Vega shares × underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Vega %", field: "vegaPercent", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option vega expressed a percentage of the underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
 
             // Greeks - Rho
             {headerName: "Option Rho", field: "rho", sortable: true, minWidth: 115, width: 115, filter: true, headerTooltip: 'Option rho (rate of change of option price with respect to changes in interest rates)',
-                editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+                editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Rho Shares", field: "rhoShares", sortable: true, minWidth: 120, width: 120, filter: true, headerTooltip: 'Option rho × number of contracts × contract multiplier',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Rho Notional", field: "rhoNotional", sortable: true, minWidth: 130, width: 130, filter: true, headerTooltip: 'Rho shares × underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Rho %", field: "rhoPercent", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Option rho expressed a percentage of the underlying price',
-             editable: false, type: 'numericColumn', valueFormatter: (params) => numberFormatter(params.value, 4)}
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter}
         ]);
     }, [clients, books, currencies, dayCountConventions, statusEnums, hedgeTypeEnums, getUniqueClientNames, getUniqueBookCodes]);
 
