@@ -363,7 +363,7 @@ export const RfqsApp = () =>
             totalShares += legShares;
             totalNotionalShares += legNotionalShares;
             totalNotionalInLocal += legNotionalInLocal;
-            totalNotionalInUSD += getValueInUSD(legNotionalInLocal, leg.currency || config.defaultSettlementCurrency);
+            totalNotionalInUSD += rfqData.notionalFXRate > 0 ? (legNotionalInLocal/rfqData.notionalFXRate) : rfqData.notionalFXRate
         }
         
         return {
