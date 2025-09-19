@@ -743,7 +743,7 @@ export const RfqsApp = () =>
         const fieldsRequiringRecalculation =
         [
             'notionalFXRate', 'interestRate', 'volatility', 'dayCountConvention', 'multiplier',
-            'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'contracts', 'underlyingPrice'
+            'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'underlyingPrice'
         ];
         
         if (fieldsRequiringRecalculation.includes(colDef.field))
@@ -839,7 +839,7 @@ export const RfqsApp = () =>
             {headerName: "Multiplier", field: "multiplier", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Contract multiplier defining the number of units of the underlying asset per option contract',
              editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Contracts", field: "contracts", sortable: true, minWidth: 100, width: 100, filter: true, headerTooltip: 'Number of option contracts in the RFQ',
-             editable: true, type: 'numericColumn', valueFormatter: numberFormatter},
+             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Legs", field: "legs", sortable: true, minWidth: 80, width: 80, filter: true, headerTooltip: 'Number of legs in the option strategy',
                 editable: false, valueFormatter: (params) => params.value ? params.value.length : 0},
 
