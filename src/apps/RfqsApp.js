@@ -803,14 +803,15 @@ export const RfqsApp = () =>
         return ([
             {headerName: 'Actions', field: 'actions', sortable: false, width: 140, filter: false, hide: true, cellRenderer: RfqActionIconsRenderer },
              {headerName: "Arrival Time", field: "arrivalTime", sortable: true, minWidth: 130, width: 130, filter: true, editable: false},
-             {headerName: "Request", field: "request", sortable: true, minWidth: 250, width: 250, filter: true, editable: false},
+             {headerName: "Request", field: "request", sortable: true, minWidth: 220, width: 220, filter: true, editable: false},
+            {headerName: "Status", field: "status", sortable: true, minWidth: 160, width: 160, filter: true,
+                cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) },
+                cellRenderer: StatusRenderer},
              {headerName: "Client", field: "client", sortable: true, minWidth: 200, width: 200, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: clientDropdownValues }, editable: true},
             {headerName: "Underlying Code", field: "underlying", sortable: true, minWidth: 160, width: 160, filter: true, editable: false},
             {headerName: "Strikes", cellDataType: 'text' , field: "strike", sortable: true, minWidth: 150, width: 150, filter: true, editable: false},
             {headerName: "Underlying Prices", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
-             {headerName: "Status", field: "status", sortable: true, minWidth: 120, width: 120, filter: true,
-              cellEditor: 'agSelectCellEditor', cellEditorParams: { values: statusEnums.map(s => s.description) }, cellRenderer: StatusRenderer},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
             {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
@@ -966,6 +967,34 @@ export const RfqsApp = () =>
         handleRfqAction(action, selectedRow);
     }, [selectedRow, handleRfqAction]);
 
+    const handleCellDoubleClicked = useCallback((params) =>
+    {
+        if (params.colDef.field === 'status')
+        {
+            alert('Hello');
+        }
+    }, []);
+
+    const handleCellClicked = useCallback((params) =>
+    {
+        if (params.colDef.field === 'status')
+        {
+            const rfqData = params.data;
+            const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
+            const encodedConfig = encodeURIComponent(JSON.stringify(config));
+            
+            // Launch RfqWorkflowsApp
+            const launchRfqWorkflowsApp = () =>
+                window.launchPad.openApp({
+                    url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`,
+                    title: `RFQ Workflows: ${rfqData.rfqId}`,
+                    modalFlag: true
+                });
+
+            launchRfqWorkflowsApp();
+        }
+    }, [config]);
+
     return (<>
         <SnippetTitleBarComponent 
             title="Request For Quote" 
@@ -990,6 +1019,8 @@ export const RfqsApp = () =>
                     onCellValueChanged={handleCellValueChanged}
                     onRowSelected={onRowSelected}
                     onSelectionChanged={onSelectionChanged}
+                    onCellClicked={handleCellClicked}
+                    onCellDoubleClicked={handleCellDoubleClicked}
                     rowSelection="single"
                     context={{ handleRfqAction }}
                     enableCellChangeFlash={true}
