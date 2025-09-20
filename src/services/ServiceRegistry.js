@@ -10,6 +10,7 @@ import { ConfigurationService } from './ConfigurationService';
 import { HealthCheckService } from './HealthCheckService';
 import { AlertConfigurationsService } from './AlertConfigurationsService';
 import { MarketDataService } from './MarketDataService';
+import { RfqService } from './RfqService';
 
 class ServiceRegistry
 {
@@ -85,7 +86,11 @@ class ServiceRegistry
         return this.getService(MarketDataService);
     }
 
-    // Method to preload all services
+    static getRfqService()
+    {
+        return this.getService(RfqService);
+    }
+
     static async preloadAllServices(ownerId = null)
     {
         const services = [
@@ -99,7 +104,8 @@ class ServiceRegistry
             this.getExchangeRateService(),
             this.getConfigurationService(),
             this.getAlertConfigurationsService(),
-            this.getMarketDataService()
+            this.getMarketDataService(),
+            this.getRfqService()
         ];
 
         const loadPromises = [
@@ -115,7 +121,6 @@ class ServiceRegistry
             services[9].loadAlertConfigurations()
         ];
 
-        // Only load configurations if ownerId is provided
         if (ownerId)
         {
             loadPromises.push(services[8].loadConfigurations(ownerId));
@@ -138,11 +143,11 @@ class ServiceRegistry
             { name: 'Limits Service', port: 20017, actuatorUrl: 'http://localhost:20017/health' },
             { name: 'Pricing Service', port: 20015, actuatorUrl: 'http://localhost:20015/health' },
             { name: 'IOI Service', port: 20018, actuatorUrl: 'http://localhost:20018/health' },
-            { name: 'Market Data Service', port: 20019, actuatorUrl: 'http://localhost:20019/health' }
+            { name: 'Market Data Service', port: 20019, actuatorUrl: 'http://localhost:20019/health' },
+            { name: 'RFQ Service', port: 20020, actuatorUrl: 'http://localhost:20020/health' }
         ];
     }
 
-    // Health check method for all services
     static async checkAllServicesHealth()
     {
         const healthCheckService = this.getHealthCheckService();
