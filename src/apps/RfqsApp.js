@@ -608,9 +608,7 @@ export const RfqsApp = () =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
         const encodedConfig = encodeURIComponent(JSON.stringify(config));
-        const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-charts?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
-
+        const launchRfqDetailsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-charts?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Charts : ${rfqData.rfqId}`, modalFlag: true});
         launchRfqDetailsApp();
     }, [config]);
 
@@ -618,9 +616,7 @@ export const RfqsApp = () =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
         const encodedConfig = encodeURIComponent(JSON.stringify(config));
-        const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false&config=${encodedConfig}`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
-
+        const launchRfqDetailsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=false&config=${encodedConfig}`,title: `RFQ Details Read-Only: ${rfqData.rfqId}`, modalFlag: true});
         launchRfqDetailsApp();
     }, [config]);
 
@@ -628,21 +624,16 @@ export const RfqsApp = () =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
         const encodedConfig = encodeURIComponent(JSON.stringify(config));
-        const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true&config=${encodedConfig}`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
-
+        const launchRfqDetailsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-details?rfqData=${encodedRfqData}&editable=true&config=${encodedConfig}`,title: `RFQ Details : ${rfqData.rfqId}`, modalFlag: true});
         launchRfqDetailsApp();
     }, [config]);
 
     const handleWorkflowRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
-        const encodedConfig = encodeURIComponent(JSON.stringify(config));
-        const launchRfqDetailsApp = () =>
-            window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`,title: `RFQ Workflows : ${rfqData.rfqId}`, modalFlag: true});
-
+        const launchRfqDetailsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}`});
         launchRfqDetailsApp();
-    }, [config]);
+    }, []);
 
     const handleRfqAction = useCallback((action, rfqData) =>
     {
@@ -672,7 +663,7 @@ export const RfqsApp = () =>
             default:
                 loggerService.logError(`Unknown RFQ action: ${action}`);
         }
-    }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleSaveRfq, handleChartRfq, handleViewRfq, loggerService]);
+    }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleSaveRfq, handleChartRfq, handleViewRfq, handleWorkflowRfq, loggerService]);
 
     const recalculateRFQ = useCallback(async (rfqData) =>
     {
@@ -967,33 +958,11 @@ export const RfqsApp = () =>
         handleRfqAction(action, selectedRow);
     }, [selectedRow, handleRfqAction]);
 
-    const handleCellDoubleClicked = useCallback((params) =>
-    {
-        if (params.colDef.field === 'status')
-        {
-            alert('Hello');
-        }
-    }, []);
-
     const handleCellClicked = useCallback((params) =>
     {
         if (params.colDef.field === 'status')
-        {
-            const rfqData = params.data;
-            const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
-            const encodedConfig = encodeURIComponent(JSON.stringify(config));
-            
-            // Launch RfqWorkflowsApp
-            const launchRfqWorkflowsApp = () =>
-                window.launchPad.openApp({
-                    url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`,
-                    title: `RFQ Workflows: ${rfqData.rfqId}`,
-                    modalFlag: true
-                });
-
-            launchRfqWorkflowsApp();
-        }
-    }, [config]);
+            handleWorkflowRfq(params.data);
+    }, [handleWorkflowRfq]);
 
     return (<>
         <SnippetTitleBarComponent 
@@ -1020,7 +989,6 @@ export const RfqsApp = () =>
                     onRowSelected={onRowSelected}
                     onSelectionChanged={onSelectionChanged}
                     onCellClicked={handleCellClicked}
-                    onCellDoubleClicked={handleCellDoubleClicked}
                     rowSelection="single"
                     context={{ handleRfqAction }}
                     enableCellChangeFlash={true}

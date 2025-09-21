@@ -1,60 +1,65 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useRecoilState } from 'recoil';
-import { selectedContextShareState } from '../atoms/component-state';
+import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import { LoggerService } from '../services/LoggerService';
 import { ServiceRegistry } from '../services/ServiceRegistry';
 import TitleBarComponent from "../components/TitleBarComponent";
-import { Button, Paper, TextField, Typography, MenuItem, FormControl, InputLabel, Select } from "@mui/material";
+import {Button, Paper, TextField, Typography, MenuItem, FormControl, InputLabel, Select, Tooltip} from "@mui/material";
 
 const RfqWorkflowsApp = () =>
 {
-    const [selectedContextShare] = useRecoilState(selectedContextShareState);
     const windowId = useMemo(() => window.command.getWindowId("rfq-workflows"), []);
     const loggerService = useRef(new LoggerService(RfqWorkflowsApp.name)).current;
     const rfqService = useRef(ServiceRegistry.getRfqService()).current;
-    
-    // RFQ data from service
     const [rfqData, setRfqData] = useState(null);
     const [activityFeed, setActivityFeed] = useState([]);
     const [availableTraders, setAvailableTraders] = useState([]);
     const [validTransitions, setValidTransitions] = useState([]);
-
-    // Workflow state
     const [newStatus, setNewStatus] = useState('');
     const [newAssignee, setNewAssignee] = useState('');
     const [newComment, setNewComment] = useState('');
 
+    useEffect(() =>
+    {
+        try
+        {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rfqDataParam = urlParams.get('rfqData');
+            if (rfqDataParam)
+            {
+                const parsedRfqData = JSON.parse(decodeURIComponent(rfqDataParam));
+                setRfqData(parsedRfqData);
+            }
+            else
+                loggerService.logError("No rfqData parameter found in URL");
+        }
+        catch (error)
+        {
+            loggerService.logError(`Error parsing RFQ data: ${error.message}`);
+        }
+    },[]);
 
-    // Load initial data - force recompile
+
     useEffect(() =>
     {
         const loadInitialData = () =>
         {
-            // Get the first RFQ for demo purposes
-            const rfqs = rfqService.getAllRfqs();
-            if (rfqs.length > 0)
+            if (!rfqData)
             {
-                const firstRfq = rfqs[0];
-                setRfqData(firstRfq);
-                
-                // Load workflow events for this RFQ
-                const events = rfqService.getWorkflowEvents(firstRfq.rfqId);
-                setActivityFeed(events);
-                
-                // Get valid transitions for current status
-                const transitions = rfqService.getValidStatusTransitions(firstRfq.status, 'RT');
-                setValidTransitions(transitions);
+                loggerService.logError("rfqData is null, skipping data load");
+                return;
             }
-            
-            // Load available traders
+
+            const events = rfqService.getWorkflowEvents('RFQ-2024-001');//  (rfqData.rfqId);
+            setActivityFeed(events);
+            const transitions = rfqService.getValidStatusTransitions(rfqData.status, 'RT');
+            setValidTransitions(transitions);
             const traders = rfqService.getAvailableTraders();
             setAvailableTraders(traders);
         };
 
         loadInitialData();
-    }, [rfqService]);
+    }, [rfqService, rfqData]);
 
-    const handleWorkflowAction = () =>
+    const handleWorkflowAction =  useCallback(() =>
     {
         if (!rfqData)
             return;
@@ -126,16 +131,16 @@ const RfqWorkflowsApp = () =>
             loggerService.logError(`Workflow action failed: ${error.message}`);
             alert(`Workflow action failed: ${error.message}`);
         }
-    };
+    }, [rfqData]);
 
-    const handleCancel = () =>
+    const handleClear = useCallback(() =>
     {
         setNewStatus('');
         setNewAssignee('');
         setNewComment('');
-    };
+    }, []);
 
-    const getStatusColor = (status) =>
+    const getStatusColor = useCallback((status) =>
     {
         switch (status)
         {
@@ -147,20 +152,21 @@ const RfqWorkflowsApp = () =>
             case 'TRADE_COMPLETED': return '#26a69a';
             default: return '#9e9e9e';
         }
-    };
+    }, []);
 
-    const getActivityIcon = (eventType) =>
+    const getActivityIcon = useCallback((eventType) =>
     {
         switch (eventType)
         {
             case 'COMMENT': return '💬';
             case 'STATUS_CHANGE': return '🔵';
             case 'ASSIGNMENT': return '👤';
+            case 'ARRIVAL': return '📥';
             default: return '📝';
         }
-    };
+    }, []);
 
-    const formatActivityMessage = (event) =>
+    const formatActivityMessage = useCallback((event) =>
     {
         if (event.eventType === 'STATUS_CHANGE')
             return `Status changed: ${event.fromStatus} → ${event.toStatus}`;
@@ -170,29 +176,22 @@ const RfqWorkflowsApp = () =>
             return event.comment;
         else
             return event.comment || 'Workflow event';
-    };
+    }, []);
 
-    // Show loading state if no RFQ data
+    const canClear = () => !(newStatus || newAssignee || newComment);
+
     if (!rfqData)
     {
         return (
             <>
-                <TitleBarComponent 
-                    title="RFQ Workflow: Loading..."
-                    windowId={windowId} 
-                    addButtonProps={undefined}
-                    showChannel={false} 
-                    showTools={false}
-                />
-                <div style={{ 
-                    width: '100%', 
-                    height: 'calc(100vh - 65px)', 
-                    float: 'left', 
-                    padding: '20px', 
-                    margin: '45px 0px 0px 0px',
-                    textAlign: 'center'
-                }}>
-                    <Typography variant="h6">Loading RFQ data...</Typography>
+                <TitleBarComponent title="RFQ Workflow - No Data" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+                <div style={{ padding: '20px', textAlign: 'center' }}>
+                    <Typography variant="h6" color="error">
+                        No RFQ data provided
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" style={{ marginTop: '10px' }}>
+                        Please ensure you're accessing this page with valid RFQ data in the URL parameters.
+                    </Typography>
                 </div>
             </>
         );
@@ -200,100 +199,85 @@ const RfqWorkflowsApp = () =>
 
     return (
         <>
-            <TitleBarComponent 
-                title={`RFQ Workflow: ${rfqData.rfqId}`}
-                windowId={windowId} 
-                addButtonProps={undefined}
-                showChannel={false} 
-                showTools={false}/>
-            
-            <div style={{ 
-                width: '100%', 
-                height: 'calc(100vh - 65px)', 
-                float: 'left', 
-                padding: '0px',
-                margin: '45px 0px 0px 0px'
-            }}>
+            <TitleBarComponent title={`RFQ Workflow: ${rfqData.request} (Arrived: ${rfqData.arrivalTime})`} windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin: '45px 0px 0px 0px'}}>
                 <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', gap: '5px' }}>
-                            <TextField 
+                            <TextField
                                 size="small"
-                                label="RFQ ID" 
-                                value={rfqData.rfqId} 
+                                label="Client"
+                                value={rfqData.client}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Client" 
-                                value={rfqData.client} 
+                                label="Notional value in USD"
+                                value={rfqData.notionalInUSD}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Underlying" 
-                                value={rfqData.underlying} 
+                                label="Underlying instrument code"
+                                value={rfqData.underlying}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Strike" 
-                                value={rfqData.strike} 
+                                label="Underlying Price"
+                                value={rfqData.underlyingPrice}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
+                                style={{ width: '230px' }}/>
                         </div>
                         <div style={{ display: 'flex', gap: '5px' }}>
-                            <TextField 
+                            <TextField
                                 size="small"
                                 label="Current Status"
-                                value={rfqData.status} 
-                                InputProps={{ 
-                                    readOnly: true, 
-                                    style: { 
+                                value={rfqData.status}
+                                InputProps={{
+                                    readOnly: true,
+                                    style: {
                                         fontSize: '0.75rem',
                                         color: getStatusColor(rfqData.status),
                                         fontWeight: 'bold'
-                                    } 
+                                    }
                                 }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Assigned To" 
-                                value={rfqData.assignedTo} 
+                                label="Assigned To"
+                                value={rfqData.assignedTo}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Priority" 
-                                value={rfqData.priority} 
+                                label="Sales Credit in USD"
+                                value={rfqData.salesCreditAmount}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
-                            <TextField 
+                                style={{ width: '230px' }}/>
+                            <TextField
                                 size="small"
-                                label="Last Activity" 
-                                value={rfqData.lastActivity} 
+                                label="Strike"
+                                value={rfqData.strike}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '180px' }}/>
+                                style={{ width: '230px' }}/>
                         </div>
                     </div>
                 </Paper>
-
-                {/* Activity Feed */}
                 <Paper elevation={4} style={{ padding: '10px' }}>
-                    {/* Workflow Controls */}
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
-                            <FormControl size="small" style={{ width: '150px' }}>
+                            <FormControl size="small" style={{ width: '190px' }}>
                                 <InputLabel style={{ fontSize: '0.75rem' }}>Change Status</InputLabel>
-                                <Select 
-                                    value={newStatus} 
+                                <Select
+                                    value={newStatus}
                                     onChange={(e) => setNewStatus(e.target.value)}
                                     style={{ fontSize: '0.75rem' }}>
                                     {validTransitions.map(status => (
@@ -303,10 +287,10 @@ const RfqWorkflowsApp = () =>
                                     ))}
                                 </Select>
                             </FormControl>
-                            <FormControl size="small" style={{ width: '150px' }}>
+                            <FormControl size="small" style={{ width: '190px' }}>
                                 <InputLabel style={{ fontSize: '0.75rem' }}>Assign To</InputLabel>
-                                <Select 
-                                    value={newAssignee} 
+                                <Select
+                                    value={newAssignee}
                                     onChange={(e) => setNewAssignee(e.target.value)}
                                     style={{ fontSize: '0.75rem' }}>
                                     {availableTraders.map(trader => (
@@ -323,29 +307,25 @@ const RfqWorkflowsApp = () =>
                                 onChange={(e) => setNewComment(e.target.value)}
                                 InputProps={{ style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                                style={{ width: '200px' }}
+                                style={{ width: '382px' }}
                                 placeholder="Type your comment..."
                             />
-                            <Button 
-                                variant="contained" 
-                                size="small"
-                                onClick={handleWorkflowAction}
-                                style={{ fontSize: '0.75rem', marginRight: '5px' }}>
-                                Apply Changes
-                            </Button>
-                            <Button 
-                                variant="outlined" 
-                                size="small"
-                                onClick={handleCancel}
-                                style={{ fontSize: '0.75rem' }}>
-                                Cancel
-                            </Button>
+                            <Tooltip title={<Typography fontSize={12}>Apply changes for all entered workflow values.</Typography>}>
+                                <span>
+                                    <Button className="dialog-action-button" style={{ fontSize: '0.75rem', marginRight: '5px' }} disabled={canClear()} variant='contained' onClick={handleWorkflowAction}>Apply</Button>
+                                </span>
+                            </Tooltip>
+                            <Tooltip title={<Typography fontSize={12}>Clear all entered workflow values.</Typography>}>
+                                <span>
+                                    <Button className="dialog-action-button" style={{ fontSize: '0.75rem', marginRight: '5px' }} disabled={canClear()} variant='contained' onClick={handleClear}>Clear</Button>
+                                </span>
+                            </Tooltip>
                         </div>
-                    
+
                     <div style={{ height: 'calc(100vh - 240px)', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px' }}>
                         {activityFeed.map(event => (
-                            <div key={event.id} style={{ 
-                                padding: '8px', 
+                            <div key={event.id} style={{
+                                padding: '8px',
                                 borderBottom: '1px solid #eee',
                                 backgroundColor: event.eventType === 'COMMENT' ? '#f5f5f5' : '#fff'
                             }}>
@@ -359,9 +339,9 @@ const RfqWorkflowsApp = () =>
                                     {formatActivityMessage(event)}
                                 </Typography>
                                 {event.comment && event.eventType !== 'COMMENT' && (
-                                    <Typography variant="body2" style={{ 
-                                        fontSize: '0.75rem', 
-                                        marginTop: '4px', 
+                                    <Typography variant="body2" style={{
+                                        fontSize: '0.75rem',
+                                        marginTop: '4px',
                                         fontStyle: 'italic',
                                         color: '#666'
                                     }}>
@@ -372,7 +352,6 @@ const RfqWorkflowsApp = () =>
                         ))}
                     </div>
                 </Paper>
-
             </div>
         </>
     );
