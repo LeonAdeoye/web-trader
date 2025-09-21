@@ -11,6 +11,7 @@ import { HealthCheckService } from './HealthCheckService';
 import { AlertConfigurationsService } from './AlertConfigurationsService';
 import { MarketDataService } from './MarketDataService';
 import { RfqService } from './RfqService';
+import { DeskService } from "./DeskService";
 
 class ServiceRegistry
 {
@@ -61,6 +62,11 @@ class ServiceRegistry
         return this.getService(TraderService);
     }
 
+    static getDeskService()
+    {
+        return this.getService(DeskService);
+    }
+
     static getExchangeRateService()
     {
         return this.getService(ExchangeRateService);
@@ -105,20 +111,22 @@ class ServiceRegistry
             this.getConfigurationService(),
             this.getAlertConfigurationsService(),
             this.getMarketDataService(),
-            this.getRfqService()
+            this.getRfqService(),
+            this.getDeskService()
         ];
 
         const loadPromises = [
-            services[0].loadVolatilities(),
-            services[1].loadPrices(),
-            services[2].loadRates(),
-            services[3].loadInstruments(),
-            services[4].loadBankHolidays(),
-            services[5].loadClients(),
-            services[6].loadTraders(),
-            services[7].loadExchangeRates(),
-            services[9].loadAlertTypes(),
-            services[9].loadAlertConfigurations()
+            await services[0].loadVolatilities(),
+            await services[1].loadPrices(),
+            await services[2].loadRates(),
+            await services[3].loadInstruments(),
+            await services[4].loadBankHolidays(),
+            await services[5].loadClients(),
+            await services[6].loadTraders(),
+            await services[7].loadExchangeRates(),
+            await services[9].loadAlertTypes(),
+            await services[10].loadAlertConfigurations(),
+            await services[11].loadDesks()
         ];
 
         if (ownerId)

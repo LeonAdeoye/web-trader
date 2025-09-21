@@ -1,10 +1,14 @@
 import { LoggerService } from './LoggerService';
+import { DeskService } from './DeskService';
+import { TraderService } from './TraderService';
 
 class RfqService
 {
     constructor()
     {
         this.loggerService = new LoggerService(RfqService.name);
+        this.deskService = new DeskService();
+        this.traderService = new TraderService();
         this.rfqs = new Map();
         this.workflowEvents = new Map();
         this.comments = new Map();
@@ -230,7 +234,8 @@ class RfqService
 
     addComment(commentData)
     {
-        const comment = {
+        const comment =
+        {
             id: commentData.id || `comment-${Date.now()}`,
             rfqId: commentData.rfqId,
             userId: commentData.userId,
@@ -238,21 +243,19 @@ class RfqService
             comment: commentData.comment,
             type: commentData.type || 'COMMENT'
         };
-
         this.comments.set(comment.id, comment);
         this.loggerService.logInfo(`Added comment: ${comment.id} for RFQ: ${comment.rfqId}`);
         return comment;
     }
 
-    // Status and workflow management
-    getValidStatusTransitions(currentStatus, userRole)
+    getValidStatusTransitions(currentStatus)
     {
         const transitions =
         {
-            'PENDING': userRole === 'ST' ? ['ACCEPTED', 'REJECTED'] : [],
-            'ACCEPTED': userRole === 'ST' ? ['PRICING'] : [],
-            'PRICING': userRole === 'RT' ? ['PRICED'] : [],
-            'PRICED': userRole === 'ST' ? ['TRADED_AWAY', 'TRADE_COMPLETED'] : [],
+            'PENDING': ['ACCEPTED', 'REJECTED'],
+            'ACCEPTED': ['PRICING'],
+            'PRICING': ['PRICED'],
+            'PRICED': ['TRADED_AWAY', 'TRADE_COMPLETED'],
             'REJECTED': [],
             'TRADED_AWAY': [],
             'TRADE_COMPLETED': []
@@ -260,25 +263,42 @@ class RfqService
         return transitions[currentStatus] || [];
     }
 
-    getAvailableTraders()
+    async getAvailableTraders()
     {
-        return [
-            { id: 'john-smith', name: 'John Smith (RT)', role: 'RT' },
-            { id: 'jane-doe', name: 'Jane Doe (RT)', role: 'RT' },
-            { id: 'mike-wilson', name: 'Mike Wilson (RT)', role: 'RT' },
-            { id: 'sarah-johnson', name: 'Sarah Johnson (ST)', role: 'ST' },
-            { id: 'alex-brown', name: 'Alex Brown (ST)', role: 'ST' }
-        ];
+        try
+        {
+            await this.deskService.loadDesks();
+            await this.traderService.loadTraders();
+            const desks = this.deskService.getDesks();
+            const traders = this.traderService.getTraders();
+            const deltaOneDesk = desks.find(desk => desk.deskName === 'Delta One Desk');
+            const deltaOneTraderIds = deltaOneDesk ? deltaOneDesk.traders || [] : [];
+            const availableTraders = traders.map(trader => 
+            {
+                const isRT = deltaOneTraderIds.includes(trader.traderId);
+                return {
+                    id: trader.traderId,
+                    name: `${trader.firstName} ${trader.lastName} (${isRT ? 'RT' : 'ST'})`,
+                    role: isRT ? 'RT' : 'ST'
+                };
+            });
+            this.loggerService.logInfo(`Generated ${availableTraders.length} available traders: ${JSON.stringify(availableTraders)}`);
+            return availableTraders;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error loading available traders: ${error.message}`);
+            return [];
+        }
     }
 
-    // Workflow action processing
-    processWorkflowAction(rfqId, action, userId, comment = null, fieldChanges = {})
+    async processWorkflowAction(rfqId, action, userId, comment = null, fieldChanges = {})
     {
         const rfq = this.getRfqById(rfqId);
         if (!rfq)
             throw new Error(`RFQ not found: ${rfqId}`);
 
-        const userRole = this.getUserRole(userId);
+        const userRole = await this.getUserRole(userId);
         const validTransitions = this.getValidStatusTransitions(rfq.status, userRole);
         
         if (!validTransitions.includes(action))
@@ -321,10 +341,19 @@ class RfqService
         return updatedRfq;
     }
 
-    getUserRole(userId)
+    async getUserRole(userId)
     {
-        const trader = this.getAvailableTraders().find(t => t.id === userId);
-        return trader ? trader.role : 'UNKNOWN';
+        try
+        {
+            const availableTraders = await this.getAvailableTraders();
+            const trader = availableTraders.find(t => t.id === userId);
+            return trader ? trader.role : 'UNKNOWN';
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error getting user role for ${userId}: ${error.message}`);
+            return 'UNKNOWN';
+        }
     }
 
     async loadRfqs()

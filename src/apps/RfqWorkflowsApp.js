@@ -37,10 +37,9 @@ const RfqWorkflowsApp = () =>
         }
     },[]);
 
-
     useEffect(() =>
     {
-        const loadInitialData = () =>
+        const loadInitialData = async () =>
         {
             if (!rfqData)
             {
@@ -50,14 +49,16 @@ const RfqWorkflowsApp = () =>
 
             const events = rfqService.getWorkflowEvents('RFQ-2024-001');//  (rfqData.rfqId);
             setActivityFeed(events);
-            const transitions = rfqService.getValidStatusTransitions(rfqData.status, 'RT');
+
+            const transitions = rfqService.getValidStatusTransitions(rfqData.status.toUpperCase());
             setValidTransitions(transitions);
-            const traders = rfqService.getAvailableTraders();
+
+            const traders = await rfqService.getAvailableTraders();
             setAvailableTraders(traders);
         };
 
-        loadInitialData();
-    }, [rfqService, rfqData]);
+        loadInitialData().then(() => loggerService.logInfo("RFQs initial data has been loaded."));
+    }, [rfqData]);
 
     const handleWorkflowAction =  useCallback(() =>
     {
@@ -237,7 +238,7 @@ const RfqWorkflowsApp = () =>
                             <TextField
                                 size="small"
                                 label="Current Status"
-                                value={rfqData.status}
+                                value={rfqData.status.toUpperCase()}
                                 InputProps={{
                                     readOnly: true,
                                     style: {
