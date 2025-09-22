@@ -16,6 +16,13 @@ const RfqWorkflowsApp = () =>
     const [newStatus, setNewStatus] = useState('');
     const [newAssignee, setNewAssignee] = useState('');
     const [newComment, setNewComment] = useState('');
+    const [ownerId, setOwnerId] = useState('');
+
+    useEffect(() =>
+    {
+        const loadOwner = async () => setOwnerId(await window.configurations.getLoggedInUserId());
+        loadOwner().then(() => loggerService.logInfo(`Logged in user ID: ${ownerId}`));
+    }, []);
 
     useEffect(() =>
     {
@@ -42,17 +49,13 @@ const RfqWorkflowsApp = () =>
         const loadInitialData = async () =>
         {
             if (!rfqData)
-            {
-                loggerService.logError("rfqData is null, skipping data load");
                 return;
-            }
 
-            const events = rfqService.getWorkflowEvents('RFQ-2024-001');//  (rfqData.rfqId);
+            // const events = rfqService.getWorkflowEvents('RFQ-2024-001');
+            const events = rfqService.getWorkflowEvents(rfqData.rfqId);
             setActivityFeed(events);
-
-            const transitions = rfqService.getValidStatusTransitions(rfqData.status.toUpperCase());
+            const transitions = rfqService.getValidStatusTransitions(rfqData.status); // TODO
             setValidTransitions(transitions);
-
             const traders = await rfqService.getAvailableTraders();
             setAvailableTraders(traders);
         };
@@ -60,69 +63,38 @@ const RfqWorkflowsApp = () =>
         loadInitialData().then(() => loggerService.logInfo("RFQs initial data has been loaded."));
     }, [rfqData]);
 
-    const handleWorkflowAction =  useCallback(() =>
+    const handleWorkflowAction =  useCallback(async () =>
     {
-        if (!rfqData)
-            return;
-
         try
         {
             if (newStatus)
             {
-                // Process status change
-                const updatedRfq = rfqService.processWorkflowAction(
-                    rfqData.rfqId, 
-                    newStatus, 
-                    'current-user', // TODO: Get actual user ID
-                    newComment
-                );
+                const updatedRfq = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
                 setRfqData(updatedRfq);
-                
-                // Refresh activity feed
                 const events = rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
-                
-                // Update valid transitions
-                const transitions = rfqService.getValidStatusTransitions(updatedRfq.status, 'RT');
+                const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
                 setValidTransitions(transitions);
             }
             
             if (newAssignee)
             {
-                // Process assignment change
                 const updatedRfq = rfqService.updateRfq(rfqData.rfqId, { assignedTo: newAssignee });
                 setRfqData(updatedRfq);
-                
-                // Add workflow event for assignment
-                rfqService.addWorkflowEvent({
-                    rfqId: rfqData.rfqId,
-                    eventType: 'ASSIGNMENT',
-                    userId: 'current-user',
-                    comment: `Assigned to ${newAssignee}`
-                });
-                
-                // Refresh activity feed
+                rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
                 const events = rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
             }
             
             if (newComment && !newStatus)
             {
-                // Add comment only
-                rfqService.addComment({
-                    rfqId: rfqData.rfqId,
-                    userId: 'current-user',
-                    comment: newComment
-                });
-                
-                // Refresh activity feed
+                rfqService.addComment({rfqId: rfqData.rfqId, userId: ownerId, comment: newComment}); // Not sure if needed.
+                rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'COMMENT', userId: ownerId, comment: newComment});
                 const events = rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
             }
             
             loggerService.logInfo(`Workflow action completed: Status=${newStatus}, Assignee=${newAssignee}, Comment=${newComment}`);
-            
-            // Reset form
             setNewStatus('');
             setNewAssignee('');
             setNewComment('');
@@ -132,7 +104,7 @@ const RfqWorkflowsApp = () =>
             loggerService.logError(`Workflow action failed: ${error.message}`);
             alert(`Workflow action failed: ${error.message}`);
         }
-    }, [rfqData]);
+    }, [rfqData, newStatus, newAssignee, newComment, ownerId]);
 
     const handleClear = useCallback(() =>
     {
@@ -238,7 +210,7 @@ const RfqWorkflowsApp = () =>
                             <TextField
                                 size="small"
                                 label="Current Status"
-                                value={rfqData.status.toUpperCase()}
+                                value={rfqData.status}
                                 InputProps={{
                                     readOnly: true,
                                     style: {
@@ -295,7 +267,7 @@ const RfqWorkflowsApp = () =>
                                     onChange={(e) => setNewAssignee(e.target.value)}
                                     style={{ fontSize: '0.75rem' }}>
                                     {availableTraders.map(trader => (
-                                        <MenuItem key={trader.id} value={trader.id} style={{ fontSize: '0.75rem' }}>
+                                        <MenuItem key={trader.id} value={trader.name} style={{ fontSize: '0.75rem' }}>
                                             {trader.name}
                                         </MenuItem>
                                     ))}
@@ -309,8 +281,7 @@ const RfqWorkflowsApp = () =>
                                 InputProps={{ style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '382px' }}
-                                placeholder="Type your comment..."
-                            />
+                                placeholder="Type your comment..."/>
                             <Tooltip title={<Typography fontSize={12}>Apply changes for all entered workflow values.</Typography>}>
                                 <span>
                                     <Button className="dialog-action-button" style={{ fontSize: '0.75rem', marginRight: '5px' }} disabled={canClear()} variant='contained' onClick={handleWorkflowAction}>Apply</Button>

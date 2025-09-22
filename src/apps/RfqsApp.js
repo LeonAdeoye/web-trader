@@ -40,6 +40,7 @@ export const RfqsApp = () =>
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const traderService = useRef(ServiceRegistry.getTraderService()).current;
     const clientService = useRef(ServiceRegistry.getClientService()).current;
+    const rfqService = useRef(ServiceRegistry.getRfqService()).current;
     const optionRequestParserService = useRef(new OptionRequestParserService()).current;
     const bookService = useRef(new BookService()).current;
     const optionPricingService = useRef(new OptionPricingService()).current;
@@ -88,17 +89,12 @@ export const RfqsApp = () =>
         'rfq_defaultOptionModel'
     ];
 
-
-
     useEffect(() =>
     {
         const loadOwner = async () =>  setOwnerId(await window.configurations.getLoggedInUserId());
         loadOwner();
     }, []);
 
-
-
-    // Load configuration from service
     const loadConfiguration = useCallback(async () => 
     {
         try 
@@ -484,7 +480,7 @@ export const RfqsApp = () =>
             underlyingPrice: rfqData.underlyingPrice,
             request: snippet,
             client:  'Select Client',
-            status: 'Pending',
+            status: 'PENDING',
             bookCode: 'Select Book',
             notionalInUSD: metrics.notionalInUSD.toFixed(config.decimalPrecision),
             notionalInLocal: metrics.notionalInLocal,
@@ -536,11 +532,12 @@ export const RfqsApp = () =>
             rhoNotional: derivedValues.rhoNotional,
             rho: derivedValues.rho,
             rhoPercent: derivedValues.rhoPercent,
-            legs: parsedOptions
+            legs: parsedOptions,
+            createdBy: ownerId,
         };
 
         return rfq;
-    }, [config, optionRequestParserService, volatilityService, rateService, exerciseType, exchangeRateService, calculateOptionMetrics, calculateDerivedValues]);
+    }, [config, optionRequestParserService, volatilityService, rateService, exerciseType, exchangeRateService, calculateOptionMetrics, calculateDerivedValues, ownerId]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
@@ -593,16 +590,17 @@ export const RfqsApp = () =>
 
     const handleCloneRfq = useCallback((rfqData) =>
     {
-        const clonedRfq = {...rfqData, rfqId: crypto.randomUUID(), arrivalTime: new Date().toLocaleTimeString(), status: 'Pending' };
+        const clonedRfq = {...rfqData, rfqId: crypto.randomUUID(), arrivalTime: new Date().toLocaleTimeString(), status: 'PENDING' };
         setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
         loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
     }, [loggerService, setRfqs]);
 
-    const handleSaveRfq = useCallback((rfqData) =>
+    const handleSaveRfq = useCallback(async (rfqData) =>
     {
-        outboundWorker.postMessage(rfqData)
-        loggerService.logInfo(`Saving to RMS for RFQ ${JSON.stringify(rfqData)}`);
-    }, [loggerService]);
+        const savedRfq = await rfqService.saveRfq(rfqData);
+        // TODO
+        //outboundWorker.postMessage(savedRfq);
+    }, [rfqService, outboundWorker]);
 
     const handleChartRfq = useCallback((rfqData) =>
     {

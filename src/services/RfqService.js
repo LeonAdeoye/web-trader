@@ -147,9 +147,46 @@ class RfqService
         dummyComments.forEach(comment => this.comments.set(comment.id, comment));
     }
 
-    getRfqById(rfqId)
+    async getRfqById(rfqId)
     {
-        return this.rfqs.get(rfqId);
+        let rfq = this.rfqs.get(rfqId);
+        if (rfq)
+        {
+            this.loggerService.logInfo(`Found RFQ in local cache: ${rfqId}`);
+            return rfq;
+        }
+
+        this.loggerService.logInfo(`Fetching RFQ from backend service: ${rfqId}`);
+        try
+        {
+            const response = await fetch(`http://localhost:20020/rfq/${rfqId}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            });
+
+            if (response.status === 404)
+            {
+                this.loggerService.logInfo(`RFQ not found: ${rfqId}`);
+                return null;
+            }
+
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to get RFQ: ${response.status} - ${errorText}`);
+                return null;
+            }
+
+            const fetchedRfq = await response.json();
+            this.loggerService.logInfo(`Successfully fetched RFQ from backend: ${fetchedRfq.rfqId}`);
+            this.rfqs.set(fetchedRfq.rfqId, fetchedRfq);
+            return fetchedRfq;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error fetching RFQ: ${error.message}`);
+            return null;
+        }
     }
 
     getAllRfqs()
@@ -162,13 +199,11 @@ class RfqService
         const rfq =
         {
             ...rfqData,
-            rfqId: rfqData.rfqId || `RFQ-${Date.now()}`,
+            rfqId: rfqData.rfqId,
             lastActivity: new Date().toLocaleTimeString(),
             createdBy: rfqData.createdBy || 'Unknown User'
         };
-        
         this.rfqs.set(rfq.rfqId, rfq);
-        this.loggerService.logInfo(`Created RFQ: ${rfq.rfqId}`);
         return rfq;
     }
 
@@ -236,7 +271,7 @@ class RfqService
     {
         const comment =
         {
-            id: commentData.id || `comment-${Date.now()}`,
+            id: crypto.randomUUID(),
             rfqId: commentData.rfqId,
             userId: commentData.userId,
             timestamp: commentData.timestamp || new Date().toLocaleTimeString(),
@@ -244,7 +279,7 @@ class RfqService
             type: commentData.type || 'COMMENT'
         };
         this.comments.set(comment.id, comment);
-        this.loggerService.logInfo(`Added comment: ${comment.id} for RFQ: ${comment.rfqId}`);
+        this.loggerService.logInfo(`Added comment with Id: ${comment.id} for RFQ with id: ${comment.rfqId}`);
         return comment;
     }
 
@@ -260,7 +295,7 @@ class RfqService
             'TRADED_AWAY': [],
             'TRADE_COMPLETED': []
         };
-        return transitions[currentStatus] || [];
+        return transitions[currentStatus.toUpperCase()] || [];
     }
 
     async getAvailableTraders()
@@ -294,15 +329,9 @@ class RfqService
 
     async processWorkflowAction(rfqId, action, userId, comment = null, fieldChanges = {})
     {
-        const rfq = this.getRfqById(rfqId);
+        const rfq = await this.getRfqById(rfqId);
         if (!rfq)
             throw new Error(`RFQ not found: ${rfqId}`);
-
-        const userRole = await this.getUserRole(userId);
-        const validTransitions = this.getValidStatusTransitions(rfq.status, userRole);
-        
-        if (!validTransitions.includes(action))
-            throw new Error(`Invalid workflow action: ${action} for status: ${rfq.status} by user role: ${userRole}`);
 
         let updates = {};
         switch (action)
@@ -365,9 +394,32 @@ class RfqService
 
     async saveRfq(rfqData)
     {
-        // TODO: Implement API call to rfq-service
         this.loggerService.logInfo(`Saving RFQ to backend service: ${rfqData.rfqId}`);
-        return this.createRfq(rfqData);
+        
+        try
+        {
+            const response = await fetch('http://localhost:20020/rfq', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(rfqData)
+            });
+
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to save RFQ: ${response.status} - ${errorText}`);
+            }
+
+            const savedRfq = await response.json();
+            this.loggerService.logInfo(`Successfully saved RFQ: ${savedRfq.rfqId}`);
+            this.rfqs.set(savedRfq.rfqId, savedRfq);
+            return savedRfq;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error saving RFQ: ${error.message}`);
+            throw error;
+        }
     }
 
     async updateRfqBackend(rfqId, updates)
