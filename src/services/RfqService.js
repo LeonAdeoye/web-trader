@@ -12,139 +12,6 @@ class RfqService
         this.rfqs = new Map();
         this.workflowEvents = new Map();
         this.comments = new Map();
-        this.initializeDummyData();
-    }
-
-    initializeDummyData()
-    {
-        const dummyRfq = {
-            rfqId: 'RFQ-2024-001',
-            client: 'Goldman Sachs',
-            underlying: 'AAPL',
-            strike: '150.00',
-            quantity: '100 contracts',
-            status: 'PRICING',
-            assignedTo: 'John Smith (RT)',
-            priority: 'HIGH',
-            lastActivity: '2 min ago',
-            createdBy: 'Sarah Johnson (ST)',
-            arrivalTime: '14:18:32',
-            impliedVol: '22.5%',
-            notionalInUSD: '15000.00',
-            notionalInLocal: '15000.00',
-            notionalCurrency: 'USD',
-            maturityDate: '2024-12-20',
-            daysToExpiry: 45,
-            exerciseType: 'EUROPEAN',
-            dayCountConvention: 250,
-            multiplier: 100,
-            contracts: 100,
-            salesCreditPercentage: 0.5,
-            salesCreditAmount: '75.00',
-            premiumSettlementCurrency: 'USD',
-            premiumSettlementDate: '2024-12-22',
-            legs: [
-                {
-                    quantity: 100,
-                    strike: 150.00,
-                    optionType: 'CALL',
-                    side: 'BUY',
-                    volatility: 22.5,
-                    interestRate: 5.25
-                }
-            ]
-        };
-
-        this.rfqs.set(dummyRfq.rfqId, dummyRfq);
-
-        const dummyEvents = [
-            {
-                id: '1',
-                rfqId: 'RFQ-2024-001',
-                eventType: 'STATUS_CHANGE',
-                fromStatus: 'PRICING',
-                toStatus: 'PRICED',
-                userId: 'John Smith (RT)',
-                timestamp: '14:32',
-                comment: 'Pricing complete. Spread tightened to 0.25',
-                fieldChanges: {
-                    status: { fieldName: 'status', oldValue: 'PRICING', newValue: 'PRICED', changeType: 'UPDATED' }
-                }
-            },
-            {
-                id: '2',
-                rfqId: 'RFQ-2024-001',
-                eventType: 'COMMENT',
-                fromStatus: null,
-                toStatus: null,
-                userId: 'Sarah Johnson (ST)',
-                timestamp: '14:28',
-                comment: 'Client is asking for better pricing on the spread',
-                fieldChanges: {}
-            },
-            {
-                id: '3',
-                rfqId: 'RFQ-2024-001',
-                eventType: 'ASSIGNMENT',
-                fromStatus: null,
-                toStatus: null,
-                userId: 'John Smith (RT)',
-                timestamp: '14:25',
-                comment: 'Assigned RFQ for pricing',
-                fieldChanges: {
-                    assignedTo: { fieldName: 'assignedTo', oldValue: null, newValue: 'John Smith (RT)', changeType: 'UPDATED' }
-                }
-            },
-            {
-                id: '4',
-                rfqId: 'RFQ-2024-001',
-                eventType: 'STATUS_CHANGE',
-                fromStatus: 'ACCEPTED',
-                toStatus: 'PRICING',
-                userId: 'Sarah Johnson (ST)',
-                timestamp: '14:20',
-                comment: 'Please price this RFQ - client is very interested',
-                fieldChanges: {
-                    status: { fieldName: 'status', oldValue: 'ACCEPTED', newValue: 'PRICING', changeType: 'UPDATED' }
-                }
-            },
-            {
-                id: '5',
-                rfqId: 'RFQ-2024-001',
-                eventType: 'STATUS_CHANGE',
-                fromStatus: 'PENDING',
-                toStatus: 'ACCEPTED',
-                userId: 'Sarah Johnson (ST)',
-                timestamp: '14:18',
-                comment: 'Good client, worth pricing',
-                fieldChanges: {
-                    status: { fieldName: 'status', oldValue: 'PENDING', newValue: 'ACCEPTED', changeType: 'UPDATED' }
-                }
-            }
-        ];
-
-        dummyEvents.forEach(event => this.workflowEvents.set(event.id, event));
-
-        const dummyComments = [
-            {
-                id: '1',
-                rfqId: 'RFQ-2024-001',
-                userId: 'Sarah Johnson (ST)',
-                timestamp: '14:28',
-                comment: 'Client is asking for better pricing on the spread',
-                type: 'COMMENT'
-            },
-            {
-                id: '2',
-                rfqId: 'RFQ-2024-001',
-                userId: 'John Smith (RT)',
-                timestamp: '14:32',
-                comment: 'Pricing complete. Spread tightened to 0.25',
-                type: 'COMMENT'
-            }
-        ];
-
-        dummyComments.forEach(comment => this.comments.set(comment.id, comment));
     }
 
     async getRfqById(rfqId)
@@ -205,16 +72,6 @@ class RfqService
         };
         await this.saveRfq(rfq);
         return rfq;
-    }
-
-    async updateRfq(rfqId, updates)
-    {
-        return await this.updateRfqBackend(rfqId, updates);
-    }
-
-    async deleteRfq(rfqId)
-    {
-        return await this.deleteRfqBackend(rfqId);
     }
 
     async getWorkflowEvents(rfqId)
@@ -279,14 +136,6 @@ class RfqService
             throw error;
         }
     }
-
-    getComments(rfqId)
-    {
-        return Array.from(this.comments.values())
-            .filter(comment => comment.rfqId === rfqId)
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    }
-
 
     getValidStatusTransitions(currentStatus)
     {
@@ -375,21 +224,6 @@ class RfqService
         return { updatedRfq, workflowEvent };
     }
 
-    async getUserRole(userId)
-    {
-        try
-        {
-            const availableTraders = await this.getAvailableTraders();
-            const trader = availableTraders.find(t => t.id === userId);
-            return trader ? trader.role : 'UNKNOWN';
-        }
-        catch (error)
-        {
-            this.loggerService.logError(`Error getting user role for ${userId}: ${error.message}`);
-            return 'UNKNOWN';
-        }
-    }
-
     async loadRfqs()
     {
         // TODO: Implement API call to rfq-service
@@ -427,14 +261,13 @@ class RfqService
         }
     }
 
-    async updateRfqBackend(rfqId, updates)
+    async updateRfq(rfqId, updates)
     {
         this.loggerService.logInfo(`Updating RFQ in backend service: ${rfqId}`);
         
         try
         {
             const response = await fetch(`http://localhost:20020/rfq/${rfqId}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(updates)});
-            
             if (response.status === 404)
             {
                 this.loggerService.logInfo(`RFQ not found: ${rfqId}`);
@@ -450,10 +283,7 @@ class RfqService
             
             const updatedRfq = await response.json();
             this.loggerService.logInfo(`Successfully updated RFQ in backend: ${updatedRfq.rfqId}`);
-            
-            // Update local cache
             this.rfqs.set(updatedRfq.rfqId, updatedRfq);
-            
             return updatedRfq;
         }
         catch (error)
@@ -463,10 +293,9 @@ class RfqService
         }
     }
 
-    async deleteRfqBackend(rfqId)
+    async deleteRfq(rfqId)
     {
         this.loggerService.logInfo(`Deleting RFQ from backend service: ${rfqId}`);
-        
         try
         {
             const response = await fetch(`http://localhost:20020/rfq/${rfqId}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}});

@@ -51,7 +51,6 @@ const RfqWorkflowsApp = () =>
             if (!rfqData)
                 return;
 
-            // const events = rfqService.getWorkflowEvents('RFQ-2024-001');
             const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
             setActivityFeed(events);
             const transitions = rfqService.getValidStatusTransitions(rfqData.status); // TODO

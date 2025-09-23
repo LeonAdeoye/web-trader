@@ -582,11 +582,13 @@ export const RfqsApp = () =>
 
     }, [handleSnippetSubmit, loggerService]);
 
-    const handleDeleteRfq = useCallback((rfqData) =>
+    const handleDeleteRfq = useCallback(async (rfqData) =>
     {
-        setRfqs(prevRfqs => prevRfqs.filter(rfq => rfq.rfqId !== rfqData.rfqId));
-        loggerService.logInfo(`Successfully deleted RFQ: ${rfqData.rfqId}`);
-    }, [loggerService, setRfqs]);
+        const success = await rfqService.deleteRfq(rfqData.rfqId);
+        if (success)
+            setRfqs(prevRfqs => prevRfqs.filter(rfq => rfq.rfqId !== rfqData.rfqId));
+
+    }, []);
 
     const handleCloneRfq = useCallback((rfqData) =>
     {
