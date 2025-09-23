@@ -69,10 +69,9 @@ const RfqWorkflowsApp = () =>
         {
             if (newStatus)
             {
-                const updatedRfq = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
+                const { updatedRfq, workflowEvent } = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
                 setRfqData(updatedRfq);
-                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
-                setActivityFeed(events);
+                setActivityFeed(prevEvents => [workflowEvent, ...prevEvents]);
                 const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
                 setValidTransitions(transitions);
             }
@@ -81,17 +80,14 @@ const RfqWorkflowsApp = () =>
             {
                 const updatedRfq = await rfqService.updateRfq(rfqData.rfqId, { assignedTo: newAssignee });
                 setRfqData(updatedRfq);
-                await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
-                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
-                setActivityFeed(events);
+                const newEvent = await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
+                setActivityFeed(prevEvents => [newEvent, ...prevEvents]);
             }
             
             if (newComment && !newStatus)
             {
-                rfqService.addComment({rfqId: rfqData.rfqId, userId: ownerId, comment: newComment}); // Not sure if needed.
-                await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'COMMENT', userId: ownerId, comment: newComment});
-                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
-                setActivityFeed(events);
+                const newEvent = await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'COMMENT', userId: ownerId, comment: newComment});
+                setActivityFeed(prevEvents => [newEvent, ...prevEvents]);
             }
             
             loggerService.logInfo(`Workflow action completed: Status=${newStatus}, Assignee=${newAssignee}, Comment=${newComment}`);

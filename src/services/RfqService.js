@@ -287,21 +287,6 @@ class RfqService
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
 
-    addComment(commentData)
-    {
-        const comment =
-        {
-            id: crypto.randomUUID(),
-            rfqId: commentData.rfqId,
-            userId: commentData.userId,
-            timestamp: commentData.timestamp || new Date().toLocaleTimeString(),
-            comment: commentData.comment,
-            type: commentData.type || 'COMMENT'
-        };
-        this.comments.set(comment.id, comment);
-        this.loggerService.logInfo(`Added comment with Id: ${comment.id} for RFQ with id: ${comment.rfqId}`);
-        return comment;
-    }
 
     getValidStatusTransitions(currentStatus)
     {
@@ -377,7 +362,7 @@ class RfqService
         }
 
         const updatedRfq = await this.updateRfq(rfqId, updates);
-        await this.addWorkflowEvent({
+        const workflowEvent = await this.addWorkflowEvent({
             rfqId,
             eventType: 'STATUS_CHANGE',
             fromStatus: rfq.status,
@@ -387,7 +372,7 @@ class RfqService
             fieldChanges
         });
 
-        return updatedRfq;
+        return { updatedRfq, workflowEvent };
     }
 
     async getUserRole(userId)
