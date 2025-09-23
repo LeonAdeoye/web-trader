@@ -194,7 +194,7 @@ class RfqService
         return Array.from(this.rfqs.values());
     }
 
-    createRfq(rfqData)
+    async createRfq(rfqData)
     {
         const rfq =
         {
@@ -203,61 +203,81 @@ class RfqService
             lastActivity: new Date().toLocaleTimeString(),
             createdBy: rfqData.createdBy || 'Unknown User'
         };
-        this.rfqs.set(rfq.rfqId, rfq);
+        await this.saveRfq(rfq);
         return rfq;
     }
 
-    updateRfq(rfqId, updates)
+    async updateRfq(rfqId, updates)
     {
-        const existingRfq = this.rfqs.get(rfqId);
-        if (!existingRfq)
-            throw new Error(`RFQ not found: ${rfqId}`);
+        return await this.updateRfqBackend(rfqId, updates);
+    }
 
-        const updatedRfq =
+    async deleteRfq(rfqId)
+    {
+        return await this.deleteRfqBackend(rfqId);
+    }
+
+    async getWorkflowEvents(rfqId)
+    {
+        this.loggerService.logInfo(`Fetching workflow events from backend service: ${rfqId}`);
+        
+        try
         {
-            ...existingRfq,
-            ...updates,
-            lastActivity: new Date().toLocaleTimeString()
-        };
-
-        this.rfqs.set(rfqId, updatedRfq);
-        this.loggerService.logInfo(`Updated RFQ: ${rfqId}`);
-        return updatedRfq;
-    }
-
-    deleteRfq(rfqId)
-    {
-        const deleted = this.rfqs.delete(rfqId);
-        if (deleted)
-            this.loggerService.logInfo(`Deleted RFQ: ${rfqId}`);
-        return deleted;
-    }
-
-    getWorkflowEvents(rfqId)
-    {
-        return Array.from(this.workflowEvents.values())
-            .filter(event => event.rfqId === rfqId)
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    }
-
-    addWorkflowEvent(eventData)
-    {
-        const event =
+            const response = await fetch(`http://localhost:20020/rfq/workflow/events/${rfqId}`, {method: 'GET', headers: {'Content-Type': 'application/json'}});
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to get workflow events: ${response.status} - ${errorText}`);
+                return [];
+            }
+            const events = await response.json();
+            this.loggerService.logInfo(`Successfully fetched ${events.length} workflow events for RFQ: ${rfqId}`);
+            events.forEach(event => this.workflowEvents.set(event.id, event));
+            return events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+        catch (error)
         {
-            id: eventData.id || `event-${Date.now()}`,
-            rfqId: eventData.rfqId,
-            eventType: eventData.eventType,
-            fromStatus: eventData.fromStatus,
-            toStatus: eventData.toStatus,
-            userId: eventData.userId,
-            timestamp: eventData.timestamp || new Date().toLocaleTimeString(),
-            comment: eventData.comment,
-            fieldChanges: eventData.fieldChanges || {}
-        };
+            this.loggerService.logError(`Error fetching workflow events: ${error.message}`);
+            return [];
+        }
+    }
 
-        this.workflowEvents.set(event.id, event);
-        this.loggerService.logInfo(`Added workflow event: ${event.id} for RFQ: ${event.rfqId}`);
-        return event;
+    async addWorkflowEvent(eventData)
+    {
+        this.loggerService.logInfo(`Adding workflow event to backend service for RFQ: ${eventData.rfqId}`);
+        
+        try
+        {
+            const eventPayload = {
+                id: eventData.id || crypto.randomUUID(),
+                rfqId: eventData.rfqId,
+                eventType: eventData.eventType,
+                fromStatus: eventData.fromStatus,
+                toStatus: eventData.toStatus,
+                userId: eventData.userId,
+                timestamp: eventData.timestamp || new Date().toISOString(),
+                comment: eventData.comment,
+                fieldChanges: eventData.fieldChanges || {}
+            };
+
+            const response = await fetch('http://localhost:20020/rfq/workflow/event', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(eventPayload)});
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to add workflow event: ${response.status} - ${errorText}`);
+                throw new Error(`Failed to add workflow event: ${response.status} - ${errorText}`);
+            }
+
+            const addedEvent = await response.json();
+            this.loggerService.logInfo(`Successfully added workflow event: ${addedEvent.id} for RFQ: ${addedEvent.rfqId}`);
+            this.workflowEvents.set(addedEvent.id, addedEvent);
+            return addedEvent;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error adding workflow event: ${error.message}`);
+            throw error;
+        }
     }
 
     getComments(rfqId)
@@ -356,8 +376,8 @@ class RfqService
                 break;
         }
 
-        const updatedRfq = this.updateRfq(rfqId, updates);
-        this.addWorkflowEvent({
+        const updatedRfq = await this.updateRfq(rfqId, updates);
+        await this.addWorkflowEvent({
             rfqId,
             eventType: 'STATUS_CHANGE',
             fromStatus: rfq.status,
@@ -424,16 +444,69 @@ class RfqService
 
     async updateRfqBackend(rfqId, updates)
     {
-        // TODO: Implement API call to rfq-service
         this.loggerService.logInfo(`Updating RFQ in backend service: ${rfqId}`);
-        return this.updateRfq(rfqId, updates);
+        
+        try
+        {
+            const response = await fetch(`http://localhost:20020/rfq/${rfqId}`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(updates)});
+            
+            if (response.status === 404)
+            {
+                this.loggerService.logInfo(`RFQ not found: ${rfqId}`);
+                return null;
+            }
+            
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to update RFQ: ${response.status} - ${errorText}`);
+                return null;
+            }
+            
+            const updatedRfq = await response.json();
+            this.loggerService.logInfo(`Successfully updated RFQ in backend: ${updatedRfq.rfqId}`);
+            
+            // Update local cache
+            this.rfqs.set(updatedRfq.rfqId, updatedRfq);
+            
+            return updatedRfq;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error updating RFQ: ${error.message}`);
+            return null;
+        }
     }
 
     async deleteRfqBackend(rfqId)
     {
-        // TODO: Implement API call to rfq-service
         this.loggerService.logInfo(`Deleting RFQ from backend service: ${rfqId}`);
-        return this.deleteRfq(rfqId);
+        
+        try
+        {
+            const response = await fetch(`http://localhost:20020/rfq/${rfqId}`, {method: 'DELETE', headers: {'Content-Type': 'application/json'}});
+            if (response.status === 404)
+            {
+                this.loggerService.logInfo(`RFQ not found: ${rfqId}`);
+                return false;
+            }
+            
+            if (!response.ok)
+            {
+                const errorText = await response.text();
+                this.loggerService.logError(`Failed to delete RFQ: ${response.status} - ${errorText}`);
+                return false;
+            }
+            
+            this.loggerService.logInfo(`Successfully deleted RFQ from backend: ${rfqId}`);
+            this.rfqs.delete(rfqId);
+            return true;
+        }
+        catch (error)
+        {
+            this.loggerService.logError(`Error deleting RFQ: ${error.message}`);
+            return false;
+        }
     }
 }
 

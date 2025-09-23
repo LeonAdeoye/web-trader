@@ -52,7 +52,7 @@ const RfqWorkflowsApp = () =>
                 return;
 
             // const events = rfqService.getWorkflowEvents('RFQ-2024-001');
-            const events = rfqService.getWorkflowEvents(rfqData.rfqId);
+            const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
             setActivityFeed(events);
             const transitions = rfqService.getValidStatusTransitions(rfqData.status); // TODO
             setValidTransitions(transitions);
@@ -71,7 +71,7 @@ const RfqWorkflowsApp = () =>
             {
                 const updatedRfq = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
                 setRfqData(updatedRfq);
-                const events = rfqService.getWorkflowEvents(rfqData.rfqId);
+                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
                 const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
                 setValidTransitions(transitions);
@@ -79,18 +79,18 @@ const RfqWorkflowsApp = () =>
             
             if (newAssignee)
             {
-                const updatedRfq = rfqService.updateRfq(rfqData.rfqId, { assignedTo: newAssignee });
+                const updatedRfq = await rfqService.updateRfq(rfqData.rfqId, { assignedTo: newAssignee });
                 setRfqData(updatedRfq);
-                rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
-                const events = rfqService.getWorkflowEvents(rfqData.rfqId);
+                await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
+                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
             }
             
             if (newComment && !newStatus)
             {
                 rfqService.addComment({rfqId: rfqData.rfqId, userId: ownerId, comment: newComment}); // Not sure if needed.
-                rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'COMMENT', userId: ownerId, comment: newComment});
-                const events = rfqService.getWorkflowEvents(rfqData.rfqId);
+                await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'COMMENT', userId: ownerId, comment: newComment});
+                const events = await rfqService.getWorkflowEvents(rfqData.rfqId);
                 setActivityFeed(events);
             }
             

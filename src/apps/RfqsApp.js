@@ -597,7 +597,7 @@ export const RfqsApp = () =>
 
     const handleSaveRfq = useCallback(async (rfqData) =>
     {
-        const savedRfq = await rfqService.saveRfq(rfqData);
+        const savedRfq = await rfqService.createRfq(rfqData);
         // TODO
         //outboundWorker.postMessage(savedRfq);
     }, [rfqService, outboundWorker]);
