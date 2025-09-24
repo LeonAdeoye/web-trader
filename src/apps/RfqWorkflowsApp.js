@@ -207,14 +207,7 @@ const RfqWorkflowsApp = () =>
                                 size="small"
                                 label="Current Status"
                                 value={rfqData.status}
-                                InputProps={{
-                                    readOnly: true,
-                                    style: {
-                                        fontSize: '0.75rem',
-                                        color: getStatusColor(rfqData.status),
-                                        fontWeight: 'bold'
-                                    }
-                                }}
+                                InputProps={{readOnly: true, style: { fontSize: '0.75rem', color: getStatusColor(rfqData.status), fontWeight: 'bold'} }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
@@ -222,7 +215,10 @@ const RfqWorkflowsApp = () =>
                                 label="Assigned To"
                                 value={rfqData.assignedTo}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
-                                InputLabelProps={{ style: { fontSize: '0.75rem' } }}
+                                InputLabelProps={{ 
+                                    shrink: true,
+                                    style: { fontSize: '0.75rem' } 
+                                }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
