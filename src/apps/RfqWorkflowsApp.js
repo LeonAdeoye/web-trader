@@ -3,6 +3,7 @@ import { LoggerService } from '../services/LoggerService';
 import { ServiceRegistry } from '../services/ServiceRegistry';
 import TitleBarComponent from "../components/TitleBarComponent";
 import {Button, Paper, TextField, Typography, MenuItem, FormControl, InputLabel, Select, Tooltip} from "@mui/material";
+import {formatTimestamp} from "../utilities";
 
 const RfqWorkflowsApp = () =>
 {
@@ -22,7 +23,7 @@ const RfqWorkflowsApp = () =>
     {
         const loadOwner = async () => setOwnerId(await window.configurations.getLoggedInUserId());
         loadOwner().then(() => loggerService.logInfo(`Logged in user ID: ${ownerId}`));
-    }, []);
+    }, [loggerService]);
 
     useEffect(() =>
     {
@@ -42,7 +43,7 @@ const RfqWorkflowsApp = () =>
         {
             loggerService.logError(`Error parsing RFQ data: ${error.message}`);
         }
-    },[]);
+    },[loggerService]);
 
     useEffect(() =>
     {
@@ -60,7 +61,7 @@ const RfqWorkflowsApp = () =>
         };
 
         loadInitialData().then(() => loggerService.logInfo("RFQs initial data has been loaded."));
-    }, [rfqData]);
+    }, [rfqData, loggerService, rfqService]);
 
     const handleWorkflowAction =  useCallback(async () =>
     {
@@ -99,7 +100,7 @@ const RfqWorkflowsApp = () =>
             loggerService.logError(`Workflow action failed: ${error.message}`);
             alert(`Workflow action failed: ${error.message}`);
         }
-    }, [rfqData, newStatus, newAssignee, newComment, ownerId]);
+    }, [rfqData, newStatus, newAssignee, newComment, ownerId , loggerService, rfqService]);
 
     const handleClear = useCallback(() =>
     {
@@ -152,7 +153,7 @@ const RfqWorkflowsApp = () =>
     {
         return (
             <>
-                <TitleBarComponent title="RFQ Workflow - No Data" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+                <TitleBarComponent title="Request For Quote Workflow - No Data" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
                 <div style={{ padding: '20px', textAlign: 'center' }}>
                     <Typography variant="h6" color="error">
                         No RFQ data provided
@@ -167,7 +168,7 @@ const RfqWorkflowsApp = () =>
 
     return (
         <>
-            <TitleBarComponent title={`RFQ Workflow: ${rfqData.request} (Arrived: ${rfqData.arrivalTime})`} windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
+            <TitleBarComponent title={`Request For Quote Workflow: ${rfqData.request} (Arrived: ${rfqData.arrivalTime})`} windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
             <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin: '45px 0px 0px 0px'}}>
                 <Paper elevation={4} style={{ padding: '10px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -299,7 +300,7 @@ const RfqWorkflowsApp = () =>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ fontSize: '0.8rem' }}>{getActivityIcon(event.eventType)}</span>
                                     <Typography variant="body2" color="textSecondary" style={{ fontSize: '0.75rem' }}>
-                                        {event.timestamp} - {event.userId}
+                                        {formatTimestamp(event.timestamp)} - {event.userId}
                                     </Typography>
                                 </div>
                                 <Typography variant="body1" style={{ fontSize: '0.8rem', marginTop: '2px' }}>

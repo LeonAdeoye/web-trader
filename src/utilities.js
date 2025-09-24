@@ -76,12 +76,8 @@ export const formatDate = (date) =>
 export const formatTime = (timeValue) =>
 {
     if (!timeValue) return 'N/A';
-    
-    // If it's already a time string (HH:MM or HH:MM:SS), return as is
     const timeStr = timeValue.toString();
     if (timeStr.includes(':')) return timeStr;
-    
-    // If it's a Date object or timestamp, format to time
     const date = new Date(timeValue);
     if (isNaN(date)) return 'N/A';
     
@@ -93,28 +89,23 @@ export const formatTime = (timeValue) =>
     });
 }
 
-// Additional function to handle ISO datetime strings and extract just the time part
 export const formatTimeFromISO = (isoString) =>
 {
     if (!isoString) return 'N/A';
-    
-    // If it's already a time string (HH:MM or HH:MM:SS), return as is
     const timeStr = isoString.toString();
     if (timeStr.includes(':') && !timeStr.includes('T')) return timeStr;
-    
-    // If it's an ISO datetime string, extract just the time part
-    if (timeStr.includes('T')) {
+
+    if (timeStr.includes('T'))
+    {
         const timePart = timeStr.split('T')[1];
-        // Remove any timezone info (Z or +HH:MM)
         const cleanTime = timePart.split('Z')[0].split('+')[0].split('-')[0];
         return cleanTime;
     }
-    
-    // If it's a Date object or timestamp, format to time
+
     const date = new Date(isoString);
     if (isNaN(date)) return 'N/A';
     
-    return date.toLocaleTimeString('en-US', { 
+    return date.toLocaleTimeString('en-US', {
         hour12: false, 
         hour: '2-digit', 
         minute: '2-digit', 
@@ -181,8 +172,10 @@ export const settlementTypeConverter = (value) => {
     return settlementTypeMapping[value] || value;
 };
 
-export const assetTypeConverter = (value) => {
-    const assetTypeMapping = {
+export const assetTypeConverter = (value) =>
+{
+    const assetTypeMapping =
+    {
         "STOCK": "Stock",
         "BOND": "Bond",
         "FUT": "Future",
@@ -273,4 +266,16 @@ export const getSideColour = (params) =>
 export const getLimitBreachTypeColour = (params) =>
 {
     if (params.value.includes("Full")) return {fontWeight: 'bold', color: 'olive'};
+}
+
+export const formatTimestamp = (timestamp) =>
+{
+        const date = new Date(timestamp);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('en-US', { month: 'short' });
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
 }
