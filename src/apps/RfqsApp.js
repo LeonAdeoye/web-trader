@@ -270,15 +270,6 @@ export const RfqsApp = () =>
 
     }, []);
 
-    const handleSendSlice = (childOrders) =>
-    {
-        childOrders.forEach((childOrder) =>
-        {
-            loggerService.logInfo(`Sending child order with Id: ${childOrder.orderId} to OMS`)
-            outboundWorker.postMessage(childOrder);
-        });
-    }
-
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
 
     const openConfig = useCallback(() =>
@@ -601,7 +592,7 @@ export const RfqsApp = () =>
     {
         const savedRfq = await rfqService.createRfq(rfqData);
         // TODO
-        //outboundWorker.postMessage(savedRfq);
+        outboundWorker.postMessage(savedRfq);
     }, [rfqService, outboundWorker]);
 
     const handleChartRfq = useCallback((rfqData) =>
@@ -741,24 +732,6 @@ export const RfqsApp = () =>
             recalculateRFQ(rfqData).then(() => loggerService.logInfo(`Field ${colDef.field} changed from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId} this will trigger a recalculation.`));
 
     }, [recalculateRFQ, loggerService]);
-
-    const handleSaveRequest = (isSave) =>
-    {
-        if (isSave)
-            loggerService.logInfo('Saving RFQ:', selectedRFQ);
-    };
-
-    useEffect(() =>
-    {
-        if (inboundWorker)
-            inboundWorker.onmessage = handleWorkerMessage;
-
-        return () =>
-        {
-            if (inboundWorker)
-                inboundWorker.onmessage = null;
-        };
-    }, [inboundWorker]);
 
     useEffect(() =>
     {

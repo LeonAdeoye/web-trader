@@ -1,5 +1,5 @@
 const { Client, Command } = require('amps');
-const { onAmpsOrderMessage } = require("./message_handler");
+const { onAmpsRfqMessage } = require("./message_handler");
 const {LoggerService} = require("../services/LoggerService");
 let loggerService = new LoggerService("read-rfq.js");
 
@@ -12,7 +12,7 @@ const main = async () =>
         const client = new Client(clientName);
         await client.connect(url);
         const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui.rfq");
-        await client.execute(inboundCmd, onAmpsOrderMessage);
+        await client.execute(inboundCmd, onAmpsRfqMessage);
         loggerService.logInfo(`RFQ reader web worker connected to AMPS using URL: ${url}`);
     }
     catch (e)

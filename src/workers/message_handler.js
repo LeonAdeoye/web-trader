@@ -106,34 +106,13 @@ export const onAmpsMarketDataMessage = (message) =>
 
 export const onAmpsCryptoPriceMessage = (message) =>
 {
-    if (!message)
-    {
-        console.error("Invalid message received:", message);
+    if ((!message ) || (!message.data) || (message.c === 'group_begin' || message.c === 'group_end'))
         return;
-    }
 
-    // Handle control messages that don't contain data
-    if (message.c === 'group_begin' || message.c === 'group_end')
-    {
-        return;
-    }
-
-    if (!message.data)
-    {
-        console.error("Invalid message received:", message);
-        return;
-    }
-
-    // Handle different possible timestamp field names
     const timestamp = message.data.timestamp || message.data.time_stamp || new Date().toISOString();
     const dateTime = new Date(timestamp);
-    
-    // Ensure we have a valid timestamp
     if (isNaN(dateTime.getTime()))
-    {
-        console.error("Invalid timestamp in message:", timestamp);
         return;
-    }
     
     switch (message.header.command())
     {
@@ -142,6 +121,21 @@ export const onAmpsCryptoPriceMessage = (message) =>
             break;
         case 'p':
             postMessage({messageType: "update", cryptoPrice: {...message.data, timestamp: dateTime}});
+            break;
+        default:
+            break;
+    }
+}
+
+export const onAmpsRfqMessage = (message) =>
+{
+    switch (message.header.command())
+    {
+        case 'sow':
+            postMessage({messageType: "snapshot", rfq: message.data});
+            break;
+        case 'p':
+            postMessage({messageType: "update", rfq: message.data});
             break;
         default:
             break;
