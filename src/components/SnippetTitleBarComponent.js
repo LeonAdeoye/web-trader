@@ -6,7 +6,6 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
-import SaveIcon from "@mui/icons-material/Save";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import RepeatIcon from '@mui/icons-material/Repeat';
@@ -189,21 +188,6 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     }}
                                 >
                                     <EditIcon style={{height: '24px'}} />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
-                        <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). The RMS will trigger the corresponding RFQ internal workflow.">
-                            <span>
-                                <IconButton 
-                                    className="title-bar-action" 
-                                    onClick={() => handleActionClick('save')}
-                                    disabled={isActionDisabled}
-                                    style={{ 
-                                        cursor: isActionDisabled ? 'not-allowed' : 'pointer',
-                                        WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
-                                    <SaveIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
                         </Tooltip>

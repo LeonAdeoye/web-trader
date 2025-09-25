@@ -22,7 +22,6 @@ export const RfqsApp = () =>
 {
     const [rfqs, setRfqs] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
-    const [outboundWorker, setOutboundWorker] = useState(null);
     const [instrumentCode, setInstrumentCode] = useState(null);
     const [clientCode, setClientCode] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -76,8 +75,6 @@ export const RfqsApp = () =>
 
     const [selectedRow, setSelectedRow] = useState(null);
     const [ownerId, setOwnerId] = useState(null);
-
-    // Define RFQ-specific config keys with prefix
     const RFQ_CONFIG_KEYS = [
         'rfq_defaultSettlementCurrency',
         'rfq_defaultSettlementDays',
@@ -190,13 +187,6 @@ export const RfqsApp = () =>
                 inboundWorker.onmessage = null;
         };
     }, [inboundWorker]);
-
-    useEffect(() =>
-    {
-        const webWorker = new Worker(new URL("../workers/send-rfq.js", import.meta.url));
-        setOutboundWorker(webWorker);
-        return () => webWorker.terminate();
-    }, []);
 
     useEffect(() =>
     {
@@ -550,11 +540,12 @@ export const RfqsApp = () =>
             if (!parsedOptions || parsedOptions.length === 0)
                 return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date Jan 10 2026, and the same underlying Toyota]" };
 
-            createRFQFromOptions(snippet, parsedOptions).then(newRFQ =>
+            createRFQFromOptions(snippet, parsedOptions).then(async (newRFQ) =>
             {
+                await rfqService.saveRfq(newRFQ);
                 setSelectedRFQ(newRFQ);
                 setRfqs(prevOrders => [newRFQ, ...prevOrders]);
-                loggerService.logInfo(`Successfully created RFQ from snippet: ${snippet}`);
+                loggerService.logInfo(`Successfully created and saved RFQ from snippet: ${snippet}`);
             });
 
             return { success: true };
@@ -588,12 +579,6 @@ export const RfqsApp = () =>
         loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
     }, [loggerService, setRfqs]);
 
-    const handleSaveRfq = useCallback(async (rfqData) =>
-    {
-        const savedRfq = await rfqService.createRfq(rfqData);
-        // TODO
-        outboundWorker.postMessage(savedRfq);
-    }, [rfqService, outboundWorker]);
 
     const handleChartRfq = useCallback((rfqData) =>
     {
@@ -639,9 +624,6 @@ export const RfqsApp = () =>
             case "edit":
                 handleEditRfq(rfqData);
                 break;
-            case "save":
-                handleSaveRfq(rfqData);
-                break;
             case "chart":
                 handleChartRfq(rfqData);
                 break;
@@ -654,7 +636,7 @@ export const RfqsApp = () =>
             default:
                 loggerService.logError(`Unknown RFQ action: ${action}`);
         }
-    }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleSaveRfq, handleChartRfq, handleViewRfq, handleWorkflowRfq, loggerService]);
+    }, [handleDeleteRfq, handleCloneRfq, handleEditRfq, handleChartRfq, handleViewRfq, handleWorkflowRfq, loggerService]);
 
     const recalculateRFQ = useCallback(async (rfqData) =>
     {
@@ -719,7 +701,7 @@ export const RfqsApp = () =>
         }
     }, [config, optionPricingService, optionRequestParserService, loggerService, setRfqs, calculateOptionMetrics, calculateDerivedValues]);
 
-    const handleCellValueChanged = useCallback((params) =>
+    const handleCellValueChanged = useCallback(async (params) =>
     {
         const { data: rfqData, colDef, oldValue, newValue } = params;
         const fieldsRequiringRecalculation =
@@ -727,11 +709,14 @@ export const RfqsApp = () =>
             'notionalFXRate', 'interestRate', 'volatility', 'dayCountConvention', 'multiplier',
             'salesCreditPercentage', 'premiumSettlementDaysOverride', 'spread', 'underlyingPrice'
         ];
-        
-        if (fieldsRequiringRecalculation.includes(colDef.field))
-            recalculateRFQ(rfqData).then(() => loggerService.logInfo(`Field ${colDef.field} changed from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId} this will trigger a recalculation.`));
 
-    }, [recalculateRFQ, loggerService]);
+        const updatedRfqData = { ...rfqData, [colDef.field]: newValue };
+        await rfqService.updateRfq(rfqData.rfqId, { [colDef.field]: newValue });
+        loggerService.logInfo(`Successfully saved field ${colDef.field} change from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId}`);
+        if (fieldsRequiringRecalculation.includes(colDef.field))
+            recalculateRFQ(updatedRfqData).then(() => loggerService.logInfo(`Field change triggered a recalculation.`));
+
+    }, [recalculateRFQ, loggerService, rfqService]);
 
     useEffect(() =>
     {

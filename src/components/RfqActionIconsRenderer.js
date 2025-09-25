@@ -2,7 +2,6 @@ import * as React from 'react';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
-import SaveIcon from "@mui/icons-material/Save";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {Tooltip} from "@mui/material";
@@ -15,7 +14,6 @@ const RfqActionIconsRenderer = ({data, context}) =>
         DELETE: 'delete',
         CLONE: 'clone',
         EDIT: 'edit',
-        SAVE: 'save',
         CHART: 'chart',
         VIEW: 'view'
     };
@@ -37,12 +35,6 @@ const RfqActionIconsRenderer = ({data, context}) =>
             <Tooltip title="Open this RFQ request in edit mode. All fields will be editable allowing you to modify the RFQ parameters, pricing, and other details.">
                 <EditIcon 
                     onClick={() => handleRfqAction(ACTIONS.EDIT, data)} 
-                    style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
-                />
-            </Tooltip>
-            <Tooltip title="Save this RFQ request and send it to the RFQ management system (RMS). The RMS will trigger the corresponding internal RFQ workflow.">
-                <SaveIcon 
-                    onClick={() => handleRfqAction(ACTIONS.SAVE, data)} 
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
                 />
             </Tooltip>
