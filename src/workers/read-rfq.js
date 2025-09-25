@@ -11,7 +11,7 @@ const main = async () =>
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.gui.rfq");
+        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.rfq.gui");
         await client.execute(inboundCmd, onAmpsRfqMessage);
         loggerService.logInfo(`RFQ reader web worker connected to AMPS using URL: ${url}`);
     }
