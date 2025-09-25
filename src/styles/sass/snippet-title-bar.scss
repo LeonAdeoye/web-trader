@@ -27,10 +27,10 @@
 
   .snippet-input-container {
     position: absolute;
-    left: 50%;
+    right: 560px;
     top: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
+    transform: translateY(-50%);
+    width: 386px;
     -webkit-app-region: no-drag;
     pointer-events: auto;
     z-index: 1002;
@@ -56,10 +56,9 @@
 
   .snippet-error-container {
     position: absolute;
-    left: 50%;
+    right: 560px;
     top: 100%;
-    transform: translateX(-50%);
-    width: 600px;
+    width: 386px;
     z-index: 1001;
     margin-top: 5px;
     animation: slideDown 0.3s ease-out;
@@ -123,13 +122,15 @@
      // Responsive design for smaller screens
    @media (max-width: 768px) {
      .snippet-input-container {
+       right: 320px;
        width: 90%;
-       max-width: 500px;
+       max-width: 324px;
      }
      
      .snippet-error-container {
+       right: 320px;
        width: 90%;
-       max-width: 500px;
+       max-width: 324px;
        
        .snippet-error-alert {
          max-height: 450px;
@@ -139,13 +140,15 @@
    
    @media (max-width: 480px) {
      .snippet-input-container {
+       right: 280px;
        width: 95%;
-       max-width: 400px;
+       max-width: 260px;
      }
      
      .snippet-error-container {
+       right: 280px;
        width: 95%;
-       max-width: 400px;
+       max-width: 260px;
        
        .snippet-error-alert {
          max-height: 500px;

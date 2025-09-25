@@ -949,7 +949,7 @@ export const RfqsApp = () =>
             onSnippetSubmit={handleSnippetSubmit}
             actionButtonsProps={{ selectedRow: selectedRow, onAction: handleTitleBarAction }} />
 
-        <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 75px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+        <div className="rfqs-app" style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="ag-theme-alpine notional-limits-grid" style={{ height: '100%', width: '100%' }}>
                 <AgGridReact 
                     rowData={rfqs} 
