@@ -14,7 +14,7 @@ const main = async () =>
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        const cmd = new Command("sow_and_subscribe").topic(topicName).filter(filter).filer("/messageType = 'CHILD_ORDER'");
+        const cmd = new Command("sow_and_subscribe").topic(topicName).filter(filter);
         await client.execute(cmd, onAmpsCrossMessage);
         loggerService.logInfo(`Cross reader web worker connected to AMPS using URL: ${url}`);
     }

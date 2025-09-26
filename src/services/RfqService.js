@@ -224,13 +224,6 @@ class RfqService
         return { updatedRfq, workflowEvent };
     }
 
-    async loadRfqs()
-    {
-        // TODO: Implement API call to rfq-service
-        this.loggerService.logInfo('Loading RFQs from backend service...');
-        return this.getAllRfqs();
-    }
-
     async saveRfq(rfqData)
     {
         this.loggerService.logInfo(`Saving RFQ to backend service: ${rfqData.rfqId}`);
