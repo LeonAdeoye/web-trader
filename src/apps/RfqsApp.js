@@ -712,6 +712,7 @@ export const RfqsApp = () =>
 
         const updatedRfqData = { ...rfqData, [colDef.field]: newValue };
         await rfqService.updateRfq(rfqData.rfqId, { [colDef.field]: newValue });
+        await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: "FIELD_CHANGE", userId: ownerId, timestamp: new Date().toISOString(), fieldChanges: [{newValue: newValue, fieldName: colDef.field, oldValue: oldValue, changeType: "UPDATE"}]});
         loggerService.logInfo(`Successfully saved field ${colDef.field} change from ${oldValue} to ${newValue} for RFQ: ${rfqData.rfqId}`);
         if (fieldsRequiringRecalculation.includes(colDef.field))
             recalculateRFQ(updatedRfqData).then(() => loggerService.logInfo(`Field change triggered a recalculation.`));

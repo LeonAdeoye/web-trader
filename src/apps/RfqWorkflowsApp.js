@@ -69,11 +69,15 @@ const RfqWorkflowsApp = () =>
         {
             if (newStatus)
             {
-                const { updatedRfq, workflowEvent } = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
-                setRfqData(updatedRfq);
-                setActivityFeed(prevEvents => [workflowEvent, ...prevEvents]);
-                const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
-                setValidTransitions(transitions);
+                const result = await rfqService.processWorkflowAction(rfqData.rfqId, newStatus, ownerId, newComment);
+                if(result?.updatedRfq && result?.workflowEvent)
+                {
+                    const { updatedRfq, workflowEvent } = result;
+                    setRfqData(updatedRfq);
+                    setActivityFeed(prevEvents => [workflowEvent, ...prevEvents]);
+                    const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
+                    setValidTransitions(transitions);
+                }
             }
             
             if (newAssignee)
@@ -137,14 +141,23 @@ const RfqWorkflowsApp = () =>
 
     const formatActivityMessage = useCallback((event) =>
     {
-        if (event.eventType === 'STATUS_CHANGE')
-            return `Status changed: ${event.fromStatus} → ${event.toStatus}`;
-        else if (event.eventType === 'ASSIGNMENT')
-            return `Assigned RFQ for pricing`;
-        else if (event.eventType === 'COMMENT')
-            return event.comment;
-        else
-            return event.comment || 'Workflow event';
+        switch(event.eventType)
+        {
+            case 'STATUS_CHANGE':
+                return `Status changed: ${event.fromStatus} → ${event.toStatus}`;
+            case 'ASSIGNMENT':
+                return `Assigned RFQ for pricing`;
+            case 'COMMENT':
+                return event.comment;
+            case 'FIELD_CHANGE':
+            {
+                let workflowEvent = "";
+                event.fieldChanges.forEach(field => workflowEvent += `Field ${field.fieldName} changed: ${field.oldValue} → ${field.newValue}`);
+                return workflowEvent
+            }
+            default:
+                return 'Unknown workflow event';
+        }
     }, []);
 
     const canClear = () => !(newStatus || newAssignee || newComment);

@@ -56,11 +56,6 @@ class RfqService
         }
     }
 
-    getAllRfqs()
-    {
-        return Array.from(this.rfqs.values());
-    }
-
     async createRfq(rfqData)
     {
         const rfq =
@@ -101,11 +96,11 @@ class RfqService
 
     async addWorkflowEvent(eventData)
     {
-        this.loggerService.logInfo(`Adding workflow event to backend service for RFQ: ${eventData.rfqId}`);
-        
+        this.loggerService.logInfo(`Adding workflow event to backend service for RFQ: ${JSON.stringify(eventData)}`);
         try
         {
-            const eventPayload = {
+            const eventPayload =
+            {
                 id: eventData.id || crypto.randomUUID(),
                 rfqId: eventData.rfqId,
                 eventType: eventData.eventType,
@@ -114,15 +109,15 @@ class RfqService
                 userId: eventData.userId,
                 timestamp: eventData.timestamp || new Date().toISOString(),
                 comment: eventData.comment,
-                fieldChanges: eventData.fieldChanges || {}
+                fieldChanges: eventData.fieldChanges || []
             };
 
+            this.loggerService.logInfo(`Workflow event payload: ${JSON.stringify(eventPayload)}`);
             const response = await fetch('http://localhost:20020/rfq/workflow/event', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(eventPayload)});
             if (!response.ok)
             {
                 const errorText = await response.text();
                 this.loggerService.logError(`Failed to add workflow event: ${response.status} - ${errorText}`);
-                throw new Error(`Failed to add workflow event: ${response.status} - ${errorText}`);
             }
 
             const addedEvent = await response.json();
@@ -133,7 +128,6 @@ class RfqService
         catch (error)
         {
             this.loggerService.logError(`Error adding workflow event: ${error.message}`);
-            throw error;
         }
     }
 
@@ -181,11 +175,14 @@ class RfqService
         }
     }
 
-    async processWorkflowAction(rfqId, action, userId, comment = null, fieldChanges = {})
+    async processWorkflowAction(rfqId, action, userId, comment = null, fieldChanges = [])
     {
         const rfq = await this.getRfqById(rfqId);
         if (!rfq)
-            throw new Error(`RFQ not found: ${rfqId}`);
+        {
+            this.loggerService.logError(`RFQ not found for processing workflow action: ${rfqId}`);
+            return null;
+        }
 
         let updates = {};
         switch (action)
@@ -250,7 +247,6 @@ class RfqService
         catch (error)
         {
             this.loggerService.logError(`Error saving RFQ: ${error.message}`);
-            throw error;
         }
     }
 
