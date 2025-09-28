@@ -3,6 +3,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {Tooltip} from "@mui/material";
 
@@ -14,6 +15,7 @@ const RfqActionIconsRenderer = ({data, context}) =>
         DELETE: 'delete',
         CLONE: 'clone',
         EDIT: 'edit',
+        STATS: 'stats',
         CHART: 'chart',
         VIEW: 'view'
     };
@@ -38,8 +40,14 @@ const RfqActionIconsRenderer = ({data, context}) =>
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
                 />
             </Tooltip>
-            <Tooltip title="Open option pricing scenario charting dialog. This will allow you to analyze different pricing scenarios, volatility impacts, and Greeks calculations for this RFQ.">
+            <Tooltip title="Open RFQ statistics window.">
                 <BarChartIcon 
+                    onClick={() => handleRfqAction(ACTIONS.STATS, data)} 
+                    style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
+                />
+            </Tooltip>
+            <Tooltip title="Open option pricing scenario charts.">
+                <ShowChartIcon 
                     onClick={() => handleRfqAction(ACTIONS.CHART, data)} 
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
                 />

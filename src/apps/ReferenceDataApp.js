@@ -15,7 +15,7 @@ import {AccountService} from "../services/AccountService";
 import {DeskService} from "../services/DeskService";
 import {ExchangeService} from "../services/ExchangeService";
 import {BookService} from "../services/BookService";
-import { ServiceRegistry } from "../services/ServiceRegistry";
+import {ServiceRegistry} from "../services/ServiceRegistry";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
 
 export const ReferenceDataApp = () =>

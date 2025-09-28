@@ -267,6 +267,13 @@ export const RfqsApp = () =>
         setIsConfigOpen(true);
     }, [setIsConfigOpen]);
 
+    const openStats = useCallback(() =>
+    {
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
+        const launchStatsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-stats?config=${encodedConfig}`, modalFlag: true});
+        launchStatsApp();
+    }, [config]);
+
     const closeConfig = useCallback(() => setIsConfigOpen(false), [setIsConfigOpen]);
     const applyConfig = useCallback(async (newConfig) =>
     {
@@ -578,7 +585,6 @@ export const RfqsApp = () =>
         setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
         loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
     }, [loggerService, setRfqs]);
-
 
     const handleChartRfq = useCallback((rfqData) =>
     {
@@ -927,7 +933,8 @@ export const RfqsApp = () =>
         <SnippetTitleBarComponent 
             title="Request For Quote" 
             windowId={windowId} 
-            addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }} 
+            addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }}
+            showStats={{handler: openStats}}
             showChannel={true}
             showTools={false} 
             showConfig={{ handler: openConfig }} 

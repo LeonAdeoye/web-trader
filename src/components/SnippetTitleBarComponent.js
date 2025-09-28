@@ -7,13 +7,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import RepeatIcon from '@mui/icons-material/Repeat';
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit, actionButtonsProps}) =>
+const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showStats, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit, actionButtonsProps}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -64,9 +65,13 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
     const handleActionClick = (action) =>
     {
         if (actionButtonsProps?.onAction && actionButtonsProps?.selectedRow)
-        {
             actionButtonsProps.onAction(action);
-        }
+    };
+
+    const handleStatsActionClick = () =>
+    {
+        if (actionButtonsProps?.onAction)
+            actionButtonsProps.onAction("stats");
     };
 
     const isActionDisabled = !actionButtonsProps?.selectedRow;
@@ -143,7 +148,15 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                         </IconButton>
                     </Tooltip>
                 )}
-                
+                {showStats && (
+                    <Tooltip title="Open RFQ statistics window.">
+                    <span>
+                        <IconButton className="title-bar-action" onClick={showStats.handler}>
+                            <BarChartIcon style={{height: '24px'}} />
+                        </IconButton>
+                    </span>
+                    </Tooltip>
+                )}
                 {actionButtonsProps && (
                     <>
                         <Tooltip title="Delete this RFQ request completely from the system. This action cannot be undone and will permanently remove the selected RFQ row.">
@@ -155,8 +168,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     style={{ 
                                         cursor: isActionDisabled ? 'not-allowed' : 'pointer',
                                         WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
+                                    }}>
                                     <DeleteIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
@@ -170,8 +182,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     style={{ 
                                         cursor: isActionDisabled ? 'not-allowed' : 'pointer',
                                         WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
+                                    }}>
                                     <FileCopyIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
@@ -185,13 +196,12 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     style={{ 
                                         cursor: isActionDisabled ? 'not-allowed' : 'pointer',
                                         WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
+                                    }}>
                                     <EditIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
                         </Tooltip>
-                        <Tooltip title="Open option pricing scenario charting dialog. This will allow you to analyze different pricing scenarios, volatility impacts, and Greeks calculations for this RFQ.">
+                        <Tooltip title="Open option pricing scenario charts.">
                             <span>
                                 <IconButton 
                                     className="title-bar-action" 
@@ -200,9 +210,8 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     style={{ 
                                         cursor: isActionDisabled ? 'not-allowed' : 'pointer',
                                         WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
-                                    <BarChartIcon style={{height: '24px'}} />
+                                    }}>
+                                    <ShowChartIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
                         </Tooltip>
@@ -215,8 +224,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                                     style={{ 
                                         cursor: isActionDisabled ? 'not-allowed' : 'pointer',
                                         WebkitAppRegion: 'no-drag'
-                                    }}
-                                >
+                                    }}>
                                     <VisibilityIcon style={{height: '24px'}} />
                                 </IconButton>
                             </span>
@@ -244,7 +252,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showChannel
                             ? "Context sharing not enabled."
                             : `Context sharing on the ${titleBarContextShareColour.toUpperCase()} channel.`}>
                         <IconButton className="title-bar-channel" style={{ color: titleBarContextShareColour }}>
-                            <Lan />
+                            <Lan/>
                         </IconButton>
                     </Tooltip>
                 )}

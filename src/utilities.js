@@ -65,13 +65,64 @@ export const formatDate = (date) =>
 {
     if (!(date instanceof Date)) date = new Date(date);
     if (isNaN(date)) return ''; // Handle invalid dates
-
     const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'short' });
     const year = date.getFullYear();
-
     return `${day} ${month} ${year}`;
 }
+
+export const getTodayTradeDateFormat = () =>
+{
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+};
+
+// Status-related utility functions
+export const getStatusColor = (status) =>
+{
+    switch (status?.toUpperCase()) 
+    {
+        case 'PENDING':
+            return '#ffa726'; // Orange
+        case 'ACCEPTED':
+            return '#66bb6a'; // Green
+        case 'REJECTED':
+            return '#ef5350'; // Red
+        case 'PRICING':
+            return '#ab47bc'; // Purple
+        case 'PRICED':
+            return '#42a5f5'; // Blue
+        case 'TRADED_AWAY':
+            return '#ff7043'; // Deep Orange
+        case 'TRADE_COMPLETED':
+            return '#26a69a'; // Teal
+        default:
+            return '#9e9e9e'; // Gray
+    }
+};
+
+export const formatStatus = (status) =>
+{
+    if (!status) return '';
+    return status.replace(/_/g, ' ')
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+};
+
+// Color manipulation utility function
+export const adjustColor = (color, amount) =>
+{
+    const num = parseInt(color.replace("#", ""), 16);
+    const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+    const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+};
 
 export const formatTime = (timeValue) =>
 {

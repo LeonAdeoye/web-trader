@@ -3,7 +3,7 @@ import { LoggerService } from '../services/LoggerService';
 import { ServiceRegistry } from '../services/ServiceRegistry';
 import TitleBarComponent from "../components/TitleBarComponent";
 import {Button, Paper, TextField, Typography, MenuItem, FormControl, InputLabel, Select, Tooltip} from "@mui/material";
-import {formatTimestamp} from "../utilities";
+import {formatTimestamp, getStatusColor} from "../utilities";
 
 const RfqWorkflowsApp = () =>
 {
@@ -113,19 +113,6 @@ const RfqWorkflowsApp = () =>
         setNewComment('');
     }, []);
 
-    const getStatusColor = useCallback((status) =>
-    {
-        switch (status)
-        {
-            case 'PENDING': return '#ffa726';
-            case 'ACCEPTED': return '#66bb6a';
-            case 'PRICING': return '#ab47bc';
-            case 'PRICED': return '#42a5f5';
-            case 'TRADED_AWAY': return '#ff7043';
-            case 'TRADE_COMPLETED': return '#26a69a';
-            default: return '#9e9e9e';
-        }
-    }, []);
 
     const getActivityIcon = useCallback((eventType) =>
     {

@@ -1,6 +1,7 @@
 const { Client, Command } = require('amps');
 const { onAmpsRfqMessage } = require("./message_handler");
 const {LoggerService} = require("../services/LoggerService");
+const {getTodayTradeDateFormat} = require("../utilities");
 let loggerService = new LoggerService("read-rfq.js");
 
 const main = async () =>
@@ -11,7 +12,7 @@ const main = async () =>
         const url = "ws://localhost:9008/amps/json";
         const client = new Client(clientName);
         await client.connect(url);
-        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.rfq.gui").filter("/active = true")
+        const inboundCmd = new Command("sow_and_subscribe").topic("inbound.rfq.gui").filter(`/active = true AND /tradeDate = '${getTodayTradeDateFormat()}'`);
         await client.execute(inboundCmd, onAmpsRfqMessage);
         loggerService.logInfo(`RFQ reader web worker connected to AMPS using URL: ${url}`);
     }
