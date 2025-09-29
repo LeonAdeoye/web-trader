@@ -172,7 +172,7 @@ const TodayStatsComponent = () =>
     return (
         <>
             {renderTodayStatsSummary()}
-            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 73px)', width: '100%' }}>
+            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 71px)', width: '100%' }}>
                 <AgGridReact
                     rowData={todayStatsGridData}
                     columnDefs={todayStatsColumnDefs}
