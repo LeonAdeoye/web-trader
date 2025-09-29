@@ -103,27 +103,27 @@ const InstrumentAnalysisComponent = () =>
     return (
         <>
             <div className="filter-controls">
-                <FormControl size="small">
-                    <InputLabel>Status</InputLabel>
+                <FormControl size="small" style={{ width: '180px', marginLeft: '10px', marginTop: '10px', marginBottom: '10px'}}>
+                    <InputLabel style={{ fontSize: '0.75rem' }}>Status</InputLabel>
                     <Select
                         value={selectedInstrumentStatus}
                         onChange={(e) => setSelectedInstrumentStatus(e.target.value)}
+                        style={{ fontSize: '0.70rem' }}
                         size="small">
                         {statusOptions.map(status => (
-                            <MenuItem key={status} value={status}>{status.replace('_', ' ')}</MenuItem>
+                            <MenuItem key={status} style={{ fontSize: '0.70rem' }} value={status}>{status.replace('_', ' ')}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
             </div>
-            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 80px)', width: '100%' }}>
+            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 55px)', width: '100%' }}>
                 <AgGridReact
                     rowData={instrumentStats}
                     columnDefs={instrumentStatsColumnDefs}
                     rowHeight={22}
                     headerHeight={22}
                     animateRows={true}
-                    defaultColDef={{ resizable: true, sortable: true, filter: true }}
-                />
+                    defaultColDef={{ resizable: true, sortable: true, filter: true }}/>
             </div>
         </>
     );

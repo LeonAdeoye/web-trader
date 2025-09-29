@@ -124,28 +124,27 @@ const DailyTrendsComponent = () =>
     return (
         <>
             <div className="filter-controls">
-                <FormControl size="small">
-                    <InputLabel>Days</InputLabel>
+                <FormControl size="small" style={{ width: '150px', marginLeft: '10px', marginTop: '10px', marginBottom: '10px'}}>
+                    <InputLabel style={{ fontSize: '0.75rem' }}>Days</InputLabel>
                     <Select
                         value={selectedDays}
+                        style={{ fontSize: '0.70rem' }}
                         onChange={(e) => setSelectedDays(e.target.value)}
-                        size="small"
-                    >
-                        <MenuItem value={7}>Last 7 days</MenuItem>
-                        <MenuItem value={14}>Last 14 days</MenuItem>
-                        <MenuItem value={30}>Last 30 days</MenuItem>
+                        size="small">
+                        <MenuItem style={{ fontSize: '0.70rem' }} value={7}>Last 7 days</MenuItem>
+                        <MenuItem style={{ fontSize: '0.70rem' }} value={14}>Last 14 days</MenuItem>
+                        <MenuItem style={{ fontSize: '0.70rem' }} value={30}>Last 30 days</MenuItem>
                     </Select>
                 </FormControl>
             </div>
-            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 80px)', width: '100%' }}>
+            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 55px)', width: '100%' }}>
                 <AgGridReact
                     rowData={dailyStats}
                     columnDefs={dailyStatsColumnDefs}
                     rowHeight={22}
                     headerHeight={22}
                     animateRows={true}
-                    defaultColDef={{ resizable: true, sortable: true, filter: true }}
-                />
+                    defaultColDef={{ resizable: true, sortable: true, filter: true }}/>
             </div>
         </>
     );

@@ -132,7 +132,8 @@ const TodayStatsComponent = () =>
                         <span className="stats-value">{numberFormatter({value: totalSalesCredit})}</span>
                         <div className="stats-label">Total Sales Credit $</div>
                     </div>
-                    {Object.entries(todayStats.statusAggregates || {}).map(([status, aggregate]) => {
+                    {Object.entries(todayStats.statusAggregates || {}).map(([status, aggregate]) =>
+                    {
                         const color = getStatusColor(status);
                         const darkerColor = adjustColor(color, -20);
                         
