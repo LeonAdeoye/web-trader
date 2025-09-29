@@ -120,17 +120,17 @@ const TodayStatsComponent = () =>
         return (
             <div className="stats-summary-card">
                 <div className="stats-grid">
-                    <div className="stats-item">
-                        <span className="stats-value">{todayStats.totalRfqs || 0}</span>
-                        <div className="stats-label">Total RFQs</div>
+                    <div className="stats-item" style={{ width: '88px', flexShrink: 0, fontFamily: 'Arial, sans-serif' }}>
+                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{todayStats.totalRfqs || 0}</span>
+                        <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total RFQs</div>
                     </div>
-                    <div className="stats-item">
-                        <span className="stats-value">{numberFormatter({value: totalNotional})}</span>
-                        <div className="stats-label">Total Notional $</div>
+                    <div className="stats-item" style={{ width: '88px', flexShrink: 0, fontFamily: 'Arial, sans-serif' }}>
+                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{numberFormatter({value: totalNotional})}</span>
+                        <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total Notional $</div>
                     </div>
-                    <div className="stats-item">
-                        <span className="stats-value">{numberFormatter({value: totalSalesCredit})}</span>
-                        <div className="stats-label">Total Sales Credit $</div>
+                    <div className="stats-item" style={{ width: '88px', flexShrink: 0, fontFamily: 'Arial, sans-serif' }}>
+                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{numberFormatter({value: totalSalesCredit})}</span>
+                        <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total Sales Credit $</div>
                     </div>
                     {Object.entries(todayStats.statusAggregates || {}).map(([status, aggregate]) =>
                     {
@@ -142,12 +142,25 @@ const TodayStatsComponent = () =>
                                 background: `linear-gradient(145deg, ${color}, ${darkerColor})`,
                                 color: '#ffffff',
                                 borderRadius: '8px',
-                                boxShadow: '0 6px 12px rgba(0,0,0,0.25), 0 3px 6px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3)',
+                                boxShadow: '0 8px 16px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)',
                                 textShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                                transform: 'translateY(-1px)'
+                                transform: 'translateY(-1px)',
+                                width: '84px',
+                                flexShrink: 0,
+                                fontFamily: 'Arial, sans-serif',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-3px) scale(1.02)';
+                                e.target.style.boxShadow = '0 12px 24px rgba(0,0,0,0.5), 0 6px 12px rgba(0,0,0,0.35), 0 3px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(-1px) scale(1)';
+                                e.target.style.boxShadow = '0 8px 16px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)';
                             }}>
-                                <span className="stats-value" style={{ color: '#ffffff' }}>{aggregate.count || 0}</span>
-                                <div className="stats-label" style={{ color: '#ffffff' }}>{formatStatus(status)}</div>
+                                <span className="stats-value" style={{ color: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: '14px' }}>{aggregate.count || 0}</span>
+                                <div className="stats-label" style={{ color: '#ffffff', fontFamily: 'Arial, sans-serif' }}>{formatStatus(status)}</div>
                             </div>
                         );
                     })}
