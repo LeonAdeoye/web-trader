@@ -59,7 +59,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1.2, py: 0.6 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0.8, py: 0.6 }}>
                     <Typography variant="caption" sx={{ fontSize: '0.68rem' }}>RFQ Settings</Typography>
                     <IconButton size="small" onClick={handleClose} sx={{ color: 'white' }} aria-label="Close settings">
                         <CloseIcon fontSize="small"/>
@@ -70,8 +70,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                 <Box sx={{ px: 2, py: 1, overflow: 'auto' }}>
                     <Grid container spacing={0.6}>
                         <Grid item xs={12}>
-                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Settlement Defaults</Typography>
+                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 0.8, mb: 0.00 }}>
                                 <Box sx={{ px: 1.8 }}>
                                     <Box sx={{ mb: 1 }}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Default Settlement Currency</Typography>
@@ -105,8 +104,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Trading Defaults</Typography>
+                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 0.8, mb: 0.00 }}>
                                 <Box sx={{ px: 1.8 }}>
                                     <Box sx={{ mb: 1 }}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Default Spread</Typography>
@@ -141,8 +139,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Risk Parameters</Typography>
+                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 0.8, mb: 0.00 }}>
                                 <Box sx={{ px: 1.8 }}>
                                     <Box sx={{ mb: 1 }}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Default Volatility %</Typography>
@@ -177,8 +174,7 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Display Settings</Typography>
+                            <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.0, mb: 0.00 }}>
                                 <Box sx={{ px: 1.8 }}>
                                     <Box sx={{ mb: 1 }}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Decimal Precision</Typography>
@@ -200,7 +196,6 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
 
                         <Grid item xs={12}>
                             <Paper variant="outlined" sx={{ backgroundColor: '#2f2f2f', borderColor: 'rgba(255,255,255,0.12)', p: 1.2, mb: 0.05 }}>
-                                <Typography variant="caption" sx={{ fontSize: '0.68rem', opacity: 0.85, display: 'block', mb: 0.6 }}>Option Pricing</Typography>
                                 <Box sx={{ px: 1.8 }}>
                                     <Box sx={{ mb: 1 }}>
                                         <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Default Option Model</Typography>
