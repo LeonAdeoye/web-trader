@@ -102,13 +102,13 @@ const ClientPerformanceComponent = () =>
             <div className="filter-controls">
                 <TextField
                     type="date"
-                    InputProps={{ style: { fontSize: '0.75rem', height: '30px' , marginLeft: '10px', marginTop: '10px', marginBottom: '10px'} }}
+                    InputProps={{ style: { fontSize: '0.75rem', height: '35px' , width: '180px', marginLeft: '10px', marginTop: '10px', marginBottom: '10px'} }}
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value) }
                     size="small"
                     InputLabelProps={{ shrink: true}}/>
             </div>
-            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 52px)', width: '100%' }}>
+            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 57px)', width: '100%' }}>
                 <AgGridReact
                     rowData={clientPercentages}
                     columnDefs={clientPercentagesColumnDefs}

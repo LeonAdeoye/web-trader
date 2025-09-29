@@ -124,7 +124,7 @@ const DailyTrendsComponent = () =>
     return (
         <>
             <div className="filter-controls">
-                <FormControl size="small" style={{ width: '150px', marginLeft: '10px', marginTop: '10px', marginBottom: '10px'}}>
+                <FormControl size="small" style={{ width: '180px', marginLeft: '10px', marginTop: '10px', marginBottom: '10px'}}>
                     <InputLabel style={{ fontSize: '0.75rem' }}>Days</InputLabel>
                     <Select
                         value={selectedDays}

@@ -125,11 +125,11 @@ const TodayStatsComponent = () =>
                         <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total RFQs</div>
                     </div>
                     <div className="stats-item" style={{ width: '88px', flexShrink: 0, fontFamily: 'Arial, sans-serif' }}>
-                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{numberFormatter({value: totalNotional})}</span>
+                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{Math.round(totalNotional).toLocaleString()}</span>
                         <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total Notional $</div>
                     </div>
                     <div className="stats-item" style={{ width: '88px', flexShrink: 0, fontFamily: 'Arial, sans-serif' }}>
-                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{numberFormatter({value: totalSalesCredit})}</span>
+                        <span className="stats-value" style={{ fontFamily: 'Arial, sans-serif' }}>{Math.round(totalSalesCredit).toLocaleString()}</span>
                         <div className="stats-label" style={{ fontFamily: 'Arial, sans-serif' }}>Total Sales Credit $</div>
                     </div>
                     {Object.entries(todayStats.statusAggregates || {}).map(([status, aggregate]) =>
@@ -159,7 +159,7 @@ const TodayStatsComponent = () =>
                                 e.target.style.transform = 'translateY(-1px) scale(1)';
                                 e.target.style.boxShadow = '0 8px 16px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)';
                             }}>
-                                <span className="stats-value" style={{ color: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: '14px' }}>{aggregate.count || 0}</span>
+                                <span className="stats-value" style={{ color: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: '12px' }}>{aggregate.count || 0}</span>
                                 <div className="stats-label" style={{ color: '#ffffff', fontFamily: 'Arial, sans-serif' }}>{formatStatus(status)}</div>
                             </div>
                         );
@@ -172,7 +172,7 @@ const TodayStatsComponent = () =>
     return (
         <>
             {renderTodayStatsSummary()}
-            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 75px)', width: '100%' }}>
+            <div className="ag-theme-alpine" style={{ height: 'calc(100% - 73px)', width: '100%' }}>
                 <AgGridReact
                     rowData={todayStatsGridData}
                     columnDefs={todayStatsColumnDefs}
