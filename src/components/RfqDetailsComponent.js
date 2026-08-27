@@ -11,152 +11,165 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 {
     const [legMetrics, setLegMetrics] = useState(null);
     const [legDerivedValues, setLegDerivedValues] = useState(null);
-    const optionPricingService = new OptionPricingService();
-    const loggerService = useRef(new LoggerService(RfqDetailsComponent.name)).current;
+    const optionPricingService = useMemo(() => new OptionPricingService(), []);
+    const loggerService = useMemo(() => new LoggerService(RfqDetailsComponent.name), []);
     const windowId = useMemo(() => window.command.getWindowId("RFQ Details"), []);
 
-    useEffect(() =>
-    {
+    const buildMetrics = (rfq, leg, greeks) => {
+        const sign = leg.side === 'SELL' ? -1 : 1;
+
+        const shares = leg.quantity * rfq.multiplier;
+        const notionalShares = shares * rfq.underlyingPrice;
+        const notionalInLocal = leg.quantity * rfq.multiplier * leg.strike;
+        const notionalInUSD = notionalInLocal / rfq.notionalFXRate;
+
+        return {
+            spread: rfq.spread,
+            delta: Number(greeks.delta) * sign,
+            gamma: Number(greeks.gamma) * sign,
+            theta: Number(greeks.theta) * sign,
+            vega: Number(greeks.vega) * sign,
+            rho: Number(greeks.rho) * sign,
+            price: Number(greeks.price) * sign,
+            shares,
+            notionalShares,
+            notionalInLocal,
+            notionalInUSD
+        };
+    };
+
+    const buildDerivedValues = (rfq, leg, metrics) => {
+        const { delta, gamma, theta, vega, rho, price, shares, notionalShares, notionalInUSD } = metrics;
+        const { underlyingPrice, notionalFXRate, salesCreditPercentage } = rfq;
+
+        return {
+            deltaShares: delta * shares,
+            deltaNotional: delta * notionalShares,
+            deltaPercent: (delta * 100) / underlyingPrice,
+
+            gammaShares: gamma * shares,
+            gammaNotional: gamma * notionalShares,
+            gammaPercent: (gamma * 100) / underlyingPrice,
+
+            thetaShares: theta * shares,
+            thetaNotional: theta * notionalShares,
+            thetaPercent: (theta * 100) / underlyingPrice,
+
+            vegaShares: vega * shares,
+            vegaNotional: vega * notionalShares,
+            vegaPercent: (vega * 100) / underlyingPrice,
+
+            rhoShares: rho * shares,
+            rhoNotional: rho * notionalShares,
+            rhoPercent: (rho * 100) / underlyingPrice,
+
+            premiumInUSD: price / notionalFXRate,
+            premiumInLocal: price,
+            premiumPercentage: (price * 100) / underlyingPrice,
+
+            salesCreditAmount: (salesCreditPercentage * notionalInUSD) / 100
+        };
+    };
+
+    useEffect(() => {
         if (!rfq?.legs?.length) return;
 
         const leg = rfq.legs[index];
-        const calculateLegMetrics = async () =>
-        {
-            try
-            {
-                const { notionalFXRate = 1, interestRate, volatility, underlyingPrice, spread, multiplier, salesCreditPercentage } = rfq;
-                const { quantity = 1, strike = 100, optionType = 'CALL' } = leg;
-                const isCall = (optionType === 'CALL');
-                const isEuropean = rfq.exerciseType === "EUROPEAN";
-                const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} = await optionPricingService.calculateOptionPrice({
-                    strike, volatility: volatility/100, underlyingPrice, daysToExpiry: rfq.daysToExpiry || 30, interestRate: interestRate/100,
-                    isCall, isEuropean, dayCountConvention: rfq.dayCountConvention || '365'
+
+        const calculate = async () => {
+            try {
+                const greeks = await optionPricingService.calculateOptionPrice({
+                    strike: leg.strike,
+                    volatility: rfq.volatility / 100,
+                    underlyingPrice: rfq.underlyingPrice,
+                    daysToExpiry: rfq.daysToExpiry || 30,
+                    interestRate: rfq.interestRate / 100,
+                    isCall: leg.optionType === 'CALL',
+                    isEuropean: rfq.exerciseType === "EUROPEAN",
+                    dayCountConvention: rfq.dayCountConvention || '365'
                 });
-                const deltaNumber = Number(rawDelta);
-                const gammaNumber = Number(rawGamma);
-                const thetaNumber = Number(rawTheta);
-                const vegaNumber = Number(rawVega);
-                const rhoNumber = Number(rawRho);
-                const shares = quantity * multiplier;
-                const notionalShares = shares * underlyingPrice;
-                const notionalInLocal = quantity * multiplier * strike;
-                const notionalInUSD = notionalInLocal / notionalFXRate;
-                const metrics =
-                {
-                    spread: spread,
-                    delta: deltaNumber * (leg.side === 'SELL' ? -1 : 1),
-                    gamma: gammaNumber * (leg.side === 'SELL' ? -1 : 1),
-                    theta: thetaNumber * (leg.side === 'SELL' ? -1 : 1),
-                    vega: vegaNumber * (leg.side === 'SELL' ? -1 : 1),
-                    rho: rhoNumber * (leg.side === 'SELL' ? -1 : 1),
-                    price: Number(rawPrice) * (leg.side === 'SELL' ? -1 : 1),
-                    shares,
-                    notionalShares,
-                    notionalInLocal,
-                    notionalInUSD
-                };
-                
+
+                const metrics = buildMetrics(rfq, leg, greeks);
+                const derived = buildDerivedValues(rfq, leg, metrics);
+
                 setLegMetrics(metrics);
-                const { delta, gamma, theta, vega, rho, price: optionPrice, shares: legShares, notionalShares: legNotionalShares, notionalInUSD: legNotionalInUSD } = metrics;
-                const salesCreditAmount = (salesCreditPercentage * legNotionalInUSD / 100);
-                const derivedValues =
-                {
-                    deltaShares: delta * legShares,
-                    deltaNotional: delta * legNotionalShares,
-                    deltaPercent: (delta * 100) / underlyingPrice,
-                    gammaShares: gamma * legShares,
-                    gammaNotional: gamma * legNotionalShares,
-                    gammaPercent: (gamma * 100) / underlyingPrice,
-                    thetaShares: theta * legShares,
-                    thetaNotional: theta * legNotionalShares,
-                    thetaPercent: (theta * 100) / underlyingPrice,
-                    vegaShares: vega * legShares,
-                    vegaNotional: vega * legNotionalShares,
-                    vegaPercent: (vega * 100) / underlyingPrice,
-                    rhoShares: rho * legShares,
-                    rhoNotional: rho * legNotionalShares,
-                    rhoPercent: (rho * 100) / underlyingPrice,
-                    premiumInUSD: optionPrice / notionalFXRate,
-                    premiumInLocal: optionPrice,
-                    premiumPercentage: (optionPrice * 100) / underlyingPrice,
-                    salesCreditAmount
-                };
-                setLegDerivedValues(derivedValues);
-            }
-            catch (error)
-            {
-                loggerService.logError('Error calculating leg metrics:', error);
+                setLegDerivedValues(derived);
+            } catch (err) {
+                loggerService.logError("Error calculating leg metrics", err);
             }
         };
 
-        calculateLegMetrics().then(() => loggerService.logInfo("Successfully calculated option prices and greeks."))
+        calculate();
     }, [rfq, index]);
 
-    if (!rfq || !rfq.legs || rfq.legs.length === 0 || legMetrics === null || legDerivedValues === null)
+    if (!rfq?.legs?.length || !legMetrics || !legDerivedValues)
         return <div>No RFQ data available</div>;
 
     const leg = rfq.legs[index];
-    const gridData =
-    [
-        { 
-            field: 'Greek', 
-            delta: (legMetrics.delta * leg.quantity).toFixed(config.decimalPrecision),
-            gamma: (legMetrics.gamma * leg.quantity).toFixed(config.decimalPrecision),
-            theta: (legMetrics.theta * leg.quantity).toFixed(config.decimalPrecision),
-            vega: (legMetrics.vega * leg.quantity).toFixed(config.decimalPrecision),
-            rho: (legMetrics.rho * leg.quantity).toFixed(config.decimalPrecision)
-        },
-        { 
-            field: 'Notional', 
-            delta: legDerivedValues.deltaNotional.toFixed(config.decimalPrecision),
-            gamma: legDerivedValues.gammaNotional.toFixed(config.decimalPrecision),
-            theta: legDerivedValues.thetaNotional.toFixed(config.decimalPrecision),
-            vega: legDerivedValues.vegaNotional.toFixed(config.decimalPrecision),
-            rho: legDerivedValues.rhoNotional.toFixed(config.decimalPrecision)
-        },
-        { 
-            field: 'Percent', 
-            delta: (legDerivedValues.deltaPercent * leg.quantity).toFixed(config.decimalPrecision),
-            gamma: (legDerivedValues.gammaPercent * leg.quantity).toFixed(config.decimalPrecision),
-            theta: (legDerivedValues.thetaPercent * leg.quantity).toFixed(config.decimalPrecision),
-            vega: (legDerivedValues.vegaPercent * leg.quantity).toFixed(config.decimalPrecision),
-            rho: (legDerivedValues.rhoPercent * leg.quantity).toFixed(config.decimalPrecision)
-        },
-        { 
-            field: 'Shares', 
-            delta: legDerivedValues.deltaShares.toFixed(0),
-            gamma: legDerivedValues.gammaShares.toFixed(0),
-            theta: legDerivedValues.thetaShares.toFixed(0),
-            vega: legDerivedValues.vegaShares.toFixed(0),
-            rho: legDerivedValues.rhoShares.toFixed(0)
-        }
-    ];
 
-    const columnDefs =
-    [
-        { 
-            headerName: 'Field', 
-            field: 'field', 
-            width: 100, 
-            pinned: 'left',
-            cellStyle: { 
-                backgroundColor: '#f5f5f5', 
-                fontWeight: 'bold',
-                fontSize: '12px'
+    const gridData = useMemo(() => {
+        if (!legMetrics || !legDerivedValues) return [];
+
+        return [
+            {
+                field: 'Greek',
+                delta: (legMetrics.delta * leg.quantity).toFixed(config.decimalPrecision),
+                gamma: (legMetrics.gamma * leg.quantity).toFixed(config.decimalPrecision),
+                theta: (legMetrics.theta * leg.quantity).toFixed(config.decimalPrecision),
+                vega: (legMetrics.vega * leg.quantity).toFixed(config.decimalPrecision),
+                rho: (legMetrics.rho * leg.quantity).toFixed(config.decimalPrecision)
+            },
+            {
+                field: 'Notional',
+                delta: legDerivedValues.deltaNotional.toFixed(config.decimalPrecision),
+                gamma: legDerivedValues.gammaNotional.toFixed(config.decimalPrecision),
+                theta: legDerivedValues.thetaNotional.toFixed(config.decimalPrecision),
+                vega: legDerivedValues.vegaNotional.toFixed(config.decimalPrecision),
+                rho: legDerivedValues.rhoNotional.toFixed(config.decimalPrecision)
+            },
+            {
+                field: 'Percent',
+                delta: (legDerivedValues.deltaPercent * leg.quantity).toFixed(config.decimalPrecision),
+                gamma: (legDerivedValues.gammaPercent * leg.quantity).toFixed(config.decimalPrecision),
+                theta: (legDerivedValues.thetaPercent * leg.quantity).toFixed(config.decimalPrecision),
+                vega: (legDerivedValues.vegaPercent * leg.quantity).toFixed(config.decimalPrecision),
+                rho: (legDerivedValues.rhoPercent * leg.quantity).toFixed(config.decimalPrecision)
+            },
+            {
+                field: 'Shares',
+                delta: legDerivedValues.deltaShares.toFixed(0),
+                gamma: legDerivedValues.gammaShares.toFixed(0),
+                theta: legDerivedValues.thetaShares.toFixed(0),
+                vega: legDerivedValues.vegaShares.toFixed(0),
+                rho: legDerivedValues.rhoShares.toFixed(0)
             }
-        },
+        ];
+    }, [legMetrics, legDerivedValues, config]);
+
+    const columnDefs = useMemo(() =>
+    [
+        { headerName: 'Field', field: 'field', width: 100, pinned: 'left', cellStyle: { backgroundColor: '#f5f5f5', fontWeight: 'bold', fontSize: '12px' }},
         { headerName: 'Delta', field: 'delta', width: 120 },
         { headerName: 'Gamma', field: 'gamma', width: 120 },
         { headerName: 'Theta', field: 'theta', width: 120 },
         { headerName: 'Vega', field: 'vega', width: 120 },
         { headerName: 'Rho', field: 'rho', width: 120 }
-    ];
+    ], []);
+
+    const maturityDate = useMemo(() => {
+        return formatDate(new Date(leg.maturityDate).toLocaleDateString());
+    }, [leg.maturityDate]);
+
+    const premiumSettlementDate = useMemo(() => {
+        if (!rfq?.premiumSettlementDate) return "";
+        return formatDate(new Date(rfq.premiumSettlementDate).toLocaleDateString());
+    }, [rfq?.premiumSettlementDate]);
 
     const textFields =
     [
         { label: "Arrival Time", value: rfq.arrivalTime || '' },
         { label: "Quantity", value: leg.quantity || '' },
-        { label: "Maturity Date", value: formatDate(new Date(leg.maturityDate).toLocaleDateString()) },
+        { label: "Maturity Date", value: maturityDate },
         { label: "Days To Expiry", value: leg.daysToExpiry || '' },
         { label: "RFQ ID", value: rfq.rfqId || '' },
         { label: "Status", value: rfq.status || '' },
@@ -178,7 +191,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         { label: "Bid Premium", value: (legMetrics.price - legMetrics.spread/2).toFixed(config.decimalPrecision) || '' },
         { label: "Premium Percentage", value: legDerivedValues.premiumPercentage.toFixed(config.decimalPrecision) || '' },
         { label: "Premium Settlement Currency", value: rfq.premiumSettlementCurrency || '' },
-        { label: "Premium Settlement Date", value: formatDate(new Date(rfq.premiumSettlementDate).toLocaleDateString())},
+        { label: "Premium Settlement Date", value: premiumSettlementDate},
         { label: "Premium Settlement Days Override", value: rfq.premiumSettlementDaysOverride || '' },
         { label: "Premium Settlement FX Rate", value: rfq.premiumSettlementFXRate || '' },
         { label: "Sales Credit Amount", value: legDerivedValues.salesCreditAmount.toFixed(config.decimalPrecision) || '' },
