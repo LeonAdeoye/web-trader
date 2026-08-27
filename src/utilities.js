@@ -330,3 +330,9 @@ export const formatTimestamp = (timestamp) =>
         const seconds = date.getSeconds().toString().padStart(2, '0');
         return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
 }
+
+export const formatSettlementType = value => {
+    const num = value.split('_').pop();
+    const map = { ZERO: 0, ONE: 1, TWO: 2, THREE: 3 };
+    return `T+${map[num]}`;
+};

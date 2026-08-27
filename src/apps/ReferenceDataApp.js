@@ -17,6 +17,7 @@ import {ExchangeService} from "../services/ExchangeService";
 import {BookService} from "../services/BookService";
 import {ServiceRegistry} from "../services/ServiceRegistry";
 import ActionIconsRenderer from "../components/ActionIconsRenderer";
+import {formatSettlementType} from "../utilities";
 
 export const ReferenceDataApp = () =>
 {
@@ -399,6 +400,7 @@ export const ReferenceDataApp = () =>
             headerName: 'Settlement Type',
             field: 'settlementType',
             width: 125,
+            valueFormatter: params => formatSettlementType(params.value),
             headerTooltip: 'Settlement Type',
             sortable: true,
             filter: true,
