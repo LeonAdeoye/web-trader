@@ -4,8 +4,10 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { OptionPricingService } from '../services/OptionPricingService';
-import {LoggerService} from "../services/LoggerService";
-import {formatDate} from "../utilities";
+import { LoggerService } from "../services/LoggerService";
+import { formatDate } from "../utilities";
+import { buildMetrics } from "../calculations/buildMetrics";
+import { buildDerivedValues } from "../calculations/buidDerivedValues";
 
 export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 {
@@ -14,62 +16,6 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
     const optionPricingService = useMemo(() => new OptionPricingService(), []);
     const loggerService = useMemo(() => new LoggerService(RfqDetailsComponent.name), []);
     const windowId = useMemo(() => window.command.getWindowId("RFQ Details"), []);
-
-    const buildMetrics = (rfq, leg, greeks) => {
-        const sign = leg.side === 'SELL' ? -1 : 1;
-
-        const shares = leg.quantity * rfq.multiplier;
-        const notionalShares = shares * rfq.underlyingPrice;
-        const notionalInLocal = leg.quantity * rfq.multiplier * leg.strike;
-        const notionalInUSD = notionalInLocal / rfq.notionalFXRate;
-
-        return {
-            spread: rfq.spread,
-            delta: Number(greeks.delta) * sign,
-            gamma: Number(greeks.gamma) * sign,
-            theta: Number(greeks.theta) * sign,
-            vega: Number(greeks.vega) * sign,
-            rho: Number(greeks.rho) * sign,
-            price: Number(greeks.price) * sign,
-            shares,
-            notionalShares,
-            notionalInLocal,
-            notionalInUSD
-        };
-    };
-
-    const buildDerivedValues = (rfq, leg, metrics) => {
-        const { delta, gamma, theta, vega, rho, price, shares, notionalShares, notionalInUSD } = metrics;
-        const { underlyingPrice, notionalFXRate, salesCreditPercentage } = rfq;
-
-        return {
-            deltaShares: delta * shares,
-            deltaNotional: delta * notionalShares,
-            deltaPercent: (delta * 100) / underlyingPrice,
-
-            gammaShares: gamma * shares,
-            gammaNotional: gamma * notionalShares,
-            gammaPercent: (gamma * 100) / underlyingPrice,
-
-            thetaShares: theta * shares,
-            thetaNotional: theta * notionalShares,
-            thetaPercent: (theta * 100) / underlyingPrice,
-
-            vegaShares: vega * shares,
-            vegaNotional: vega * notionalShares,
-            vegaPercent: (vega * 100) / underlyingPrice,
-
-            rhoShares: rho * shares,
-            rhoNotional: rho * notionalShares,
-            rhoPercent: (rho * 100) / underlyingPrice,
-
-            premiumInUSD: price / notionalFXRate,
-            premiumInLocal: price,
-            premiumPercentage: (price * 100) / underlyingPrice,
-
-            salesCreditAmount: (salesCreditPercentage * notionalInUSD) / 100
-        };
-    };
 
     useEffect(() => {
         if (!rfq?.legs?.length) return;
