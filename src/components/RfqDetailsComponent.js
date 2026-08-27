@@ -17,8 +17,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
 
     useEffect(() =>
     {
-        if (!rfq || !rfq.legs || rfq.legs.length === 0)
-            return;
+        if (!rfq?.legs?.length) return;
 
         const leg = rfq.legs[index];
         const calculateLegMetrics = async () =>
