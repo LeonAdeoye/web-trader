@@ -1,15 +1,105 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { LoggerService } from '../services/LoggerService';
-import { useRef } from 'react';
+import { OptionPricingService } from '../services/OptionPricingService';
 import TitleBarComponent from "../components/TitleBarComponent";
-import {RfqDetailsComponent} from "../components/RfqDetailsComponent";
+import { RfqDetailsComponent } from "../components/RfqDetailsComponent";
+import { useRfqAllLegCalculations } from '../hooks/useRfqAllLegCalculations';
+
+const RfqDetailsContent = ({ rfq, config, editable, windowId }) =>
+{
+    const loggerService = useRef(new LoggerService(RfqDetailsApp.name)).current;
+    const optionPricingService = useMemo(() => new OptionPricingService(), []);
+    const [activeTab, setActiveTab] = useState(0);
+    const hasSummaryTab = rfq.legs.length > 1;
+    const { legResults, summary, loading } = useRfqAllLegCalculations(rfq, optionPricingService, loggerService, config);
+
+    const getLegTabIndex = (legIndex) => hasSummaryTab ? legIndex + 1 : legIndex;
+
+    return (
+        <>
+            <TitleBarComponent
+                title={`Request For Quote Details (${rfq.request})`}
+                windowId={windowId}
+                addButtonProps={undefined}
+                showChannel={false}
+                showTools={false}/>
+
+            <div className="rfq-details-app" style={{
+                width: '100%',
+                height: 'calc(100vh - 65px)',
+                float: 'left',
+                padding: '0px',
+                margin: '45px 0px 0px 0px'
+            }}>
+                <div className="rfq-details-tab-container">
+                    <div className="rfq-details-tab-list">
+                        {hasSummaryTab && (
+                            <button
+                                onClick={() => setActiveTab(0)}
+                                className={`rfq-details-leg-tab ${activeTab === 0 ? 'selected' : ''}`}
+                                title="Summary across all legs">
+                                <div className="leg-content">
+                                    <div className="leg-badges">
+                                        <span className="summary-tab-badge">SUMMARY</span>
+                                    </div>
+                                </div>
+                            </button>
+                        )}
+                        {rfq.legs.map((leg, legIndex) => (
+                            <button
+                                key={legIndex}
+                                onClick={() => setActiveTab(getLegTabIndex(legIndex))}
+                                className={`rfq-details-leg-tab ${activeTab === getLegTabIndex(legIndex) ? 'selected' : ''}`}
+                                title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}>
+                                <div className="leg-content">
+                                    <span className="leg-id">{leg.legId}</span>
+                                    <div className="leg-badges">
+                                        <span className={`option-type-badge ${leg.optionType.toLowerCase()}`}>
+                                            {leg.optionType}
+                                        </span>
+                                        <span className={`side-badge ${leg.side.toLowerCase()}`}>
+                                            {leg.side}
+                                        </span>
+                                    </div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="rfq-details-content">
+                    {hasSummaryTab && (
+                        <div style={{ display: activeTab === 0 ? 'block' : 'none', height: '100%' }}>
+                            <RfqDetailsComponent
+                                rfq={rfq}
+                                editable={editable}
+                                mode="summary"
+                                legResults={legResults}
+                                summary={summary}
+                                loading={loading}
+                                config={config}/>
+                        </div>
+                    )}
+                    {rfq.legs.map((leg, legIndex) => (
+                        <div key={legIndex} style={{ display: activeTab === getLegTabIndex(legIndex) ? 'block' : 'none', height: '100%' }}>
+                            <RfqDetailsComponent
+                                rfq={rfq}
+                                editable={editable}
+                                mode="leg"
+                                legResult={legResults?.[legIndex]}
+                                loading={loading}
+                                config={config}/>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </>
+    );
+};
 
 const RfqDetailsApp = () =>
 {
     const windowId = window.command.getWindowId("rfq-details");
     const loggerService = useRef(new LoggerService(RfqDetailsApp.name)).current;
-    const [activeTab, setActiveTab] = useState(0);
-    const handleTabChange = (event, newValue) => setActiveTab(newValue);
     const urlParams = new URLSearchParams(window.location.search);
     const rfqDataParam = urlParams.get('rfqData');
     const editable = urlParams.get('editable');
@@ -17,58 +107,12 @@ const RfqDetailsApp = () =>
 
     if (rfqDataParam)
     {
-        try {
+        try
+        {
             const rfq = JSON.parse(decodeURIComponent(rfqDataParam));
             const config = JSON.parse(decodeURIComponent(configParam));
             return (
-                <>
-                    <TitleBarComponent
-                        title={`Request For Quote Details (${rfq.request})`}
-                        windowId={windowId}
-                        addButtonProps={undefined}
-                        showChannel={false}
-                        showTools={false}/>
-
-                    <div className="rfq-details-app" style={{
-                        width: '100%',
-                        height: 'calc(100vh - 65px)',
-                        float: 'left',
-                        padding: '0px',
-                        margin: '45px 0px 0px 0px'
-                    }}>
-                        <div className="rfq-details-tab-container">
-                            <div className="rfq-details-tab-list">
-                                {rfq.legs.map((leg, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleTabChange(null, index)}
-                                        className={`rfq-details-leg-tab ${activeTab === index ? 'selected' : ''}`}
-                                        title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}>
-                                        <div className="leg-content">
-                                            <span className="leg-id">{leg.legId}</span>
-                                            <div className="leg-badges">
-                                                <span className={`option-type-badge ${leg.optionType.toLowerCase()}`}>
-                                                    {leg.optionType}
-                                                </span>
-                                                <span className={`side-badge ${leg.side.toLowerCase()}`}>
-                                                    {leg.side}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="rfq-details-content">
-                            {rfq.legs.map((leg, index) =>
-                            (
-                                <div key={index} style={{ display: activeTab === index ? 'block' : 'none', height: '100%' }}>
-                                    <RfqDetailsComponent rfq={rfq} editable={editable} index={index} config={config}/>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </>
+                <RfqDetailsContent rfq={rfq} config={config} editable={editable} windowId={windowId}/>
             );
         }
         catch (error)
