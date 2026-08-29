@@ -190,6 +190,20 @@ export const RfqsConfigPanel = ({ isOpen, config, onClose, onApply }) =>
                                                 '& .MuiOutlinedInput-root': { height: 18, borderRadius: 1 } 
                                             }}/>
                                     </Box>
+                                    <Box sx={{ mb: 0 }}>
+                                        <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.68rem' }}>Recalculation Period (seconds)</Typography>
+                                        <TextField 
+                                            size="small" 
+                                            fullWidth 
+                                            type="number"
+                                            value={tempConfig.recalculationPeriodSeconds ?? 30}
+                                            onChange={(e) => handleInputChange('recalculationPeriodSeconds', parseInt(e.target.value) || 30)}
+                                            inputProps={{ min: 1, style: { padding: '0 4px', height: 16, fontSize: '0.6rem' } }}
+                                            sx={{ 
+                                                '& .MuiInputBase-input': { fontSize: '0.6rem', lineHeight: '16px', padding: '0 4px', height: 16 }, 
+                                                '& .MuiOutlinedInput-root': { height: 18, borderRadius: 1 } 
+                                            }}/>
+                                    </Box>
                                 </Box>
                             </Paper>
                         </Grid>

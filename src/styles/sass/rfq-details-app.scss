@@ -117,4 +117,20 @@
     height: calc(100% - 80px);
     overflow: auto;
   }
+
+  .rfq-details-field-changed {
+    .MuiInputBase-root {
+      animation: rfq-details-cell-flash 2s ease-out;
+    }
+  }
+}
+
+@keyframes rfq-details-cell-flash {
+  0% {
+    background-color: #a5d6a7;
+  }
+
+  100% {
+    background-color: transparent;
+  }
 }

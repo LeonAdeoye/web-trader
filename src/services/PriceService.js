@@ -29,10 +29,9 @@ export class PriceService
         }
     }
 
-    loadPrices = async () =>
+    loadPrices = async (forceReload = false) =>
     {
-        // Check if we already have cached data
-        if (this.#prices && this.#prices.length > 0)
+        if (!forceReload && this.#prices && this.#prices.length > 0)
         {
             this.#loggerService.logInfo(`Using cached price data (${this.#prices.length} records)`);
             return this.#prices;
@@ -58,18 +57,24 @@ export class PriceService
             else
             {
                 this.#loggerService.logError(`Failed to load prices: ${response.status}`);
-                // Set empty array if service fails
-                this.#prices = [];
             }
         }
         catch (error)
         {
             this.#loggerService.logError(`Error loading prices: ${error}`);
-            // Set empty array if service fails
-            this.#prices = [];
         }
 
-        return this.#prices;
+        return this.#prices ?? [];
+    }
+
+    async refreshPrices()
+    {
+        return this.loadPrices(true);
+    }
+
+    clearPriceCache()
+    {
+        this.#prices = null;
     }
 
     updatePrice = async (instrumentCode, closePrice, openPrice, lastUpdatedBy) =>
@@ -94,14 +99,11 @@ export class PriceService
                 const updatedPrice = await response.json();
                 this.#loggerService.logInfo(`Successfully updated price for ${instrumentCode}: ${JSON.stringify(updatedPrice)}`);
                 
-                // Update local data
                 if (this.#prices)
                 {
                     const index = this.#prices.findIndex(p => p.instrumentCode === instrumentCode);
                     if (index !== -1)
-                    {
                         this.#prices[index] = updatedPrice;
-                    }
                 }
                 
                 return updatedPrice;
@@ -143,3 +145,12 @@ export class PriceService
         return defaultPrices;
     }
 }
+
+export const refreshPriceData = async (priceService) =>
+{
+    const service = priceService?.loadPrices ? priceService : null;
+    if (!service)
+        return;
+
+    return service.loadPrices(true);
+};

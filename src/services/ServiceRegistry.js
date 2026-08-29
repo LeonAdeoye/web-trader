@@ -34,7 +34,17 @@ class ServiceRegistry
 
     static getPriceService()
     {
-        return this.getService(PriceService);
+        const serviceName = PriceService.name;
+        const service = this.#services.get(serviceName);
+
+        if (!service || typeof service.loadPrices !== 'function' || typeof service.clearPriceCache !== 'function')
+        {
+            const freshService = new PriceService();
+            this.#services.set(serviceName, freshService);
+            return freshService;
+        }
+
+        return service;
     }
 
     static getRateService()

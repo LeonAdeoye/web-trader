@@ -1,48 +1,74 @@
-import { useEffect, useMemo, useState } from 'react';
-import { aggregateLegResults, buildLegResult, getOptionPricingParams } from '../calculations/rfqDetailsViewModel';
+import { useEffect, useRef, useState } from 'react';
+import { calculateRfqOptionMetrics } from '../calculations/calculateRfqOptionMetrics';
+import { aggregateLegResults } from '../calculations/rfqDetailsViewModel';
+import { useLiveRfqPricingInputs } from './useLiveRfqPricingInputs';
+import { ServiceRegistry } from '../services/ServiceRegistry';
 
-export const useRfqAllLegCalculations = (rfq, optionPricingService, loggerService, config) =>
+export const useRfqAllLegCalculations = (rfq, optionPricingService, loggerService, config, optionRequestParserService) =>
 {
+    const { pricedRfq, refreshTick } = useLiveRfqPricingInputs(rfq, optionRequestParserService, config);
+    const pricedRfqRef = useRef(pricedRfq);
+    pricedRfqRef.current = pricedRfq;
+
     const [legResults, setLegResults] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [summary, setSummary] = useState(null);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const hasResultsRef = useRef(false);
 
     useEffect(() =>
     {
-        if (!rfq?.legs?.length)
+        hasResultsRef.current = false;
+        setLegResults(null);
+        setSummary(null);
+        setInitialLoading(true);
+    }, [rfq?.rfqId]);
+
+    useEffect(() =>
+    {
+        const rfqToCalculate = pricedRfqRef.current;
+
+        if (!rfqToCalculate?.legs?.length)
         {
-            setLegResults(null);
-            setLoading(false);
+            if (!hasResultsRef.current)
+            {
+                setLegResults(null);
+                setSummary(null);
+                setInitialLoading(false);
+            }
             return;
         }
 
         let cancelled = false;
+        const isInitialLoad = !hasResultsRef.current;
 
         const calculate = async () =>
         {
-            setLoading(true);
+            if (isInitialLoad)
+                setInitialLoading(true);
 
             try
             {
-                const results = await Promise.all(rfq.legs.map(async (leg) =>
-                {
-                    const greeks = await optionPricingService.calculateOptionPrice(getOptionPricingParams(rfq, leg, config));
-                    return buildLegResult(rfq, leg, greeks);
-                }));
+                const result = await calculateRfqOptionMetrics(rfqToCalculate, config, {
+                    optionPricingService,
+                    optionRequestParserService,
+                    priceService: ServiceRegistry.getPriceService()
+                });
 
-                if (!cancelled)
-                    setLegResults(results);
+                if (!cancelled && result)
+                {
+                    hasResultsRef.current = true;
+                    setLegResults(result.legResults);
+                    setSummary(aggregateLegResults(result.legResults));
+                }
             }
             catch (err)
             {
                 loggerService.logError("Error calculating leg metrics", err);
-
-                if (!cancelled)
-                    setLegResults(null);
             }
             finally
             {
-                if (!cancelled)
-                    setLoading(false);
+                if (!cancelled && isInitialLoad)
+                    setInitialLoading(false);
             }
         };
 
@@ -52,11 +78,18 @@ export const useRfqAllLegCalculations = (rfq, optionPricingService, loggerServic
         {
             cancelled = true;
         };
-    }, [rfq, optionPricingService, loggerService, config]);
+    }, [
+        refreshTick,
+        rfq?.rfqId,
+        config.decimalPrecision,
+        config.defaultOptionModel,
+        config.defaultSpread,
+        config.defaultSalesCreditPercentage,
+        config.defaultDayConvention,
+        optionPricingService,
+        loggerService,
+        optionRequestParserService
+    ]);
 
-    const summary = useMemo(() =>
-        legResults ? aggregateLegResults(legResults) : null,
-    [legResults]);
-
-    return { legResults, summary, loading };
+    return { legResults, summary, initialLoading, pricedRfq };
 };

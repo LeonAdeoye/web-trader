@@ -17,6 +17,8 @@ import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
 import { ServiceRegistry } from '../services/ServiceRegistry';
+import { calculateRfqOptionMetrics, buildRfqPricingFieldUpdates, getRfqRecalculationIntervalMs } from '../calculations/calculateRfqOptionMetrics';
+import { DEFAULT_RFQ_APP_CONFIG, normalizeRfqAppConfig, RFQ_CONFIG_NUMERIC_KEYS } from '../config/rfqAppConfig';
 import CalculationTooltipCellRenderer from "../components/CalculationTooltipCellRenderer";
 import {
     NOTIONAL_USD_HEADER_TOOLTIP,
@@ -105,16 +107,7 @@ export const RfqsApp = () =>
     const [statusEnums, setStatusEnums] = useState([]);
     const [hedgeTypeEnums, setHedgeTypeEnums] = useState([]);
     const [exerciseType] = useState('EUROPEAN');
-    const [config, setConfig] = useState({
-        defaultSettlementCurrency: 'USD',
-        defaultSettlementDays: 2,
-        decimalPrecision: 3,
-        defaultSpread: 1,
-        defaultSalesCreditPercentage: 0.5,
-        defaultVolatility: 20,
-        defaultDayConvention: 250,
-        defaultOptionModel: 'european'
-    });
+    const [config, setConfig] = useState(DEFAULT_RFQ_APP_CONFIG);
     const [selectedRFQ, setSelectedRFQ] = useState({
         rfqId: '',
         client: '',
@@ -136,7 +129,8 @@ export const RfqsApp = () =>
         'rfq_defaultSalesCreditPercentage',
         'rfq_defaultVolatility',
         'rfq_defaultDayConvention',
-        'rfq_defaultOptionModel'
+        'rfq_defaultOptionModel',
+        'rfq_recalculationPeriodSeconds'
     ];
 
     useEffect(() =>
@@ -166,14 +160,14 @@ export const RfqsApp = () =>
                     if (config.key && config.value !== null) 
                     {
                         const localKey = config.key.replace('rfq_', '');
-                        if (['defaultSettlementDays', 'decimalPrecision', 'defaultSpread', 'defaultSalesCreditPercentage', 'defaultVolatility', 'defaultDayConvention'].includes(localKey)) 
+                        if (RFQ_CONFIG_NUMERIC_KEYS.includes(localKey))
                             loadedConfig[localKey] = parseFloat(config.value);
-                        else 
+                        else
                             loadedConfig[localKey] = config.value;
                     }
                 });
 
-                setConfig(prevConfig => ({...prevConfig, ...loadedConfig}));
+                setConfig(prevConfig => normalizeRfqAppConfig({ ...prevConfig, ...loadedConfig }));
                 loggerService.logInfo(`Loaded RFQ configuration for owner: ${ownerId}`, loadedConfig);
             } 
             else
@@ -332,153 +326,28 @@ export const RfqsApp = () =>
     {
         try 
         {
-            setConfig(newConfig);
+            const normalizedConfig = normalizeRfqAppConfig(newConfig);
+            setConfig(normalizedConfig);
             setIsConfigOpen(false);
             const rfqConfigToSave = {};
             RFQ_CONFIG_KEYS.forEach(key =>
             {
                 const localKey = key.replace('rfq_', '');
-                if (newConfig[localKey] !== undefined)
-                    rfqConfigToSave[key] = newConfig[localKey];
+                if (normalizedConfig[localKey] !== undefined)
+                    rfqConfigToSave[key] = normalizedConfig[localKey];
             });
 
             await configurationService.saveOrUpdateConfigurations(ownerId, rfqConfigToSave);
             loggerService.logInfo(`Successfully applied RFQ configuration for owner: ${ownerId}`, rfqConfigToSave);
+
+            if (window.rfqConfig?.broadcast)
+                window.rfqConfig.broadcast(normalizedConfig);
         } 
         catch (error) 
         {
             loggerService.logError(`Failed to apply configuration: ${error.message}`);
         }
     }, [setIsConfigOpen, configurationService, ownerId, loggerService]);
-
-    const calculateOptionMetrics = useCallback(async (rfqData) =>
-    {
-        const { dayCountConvention, multiplier, legs } = rfqData;
-        if (!legs || legs.length === 0)
-            return null;
-        
-        let daysToExpiry = optionRequestParserService.calculateBusinessDaysToExpiry(new Date(), new Date(rfqData.maturityDate));
-        const isEuropean = rfqData.exerciseType === "EUROPEAN";
-        let totalDelta = 0;
-        let totalGamma = 0;
-        let totalTheta = 0;
-        let totalVega = 0;
-        let totalRho = 0;
-        let totalPrice = 0;
-        let totalShares = 0;
-        let totalNotionalShares = 0;
-        let totalNotionalInLocal = 0;
-        let totalNotionalInUSD = 0.0;
-
-        for (const leg of legs)
-        {
-            const {quantity, strike, optionType, } = leg;
-            const {volatility, interestRate, underlyingPrice} = rfqData;
-            const isCall = (optionType === 'CALL');
-
-            const {delta: rawDelta, gamma: rawGamma, theta: rawTheta, rho: rawRho, vega: rawVega, price: rawPrice} =
-                await optionPricingService.calculateOptionPrice({strike , volatility: volatility/100, underlyingPrice, daysToExpiry,
-                interestRate: interestRate/100, isCall, isEuropean, dayCountConvention, modelType: config.defaultOptionModel });
-            
-            const deltaNumber = rawDelta;
-            const gammaNumber = rawGamma;
-            const thetaNumber = rawTheta;
-            const vegaNumber = rawVega;
-            const rhoNumber = rawRho;
-            const priceNumber = rawPrice;
-            const legShares = quantity * multiplier;
-            const legNotionalShares = legShares * underlyingPrice;
-            const legNotionalInLocal = quantity * multiplier * strike;
-            const sideMultiplier = (leg.side === 'SELL' ? -1 : 1);
-            
-            totalDelta += deltaNumber * quantity * sideMultiplier;
-            totalGamma += gammaNumber * quantity * sideMultiplier;
-            totalTheta += thetaNumber * quantity * sideMultiplier;
-            totalVega += vegaNumber * quantity * sideMultiplier;
-            totalRho += rhoNumber * quantity * sideMultiplier;
-            totalPrice += priceNumber * quantity * sideMultiplier;
-            totalShares += legShares;
-            totalNotionalShares += legNotionalShares;
-            totalNotionalInLocal += legNotionalInLocal;
-            totalNotionalInUSD += rfqData.notionalFXRate > 0 ? (legNotionalInLocal/rfqData.notionalFXRate) : rfqData.notionalFXRate
-        }
-        
-        return {
-            notionalInLocal: totalNotionalInLocal,
-            notionalInUSD: totalNotionalInUSD,
-            daysToExpiry,
-            price: totalPrice,
-            deltaNumber: totalDelta,
-            gammaNumber: totalGamma,
-            thetaNumber: totalTheta,
-            vegaNumber: totalVega,
-            rhoNumber: totalRho,
-            shares: totalShares,
-            notionalShares: totalNotionalShares
-        };
-    }, [config, optionPricingService]);
-
-    const calculateDerivedValues = useCallback((metrics, rfqData) =>
-    {
-        const { notionalInUSD, price, deltaNumber, gammaNumber, thetaNumber, vegaNumber, rhoNumber} = metrics;
-        const { underlying, spread, notionalFXRate, multiplier = 100, legs } = rfqData;
-        const salesCreditPercentage = rfqData.salesCreditPercentage || config.defaultSalesCreditPercentage;
-        const legUnderlyingPrice = priceService.getLastTradePrice(underlying);
-
-        let weightedVolatility = 0;
-        let weightedInterestRate = 0;
-        let totalWeight = 0;
-
-        for (const leg of legs)
-        {
-            const legWeight = leg.quantity * multiplier;
-            weightedVolatility += leg.volatility * legWeight;
-            weightedInterestRate += leg.interestRate * legWeight;
-            totalWeight += legWeight;
-        }
-        
-        const avgVolatility = totalWeight > 0 ? weightedVolatility / totalWeight : 0;
-        const askPremium = (price + spread/2);
-        const bidPremium = (price - spread/2);
-        const salesCreditAmount = (salesCreditPercentage * notionalInUSD / 100).toFixed(config.decimalPrecision);
-        
-        return {
-            askPremium: askPremium.toFixed(config.decimalPrecision),
-            bidPremium: bidPremium.toFixed(config.decimalPrecision),
-            salesCreditPercentage,
-            salesCreditAmount,
-            askImpliedVol: (avgVolatility / 100),
-            impliedVol: (avgVolatility / 100),
-            bidImpliedVol: (avgVolatility / 100),
-            premiumInUSD: (price / notionalFXRate).toFixed(config.decimalPrecision),
-            premiumInLocal: price.toFixed(config.decimalPrecision),
-            askPremiumInLocal: askPremium.toFixed(config.decimalPrecision),
-            bidPremiumInLocal: bidPremium.toFixed(config.decimalPrecision),
-            askPremiumPercentage: ((askPremium * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            premiumPercentage: ((price * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            bidPremiumPercentage: ((bidPremium * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            deltaShares: (deltaNumber * multiplier).toFixed(config.decimalPrecision),
-            deltaNotional: (deltaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
-            delta: deltaNumber.toFixed(config.decimalPrecision),
-            deltaPercent: ((deltaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            gammaShares: (gammaNumber * multiplier).toFixed(config.decimalPrecision),
-            gammaNotional: (gammaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
-            gamma: gammaNumber.toFixed(config.decimalPrecision),
-            gammaPercent: ((gammaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            thetaShares: (thetaNumber * multiplier).toFixed(config.decimalPrecision),
-            thetaNotional: (thetaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
-            theta: thetaNumber.toFixed(config.decimalPrecision),
-            thetaPercent: ((thetaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            vegaShares: (vegaNumber * multiplier).toFixed(config.decimalPrecision),
-            vegaNotional: (vegaNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
-            vega: vegaNumber.toFixed(config.decimalPrecision),
-            vegaPercent: ((vegaNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision),
-            rhoShares: (rhoNumber * multiplier).toFixed(config.decimalPrecision),
-            rhoNotional: (rhoNumber * multiplier * legUnderlyingPrice).toFixed(config.decimalPrecision),
-            rho: rhoNumber.toFixed(config.decimalPrecision),
-            rhoPercent: ((rhoNumber * 100) / legUnderlyingPrice).toFixed(config.decimalPrecision)
-        };
-    }, [config, priceService]);
 
     const createRFQFromOptions = useCallback(async (snippet, parsedOptions) =>
     {
@@ -503,14 +372,16 @@ export const RfqsApp = () =>
             maturityDate: parsedOptions[0].maturityDate,
             legs: parsedOptions
         };
-        
-        const metrics = await calculateOptionMetrics(rfqData);
-        if (!metrics)
+
+        const pricingResult = await calculateRfqOptionMetrics(rfqData, config, {
+            optionPricingService,
+            optionRequestParserService,
+            priceService: ServiceRegistry.getPriceService()
+        });
+        if (!pricingResult)
             throw new Error("Failed to calculate option metrics");
-        
-        const derivedValues = calculateDerivedValues(metrics, rfqData);
-        if (!derivedValues)
-            throw new Error("Failed to calculate derived values");
+
+        const fieldUpdates = buildRfqPricingFieldUpdates(pricingResult, config, optionRequestParserService);
 
         const rfq =
         {
@@ -518,13 +389,10 @@ export const RfqsApp = () =>
             rfqId: crypto.randomUUID(),
             underlying: rfqData.underlying,
             strike: [...new Set(strikeArray)].length === 1 ? strikeArray[0] : strikeArray.join(', '),
-            underlyingPrice: rfqData.underlyingPrice,
             request: snippet,
             client:  'Select Client',
             status: 'PENDING',
             bookCode: 'Select Book',
-            notionalInUSD: metrics.notionalInUSD.toFixed(config.decimalPrecision),
-            notionalInLocal: metrics.notionalInLocal,
             notionalCurrency: rfqData.currency,
             notionalFXRate: rfqData.notionalFXRate,
             volatility: rfqData.volatility,
@@ -533,52 +401,20 @@ export const RfqsApp = () =>
             dayCountConvention: config.defaultDayConvention,
             tradeDate: new Date().toLocaleDateString(),
             maturityDate: rfqData.maturityDate,
-            daysToExpiry: metrics.daysToExpiry,
             multiplier: 100,
             contracts: totalQuantity,
             salesCreditPercentage: config.defaultSalesCreditPercentage,
-            salesCreditAmount: derivedValues.salesCreditAmount,
             premiumSettlementFXRate: 1.0,
             premiumSettlementDaysOverride: config.defaultSettlementDays,
             premiumSettlementCurrency: config.defaultSettlementCurrency,
-            premiumSettlementDate: optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, config.defaultSettlementDays),
-            askImpliedVol: derivedValues.askImpliedVol,
-            impliedVol: derivedValues.impliedVol,
-            bidImpliedVol: derivedValues.bidImpliedVol,
             spread: config.defaultSpread,
-            askPremiumInLocal: derivedValues.askPremiumInLocal,
-            premiumInUSD: derivedValues.premiumInUSD,
-            premiumInLocal: derivedValues.premiumInLocal,
-            bidPremiumInLocal: derivedValues.bidPremiumInLocal,
-            askPremiumPercentage: derivedValues.askPremiumPercentage,
-            premiumPercentage: derivedValues.premiumPercentage,
-            bidPremiumPercentage: derivedValues.bidPremiumPercentage,
-            deltaShares: derivedValues.deltaShares,
-            deltaNotional: derivedValues.deltaNotional,
-            delta: derivedValues.delta,
-            deltaPercent: derivedValues.deltaPercent,
-            gammaShares: derivedValues.gammaShares,
-            gammaNotional: derivedValues.gammaNotional,
-            gamma: derivedValues.gamma,
-            gammaPercent: derivedValues.gammaPercent,
-            thetaShares: derivedValues.thetaShares,
-            thetaNotional: derivedValues.thetaNotional,
-            theta: derivedValues.theta,
-            thetaPercent: derivedValues.thetaPercent,
-            vegaShares: derivedValues.vegaShares,
-            vegaNotional: derivedValues.vegaNotional,
-            vega: derivedValues.vega,
-            vegaPercent: derivedValues.vegaPercent,
-            rhoShares: derivedValues.rhoShares,
-            rhoNotional: derivedValues.rhoNotional,
-            rho: derivedValues.rho,
-            rhoPercent: derivedValues.rhoPercent,
             legs: parsedOptions,
             createdBy: ownerId,
+            ...fieldUpdates
         };
 
         return rfq;
-    }, [config, optionRequestParserService, volatilityService, rateService, exerciseType, exchangeRateService, calculateOptionMetrics, calculateDerivedValues, ownerId]);
+    }, [config, optionRequestParserService, exerciseType, exchangeRateService, optionPricingService, priceService, ownerId]);
 
     const handleSnippetSubmit = useCallback((snippetInput) =>
     {
@@ -701,55 +537,17 @@ export const RfqsApp = () =>
     {
         try
         {
-            const metrics = await calculateOptionMetrics(rfqData);
-            if (!metrics)
+            const pricingResult = await calculateRfqOptionMetrics(rfqData, config, {
+                optionPricingService,
+                optionRequestParserService,
+                priceService: ServiceRegistry.getPriceService()
+            });
+            if (!pricingResult)
                 throw new Error("Failed to calculate option metrics");
-            
-            const derivedValues = calculateDerivedValues(metrics, rfqData);
-            if (!derivedValues)
-                throw new Error("Failed to calculate derived values");
 
-            const premiumSettlementDate = optionRequestParserService.calculateSettlementDate(rfqData.maturityDate, rfqData.premiumSettlementDaysOverride);
-            
-            const updatedRFQ =
-            {
-                ...rfqData,
-                notionalInUSD: metrics.notionalInUSD.toFixed(config.decimalPrecision),
-                notionalInLocal: metrics.notionalInLocal,
-                salesCreditAmount: derivedValues.salesCreditAmount,
-                premiumSettlementDate: premiumSettlementDate,
-                askImpliedVol: derivedValues.askImpliedVol,
-                impliedVol: derivedValues.impliedVol,
-                bidImpliedVol: derivedValues.bidImpliedVol,
-                askPremiumInLocal: derivedValues.askPremiumInLocal,
-                premiumInUSD: derivedValues.premiumInUSD,
-                premiumInLocal: derivedValues.premiumInLocal,
-                bidPremiumInLocal: derivedValues.bidPremiumInLocal,
-                askPremiumPercentage: derivedValues.askPremiumPercentage,
-                premiumPercentage: derivedValues.premiumPercentage,
-                bidPremiumPercentage: derivedValues.bidPremiumPercentage,
-                deltaShares: derivedValues.deltaShares,
-                deltaNotional: derivedValues.deltaNotional,
-                delta: derivedValues.delta,
-                deltaPercent: derivedValues.deltaPercent,
-                gammaShares: derivedValues.gammaShares,
-                gammaNotional: derivedValues.gammaNotional,
-                gamma: derivedValues.gamma,
-                gammaPercent: derivedValues.gammaPercent,
-                thetaShares: derivedValues.thetaShares,
-                thetaNotional: derivedValues.thetaNotional,
-                theta: derivedValues.theta,
-                thetaPercent: derivedValues.thetaPercent,
-                vegaShares: derivedValues.vegaShares,
-                vegaNotional: derivedValues.vegaNotional,
-                vega: derivedValues.vega,
-                vegaPercent: derivedValues.vegaPercent,
-                rhoShares: derivedValues.rhoShares,
-                rhoNotional: derivedValues.rhoNotional,
-                rho: derivedValues.rho,
-                rhoPercent: derivedValues.rhoPercent
-            };
-            
+            const fieldUpdates = buildRfqPricingFieldUpdates(pricingResult, config, optionRequestParserService);
+            const updatedRFQ = { ...rfqData, ...fieldUpdates };
+
             setRfqs(prevRfqs => prevRfqs.map(rfq => rfq.rfqId === rfqData.rfqId ? updatedRFQ : rfq ));
             loggerService.logInfo(`Successfully recalculated RFQ: ${rfqData.rfqId}`);
         }
@@ -758,7 +556,46 @@ export const RfqsApp = () =>
             loggerService.logError(`Failed to recalculate RFQ ${rfqData.rfqId}: ${error.message}`);
             setErrorMessage(`Failed to recalculate RFQ ${rfqData.rfqId}: ${error.message}`)
         }
-    }, [config, optionPricingService, optionRequestParserService, loggerService, setRfqs, calculateOptionMetrics, calculateDerivedValues]);
+    }, [config, optionPricingService, optionRequestParserService, loggerService, setRfqs]);
+
+    const rfqsRef = useRef(rfqs);
+    rfqsRef.current = rfqs;
+
+    useEffect(() =>
+    {
+        if (!rfqs.length)
+            return;
+
+        const recalculateAllRfqs = async () =>
+        {
+            const currentPriceService = ServiceRegistry.getPriceService();
+
+            try
+            {
+                await currentPriceService.loadPrices(true);
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to reload prices during RFQ recalculation: ${error.message}`);
+            }
+
+            for (const rfq of rfqsRef.current)
+            {
+                try
+                {
+                    await recalculateRFQ(rfq);
+                }
+                catch (error)
+                {
+                    loggerService.logError(`Failed to recalculate RFQ ${rfq.rfqId}: ${error.message}`);
+                }
+            }
+        };
+
+        recalculateAllRfqs();
+        const intervalId = setInterval(recalculateAllRfqs, getRfqRecalculationIntervalMs(config));
+        return () => clearInterval(intervalId);
+    }, [rfqs.length, recalculateRFQ, config.recalculationPeriodSeconds, loggerService]);
 
     const handleCellValueChanged = useCallback(async (params) =>
     {

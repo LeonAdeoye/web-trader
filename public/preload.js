@@ -29,6 +29,14 @@ ipcRenderer.on('refresh-alert-configurations', () => {
     window.dispatchEvent(new CustomEvent('refresh-alert-configurations'));
 });
 
+ipcRenderer.on('refresh-rfq-config', (_, config) => {
+    window.dispatchEvent(new CustomEvent('refresh-rfq-config', { detail: config }));
+});
+
+contextBridge.exposeInMainWorld('rfqConfig', {
+    broadcast: (config) => ipcRenderer.send('refresh-rfq-config', config)
+});
+
 contextBridge.exposeInMainWorld('configurations', {
     setLoggedInUserId: (loggedInUserId) => ipcRenderer.send('set-user-logged-in', loggedInUserId),
     getLoggedInUserId: () => ipcRenderer.invoke('get-user-logged-in') // This get data from main and returns it back to the render in the same call.

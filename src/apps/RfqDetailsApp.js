@@ -1,17 +1,24 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { LoggerService } from '../services/LoggerService';
 import { OptionPricingService } from '../services/OptionPricingService';
+import { OptionRequestParserService } from '../services/OptionRequestParserService';
 import TitleBarComponent from "../components/TitleBarComponent";
 import { RfqDetailsComponent } from "../components/RfqDetailsComponent";
 import { useRfqAllLegCalculations } from '../hooks/useRfqAllLegCalculations';
+import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
+import { parseRfqConfigParam } from '../config/rfqAppConfig';
 
 const RfqDetailsContent = ({ rfq, config, editable, windowId }) =>
 {
     const loggerService = useRef(new LoggerService(RfqDetailsApp.name)).current;
     const optionPricingService = useMemo(() => new OptionPricingService(), []);
+    const optionRequestParserService = useMemo(() => new OptionRequestParserService(), []);
     const [activeTab, setActiveTab] = useState(0);
     const hasSummaryTab = rfq.legs.length > 1;
-    const { legResults, summary, loading } = useRfqAllLegCalculations(rfq, optionPricingService, loggerService, config);
+    const { legResults, summary, initialLoading, pricedRfq } = useRfqAllLegCalculations(
+        rfq, optionPricingService, loggerService, config, optionRequestParserService);
+
+    const displayRfq = pricedRfq ?? rfq;
 
     const getLegTabIndex = (legIndex) => hasSummaryTab ? legIndex + 1 : legIndex;
 
@@ -70,23 +77,23 @@ const RfqDetailsContent = ({ rfq, config, editable, windowId }) =>
                     {hasSummaryTab && (
                         <div style={{ display: activeTab === 0 ? 'block' : 'none', height: '100%' }}>
                             <RfqDetailsComponent
-                                rfq={rfq}
+                                rfq={displayRfq}
                                 editable={editable}
                                 mode="summary"
                                 legResults={legResults}
                                 summary={summary}
-                                loading={loading}
+                                initialLoading={initialLoading}
                                 config={config}/>
                         </div>
                     )}
                     {rfq.legs.map((leg, legIndex) => (
                         <div key={legIndex} style={{ display: activeTab === getLegTabIndex(legIndex) ? 'block' : 'none', height: '100%' }}>
                             <RfqDetailsComponent
-                                rfq={rfq}
+                                rfq={displayRfq}
                                 editable={editable}
                                 mode="leg"
                                 legResult={legResults?.[legIndex]}
-                                loading={loading}
+                                initialLoading={initialLoading}
                                 config={config}/>
                         </div>
                     ))}
@@ -105,12 +112,14 @@ const RfqDetailsApp = () =>
     const editable = urlParams.get('editable');
     const configParam = urlParams.get('config');
 
+    const initialConfig = useMemo(() => parseRfqConfigParam(configParam), [configParam]);
+    const config = useRfqAppConfig(initialConfig);
+
     if (rfqDataParam)
     {
         try
         {
             const rfq = JSON.parse(decodeURIComponent(rfqDataParam));
-            const config = JSON.parse(decodeURIComponent(configParam));
             return (
                 <RfqDetailsContent rfq={rfq} config={config} editable={editable} windowId={windowId}/>
             );
@@ -122,5 +131,4 @@ const RfqDetailsApp = () =>
         }
     }
 };
-
 export default RfqDetailsApp;

@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRecoilState } from 'recoil';
 import { selectedContextShareState } from '../atoms/component-state';
 import { LoggerService } from '../services/LoggerService';
 import { OptionPricingService } from '../services/OptionPricingService';
-import { useRef } from 'react';
 import TitleBarComponent from "../components/TitleBarComponent";
 import { AgChartsReact } from 'ag-charts-react';
 import { FormControl, Select, MenuItem, InputLabel, Tooltip, Typography } from '@mui/material';
+import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
+import { parseRfqConfigParam } from '../config/rfqAppConfig';
 
 const RfqChartsApp = () =>
 {
@@ -25,7 +26,9 @@ const RfqChartsApp = () =>
     const [isLoading, setIsLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const [hasCalculated, setHasCalculated] = useState(false);
-    const [config, setConfig] = useState({ defaultOptionModel: 'european' });
+    const initialConfig = useMemo(() => parseRfqConfigParam(configParam), [configParam]);
+    const config = useRfqAppConfig(initialConfig);
+    const previousOptionModelRef = useRef(config.defaultOptionModel);
     const rangeKeyOptions = [
         { value: 'VOLATILITY', label: 'Volatility' },
         { value: 'UNDERLYING_PRICE', label: 'Underlying Price' },
@@ -35,22 +38,6 @@ const RfqChartsApp = () =>
 
     let rfq = null;
     let rfqSnippetText = "";
-
-    useEffect(() =>
-    {
-        if (configParam)
-        {
-            try
-            {
-                const parsedConfig = JSON.parse(decodeURIComponent(configParam));
-                setConfig(parsedConfig);
-            }
-            catch (error)
-            {
-                loggerService.logError("Failed to parse config parameter: " + error.message);
-            }
-        }
-    }, [configParam]);
 
     if (rfqDataParam)
     {
@@ -209,6 +196,17 @@ const RfqChartsApp = () =>
             setIsLoading(false);
         }
     };
+
+    useEffect(() =>
+    {
+        if (previousOptionModelRef.current === config.defaultOptionModel)
+            return;
+
+        previousOptionModelRef.current = config.defaultOptionModel;
+
+        if (hasCalculated && rfq?.legs?.length)
+            calculateRange();
+    }, [config.defaultOptionModel, hasCalculated]);
 
     const handleChartClick = async () =>
     {

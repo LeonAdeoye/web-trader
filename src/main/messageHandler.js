@@ -45,6 +45,14 @@ const handleRefreshAlertConfigurationsMessage = () => {
     });
 }
 
+const handleRefreshRfqConfigMessage = (_, config) => {
+    const allWindows = BrowserWindow.getAllWindows();
+    allWindows.forEach(window => {
+        if (window.webContents)
+            window.webContents.send('refresh-rfq-config', config);
+    });
+}
+
 const handleMessageFromRenderer = (_, fdc3Message, destination, source) => {
     handleFDC3Message(fdc3Message, destination, source);
 };
@@ -81,6 +89,7 @@ const setupMessageHandlers = async () =>
     ipcMain.on('open-tools', handleOpenToolsMessage);
     ipcMain.on('open-channel', handleOpenChannelsMessage);
     ipcMain.on('refresh-alert-configurations', handleRefreshAlertConfigurationsMessage);
+    ipcMain.on('refresh-rfq-config', handleRefreshRfqConfigMessage);
 };
 
 const removeAllListeners = async () =>
@@ -96,6 +105,7 @@ const removeAllListeners = async () =>
     ipcMain.removeListener('open-tools', handleOpenToolsMessage);
     ipcMain.removeListener('open-channel', handleOpenChannelsMessage);
     ipcMain.removeListener('refresh-alert-configurations', handleRefreshAlertConfigurationsMessage);
+    ipcMain.removeListener('refresh-rfq-config', handleRefreshRfqConfigMessage);
 };
 
 module.exports = {

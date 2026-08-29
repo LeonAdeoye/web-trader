@@ -1,21 +1,11 @@
 import { buildMetrics } from "./buildMetrics";
 import { buildDerivedValues } from "./buidDerivedValues";
+import { getOptionPricingParams } from './calculateRfqOptionMetrics';
+
+export { getOptionPricingParams };
 
 const GREEK_NAMES = ['delta', 'gamma', 'theta', 'vega', 'rho'];
 const GREEK_GRID_ROWS = ['Greek', 'Notional', 'Percent', 'Shares'];
-
-export const getOptionPricingParams = (rfq, leg, config) =>
-({
-    strike: leg.strike,
-    volatility: rfq.volatility / 100,
-    underlyingPrice: rfq.underlyingPrice,
-    daysToExpiry: rfq.daysToExpiry || leg.daysToExpiry || 30,
-    interestRate: rfq.interestRate / 100,
-    isCall: leg.optionType === 'CALL',
-    isEuropean: rfq.exerciseType === "EUROPEAN",
-    dayCountConvention: rfq.dayCountConvention || '365',
-    ...(config?.defaultOptionModel ? { modelType: config.defaultOptionModel } : {})
-});
 
 export const buildLegResult = (rfq, leg, greeks) =>
 {
@@ -299,6 +289,8 @@ export const buildRfqDetailsTextFields = (rfq, viewContext, decimalPrecision) =>
         { label: "Sales Credit Percentage", value: rfq.salesCreditPercentage || '' }
     ];
 };
+
+export const RFQ_CELL_FLASH_DELAY_MS = 2000;
 
 export const GREEKS_COLUMN_DEFS =
 [
