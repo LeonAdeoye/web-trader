@@ -22,6 +22,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     const [rfqContract, setRfqContract] = useState(defaultRfqContract);
     const [contractsGrid, setContractsGrid] = useState([]);
     const [maturityDateLocked, setMaturityDateLocked] = useState(false);
+    const [underlyingInstrumentLocked, setUnderlyingInstrumentLocked] = useState(false);
 
     const canAdd = () => 
         rfqContract.optionType !== '' && 
@@ -60,6 +61,9 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
             if (!maturityDateLocked)
                 setMaturityDateLocked(true);
 
+            if (!underlyingInstrumentLocked)
+                setUnderlyingInstrumentLocked(true);
+
             setRfqContract(prev => ({...defaultRfqContract, underlyingInstrument: prev.underlyingInstrument, maturityDate: prev.maturityDate}));
         }
     };
@@ -71,7 +75,10 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
             const newGrid = prev.filter(c => c.id !== contractId);
 
             if (newGrid.length === 0)
+            {
                 setMaturityDateLocked(false);
+                setUnderlyingInstrumentLocked(false);
+            }
             
             return newGrid;
         });
@@ -82,6 +89,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
         setRfqContract(defaultRfqContract);
         setContractsGrid([]);
         setMaturityDateLocked(false);
+        setUnderlyingInstrumentLocked(false);
     };
 
     const handleCancel = () => setRfqCreationDialogOpen({open: false, clear: true});
@@ -101,51 +109,24 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
     {
         if (contractsGrid.length === 0) return '';
 
-        const buyCalls = contractsGrid.filter(c => c.side === 'BUY' && c.optionType === 'CALL');
-        const sellCalls = contractsGrid.filter(c => c.side === 'SELL' && c.optionType === 'CALL');
-        const buyPuts = contractsGrid.filter(c => c.side === 'BUY' && c.optionType === 'PUT');
-        const sellPuts = contractsGrid.filter(c => c.side === 'SELL' && c.optionType === 'PUT');
-
-        let snippet = '';
-
-        if (buyCalls.length > 0)
+        const legs = contractsGrid.map(c =>
         {
-            const quantities = buyCalls.map(c => c.numberOfContracts).join(',');
-            snippet += `+${quantities}C `;
-        }
-
-        if (sellCalls.length > 0)
-        {
-            const quantities = sellCalls.map(c => c.numberOfContracts).join(',');
-            snippet += `-${quantities}C `;
-        }
-
-        if (buyPuts.length > 0)
-        {
-            const quantities = buyPuts.map(c => c.numberOfContracts).join(',');
-            snippet += `+${quantities}P `;
-        }
-
-        if (sellPuts.length > 0)
-        {
-            const quantities = sellPuts.map(c => c.numberOfContracts).join(',');
-            snippet += `-${quantities}P `;
-        }
+            const sidePrefix = c.side === 'BUY' ? '+' : '-';
+            const optionSuffix = c.optionType === 'CALL' ? 'C' : 'P';
+            return `${sidePrefix}${c.numberOfContracts}${optionSuffix}`;
+        }).join(',');
 
         const strikes = contractsGrid.map(c => c.strikePrice).join(',');
-        snippet += `${strikes} `;
 
         const maturityDate = contractsGrid[0].maturityDate;
         const day = maturityDate.getDate().toString().padStart(2, '0');
         const month = maturityDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
         const year = maturityDate.getFullYear().toString().slice(-2);
         const formattedDate = `${day}${month}${year}`;
-        snippet += `${formattedDate} `;
 
-        const underlyings = contractsGrid.map(c => c.underlyingInstrument).join(',');
-        snippet += underlyings;
+        const underlying = contractsGrid[0].underlyingInstrument;
 
-        return snippet;
+        return `${legs} ${strikes} ${formattedDate} ${underlying}`;
     };
 
     const columnDefs = [
@@ -352,6 +333,7 @@ const RfqCreationDialog = ({ closeHandler, instruments }) =>
                                  <Select
                                      value={rfqContract.underlyingInstrument}
                                      onChange={(e) => handleInputChange('underlyingInstrument', e.target.value)}
+                                     disabled={underlyingInstrumentLocked}
                                      label="Underlying Instrument"
                                      style={{ fontSize: '12px' }}>
                                      {instruments.map((instrument) => (
