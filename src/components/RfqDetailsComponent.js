@@ -48,13 +48,11 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         calculate();
     }, [rfq, index]);
 
-    if (!rfq?.legs?.length || !legMetrics || !legDerivedValues)
-        return <div>No RFQ data available</div>;
+    const leg = rfq?.legs?.[index];
 
-    const leg = rfq.legs[index];
-
-    const gridData = useMemo(() => {
-        if (!legMetrics || !legDerivedValues) return [];
+    const gridData = useMemo(() =>
+    {
+        if (!legMetrics || !legDerivedValues || !leg) return [];
 
         return [
             {
@@ -90,7 +88,7 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
                 rho: legDerivedValues.rhoShares.toFixed(0)
             }
         ];
-    }, [legMetrics, legDerivedValues, config]);
+    }, [legMetrics, legDerivedValues, leg, config]);
 
     const columnDefs = useMemo(() =>
     [
@@ -102,14 +100,20 @@ export const RfqDetailsComponent = ({ rfq, editable, index, config}) =>
         { headerName: 'Rho', field: 'rho', width: 120 }
     ], []);
 
-    const maturityDate = useMemo(() => {
+    const maturityDate = useMemo(() =>
+    {
+        if (!leg?.maturityDate) return "";
         return formatDate(new Date(leg.maturityDate).toLocaleDateString());
-    }, [leg.maturityDate]);
+    }, [leg?.maturityDate]);
 
-    const premiumSettlementDate = useMemo(() => {
+    const premiumSettlementDate = useMemo(() =>
+    {
         if (!rfq?.premiumSettlementDate) return "";
         return formatDate(new Date(rfq.premiumSettlementDate).toLocaleDateString());
     }, [rfq?.premiumSettlementDate]);
+
+    if (!rfq?.legs?.length || !legMetrics || !legDerivedValues)
+        return <div>No RFQ data available</div>;
 
     const textFields =
     [

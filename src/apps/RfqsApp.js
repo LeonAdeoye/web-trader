@@ -17,6 +17,8 @@ import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
 import { ServiceRegistry } from '../services/ServiceRegistry';
+import { NOTIONAL_USD_HEADER_TOOLTIP } from "../calculations/rfqTooltipBuilder";
+import NotionalUSDCellRenderer from "../components/NotionalUSDCellRenderer";
 
 export const RfqsApp = () =>
 {
@@ -770,8 +772,8 @@ export const RfqsApp = () =>
             {headerName: "Underlying Prices", field: "underlyingPrice", sortable: true, minWidth: 130, width: 130, filter: true, editable: true},
              {headerName: "Book", field: "bookCode", sortable: true, minWidth: 100, width: 100, filter: true,
               cellEditor: 'agSelectCellEditor', cellEditorParams: { values: getUniqueBookCodes() }, editable: true},
-            {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in USD',
-             editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
+            {headerName: "Notional$", field: "notionalInUSD", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: NOTIONAL_USD_HEADER_TOOLTIP,
+             cellRenderer: NotionalUSDCellRenderer, editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Notional in Local", field: "notionalInLocal", sortable: true, minWidth: 120, width: 140, filter: true, headerTooltip: 'Notional amount in local currency',
                 editable: false, type: 'numericColumn', valueFormatter: numberFormatter},
             {headerName: "Currency", field: "notionalCurrency", sortable: true, minWidth: 100, width: 100, filter: true,
@@ -960,6 +962,9 @@ export const RfqsApp = () =>
                     enableCellChangeFlash={true}
                     cellFlashDelay={2000}
                     animateRows={true}
+                    enableBrowserTooltips={true}
+                    tooltipShowDelay={200}
+                    popupParent={document.body}
                     defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: false }} />
             </div>
             {errorMessage ? (<ErrorMessageComponent message={errorMessage} duration={3000} onDismiss={() => setErrorMessage(null)} position="bottom-right" maxWidth="900px"/>): null}

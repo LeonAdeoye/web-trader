@@ -86,4 +86,10 @@
       padding: 2px 4px;
     }
   }
+
+  .ag-tooltip,
+  .ag-tooltip-custom {
+    white-space: pre-line;
+    max-width: 420px;
+  }
 }
