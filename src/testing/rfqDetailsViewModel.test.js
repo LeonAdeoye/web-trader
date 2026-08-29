@@ -184,6 +184,58 @@ describe('buildRfqDetailsTextFields', () =>
         expect(fieldMap['Quantity']).toBe(1);
         expect(fieldMap['Strike']).toBe(100);
         expect(fieldMap['Premium In Local']).toBe('6.000');
+        expect(fieldMap['Notional In Local']).toBe('10000');
+    });
+
+    it('formats notional in local without decimal places in summary and leg modes', () =>
+    {
+        const rfq = createMockRfq();
+        const callLeg = { quantity: 1, strike: 100, side: 'BUY', optionType: 'CALL', underlying: '0007.HK', currency: 'HKD' };
+        const putLeg = { quantity: 2, strike: 70, side: 'SELL', optionType: 'PUT', underlying: '0007.HK', currency: 'HKD' };
+        const legResults = [
+            buildLegResult(rfq, callLeg, createMockGreeks()),
+            buildLegResult(rfq, putLeg, createMockGreeks({ price: '4.0' }))
+        ];
+        const summary = aggregateLegResults(legResults);
+
+        const summaryFields = buildRfqDetailsTextFields(rfq, { mode: 'summary', legResult: null, summary }, 3);
+        const summaryMap = Object.fromEntries(summaryFields.map(field => [field.label, field.value]));
+        expect(summaryMap['Notional In Local']).toBe('24000');
+        expect(summaryMap['Notional In Local']).not.toContain('.');
+
+        const legFields = buildRfqDetailsTextFields(rfq, { mode: 'leg', legResult: legResults[0], summary: null }, 3);
+        const legMap = Object.fromEntries(legFields.map(field => [field.label, field.value]));
+        expect(legMap['Notional In Local']).toBe('10000');
+        expect(legMap['Notional In Local']).not.toContain('.');
+    });
+
+    it('shows per-leg notional in USD on leg tabs and the sum on summary', () =>
+    {
+        const rfq = createMockRfq();
+        const callLeg = { quantity: 1, strike: 100, side: 'BUY', optionType: 'CALL', underlying: '0007.HK', currency: 'HKD' };
+        const putLeg = { quantity: 2, strike: 70, side: 'SELL', optionType: 'PUT', underlying: '0007.HK', currency: 'HKD' };
+        const legResults = [
+            buildLegResult(rfq, callLeg, createMockGreeks()),
+            buildLegResult(rfq, putLeg, createMockGreeks({ price: '4.0' }))
+        ];
+        const summary = aggregateLegResults(legResults);
+
+        const callUsd = legResults[0].metrics.notionalInUSD;
+        const putUsd = legResults[1].metrics.notionalInUSD;
+        expect(callUsd).not.toBe(putUsd);
+
+        const summaryFields = buildRfqDetailsTextFields(rfq, { mode: 'summary', legResult: null, summary }, 3);
+        const summaryMap = Object.fromEntries(summaryFields.map(field => [field.label, field.value]));
+        expect(parseFloat(summaryMap['Notional In USD'])).toBeCloseTo(callUsd + putUsd, 3);
+
+        const callFields = buildRfqDetailsTextFields(rfq, { mode: 'leg', legResult: legResults[0], summary: null }, 3);
+        const callMap = Object.fromEntries(callFields.map(field => [field.label, field.value]));
+        expect(parseFloat(callMap['Notional In USD'])).toBeCloseTo(callUsd, 3);
+        expect(callMap['Notional In USD']).not.toBe(summaryMap['Notional In USD']);
+
+        const putFields = buildRfqDetailsTextFields(rfq, { mode: 'leg', legResult: legResults[1], summary: null }, 3);
+        const putMap = Object.fromEntries(putFields.map(field => [field.label, field.value]));
+        expect(parseFloat(putMap['Notional In USD'])).toBeCloseTo(putUsd, 3);
     });
 
     it('formats maturity and premium settlement dates from ISO strings', () =>

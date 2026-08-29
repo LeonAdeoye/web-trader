@@ -181,6 +181,18 @@ const formatMaturityDate = (maturityDate) => formatRfqDetailsDate(maturityDate);
 
 const formatPremiumSettlementDate = (premiumSettlementDate) => formatRfqDetailsDate(premiumSettlementDate);
 
+const formatNotionalInLocal = (value) =>
+{
+    if (value == null || value === '') return '';
+    return Math.round(Number(value)).toString();
+};
+
+const formatNotionalInUSD = (value, decimalPrecision) =>
+{
+    if (value == null || value === '') return '';
+    return Number(value).toFixed(decimalPrecision);
+};
+
 export const buildGreeksGridData = (viewContext, decimalPrecision) =>
 {
     const { mode, legResult, legResults, summary } = viewContext;
@@ -235,14 +247,14 @@ export const buildRfqDetailsTextFields = (rfq, viewContext, decimalPrecision) =>
         {
             label: "Notional In Local",
             value: isSummary
-                ? summary?.totalNotionalInLocal.toFixed(decimalPrecision) || ''
-                : (rfq.notionalInLocal || '')
+                ? formatNotionalInLocal(summary?.totalNotionalInLocal)
+                : formatNotionalInLocal(metrics?.notionalInLocal ?? rfq.notionalInLocal)
         },
         {
             label: "Notional In USD",
             value: isSummary
-                ? summary?.totalNotionalInUSD.toFixed(decimalPrecision) || ''
-                : (rfq.notionalInUSD || '')
+                ? formatNotionalInUSD(summary?.totalNotionalInUSD, decimalPrecision)
+                : formatNotionalInUSD(metrics?.notionalInUSD ?? rfq.notionalInUSD, decimalPrecision)
         },
         {
             label: "Premium In Local",
