@@ -10,7 +10,7 @@ const main = async () =>
 {
     try
     {
-        client = new Client("web-trader-market-data-reader");
+        client = new Client(`web-trader-market-data-reader-${Date.now()}`);
         const url = "ws://localhost:9008/amps/json";
         await client.connect(url);
         const inboundCmd = new Command("sow_and_subscribe").topic("market.data");

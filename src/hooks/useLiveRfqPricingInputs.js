@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getRfqRecalculationIntervalMs, prepareRfqForPricing } from '../calculations/calculateRfqOptionMetrics';
 import { ServiceRegistry } from '../services/ServiceRegistry';
+import { useMarketDataLastPriceCache } from './useMarketDataLastPriceCache';
 
 const applyPricingInputs = (rfq, optionRequestParserService) =>
 {
@@ -22,6 +23,7 @@ const tryReloadPrices = async (priceService) =>
 
 export const useLiveRfqPricingInputs = (rfq, optionRequestParserService, config) =>
 {
+    useMarketDataLastPriceCache(rfq?.underlying ? [rfq.underlying] : []);
     const refreshIntervalMs = getRfqRecalculationIntervalMs(config);
     const [pricedRfq, setPricedRfq] = useState(() =>
         rfq?.legs?.length ? applyPricingInputs(rfq, optionRequestParserService) : null

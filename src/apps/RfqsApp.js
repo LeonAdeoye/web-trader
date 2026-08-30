@@ -17,6 +17,7 @@ import {OptionPricingService} from "../services/OptionPricingService";
 import RfqCreationDialog from "../dialogs/RfqCreationDialog";
 import {rfqCreationDialogDisplayState} from "../atoms/dialog-state";
 import { ServiceRegistry } from '../services/ServiceRegistry';
+import { useMarketDataLastPriceCache } from '../hooks/useMarketDataLastPriceCache';
 import { calculateRfqOptionMetrics, buildRfqPricingFieldUpdates, getRfqRecalculationIntervalMs } from '../calculations/calculateRfqOptionMetrics';
 import { DEFAULT_RFQ_APP_CONFIG, normalizeRfqAppConfig, RFQ_CONFIG_NUMERIC_KEYS } from '../config/rfqAppConfig';
 import CalculationTooltipCellRenderer from "../components/CalculationTooltipCellRenderer";
@@ -121,6 +122,7 @@ export const RfqsApp = () =>
 
     const [selectedRow, setSelectedRow] = useState(null);
     const [ownerId, setOwnerId] = useState(null);
+    useMarketDataLastPriceCache(rfqs.map(rfq => rfq.underlying));
     const RFQ_CONFIG_KEYS = [
         'rfq_defaultSettlementCurrency',
         'rfq_defaultSettlementDays',
@@ -292,17 +294,22 @@ export const RfqsApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const incomingRfq = event.data.rfq;
+        if (!incomingRfq)
+            return;
+
+        const rfqToApply = ServiceRegistry.getPriceService().applyLiveUnderlyingPrice(incomingRfq);
+
         setRfqs((prevData) =>
         {
-            const index = prevData.findIndex((element) => element.rfqId === incomingRfq.rfqId);
+            const index = prevData.findIndex((element) => element.rfqId === rfqToApply.rfqId);
             if (index !== -1)
             {
                 const updatedData = [...prevData];
-                updatedData[index] = incomingRfq;
+                updatedData[index] = rfqToApply;
                 return updatedData;
             }
             else
-                return [...prevData, incomingRfq];
+                return [...prevData, rfqToApply];
         });
 
     }, []);

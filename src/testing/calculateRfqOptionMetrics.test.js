@@ -3,6 +3,7 @@ import {
     calculatePortfolioDerivedValues,
     buildRfqPricingFieldUpdates,
     getRfqRecalculationIntervalMs,
+    prepareRfqForPricing,
     DEFAULT_RFQ_RECALCULATION_PERIOD_SECONDS
 } from '../calculations/calculateRfqOptionMetrics';
 import { aggregateLegResults, buildLegResult } from '../calculations/rfqDetailsViewModel';
@@ -48,6 +49,42 @@ describe('getRfqRecalculationIntervalMs', () =>
     it('uses configured recalculation period in milliseconds', () =>
     {
         expect(getRfqRecalculationIntervalMs({ recalculationPeriodSeconds: 45 })).toBe(45000);
+    });
+});
+
+describe('prepareRfqForPricing', () =>
+{
+    const optionRequestParserService = { calculateBusinessDaysToExpiry: () => 40 };
+
+    it('uses lastPrice from PriceService when present', () =>
+    {
+        const rfq = { ...createMockRfq(), underlying: '0700.HK', underlyingPrice: 78 };
+        const priceService = {
+            getLastTradePrice: (code) => code === '0700.HK' ? 112.5 : undefined
+        };
+
+        const pricedRfq = prepareRfqForPricing(rfq, { priceService, optionRequestParserService });
+
+        expect(pricedRfq.underlyingPrice).toBe(112.5);
+        expect(pricedRfq.daysToExpiry).toBe(40);
+    });
+
+    it('keeps the RFQ underlyingPrice when PriceService has no quote', () =>
+    {
+        const rfq = { ...createMockRfq(), underlying: '0700.HK', underlyingPrice: 78 };
+        const priceService = { getLastTradePrice: () => undefined };
+
+        const pricedRfq = prepareRfqForPricing(rfq, { priceService, optionRequestParserService });
+
+        expect(pricedRfq.underlyingPrice).toBe(78);
+    });
+
+    it('returns the RFQ unchanged when it has no legs', () =>
+    {
+        const rfq = { underlying: '0700.HK', underlyingPrice: 78, legs: [] };
+        const priceService = { getLastTradePrice: () => 112.5 };
+
+        expect(prepareRfqForPricing(rfq, { priceService, optionRequestParserService })).toBe(rfq);
     });
 });
 

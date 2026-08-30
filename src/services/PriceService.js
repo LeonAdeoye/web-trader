@@ -15,18 +15,77 @@ export class PriceService
         return this.#prices;
     }
 
+    #getPrice = (instrumentCode) =>
+    {
+        if (!this.#prices || instrumentCode == null)
+            return;
+
+        return this.#prices.find(price => price.instrumentCode === instrumentCode);
+    }
+
+    #preserveLast = (incomingPrices) =>
+    {
+        return incomingPrices.map(incoming =>
+        {
+            const previous = this.#getPrice(incoming.instrumentCode);
+            if (previous?.lastPrice == null)
+                return incoming;
+
+            return { ...incoming, lastPrice: previous.lastPrice };
+        });
+    }
+
+    updateLastTradePrice = (instrumentCode, price) =>
+    {
+        if (instrumentCode == null || instrumentCode === '')
+            return;
+
+        const numericPrice = Number(price);
+        if (price == null || price === '' || Number.isNaN(numericPrice))
+            return;
+
+        if (!this.#prices)
+            this.#prices = [];
+
+        const existing = this.#getPrice(instrumentCode);
+        if (existing)
+            existing.lastPrice = numericPrice;
+        else
+            this.#prices.push({ instrumentCode, lastPrice: numericPrice });
+    }
+
+    getLiveLastTradePrice = (instrumentCode) =>
+    {
+        return this.#getPrice(instrumentCode)?.lastPrice;
+    }
+
     getLastTradePrice = (instrumentCode) =>
     {
-        // TODO Create a market spring boot data price server for getting delayed market data prices.
-        //  This backend service will publish delayed and throttled prices on an AMPS topic for this service to listen to.
-        if (this.#prices)
-        {
-            const index = this.#prices.findIndex(p => p.instrumentCode === instrumentCode);
-            if (index !== -1)
-            {
-                return this.#prices[index].closePrice;
-            }
-        }
+        const price = this.#getPrice(instrumentCode);
+        if (!price)
+            return;
+
+        return price.lastPrice ?? price.closePrice;
+    }
+
+    cacheMarketDataTick = (marketData) =>
+    {
+        if (!marketData)
+            return;
+
+        this.updateLastTradePrice(marketData.ric, marketData.price);
+    }
+
+    applyLiveUnderlyingPrice = (rfq) =>
+    {
+        if (!rfq)
+            return rfq;
+
+        const lastPrice = this.getLiveLastTradePrice(rfq.underlying);
+        if (lastPrice == null)
+            return rfq;
+
+        return { ...rfq, underlyingPrice: lastPrice };
     }
 
     loadPrices = async (forceReload = false) =>
@@ -45,7 +104,7 @@ export class PriceService
                 const data = await response.json();
                 if (data.length > 0)
                 {
-                    this.#prices = data;
+                    this.#prices = this.#preserveLast(data);
                     this.#loggerService.logInfo(`Loaded ${data.length} price records: ${JSON.stringify(this.#prices)}`);
                 }
                 else
@@ -103,7 +162,7 @@ export class PriceService
                 {
                     const index = this.#prices.findIndex(p => p.instrumentCode === instrumentCode);
                     if (index !== -1)
-                        this.#prices[index] = updatedPrice;
+                        this.#prices[index] = { ...updatedPrice, lastPrice: this.#prices[index].lastPrice };
                 }
                 
                 return updatedPrice;
@@ -131,13 +190,13 @@ export class PriceService
             return [];
         }
 
-        const defaultPrices = instruments.map(instrument => ({
+        const defaultPrices = this.#preserveLast(instruments.map(instrument => ({
             instrumentCode: instrument.instrumentCode,
             closePrice: defaultClosePrice,
             openPrice: defaultOpenPrice,
             lastUpdatedBy: 'System',
             lastUpdatedOn: new Date().toISOString()
-        }));
+        })));
 
         this.#prices = defaultPrices;
         this.#loggerService.logInfo(`Created ${defaultPrices.length} default price records`);
