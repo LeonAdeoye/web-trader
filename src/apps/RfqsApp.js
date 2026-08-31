@@ -549,9 +549,10 @@ export const RfqsApp = () =>
     const handleWorkflowRfq = useCallback((rfqData) =>
     {
         const encodedRfqData = encodeURIComponent(JSON.stringify(rfqData));
-        const launchRfqDetailsApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}`});
-        launchRfqDetailsApp();
-    }, []);
+        const encodedConfig = encodeURIComponent(JSON.stringify(config));
+        const launchRfqWorkflowApp = () => window.launchPad.openApp({url: `http://localhost:3000/rfq-workflows?rfqData=${encodedRfqData}&config=${encodedConfig}`});
+        launchRfqWorkflowApp();
+    }, [config]);
 
     const handleRfqAction = useCallback((action, rfqData) =>
     {

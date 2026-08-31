@@ -1,15 +1,37 @@
 import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import { LoggerService } from '../services/LoggerService';
 import { ServiceRegistry } from '../services/ServiceRegistry';
+import { OptionPricingService } from '../services/OptionPricingService';
+import { OptionRequestParserService } from '../services/OptionRequestParserService';
 import TitleBarComponent from "../components/TitleBarComponent";
 import {Button, Paper, TextField, Typography, MenuItem, FormControl, InputLabel, Select, Tooltip} from "@mui/material";
 import {formatTimestamp, getStatusColor} from "../utilities";
+import { useRfqAllLegCalculations } from '../hooks/useRfqAllLegCalculations';
+import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
+import { parseRfqConfigParam } from '../config/rfqAppConfig';
+
+const formatLiveValue = (value, fallback, decimalPrecision) =>
+{
+    if (value == null || value === '')
+        return fallback;
+
+    const numeric = Number(value);
+    if (Number.isNaN(numeric))
+        return fallback;
+
+    return numeric.toFixed(decimalPrecision);
+};
 
 const RfqWorkflowsApp = () =>
 {
     const windowId = useMemo(() => window.command.getWindowId("rfq-workflows"), []);
     const loggerService = useRef(new LoggerService(RfqWorkflowsApp.name)).current;
     const rfqService = useRef(ServiceRegistry.getRfqService()).current;
+    const optionPricingService = useMemo(() => new OptionPricingService(), []);
+    const optionRequestParserService = useMemo(() => new OptionRequestParserService(), []);
+    const urlParams = useMemo(() => new URLSearchParams(window.location.search), []);
+    const initialConfig = useMemo(() => parseRfqConfigParam(urlParams.get('config')), [urlParams]);
+    const config = useRfqAppConfig(initialConfig);
     const [rfqData, setRfqData] = useState(null);
     const [activityFeed, setActivityFeed] = useState([]);
     const [availableTraders, setAvailableTraders] = useState([]);
@@ -18,6 +40,21 @@ const RfqWorkflowsApp = () =>
     const [newAssignee, setNewAssignee] = useState('');
     const [newComment, setNewComment] = useState('');
     const [ownerId, setOwnerId] = useState('');
+    const { pricedRfq, summary } = useRfqAllLegCalculations(
+        rfqData, optionPricingService, loggerService, config, optionRequestParserService);
+
+    const displayRfq = useMemo(() =>
+    {
+        if (!rfqData)
+            return null;
+
+        return {
+            ...rfqData,
+            underlyingPrice: pricedRfq?.underlyingPrice ?? rfqData.underlyingPrice,
+            notionalInUSD: formatLiveValue(summary?.totalNotionalInUSD, rfqData.notionalInUSD, config.decimalPrecision),
+            salesCreditAmount: formatLiveValue(summary?.totalSalesCreditAmount, rfqData.salesCreditAmount, config.decimalPrecision)
+        };
+    }, [rfqData, pricedRfq, summary, config.decimalPrecision]);
 
     useEffect(() =>
     {
@@ -73,7 +110,7 @@ const RfqWorkflowsApp = () =>
                 if(result?.updatedRfq && result?.workflowEvent)
                 {
                     const { updatedRfq, workflowEvent } = result;
-                    setRfqData(updatedRfq);
+                    setRfqData(prev => ({ ...prev, ...updatedRfq }));
                     setActivityFeed(prevEvents => [workflowEvent, ...prevEvents]);
                     const transitions = rfqService.getValidStatusTransitions(updatedRfq.status);
                     setValidTransitions(transitions);
@@ -83,7 +120,8 @@ const RfqWorkflowsApp = () =>
             if (newAssignee)
             {
                 const updatedRfq = await rfqService.updateRfq(rfqData.rfqId, { assignedTo: newAssignee });
-                setRfqData(updatedRfq);
+                if (updatedRfq)
+                    setRfqData(prev => ({ ...prev, ...updatedRfq }));
                 const newEvent = await rfqService.addWorkflowEvent({rfqId: rfqData.rfqId, eventType: 'ASSIGNMENT', userId: ownerId, comment: `Assigned to ${newAssignee}`});
                 setActivityFeed(prevEvents => [newEvent, ...prevEvents]);
             }
@@ -176,28 +214,28 @@ const RfqWorkflowsApp = () =>
                             <TextField
                                 size="small"
                                 label="Client"
-                                value={rfqData.client}
+                                value={displayRfq.client}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
                                 label="Notional value in USD"
-                                value={rfqData.notionalInUSD}
+                                value={displayRfq.notionalInUSD}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
                                 label="Underlying instrument code"
-                                value={rfqData.underlying}
+                                value={displayRfq.underlying}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
                                 label="Underlying Price"
-                                value={rfqData.underlyingPrice}
+                                value={displayRfq.underlyingPrice}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
@@ -206,14 +244,14 @@ const RfqWorkflowsApp = () =>
                             <TextField
                                 size="small"
                                 label="Current Status"
-                                value={rfqData.status}
-                                InputProps={{readOnly: true, style: { fontSize: '0.75rem', color: getStatusColor(rfqData.status), fontWeight: 'bold'} }}
+                                value={displayRfq.status}
+                                InputProps={{readOnly: true, style: { fontSize: '0.75rem', color: getStatusColor(displayRfq.status), fontWeight: 'bold'} }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
                                 label="Assigned To"
-                                value={rfqData.assignedTo}
+                                value={displayRfq.assignedTo}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ 
                                     shrink: true,
@@ -223,14 +261,14 @@ const RfqWorkflowsApp = () =>
                             <TextField
                                 size="small"
                                 label="Sales Credit in USD"
-                                value={rfqData.salesCreditAmount}
+                                value={displayRfq.salesCreditAmount}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
                             <TextField
                                 size="small"
                                 label="Strike"
-                                value={rfqData.strike}
+                                value={displayRfq.strike}
                                 InputProps={{ readOnly: true, style: { fontSize: '0.75rem' } }}
                                 InputLabelProps={{ style: { fontSize: '0.75rem' } }}
                                 style={{ width: '230px' }}/>
