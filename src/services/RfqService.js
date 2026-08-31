@@ -237,6 +237,7 @@ class RfqService
             {
                 const errorText = await response.text();
                 this.loggerService.logError(`Failed to save RFQ: ${response.status} - ${errorText}`);
+                throw new Error(`Failed to save RFQ: ${response.status} - ${errorText}`);
             }
 
             const savedRfq = await response.json();
@@ -247,6 +248,7 @@ class RfqService
         catch (error)
         {
             this.loggerService.logError(`Error saving RFQ: ${error.message}`);
+            throw error;
         }
     }
 

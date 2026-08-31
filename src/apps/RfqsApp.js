@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState, useCallback, useMemo, useRef} from "react";
-import {formatDate, numberFormatter} from "../utilities";
+import {formatDate, getDateToday, numberFormatter} from "../utilities";
 import {useRecoilState} from "recoil";
 import {selectedContextShareState, selectedGenericGridRowState, titleBarContextShareColourState, rfqsConfigPanelOpenState} from "../atoms/component-state";
 import {FDC3Service} from "../services/FDC3Service";
@@ -73,6 +73,27 @@ import {
     getRhoNotionalTooltip,
     getRhoPercentTooltip
 } from "../calculations/rfqTooltipBuilder";
+
+const toDateString = (value) =>
+{
+    if (!value)
+        return '';
+    if (typeof value === 'string')
+        return value;
+    if (value instanceof Date)
+        return value.toISOString();
+    return String(value);
+};
+
+const toPersistableLegs = (legs) =>
+    (legs || []).map(leg => ({
+        quantity: leg.quantity,
+        strike: leg.strike,
+        optionType: leg.optionType,
+        side: leg.side,
+        volatility: leg.volatility,
+        interestRate: leg.interestRate
+    }));
 
 export const RfqsApp = () =>
 {
@@ -389,13 +410,14 @@ export const RfqsApp = () =>
             throw new Error("Failed to calculate option metrics");
 
         const fieldUpdates = buildRfqPricingFieldUpdates(pricingResult, config, optionRequestParserService);
+        const uniqueStrikes = [...new Set(strikeArray)];
 
         const rfq =
         {
             arrivalTime: new Date().toLocaleTimeString(),
             rfqId: crypto.randomUUID(),
             underlying: rfqData.underlying,
-            strike: [...new Set(strikeArray)].length === 1 ? strikeArray[0] : strikeArray.join(', '),
+            strike: uniqueStrikes.length === 1 ? String(uniqueStrikes[0]) : uniqueStrikes.join(', '),
             request: snippet,
             client:  'Select Client',
             status: 'PENDING',
@@ -406,8 +428,8 @@ export const RfqsApp = () =>
             interestRate:  rfqData.interestRate,
             exerciseType: exerciseType,
             dayCountConvention: config.defaultDayConvention,
-            tradeDate: new Date().toLocaleDateString(),
-            maturityDate: rfqData.maturityDate,
+            tradeDate: getDateToday(),
+            maturityDate: toDateString(rfqData.maturityDate),
             multiplier: 100,
             contracts: totalQuantity,
             salesCreditPercentage: config.defaultSalesCreditPercentage,
@@ -415,15 +437,16 @@ export const RfqsApp = () =>
             premiumSettlementDaysOverride: config.defaultSettlementDays,
             premiumSettlementCurrency: config.defaultSettlementCurrency,
             spread: config.defaultSpread,
-            legs: parsedOptions,
+            legs: toPersistableLegs(parsedOptions),
             createdBy: ownerId,
+            active: true,
             ...fieldUpdates
         };
 
         return rfq;
     }, [config, optionRequestParserService, exerciseType, exchangeRateService, optionPricingService, priceService, ownerId]);
 
-    const handleSnippetSubmit = useCallback((snippetInput) =>
+    const handleSnippetSubmit = useCallback(async (snippetInput) =>
     {
         try
         {
@@ -439,33 +462,32 @@ export const RfqsApp = () =>
 
             const parsedOptions = optionRequestParserService.parseRequest(snippet);
             loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
-            
+
             if (!parsedOptions || parsedOptions.length === 0)
                 return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date Jan 10 2026, and the same underlying Toyota]" };
 
-            createRFQFromOptions(snippet, parsedOptions).then(async (newRFQ) =>
-            {
-                await rfqService.saveRfq(newRFQ);
-                setSelectedRFQ(newRFQ);
-                setRfqs(prevOrders => [newRFQ, ...prevOrders]);
-                loggerService.logInfo(`Successfully created and saved RFQ from snippet: ${snippet}`);
-            });
-
+            const newRFQ = await createRFQFromOptions(snippet, parsedOptions);
+            const savedRfq = await rfqService.saveRfq(newRFQ);
+            const rfqToShow = savedRfq || newRFQ;
+            setSelectedRFQ(rfqToShow);
+            setRfqs(prevOrders => [rfqToShow, ...prevOrders]);
+            loggerService.logInfo(`Successfully created and saved RFQ from snippet: ${snippet}`);
             return { success: true };
         }
         catch (error)
         {
-            loggerService.logError(`Failed to parse snippet: ${error.message}`);
-            return { success: false, error: `Failed to parse snippet: ${error.message}` };
+            loggerService.logError(`Failed to create RFQ: ${error.message}`);
+            setErrorMessage(`Failed to save RFQ: ${error.message}`);
+            return { success: false, error: `Failed to save RFQ: ${error.message}` };
         }
-    }, [optionRequestParserService, loggerService, createRFQFromOptions]);
+    }, [optionRequestParserService, loggerService, createRFQFromOptions, rfqService]);
 
     const handleRfqCreation = useCallback((snippet) =>
     {
         if (snippet && snippet.trim() !== '')
             handleSnippetSubmit(snippet);
 
-    }, [handleSnippetSubmit, loggerService]);
+    }, [handleSnippetSubmit]);
 
     const handleDeleteRfq = useCallback(async (rfqData) =>
     {
@@ -475,12 +497,30 @@ export const RfqsApp = () =>
 
     }, []);
 
-    const handleCloneRfq = useCallback((rfqData) =>
+    const handleCloneRfq = useCallback(async (rfqData) =>
     {
-        const clonedRfq = {...rfqData, rfqId: crypto.randomUUID(), arrivalTime: new Date().toLocaleTimeString(), status: 'PENDING' };
-        setRfqs(prevRfqs => [clonedRfq, ...prevRfqs]);
-        loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${clonedRfq.rfqId}`);
-    }, [loggerService, setRfqs]);
+        try
+        {
+            const clonedRfq =
+            {
+                ...rfqData,
+                rfqId: crypto.randomUUID(),
+                arrivalTime: new Date().toLocaleTimeString(),
+                status: 'PENDING',
+                active: true,
+                tradeDate: rfqData.tradeDate || getDateToday()
+            };
+            const savedRfq = await rfqService.saveRfq(clonedRfq);
+            const rfqToShow = savedRfq || clonedRfq;
+            setRfqs(prevRfqs => [rfqToShow, ...prevRfqs]);
+            loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${rfqToShow.rfqId}`);
+        }
+        catch (error)
+        {
+            loggerService.logError(`Failed to clone RFQ: ${error.message}`);
+            setErrorMessage(`Failed to clone RFQ: ${error.message}`);
+        }
+    }, [loggerService, rfqService]);
 
     const handleChartRfq = useCallback((rfqData) =>
     {

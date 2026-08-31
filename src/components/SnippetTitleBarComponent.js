@@ -28,13 +28,13 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showStats, 
 
     const handleInputChange = (e) => setInputValue(e.target.value);
 
-    const handleKeyPress = (e) =>
+    const handleKeyPress = async (e) =>
     {
         if (e.key === 'Enter' && onSnippetSubmit)
         {
-            const result = onSnippetSubmit(inputValue);
+            const result = await onSnippetSubmit(inputValue);
             console.log('Snippet submit result:', result);
-            
+
             if (result && result.success)
             {
                 setInputValue("");
