@@ -63,36 +63,36 @@ const InstrumentAnalysisComponent = () =>
             valueFormatter: numberFormatter
         },
         {
-            headerName: 'Total Notional',
+            headerName: 'Total Notional (USD)',
             field: 'totalNotional',
-            width: 150,
+            width: 180,
             sortable: true,
             filter: true,
             type: 'numericColumn',
             valueFormatter: numberFormatter
         },
         {
-            headerName: 'Average Notional',
+            headerName: 'Avg Notional (USD)',
             field: 'averageNotional',
-            width: 150,
+            width: 170,
             sortable: true,
             filter: true,
             type: 'numericColumn',
             valueFormatter: numberFormatter
         },
         {
-            headerName: 'Total Sales Credit',
+            headerName: 'Total Sales Credit (USD)',
             field: 'totalSalesCreditAmount',
-            width: 150,
+            width: 180,
             sortable: true,
             filter: true,
             type: 'numericColumn',
             valueFormatter: numberFormatter
         },
         {
-            headerName: 'Average Sales Credit',
+            headerName: 'Avg Sales Credit (USD)',
             field: 'averageSalesCreditAmount',
-            width: 150,
+            width: 170,
             sortable: true,
             filter: true,
             type: 'numericColumn',
