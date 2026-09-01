@@ -3,6 +3,7 @@ import {
     buildGreeksGridData,
     buildLegGreeksGridData,
     buildLegGreekRowValues,
+    buildRfqDetailsDirtyChanges,
     buildRfqDetailsTextFields,
     buildLegResult,
     buildSummaryGreeksGridData
@@ -30,7 +31,9 @@ const createMockRfq = () =>
     maturityDate: '2028-07-19',
     premiumSettlementCurrency: 'USD',
     premiumSettlementDaysOverride: 2,
-    premiumSettlementFXRate: 1
+    premiumSettlementFXRate: 1,
+    client: 'Acme',
+    bookCode: 'EQ-HK'
 });
 
 const createMockGreeks = (overrides = {}) =>
@@ -268,5 +271,50 @@ describe('buildRfqDetailsTextFields', () =>
 
         expect(fieldMap['Maturity Date']).toBe('19 Jul 2028');
         expect(fieldMap['Premium Settlement Date']).toBe('21 Jul 2028');
+    });
+});
+
+describe('RFQ details field metadata', () =>
+{
+    const editableLabels = [
+        'Client', 'Book', 'Underlying Price', 'Multiplier', 'Volatility', 'Interest Rate',
+        'Day Count', 'Spread', 'Notional FX Rate', 'Premium Settlement Currency',
+        'Premium Settlement Date', 'Premium Settlement Days Override', 'Premium Settlement FX Rate',
+        'Sales Credit Percentage'
+    ];
+
+    it('marks booking and pricing inputs editable and locks identity and outputs', () =>
+    {
+        const rfq = createMockRfq();
+        const leg = { quantity: 1, strike: 100, side: 'BUY', optionType: 'CALL', underlying: '0007.HK', currency: 'HKD', daysToExpiry: 493 };
+        const fields = buildRfqDetailsTextFields(rfq, { mode: 'leg', legResult: buildLegResult(rfq, leg, createMockGreeks()), summary: null }, 3);
+        const fieldMap = Object.fromEntries(fields.map(field => [field.label, field]));
+
+        expect(fieldMap['Client'].value).toBe('Acme');
+        expect(fieldMap['Book'].value).toBe('EQ-HK');
+        expect(fieldMap['Spread'].value).toBe(0.2);
+        expect(fieldMap['Day Count'].value).toBe(365);
+
+        for (const label of editableLabels)
+            expect(fieldMap[label].editable).toBe(true);
+
+        expect(fieldMap['Underlying'].editable).toBe(false);
+        expect(fieldMap['Strike'].editable).toBe(false);
+        expect(fieldMap['Quantity'].editable).toBe(false);
+        expect(fieldMap['Maturity Date'].editable).toBe(false);
+        expect(fieldMap['RFQ ID'].editable).toBe(false);
+        expect(fieldMap['Premium In Local'].editable).toBe(false);
+        expect(fieldMap['Sales Credit Amount'].editable).toBe(false);
+    });
+
+    it('reports dirty booking and pricing changes for apply', () =>
+    {
+        const rfq = createMockRfq();
+        const draft = { ...rfq, volatility: 25, client: 'Globex' };
+        const changes = buildRfqDetailsDirtyChanges(draft, rfq);
+
+        expect(changes.map(change => change.fieldName).sort()).toEqual(['client', 'volatility']);
+        expect(changes.find(change => change.fieldName === 'volatility').newValue).toBe(25);
+        expect(changes.find(change => change.fieldName === 'client').oldValue).toBe('Acme');
     });
 });

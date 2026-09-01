@@ -118,9 +118,55 @@
     overflow: auto;
   }
 
+  &.rfq-details-app--editable .rfq-details-content {
+    height: calc(100% - 128px);
+  }
+
+  .rfq-details-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    min-height: 48px;
+  }
+
   .rfq-details-field-changed {
     .MuiInputBase-root {
       animation: rfq-details-cell-flash 2s ease-out;
+    }
+  }
+
+  .rfq-details-field-readonly {
+    .MuiInputBase-root {
+      background-color: #f5f5f5;
+
+      fieldset {
+        border-color: #e0e0e0;
+      }
+    }
+  }
+
+  .rfq-details-field-editable {
+    .MuiInputBase-root {
+      background-color: #fff;
+
+      fieldset {
+        border-color: #90caf9;
+      }
+    }
+
+    &:hover .MuiInputBase-root fieldset {
+      border-color: #64b5f6;
+    }
+  }
+
+  .rfq-details-field-dirty {
+    .MuiInputBase-root fieldset {
+      border-color: #42a5f5;
+      border-width: 1.5px;
     }
   }
 }

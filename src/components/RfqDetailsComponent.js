@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { buildGreeksGridData, buildRfqDetailsTextFields } from '../calculations/rfqDetailsViewModel';
 import { RfqDetailsPanel } from './RfqDetailsPanel';
 
-export const RfqDetailsComponent = ({ rfq, editable, mode = 'leg', legResult, legResults, summary, initialLoading, config }) =>
+export const RfqDetailsComponent = ({ rfq, editable, mode = 'leg', legResult, legResults, summary, initialLoading, config, fieldOptions, dirtyKeys, draftEpoch, onFieldChange }) =>
 {
     const isSummary = mode === 'summary';
 
@@ -15,8 +15,8 @@ export const RfqDetailsComponent = ({ rfq, editable, mode = 'leg', legResult, le
     [viewContext, config.decimalPrecision]);
 
     const textFields = useMemo(() =>
-        buildRfqDetailsTextFields(rfq, viewContext, config.decimalPrecision),
-    [rfq, viewContext, config.decimalPrecision]);
+        buildRfqDetailsTextFields(rfq, viewContext, config.decimalPrecision, fieldOptions),
+    [rfq, viewContext, config.decimalPrecision, fieldOptions]);
 
     if (!rfq?.legs?.length)
         return <div>No RFQ data available</div>;
@@ -33,6 +33,9 @@ export const RfqDetailsComponent = ({ rfq, editable, mode = 'leg', legResult, le
         <RfqDetailsPanel
             gridData={gridData}
             textFields={textFields}
-            editable={!isSummary && editable}/>
+            editable={!isSummary && editable}
+            dirtyKeys={dirtyKeys}
+            draftEpoch={draftEpoch}
+            onFieldChange={onFieldChange}/>
     );
 };

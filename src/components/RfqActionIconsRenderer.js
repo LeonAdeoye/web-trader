@@ -34,7 +34,7 @@ const RfqActionIconsRenderer = ({data, context}) =>
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}
                 />
             </Tooltip>
-            <Tooltip title="Open this RFQ request in edit mode. All fields will be editable allowing you to modify the RFQ parameters, pricing, and other details.">
+            <Tooltip title="Open this RFQ in edit mode. Booking and pricing inputs can be changed; contract identity stays locked.">
                 <EditIcon 
                     onClick={() => handleRfqAction(ACTIONS.EDIT, data)} 
                     style={{cursor: 'pointer', marginRight: '-4px', color:'#404040', height:'20px'}}

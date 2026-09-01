@@ -7,7 +7,7 @@ import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 
-const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
+const TitleBarComponent = ({title, titleIcon, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -17,7 +17,10 @@ const TitleBarComponent = ({title, windowId, addButtonProps, showChannel, showTo
 
     return(
         <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
-            <span className="title-bar-text">{title}</span>
+            <span className="title-bar-text">
+                {titleIcon ? <span className="title-bar-label-icon">{titleIcon}</span> : null}
+                {title}
+            </span>
             <div className="title-bar-controls">
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>

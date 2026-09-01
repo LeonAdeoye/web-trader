@@ -20,12 +20,30 @@
 .title-bar-text
 {
   color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-grow: 1;
   margin-left: 0px;
   margin-top: 10px;
   font-family: Calibri;
   font-weight: bold;
   font-size: 24px;
+}
+
+.title-bar-label-icon
+{
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  color: white;
+
+  svg
+  {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .title-bar-controls

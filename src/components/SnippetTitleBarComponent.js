@@ -187,7 +187,7 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showStats, 
                                 </IconButton>
                             </span>
                         </Tooltip>
-                        <Tooltip title="Open this RFQ request in edit mode. All fields will be editable allowing you to modify the RFQ parameters, pricing, and other details.">
+                        <Tooltip title="Open this RFQ in edit mode. Booking and pricing inputs can be changed; contract identity stays locked.">
                             <span>
                                 <IconButton 
                                     className="title-bar-action" 

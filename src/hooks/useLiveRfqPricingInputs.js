@@ -41,6 +41,12 @@ export const useLiveRfqPricingInputs = (rfq, optionRequestParserService, config)
             rfq.interestRate,
             rfq.maturityDate,
             rfq.optionModel,
+            rfq.spread,
+            rfq.multiplier,
+            rfq.notionalFXRate,
+            rfq.dayCountConvention,
+            rfq.salesCreditPercentage,
+            rfq.premiumSettlementDaysOverride,
             rfq.legs?.length
         ].join('|');
     }, [rfq]);
