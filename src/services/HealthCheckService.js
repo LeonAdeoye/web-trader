@@ -15,7 +15,7 @@ export class HealthCheckService
     checkServiceHealth = async (serviceName, port) => 
     {
         const healthUrl = `http://localhost:${port}/health`;
-        this.#loggerService.logInfo(`Checking health for ${serviceName} at ${healthUrl}`);
+        this.#loggerService.logDebug(`Checking health for ${serviceName} at ${healthUrl}`);
         
         try 
         {
@@ -23,7 +23,7 @@ export class HealthCheckService
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-            this.#loggerService.logInfo(`Making fetch request to: ${healthUrl}`);
+            this.#loggerService.logDebug(`Making fetch request to: ${healthUrl}`);
             
             const response = await fetch(healthUrl, {
                 method: 'GET',
@@ -34,13 +34,13 @@ export class HealthCheckService
             });
 
             clearTimeout(timeoutId);
-            this.#loggerService.logInfo(`Response received for ${serviceName}: ${response.status} ${response.statusText}`);
-            this.#loggerService.logInfo(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+            this.#loggerService.logDebug(`Response received for ${serviceName}: ${response.status} ${response.statusText}`);
+            this.#loggerService.logDebug(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
 
             if (response.ok) 
             {
                 const healthText = await response.text();
-                this.#loggerService.logInfo(`Health response received: "${healthText}"`);
+                this.#loggerService.logDebug(`Health response received: "${healthText}"`);
                 const isHealthy = healthText.trim() === 'Up';
                 return {
                     isHealthy,
@@ -63,7 +63,6 @@ export class HealthCheckService
         catch (error) 
         {
             this.#loggerService.logError(`Fetch error for ${serviceName}: ${error.name} - ${error.message}`);
-            this.#loggerService.logError(`Error stack: ${error.stack}`);
             
             let errorMessage = 'Connection Failed';
             if (error.name === 'AbortError') 

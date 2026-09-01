@@ -96,7 +96,7 @@ class RfqService
 
     async addWorkflowEvent(eventData)
     {
-        this.loggerService.logInfo(`Adding workflow event to backend service for RFQ: ${JSON.stringify(eventData)}`);
+        this.loggerService.logDebug(`Adding workflow event to backend service for RFQ: ${JSON.stringify(eventData)}`);
         try
         {
             const eventPayload =
@@ -112,7 +112,7 @@ class RfqService
                 fieldChanges: eventData.fieldChanges || []
             };
 
-            this.loggerService.logInfo(`Workflow event payload: ${JSON.stringify(eventPayload)}`);
+            this.loggerService.logDebug(`Workflow event payload: ${JSON.stringify(eventPayload)}`);
             const response = await fetch('http://localhost:20020/rfq/workflow/event', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(eventPayload)});
             if (!response.ok)
             {
@@ -165,7 +165,7 @@ class RfqService
                     role: isRT ? 'RT' : 'ST'
                 };
             });
-            this.loggerService.logInfo(`Generated ${availableTraders.length} available traders: ${JSON.stringify(availableTraders)}`);
+            this.loggerService.logDebug(`Generated ${availableTraders.length} available traders: ${JSON.stringify(availableTraders)}`);
             return availableTraders;
         }
         catch (error)

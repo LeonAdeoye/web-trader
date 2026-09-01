@@ -42,7 +42,7 @@ export class OptionRequestParserService
                 this.#priceService.loadPrices()
             ]);
             
-            this.#loggerService.logInfo(`Reference data loaded successfully`);
+            this.#loggerService.logDebug(`Reference data loaded successfully`);
         }
         catch (error)
         {

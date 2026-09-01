@@ -20,7 +20,7 @@ export class BrokerService
                 if (data.length > 0)
                 {
                     this.#brokers = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} brokers: ${JSON.stringify(this.#brokers)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} brokers: ${JSON.stringify(this.#brokers)}`);
                 } else
                     this.#loggerService.logInfo(`Loaded zero brokers.`);
             })
@@ -45,7 +45,7 @@ export class BrokerService
     addNewBroker = async (newBroker) =>
     {
         const {brokerId, ...rest} = newBroker;
-        this.#loggerService.logInfo(`Saving new broker: ${JSON.stringify(newBroker)}.`);
+        this.#loggerService.logDebug(`Saving new broker: ${JSON.stringify(newBroker)}.`);
         return await fetch("http://localhost:20009/broker", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -54,7 +54,7 @@ export class BrokerService
             .then((brokerResponse) =>
             {
                 this.#brokers.push(brokerResponse);
-                this.#loggerService.logInfo(`Successfully saved broker: ${JSON.stringify(brokerResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved broker: ${JSON.stringify(brokerResponse)}.`);
                 return brokerResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -62,7 +62,7 @@ export class BrokerService
 
     updateBroker = async (brokerToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating broker: ${JSON.stringify(brokerToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating broker: ${JSON.stringify(brokerToUpdate)}.`);
         return await fetch(`http://localhost:20009/broker`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -78,7 +78,7 @@ export class BrokerService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated broker: ${JSON.stringify(brokerResponse)}.`);
+                this.#loggerService.logDebug(`Updated broker: ${JSON.stringify(brokerResponse)}.`);
                 return brokerResponse;
             })
             .catch(error => this.#loggerService.logError(error));

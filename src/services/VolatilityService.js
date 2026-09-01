@@ -21,7 +21,7 @@ export class VolatilityService
         // Check if we already have cached data
         if (this.#volatilities && this.#volatilities.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached volatility data (${this.#volatilities.length} records)`);
+            this.#loggerService.logDebug(`Using cached volatility data (${this.#volatilities.length} records)`);
             return this.#volatilities;
         }
 
@@ -34,7 +34,7 @@ export class VolatilityService
                 if (data.length > 0)
                 {
                     this.#volatilities = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} volatility records: ${JSON.stringify(this.#volatilities)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} volatility records: ${JSON.stringify(this.#volatilities)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero volatility records.`);
@@ -62,7 +62,7 @@ export class VolatilityService
             lastUpdatedOn
         };
 
-        this.#loggerService.logInfo(`Updating volatility for instrument ${instrumentCode}: ${JSON.stringify(volatilityData)}`);
+        this.#loggerService.logDebug(`Updating volatility for instrument ${instrumentCode}: ${JSON.stringify(volatilityData)}`);
         
         try
         {
@@ -81,7 +81,7 @@ export class VolatilityService
                 else
                     this.#volatilities.push(updatedVolatility);
                 
-                this.#loggerService.logInfo(`Successfully updated volatility for instrument ${instrumentCode}: ${JSON.stringify(updatedVolatility)}`);
+                this.#loggerService.logDebug(`Successfully updated volatility for instrument ${instrumentCode}: ${JSON.stringify(updatedVolatility)}`);
                 return updatedVolatility;
             }
             else

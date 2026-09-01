@@ -20,7 +20,7 @@ export class AccountService
                 if (data.length > 0)
                 {
                     this.#accounts = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} accounts: ${JSON.stringify(this.#accounts)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} accounts: ${JSON.stringify(this.#accounts)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero accounts.`);
@@ -46,7 +46,7 @@ export class AccountService
     addNewAccount = async (newAccount) =>
     {
         const {accountId, ...rest} = newAccount;
-        this.#loggerService.logInfo(`Saving new account: ${JSON.stringify(newAccount)}.`);
+        this.#loggerService.logDebug(`Saving new account: ${JSON.stringify(newAccount)}.`);
         return await fetch("http://localhost:20009/account", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -55,7 +55,7 @@ export class AccountService
             .then((accountResponse) =>
             {
                 this.#accounts.push(accountResponse);
-                this.#loggerService.logInfo(`Successfully saved account: ${JSON.stringify(accountResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved account: ${JSON.stringify(accountResponse)}.`);
                 return accountResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -63,7 +63,7 @@ export class AccountService
 
     updateAccount = async (accountToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating account: ${JSON.stringify(accountToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating account: ${JSON.stringify(accountToUpdate)}.`);
         return await fetch(`http://localhost:20009/account`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -79,7 +79,7 @@ export class AccountService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated account: ${JSON.stringify(accountResponse)}.`);
+                this.#loggerService.logDebug(`Updated account: ${JSON.stringify(accountResponse)}.`);
                 return accountResponse;
             })
             .catch(error => this.#loggerService.logError(error));

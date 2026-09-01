@@ -16,7 +16,7 @@ export class ClientService
         // Check if we already have cached data
         if (this.#clients && this.#clients.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached client data (${this.#clients.length} records)`);
+            this.#loggerService.logDebug(`Using cached client data (${this.#clients.length} records)`);
             return this.#clients;
         }
 
@@ -27,7 +27,7 @@ export class ClientService
                 if(data.length > 0)
                 {
                     this.#clients = data;
-                    this.#loggerService.logInfo(`Client service loaded ${this.#clients.length} clients: ${JSON.stringify(this.#clients)}`);
+                    this.#loggerService.logDebug(`Client service loaded ${this.#clients.length} clients: ${JSON.stringify(this.#clients)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero clients.`);
@@ -41,7 +41,7 @@ export class ClientService
     addNewClient = async (newClient) =>
     {
         const {clientId, ...rest} = newClient;
-        this.#loggerService.logInfo(`Saving new client: ${JSON.stringify(rest)}.`);
+        this.#loggerService.logDebug(`Saving new client: ${JSON.stringify(rest)}.`);
         return await fetch("http://localhost:20009/client", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -50,7 +50,7 @@ export class ClientService
             .then((clientResponse) =>
             {
                 this.#clients.push(clientResponse);
-                this.#loggerService.logInfo(`Successfully saved client: ${JSON.stringify(clientResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved client: ${JSON.stringify(clientResponse)}.`);
                 return clientResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -76,7 +76,7 @@ export class ClientService
 
     updateClient = async (clientToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating client: ${JSON.stringify(clientToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating client: ${JSON.stringify(clientToUpdate)}.`);
         return await fetch(`http://localhost:20009/client`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -92,7 +92,7 @@ export class ClientService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated client: ${JSON.stringify(clientResponse)}.`);
+                this.#loggerService.logDebug(`Updated client: ${JSON.stringify(clientResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

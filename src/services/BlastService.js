@@ -37,7 +37,7 @@ export class BlastService
 
     addNewBlastConfiguration = async (newBlastConfiguration) =>
     {
-        this.#loggerService.logInfo(`Saving blast configuration: ${JSON.stringify(newBlastConfiguration)}.`);
+        this.#loggerService.logDebug(`Saving blast configuration: ${JSON.stringify(newBlastConfiguration)}.`);
         return await fetch("http://localhost:20009/blast", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -46,7 +46,7 @@ export class BlastService
             .then((blastResponse) =>
             {
                 this.#blasts.push(blastResponse);
-                this.#loggerService.logInfo(`Successfully saved blast configuration: ${JSON.stringify(blastResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved blast configuration: ${JSON.stringify(blastResponse)}.`);
                 return blastResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -89,7 +89,7 @@ export class BlastService
 
     updateBlastConfiguration = async (updatedBlastConfiguration) =>
     {
-        this.#loggerService.logInfo(`Updating blast configuration: ${JSON.stringify(updatedBlastConfiguration)}`);
+        this.#loggerService.logDebug(`Updating blast configuration: ${JSON.stringify(updatedBlastConfiguration)}`);
         return await fetch("http://localhost:20009/blast", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -106,7 +106,7 @@ export class BlastService
                     }
                 }
 
-                this.#loggerService.logInfo(`Successfully updated blast configuration: ${JSON.stringify(updatedBlastConfiguration)}.`);
+                this.#loggerService.logDebug(`Successfully updated blast configuration: ${JSON.stringify(updatedBlastConfiguration)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

@@ -185,7 +185,7 @@ export class BankHolidayService
         // Check if we already have cached data
         if (this.#bankHolidays && this.#bankHolidays.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached bank holiday data (${this.#bankHolidays.length} records)`);
+            this.#loggerService.logDebug(`Using cached bank holiday data (${this.#bankHolidays.length} records)`);
             return this.#bankHolidays;
         }
 
@@ -338,7 +338,7 @@ export class BankHolidayService
             await new Promise(resolve => setTimeout(resolve, 100));
             
             this.#bankHolidays.push(newHoliday);
-            this.#loggerService.logInfo(`Added bank holiday: ${JSON.stringify(newHoliday)}`);
+            this.#loggerService.logDebug(`Added bank holiday: ${JSON.stringify(newHoliday)}`);
             return newHoliday;
         }
         catch (error)
@@ -369,7 +369,7 @@ export class BankHolidayService
             if (index !== -1)
             {
                 this.#bankHolidays[index] = { ...bankHoliday };
-                this.#loggerService.logInfo(`Updated bank holiday: ${JSON.stringify(bankHoliday)}`);
+                this.#loggerService.logDebug(`Updated bank holiday: ${JSON.stringify(bankHoliday)}`);
                 return this.#bankHolidays[index];
             }
             throw new Error('Bank holiday not found');
@@ -392,7 +392,7 @@ export class BankHolidayService
             if (index !== -1)
             {
                 const deletedHoliday = this.#bankHolidays.splice(index, 1)[0];
-                this.#loggerService.logInfo(`Deleted bank holiday: ${JSON.stringify(deletedHoliday)}`);
+                this.#loggerService.logDebug(`Deleted bank holiday: ${JSON.stringify(deletedHoliday)}`);
                 return deletedHoliday;
             }
             throw new Error('Bank holiday not found');

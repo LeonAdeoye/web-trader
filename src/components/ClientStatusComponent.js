@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { AgGridReact } from "ag-grid-react";
 import { LoggerService } from "../services/LoggerService";
-import { numberFormatter } from "../utilities";
+import { numberFormatter, twoDecimalNumberFormatter } from "../utilities";
 
 const ClientStatusComponent = () =>
 {
@@ -86,7 +86,7 @@ const ClientStatusComponent = () =>
             sortable: true,
             filter: true,
             type: 'numericColumn',
-            valueFormatter: numberFormatter
+            valueFormatter: twoDecimalNumberFormatter
         },
         {
             headerName: 'Avg Sales Credit (USD)',
@@ -95,7 +95,7 @@ const ClientStatusComponent = () =>
             sortable: true,
             filter: true,
             type: 'numericColumn',
-            valueFormatter: numberFormatter
+            valueFormatter: twoDecimalNumberFormatter
         }
     ], []);
 

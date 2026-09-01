@@ -15,7 +15,7 @@ export class MarketDataService
     {
         try
         {
-            this.#loggerService.logInfo(`Subscribing to RICs: ${JSON.stringify(rics)}`);
+            this.#loggerService.logDebug(`Subscribing to RICs: ${JSON.stringify(rics)}`);
             
             const response = await fetch(`${this.#baseUrl}/subscribe`, {
                 method: 'POST',
@@ -35,7 +35,7 @@ export class MarketDataService
             }
 
             const result = await response.json();
-            this.#loggerService.logInfo(`Successfully subscribed to RICs: ${JSON.stringify(rics)}`);
+            this.#loggerService.logDebug(`Successfully subscribed to RICs: ${JSON.stringify(rics)}`);
             return result;
         }
         catch (error)
@@ -78,7 +78,7 @@ export class MarketDataService
         try
         {
             await Promise.all(unsubscribePromises);
-            this.#loggerService.logInfo(`Successfully unsubscribed from all RICs: ${JSON.stringify(rics)}`);
+            this.#loggerService.logDebug(`Successfully unsubscribed from all RICs: ${JSON.stringify(rics)}`);
         }
         catch (error)
         {
@@ -91,7 +91,7 @@ export class MarketDataService
     {
         try
         {
-            this.#loggerService.logInfo(`Subscribing to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+            this.#loggerService.logDebug(`Subscribing to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
             
             const response = await fetch(`${this.#baseUrl}/crypto/subscribe`, {
                 method: 'POST',
@@ -110,7 +110,7 @@ export class MarketDataService
             }
 
             const result = await response.json();
-            this.#loggerService.logInfo(`Successfully subscribed to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+            this.#loggerService.logDebug(`Successfully subscribed to crypto instruments: ${JSON.stringify(instrumentCodes)}`);
             return result;
         }
         catch (error)
@@ -153,7 +153,7 @@ export class MarketDataService
         try
         {
             await Promise.all(unsubscribePromises);
-            this.#loggerService.logInfo(`Successfully unsubscribed from all crypto instruments: ${JSON.stringify(instrumentCodes)}`);
+            this.#loggerService.logDebug(`Successfully unsubscribed from all crypto instruments: ${JSON.stringify(instrumentCodes)}`);
         }
         catch (error)
         {

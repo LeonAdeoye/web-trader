@@ -63,7 +63,7 @@ export const BlastsApp = () =>
                 || blastConfigurationToSave.contents.length === 0 || blastConfigurationToSave.markets.length === 0)
                 return;
 
-            loggerService.logInfo(`User adding new blast configuration: ${JSON.stringify(blastConfigurationToSave)}`);
+            loggerService.logDebug(`User adding new blast configuration: ${JSON.stringify(blastConfigurationToSave)}`);
             blastService.addNewBlastConfiguration(blastConfigurationToSave)
                 .then((newBlast) => setBlasts([...blasts, newBlast]));
         }
@@ -81,7 +81,7 @@ export const BlastsApp = () =>
                 || blastConfigurationToUpdate.contents.length === 0 || blastConfigurationToUpdate.markets.length === 0 || isEmptyString(blastConfigurationToUpdate.blastId))
                 return;
 
-            loggerService.logInfo(`Updating existing blast configuration:${JSON.stringify(blastConfigurationToUpdate)}`);
+            loggerService.logDebug(`Updating existing blast configuration:${JSON.stringify(blastConfigurationToUpdate)}`);
             blastService.updateBlastConfiguration(blastConfigurationToUpdate)
                 .then(() => setBlasts(previousBlasts =>
                 {

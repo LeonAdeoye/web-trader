@@ -92,7 +92,7 @@ export class PriceService
     {
         if (!forceReload && this.#prices && this.#prices.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached price data (${this.#prices.length} records)`);
+            this.#loggerService.logDebug(`Using cached price data (${this.#prices.length} records)`);
             return this.#prices;
         }
 
@@ -105,7 +105,7 @@ export class PriceService
                 if (data.length > 0)
                 {
                     this.#prices = this.#preserveLast(data);
-                    this.#loggerService.logInfo(`Loaded ${data.length} price records: ${JSON.stringify(this.#prices)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} price records: ${JSON.stringify(this.#prices)}`);
                 }
                 else
                 {
@@ -156,7 +156,7 @@ export class PriceService
             if (response.ok)
             {
                 const updatedPrice = await response.json();
-                this.#loggerService.logInfo(`Successfully updated price for ${instrumentCode}: ${JSON.stringify(updatedPrice)}`);
+                this.#loggerService.logDebug(`Successfully updated price for ${instrumentCode}: ${JSON.stringify(updatedPrice)}`);
                 
                 if (this.#prices)
                 {

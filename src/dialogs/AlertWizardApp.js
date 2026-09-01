@@ -89,7 +89,7 @@ export const AlertWizardApp = () =>
                 // Trigger refresh of Alert Configuration app via IPC
                 window.command.sendMessageToMain('refresh-alert-configurations');
                 
-                loggerService.logInfo(`Successfully saved alert configuration: ${JSON.stringify(savedConfig)}.`);
+                loggerService.logDebug(`Successfully saved alert configuration: ${JSON.stringify(savedConfig)}.`);
             }
             else
             {

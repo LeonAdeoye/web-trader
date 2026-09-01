@@ -95,7 +95,7 @@ const TaskListApp = () =>
 
     const handleComplete = (completedTask) =>
     {
-        loggerService.logInfo(`Completed task: ${JSON.stringify(completedTask)}`);
+        loggerService.logDebug(`Completed task: ${JSON.stringify(completedTask)}`);
         completedTask.status = "completed";
         setTasks(prevTasks =>
         {
@@ -106,7 +106,7 @@ const TaskListApp = () =>
 
     const handleDismiss = (dismissedTask) =>
     {
-        loggerService.logInfo(`Dismissed task: ${JSON.stringify(dismissedTask)}`);
+        loggerService.logDebug(`Dismissed task: ${JSON.stringify(dismissedTask)}`);
         dismissedTask.status = "dismissed";
         setTasks(prevTasks =>
         {

@@ -178,7 +178,7 @@ export const AlertConfigurationsApp = () =>
     {
         try
         {
-            loggerService.logInfo(`User adding new alert configuration: ${JSON.stringify(alertConfigurationToSave)}`);
+            loggerService.logDebug(`User adding new alert configuration: ${JSON.stringify(alertConfigurationToSave)}`);
             alertConfigurationsService.addNewAlertConfiguration(alertConfigurationToSave)
                 .then((newAlertConfiguration) => setAlertConfigurations([...alertConfigurations, newAlertConfiguration]));
         }
@@ -192,7 +192,7 @@ export const AlertConfigurationsApp = () =>
     {
         try
         {
-            loggerService.logInfo(`Updating existing alert configuration:${JSON.stringify(alertConfigurationToUpdate)}`);
+            loggerService.logDebug(`Updating existing alert configuration:${JSON.stringify(alertConfigurationToUpdate)}`);
             alertConfigurationsService.updateAlertConfiguration(alertConfigurationToUpdate)
                 .then(() => setAlertConfigurations(previousAlertConfigurations =>
                 {

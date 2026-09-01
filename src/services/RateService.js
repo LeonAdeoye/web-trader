@@ -31,7 +31,7 @@ export class RateService
         // Check if we already have cached data
         if (this.#rates && this.#rates.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached interest rate data (${this.#rates.length} records)`);
+            this.#loggerService.logDebug(`Using cached interest rate data (${this.#rates.length} records)`);
             return this.#rates;
         }
 
@@ -44,7 +44,7 @@ export class RateService
                 if (data.length > 0)
                 {
                     this.#rates = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} interest rate records: ${JSON.stringify(this.#rates)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} interest rate records: ${JSON.stringify(this.#rates)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero interest rate records.`);
@@ -78,7 +78,7 @@ export class RateService
             lastUpdatedOn
         };
 
-        this.#loggerService.logInfo(`Updating interest rate for currency ${currencyCode}: ${JSON.stringify(rateData)}`);
+        this.#loggerService.logDebug(`Updating interest rate for currency ${currencyCode}: ${JSON.stringify(rateData)}`);
         
         try
         {
@@ -96,7 +96,7 @@ export class RateService
                     this.#rates[existingIndex] = updatedRate;
                 else
                     this.#rates.push(updatedRate);
-                this.#loggerService.logInfo(`Successfully updated interest rate for currency ${currencyCode}: ${JSON.stringify(updatedRate)}`);
+                this.#loggerService.logDebug(`Successfully updated interest rate for currency ${currencyCode}: ${JSON.stringify(updatedRate)}`);
                 return updatedRate;
             }
             else

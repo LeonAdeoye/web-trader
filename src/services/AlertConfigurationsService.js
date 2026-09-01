@@ -53,7 +53,7 @@ export class AlertConfigurationsService
 
     addNewAlertConfiguration = async (newAlertConfigurationsConfiguration) =>
     {
-        this.#loggerService.logInfo(`Saving alert configuration: ${JSON.stringify(newAlertConfigurationsConfiguration)}.`);
+        this.#loggerService.logDebug(`Saving alert configuration: ${JSON.stringify(newAlertConfigurationsConfiguration)}.`);
         return await fetch("http://localhost:20012/alert/configuration", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -62,7 +62,7 @@ export class AlertConfigurationsService
             .then((alertConfigurationsResponse) =>
             {
                 this.#alertConfigurations.push(alertConfigurationsResponse);
-                this.#loggerService.logInfo(`Successfully saved alert configuration: ${JSON.stringify(alertConfigurationsResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved alert configuration: ${JSON.stringify(alertConfigurationsResponse)}.`);
                 return alertConfigurationsResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -93,7 +93,7 @@ export class AlertConfigurationsService
 
     updateAlertConfiguration = async (updatedAlertConfigurationsConfiguration) =>
     {
-        this.#loggerService.logInfo(`Updating alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}`);
+        this.#loggerService.logDebug(`Updating alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}`);
         return await fetch("http://localhost:20012/alert/configuration", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -110,7 +110,7 @@ export class AlertConfigurationsService
                     }
                 }
 
-                this.#loggerService.logInfo(`Successfully updated alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}.`);
+                this.#loggerService.logDebug(`Successfully updated alert configuration: ${JSON.stringify(updatedAlertConfigurationsConfiguration)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     };

@@ -12,6 +12,18 @@ export const currencyFormatter = (param) =>
     return isValidParameter(param) ? formatNumber(param.value) : param.value;
 }
 
+export const twoDecimalNumberFormatter = (param) =>
+{
+    if (!isValidParameter(param))
+        return param.value;
+
+    const value = Number(param.value);
+    if (!Number.isFinite(value))
+        return param.value;
+
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export const isValidParameter = (parameter) =>
 {
     if(parameter === null || parameter === undefined)

@@ -70,7 +70,7 @@ const LaunchPadApp = () =>
             {
                 loggerService.logInfo('Checking services health...');
                 const healthResults = await ServiceRegistry.checkAllServicesHealth();
-                loggerService.logInfo(`Health check results: ${JSON.stringify(healthResults)}`);
+                loggerService.logDebug(`Health check results: ${JSON.stringify(healthResults)}`);
                 const unhealthyServices = healthResults.filter(service => !service.isHealthy);
                 if (unhealthyServices.length > 0)
                 {

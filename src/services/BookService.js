@@ -20,7 +20,7 @@ export class BookService
                 if(data.length > 0)
                 {
                     this.#books = data;
-                    this.#loggerService.logInfo(`Book service loaded ${this.#books.length} books: ${JSON.stringify(this.#books)}`);
+                    this.#loggerService.logDebug(`Book service loaded ${this.#books.length} books: ${JSON.stringify(this.#books)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero books.`);
@@ -32,7 +32,7 @@ export class BookService
     addNewBook = async (newBook) =>
     {
         const {bookId, ...rest} = newBook;
-        this.#loggerService.logInfo(`Saving new book: ${JSON.stringify(rest)}.`);
+        this.#loggerService.logDebug(`Saving new book: ${JSON.stringify(rest)}.`);
         return await fetch("http://localhost:20009/book", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -41,7 +41,7 @@ export class BookService
             .then((bookResponse) =>
             {
                 this.#books.push(bookResponse);
-                this.#loggerService.logInfo(`Successfully saved book: ${JSON.stringify(bookResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved book: ${JSON.stringify(bookResponse)}.`);
                 return bookResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -67,7 +67,7 @@ export class BookService
 
     updateBook = async (bookToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating book: ${JSON.stringify(bookToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating book: ${JSON.stringify(bookToUpdate)}.`);
         return await fetch(`http://localhost:20009/book`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -84,7 +84,7 @@ export class BookService
                     }
                 }
 
-                this.#loggerService.logInfo(`Updated book: ${JSON.stringify(bookResponse)}.`);
+                this.#loggerService.logDebug(`Updated book: ${JSON.stringify(bookResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

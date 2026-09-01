@@ -58,6 +58,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "electron:serve": "concurrently -k \"cross-env BROWSER=none npm run start\" \"npm run electron:start --trace-warnings \"",
+    "electron:serve:debug": "concurrently -k \"cross-env BROWSER=none REACT_APP_LOG_LEVEL=DEBUG npm run start\" \"npm run electron:start --trace-warnings \"",
     "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/main.js",
     "electron:start": "wait-on http://localhost:3000 && electron ."
   },

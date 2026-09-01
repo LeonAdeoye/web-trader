@@ -20,7 +20,7 @@ export class DeskService
                 if(data.length > 0)
                 {
                     this.#desks = data;
-                    this.#loggerService.logInfo(`Desk service loaded ${this.#desks.length} desks: ${JSON.stringify(this.#desks)}`);
+                    this.#loggerService.logDebug(`Desk service loaded ${this.#desks.length} desks: ${JSON.stringify(this.#desks)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero desks.`);

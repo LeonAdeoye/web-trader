@@ -29,3 +29,36 @@ To run the app from the command line:
 ```bash
 npm run electron:serve
 ```
+
+## Logging
+
+Log levels follow: `DEBUG` < `INFO` < `WARN` < `ERROR`. 
+
+`ERROR` always logs.
+
+On startup the level comes from `REACT_APP_LOG_LEVEL` in `LoggerService.resolveInitialLogLevel()` (default `INFO`). 
+
+You do not need to call `setLogLevel` from a React component for normal use.
+
+To start with DEBUG:
+
+```bash
+npm run electron:serve:debug
+```
+
+To change it while the app is running, open the DevTools console in any window:
+
+```javascript
+window.getLogLevel()        // current level
+window.setLogLevel('DEBUG') // show debug logs
+window.setLogLevel('INFO')  // hide debug logs again
+window.setLogLevel('WARN')  // only warn + error
+```
+
+To set it from code:
+
+```javascript
+import { LoggerService } from './services/LoggerService';
+
+LoggerService.setLogLevel('DEBUG');
+```

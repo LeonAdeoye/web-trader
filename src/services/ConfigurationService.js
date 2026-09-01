@@ -19,7 +19,7 @@ export class ConfigurationService
 
         if(this.#configurations.has(owner))
         {
-            this.#loggerService.logInfo(`Using cached configurations for owner: ${owner}`);
+            this.#loggerService.logDebug(`Using cached configurations for owner: ${owner}`);
             return;
         }
 
@@ -242,7 +242,7 @@ export class ConfigurationService
             else
             {
                 const defaultInstruments = ["BTC", "ETH", "XRP", "SOL", "ADA"];
-                this.#loggerService.logInfo(`No crypto instruments found in configuration, using defaults: ${JSON.stringify(defaultInstruments)}`);
+                this.#loggerService.logDebug(`No crypto instruments found in configuration, using defaults: ${JSON.stringify(defaultInstruments)}`);
                 return defaultInstruments;
             }
         }
@@ -250,7 +250,7 @@ export class ConfigurationService
         {
             this.#loggerService.logError(`Failed to get crypto instruments: ${error.message}`);
             const defaultInstruments = ["BTC", "ETH", "XRP", "SOL", "ADA"];
-            this.#loggerService.logInfo(`Using default crypto instruments due to error: ${JSON.stringify(defaultInstruments)}`);
+            this.#loggerService.logDebug(`Using default crypto instruments due to error: ${JSON.stringify(defaultInstruments)}`);
             return defaultInstruments;
         }
     }

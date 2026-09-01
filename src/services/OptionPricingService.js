@@ -27,7 +27,7 @@ export class OptionPricingService
     {
         try
         {
-            this.#loggerService.logInfo(`Calculating option price for request: ${JSON.stringify(optionPricingRequest)}`);
+            this.#loggerService.logDebug(`Calculating option price for request: ${JSON.stringify(optionPricingRequest)}`);
             const response = await fetch(`http://localhost:20015/pricing/calculate`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -43,7 +43,7 @@ export class OptionPricingService
 
             const optionPriceResult = await response.json();
             
-            this.#loggerService.logInfo(`Successfully calculated option price: ${JSON.stringify(optionPriceResult)}`);
+            this.#loggerService.logDebug(`Successfully calculated option price: ${JSON.stringify(optionPriceResult)}`);
             
             return optionPriceResult;
         }
@@ -68,7 +68,7 @@ export class OptionPricingService
     {
         try
         {
-            this.#loggerService.logInfo(`Calculating option price range for request: ${JSON.stringify(rangeRequest)}`);
+            this.#loggerService.logDebug(`Calculating option price range for request: ${JSON.stringify(rangeRequest)}`);
             const response = await fetch(`http://localhost:20015/pricing/range`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},

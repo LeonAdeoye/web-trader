@@ -37,7 +37,7 @@ export const CryptoTickerApp = () =>
             try
             {
                 const instruments = await configurationService.getCryptoInstruments();
-                loggerService.logInfo(`Loaded crypto instruments: ${JSON.stringify(instruments)}`);
+                loggerService.logDebug(`Loaded crypto instruments: ${JSON.stringify(instruments)}`);
                 
                 if (instruments && instruments.length > 0)
                 {

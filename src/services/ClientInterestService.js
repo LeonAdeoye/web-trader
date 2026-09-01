@@ -23,7 +23,7 @@ export class ClientInterestService
                 if(data.length > 0)
                 {
                     this.#clientInterests = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} client interests: ${JSON.stringify(this.#clientInterests)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} client interests: ${JSON.stringify(this.#clientInterests)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero client interests.`);
@@ -33,7 +33,7 @@ export class ClientInterestService
 
     addNewClientInterest = async (newClientInterest) =>
     {
-        this.#loggerService.logInfo(`Saving new client interest: ${JSON.stringify(newClientInterest)}.`);
+        this.#loggerService.logDebug(`Saving new client interest: ${JSON.stringify(newClientInterest)}.`);
         return await fetch("http://localhost:20009/interest", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -42,7 +42,7 @@ export class ClientInterestService
             .then((clientInterestResponse) =>
             {
                 this.#clientInterests.push(clientInterestResponse);
-                this.#loggerService.logInfo(`Successfully saved client interest: ${JSON.stringify(clientInterestResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved client interest: ${JSON.stringify(clientInterestResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }
@@ -73,7 +73,7 @@ export class ClientInterestService
 
     updateClientInterest = async (clientInterestToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating client interest: ${JSON.stringify(clientInterestToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating client interest: ${JSON.stringify(clientInterestToUpdate)}.`);
         return await fetch(`http://localhost:20009/interest`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -90,7 +90,7 @@ export class ClientInterestService
                     }
                 }
 
-                this.#loggerService.logInfo(`Successfully updated client interest: ${JSON.stringify(clientInterestResponse)}.`);
+                this.#loggerService.logDebug(`Successfully updated client interest: ${JSON.stringify(clientInterestResponse)}.`);
             })
             .catch(error => this.#loggerService.logError(error));
     }

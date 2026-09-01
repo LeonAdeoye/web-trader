@@ -18,7 +18,7 @@ const main = async () =>
             try
             {
                 await client.publish(topicName, rfq);
-                loggerService.logInfo(`Send RFQ web worker published message on topic '${topicName}': ${JSON.stringify(rfq)}`);
+                loggerService.logDebug(`Send RFQ web worker published message on topic '${topicName}': ${JSON.stringify(rfq)}`);
             }
             catch (error)
             {

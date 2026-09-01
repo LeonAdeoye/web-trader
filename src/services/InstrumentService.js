@@ -16,7 +16,7 @@ export class InstrumentService
         // Check if we already have cached data
         if (this.#instruments && this.#instruments.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached instrument data (${this.#instruments.length} records)`);
+            this.#loggerService.logDebug(`Using cached instrument data (${this.#instruments.length} records)`);
             return this.#instruments;
         }
 
@@ -27,7 +27,7 @@ export class InstrumentService
                 if(data.length > 0)
                 {
                     this.#instruments = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} instruments: ${JSON.stringify(this.#instruments)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} instruments: ${JSON.stringify(this.#instruments)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero instruments.`);
@@ -49,7 +49,7 @@ export class InstrumentService
 
     addNewInstrument = async (newInstrument) =>
     {
-        this.#loggerService.logInfo(`Saving new instrument: ${JSON.stringify(newInstrument)}.`);
+        this.#loggerService.logDebug(`Saving new instrument: ${JSON.stringify(newInstrument)}.`);
         return await fetch("http://localhost:20009/instrument", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -57,7 +57,7 @@ export class InstrumentService
             .then(response => response.json())
             .then((instrumentResponse) => {
                 this.#instruments.push(instrumentResponse);
-                this.#loggerService.logInfo(`Successfully saved instrument: ${JSON.stringify(instrumentResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved instrument: ${JSON.stringify(instrumentResponse)}.`);
                 return instrumentResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -65,7 +65,7 @@ export class InstrumentService
 
     updateInstrument = async (instrumentToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating instrument: ${JSON.stringify(instrumentToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating instrument: ${JSON.stringify(instrumentToUpdate)}.`);
         return await fetch(`http://localhost:20009/instrument`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -78,7 +78,7 @@ export class InstrumentService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated instrument: ${JSON.stringify(instrumentResponse)}.`);
+                this.#loggerService.logDebug(`Updated instrument: ${JSON.stringify(instrumentResponse)}.`);
                 return instrumentResponse;
             })
             .catch(error => this.#loggerService.logError(error));

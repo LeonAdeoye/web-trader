@@ -15,7 +15,7 @@ export class TraderService
         // Check if we already have cached data
         if (this.#traders && this.#traders.length > 0)
         {
-            this.#loggerService.logInfo(`Using cached trader data (${this.#traders.length} records)`);
+            this.#loggerService.logDebug(`Using cached trader data (${this.#traders.length} records)`);
             return this.#traders;
         }
 
@@ -26,7 +26,7 @@ export class TraderService
                 if (data.length > 0)
                 {
                     this.#traders = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} traders: ${JSON.stringify(this.#traders)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} traders: ${JSON.stringify(this.#traders)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero traders.`);
@@ -54,7 +54,7 @@ export class TraderService
     addNewTrader = async (newTrader) =>
     {
         const {traderId, ...rest} = newTrader;
-        this.#loggerService.logInfo(`Saving new trader: ${JSON.stringify(newTrader)}.`);
+        this.#loggerService.logDebug(`Saving new trader: ${JSON.stringify(newTrader)}.`);
         return await fetch("http://localhost:20009/trader", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -63,7 +63,7 @@ export class TraderService
             .then((traderResponse) =>
             {
                 this.#traders.push(traderResponse);
-                this.#loggerService.logInfo(`Successfully saved trader: ${JSON.stringify(traderResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved trader: ${JSON.stringify(traderResponse)}.`);
                 return traderResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -71,7 +71,7 @@ export class TraderService
 
     updateTrader = async (traderToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating trader: ${JSON.stringify(traderToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating trader: ${JSON.stringify(traderToUpdate)}.`);
         return await fetch(`http://localhost:20009/trader`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -87,7 +87,7 @@ export class TraderService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated trader: ${JSON.stringify(traderResponse)}.`);
+                this.#loggerService.logDebug(`Updated trader: ${JSON.stringify(traderResponse)}.`);
                 return traderResponse;
             })
             .catch(error => this.#loggerService.logError(error));

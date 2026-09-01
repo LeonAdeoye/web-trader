@@ -150,7 +150,7 @@ export class OrderService
 
         const message = this.buildFixMessage(messageArray);
 
-        this.#loggerService.logInfo(`Created FIX message: ${message}`);
+        this.#loggerService.logDebug(`Created FIX message: ${message}`);
 
         return message;
     }

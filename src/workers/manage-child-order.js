@@ -21,7 +21,7 @@ const main = async () => {
                     try
                     {
                         await client.publish(topicName, order);
-                        loggerService.logInfo(`Manage order web worker published message to topic '${topicName}': ${JSON.stringify(order)}`);
+                        loggerService.logDebug(`Manage order web worker published message to topic '${topicName}': ${JSON.stringify(order)}`);
                     }
                     catch (error)
                     {

@@ -95,6 +95,41 @@ const toPersistableLegs = (legs) =>
         interestRate: leg.interestRate
     }));
 
+const upsertRfqById = (prevRfqs, rfqToApply, prepend = false) =>
+{
+    if (!rfqToApply?.rfqId)
+        return prevRfqs;
+
+    const others = prevRfqs.filter(rfq => rfq.rfqId !== rfqToApply.rfqId);
+    if (prepend)
+        return [rfqToApply, ...others];
+
+    const index = prevRfqs.findIndex(rfq => rfq.rfqId === rfqToApply.rfqId);
+    if (index === -1)
+        return [...prevRfqs, rfqToApply];
+
+    const updated = [...others];
+    const insertAt = Math.min(index, updated.length);
+    updated.splice(insertAt, 0, rfqToApply);
+    return updated;
+};
+
+const uniqueRfqsById = (rfqs) =>
+{
+    const seen = new Set();
+    const unique = [];
+    for (const rfq of rfqs)
+    {
+        if (!rfq?.rfqId || seen.has(rfq.rfqId))
+            continue;
+
+        seen.add(rfq.rfqId);
+        unique.push(rfq);
+    }
+
+    return unique;
+};
+
 export const RfqsApp = () =>
 {
     const [rfqs, setRfqs] = useState([]);
@@ -248,18 +283,6 @@ export const RfqsApp = () =>
 
     useEffect(() =>
     {
-        if (inboundWorker)
-            inboundWorker.onmessage = handleWorkerMessage;
-
-        return () =>
-        {
-            if (inboundWorker)
-                inboundWorker.onmessage = null;
-        };
-    }, [inboundWorker]);
-
-    useEffect(() =>
-    {
         if(selectedGenericGridRow)
             window.messenger.sendMessageToMain(FDC3Service.createOrderMenuContext({rfqId: selectedGenericGridRow.rfqId, orderState: selectedGenericGridRow.state}), null, windowId);
 
@@ -315,25 +338,24 @@ export const RfqsApp = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const incomingRfq = event.data.rfq;
-        if (!incomingRfq)
+        if (!incomingRfq?.rfqId)
             return;
 
         const rfqToApply = ServiceRegistry.getPriceService().applyLiveUnderlyingPrice(incomingRfq);
-
-        setRfqs((prevData) =>
-        {
-            const index = prevData.findIndex((element) => element.rfqId === rfqToApply.rfqId);
-            if (index !== -1)
-            {
-                const updatedData = [...prevData];
-                updatedData[index] = rfqToApply;
-                return updatedData;
-            }
-            else
-                return [...prevData, rfqToApply];
-        });
-
+        setRfqs(prevData => upsertRfqById(prevData, rfqToApply));
     }, []);
+
+    useEffect(() =>
+    {
+        if (inboundWorker)
+            inboundWorker.onmessage = handleWorkerMessage;
+
+        return () =>
+        {
+            if (inboundWorker)
+                inboundWorker.onmessage = null;
+        };
+    }, [inboundWorker, handleWorkerMessage]);
 
     const handleRFQFieldChange = (field, value) => setSelectedRFQ(prev => ({...prev, [field]: value}));
 
@@ -461,7 +483,7 @@ export const RfqsApp = () =>
             }
 
             const parsedOptions = optionRequestParserService.parseRequest(snippet);
-            loggerService.logInfo(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
+            loggerService.logDebug(`Parsed RFQ from snippet: ${JSON.stringify(parsedOptions)}`);
 
             if (!parsedOptions || parsedOptions.length === 0)
                 return { success: false, error: "Invalid RFQ snippet format\n\nExamples of valid formats:\n\n1. +1c 100 15Aug25 0700.HK\n   [Buy 1 call option, strike HK$100, expiry Aug 15 2025, underlying Tencent]\n\n\n2. -2P 50 20DEC2024 9988.HK\n   [Sell 2 put options, strike HK$50, expiry Dec 20 2024, underlying Alibaba]\n\n\n3. +1c,+1P 150,120 10jan2026 7203.TK\n   [2 Legs: Buy 1 call + 1 put option, two strikes: ¥150 and ¥120 for each option leg, the same expiry date Jan 10 2026, and the same underlying Toyota]" };
@@ -470,7 +492,7 @@ export const RfqsApp = () =>
             const savedRfq = await rfqService.saveRfq(newRFQ);
             const rfqToShow = savedRfq || newRFQ;
             setSelectedRFQ(rfqToShow);
-            setRfqs(prevOrders => [rfqToShow, ...prevOrders]);
+            setRfqs(prevRfqs => upsertRfqById(prevRfqs, rfqToShow, true));
             loggerService.logInfo(`Successfully created and saved RFQ from snippet: ${snippet}`);
             return { success: true };
         }
@@ -512,7 +534,7 @@ export const RfqsApp = () =>
             };
             const savedRfq = await rfqService.saveRfq(clonedRfq);
             const rfqToShow = savedRfq || clonedRfq;
-            setRfqs(prevRfqs => [rfqToShow, ...prevRfqs]);
+            setRfqs(prevRfqs => upsertRfqById(prevRfqs, rfqToShow, true));
             loggerService.logInfo(`Successfully cloned RFQ: ${rfqData.rfqId} to new RFQ: ${rfqToShow.rfqId}`);
         }
         catch (error)
@@ -596,8 +618,8 @@ export const RfqsApp = () =>
             const fieldUpdates = buildRfqPricingFieldUpdates(pricingResult, config, optionRequestParserService);
             const updatedRFQ = { ...rfqData, ...fieldUpdates };
 
-            setRfqs(prevRfqs => prevRfqs.map(rfq => rfq.rfqId === rfqData.rfqId ? updatedRFQ : rfq ));
-            loggerService.logInfo(`Successfully recalculated RFQ: ${rfqData.rfqId}`);
+            setRfqs(prevRfqs => upsertRfqById(prevRfqs, updatedRFQ));
+            loggerService.logDebug(`Successfully recalculated RFQ: ${rfqData.rfqId}`);
         }
         catch (error)
         {
@@ -627,7 +649,7 @@ export const RfqsApp = () =>
                 loggerService.logError(`Failed to reload prices during RFQ recalculation: ${error.message}`);
             }
 
-            for (const rfq of rfqsRef.current)
+            for (const rfq of uniqueRfqsById(rfqsRef.current))
             {
                 try
                 {

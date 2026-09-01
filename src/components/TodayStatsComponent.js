@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { AgGridReact } from "ag-grid-react";
 import { LoggerService } from "../services/LoggerService";
-import { numberFormatter, getStatusColor, formatStatus, adjustColor } from "../utilities";
+import { numberFormatter, twoDecimalNumberFormatter, getStatusColor, formatStatus, adjustColor } from "../utilities";
 
 const TodayStatsComponent = () =>
 {
@@ -84,7 +84,7 @@ const TodayStatsComponent = () =>
             sortable: true,
             filter: true,
             type: 'numericColumn',
-            valueFormatter: numberFormatter
+            valueFormatter: twoDecimalNumberFormatter
         },
         {
             headerName: 'Avg Sales Credit (USD)',
@@ -93,7 +93,7 @@ const TodayStatsComponent = () =>
             sortable: true,
             filter: true,
             type: 'numericColumn',
-            valueFormatter: numberFormatter
+            valueFormatter: twoDecimalNumberFormatter
         }
     ], []);
 

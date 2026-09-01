@@ -20,7 +20,7 @@ export class ExchangeService
                 if(data.length > 0)
                 {
                     this.#exchanges = data;
-                    this.#loggerService.logInfo(`Loaded ${data.length} exchanges: ${JSON.stringify(this.#exchanges)}`);
+                    this.#loggerService.logDebug(`Loaded ${data.length} exchanges: ${JSON.stringify(this.#exchanges)}`);
                 }
                 else
                     this.#loggerService.logInfo(`Loaded zero exchanges.`);
@@ -36,7 +36,7 @@ export class ExchangeService
     addNewExchange = async (newExchange) =>
     {
         const {exchangeId, ...rest} = newExchange;
-        this.#loggerService.logInfo(`Saving new exchange: ${JSON.stringify(rest)}.`);
+        this.#loggerService.logDebug(`Saving new exchange: ${JSON.stringify(rest)}.`);
         return await fetch("http://localhost:20009/exchange", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -45,7 +45,7 @@ export class ExchangeService
             .then((exchangeResponse) =>
             {
                 this.#exchanges.push(exchangeResponse);
-                this.#loggerService.logInfo(`Successfully saved exchange: ${JSON.stringify(exchangeResponse)}.`);
+                this.#loggerService.logDebug(`Successfully saved exchange: ${JSON.stringify(exchangeResponse)}.`);
                 return exchangeResponse;
             })
             .catch(error => this.#loggerService.logError(error));
@@ -53,7 +53,7 @@ export class ExchangeService
 
     updateExchange = async (exchangeToUpdate) =>
     {
-        this.#loggerService.logInfo(`Updating exchange: ${JSON.stringify(exchangeToUpdate)}.`);
+        this.#loggerService.logDebug(`Updating exchange: ${JSON.stringify(exchangeToUpdate)}.`);
         return await fetch(`http://localhost:20009/exchange`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -66,7 +66,7 @@ export class ExchangeService
                         break;
                     }
                 }
-                this.#loggerService.logInfo(`Updated exchange: ${JSON.stringify(exchangeResponse)}.`);
+                this.#loggerService.logDebug(`Updated exchange: ${JSON.stringify(exchangeResponse)}.`);
                 return exchangeResponse;
             })
             .catch(error => this.#loggerService.logError(error));
