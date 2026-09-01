@@ -10,8 +10,10 @@ export const NewBasketApp = () =>
     return (
         <div>
             <TitleBarComponent title="New Basket" windowId={windowId} addButtonProps={undefined} showChannel={false} showTools={false}/>
-            <h1>New Basket App</h1>
-            <p>This app manages new basket orders.</p>
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '20px', margin: '45px 0px 0px 0px' }}>
+                <h1>New Basket App</h1>
+                <p>This app manages new basket orders.</p>
+            </div>
         </div>
     );
 }

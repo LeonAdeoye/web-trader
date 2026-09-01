@@ -15,6 +15,9 @@
 
   .title-bar-text {
     color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     flex: 0 0 auto;
     margin-left: 0px;
     margin-top: 10px;
@@ -23,6 +26,17 @@
     font-size: 24px;
     -webkit-app-region: drag;
     pointer-events: none;
+  }
+
+  .title-bar-label-icon {
+    margin-left: 0;
+
+    img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      filter: invert(1);
+    }
   }
 
   .snippet-input-container {

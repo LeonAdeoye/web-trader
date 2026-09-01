@@ -891,7 +891,7 @@ export const RfqsApp = () =>
 
     return (<>
         <SnippetTitleBarComponent 
-            title="Request For Quote" 
+            title="Request For Quote"
             windowId={windowId} 
             addButtonProps={{ handler: () => setRfqCreationDialogOpen({open: true, clear: true}), tooltipText: "Add new RFQ...", clearContent: true }}
             showStats={{handler: openStats}}

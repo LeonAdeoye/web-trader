@@ -44,6 +44,14 @@
     width: 26px;
     height: 26px;
   }
+
+  img
+  {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    filter: invert(1);
+  }
 }
 
 .title-bar-controls

@@ -3,6 +3,7 @@ import {useState, useEffect, useMemo, useRef} from "react";
 import { AgChartsReact } from 'ag-charts-react';
 import {time} from "ag-charts-community";
 import {CacheService} from "../services/CacheService";
+import TitleBarComponent from "../components/TitleBarComponent";
 
 export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
 {
@@ -11,7 +12,7 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
     const [newlySelectedSymbol, setNewlySelectedSymbol] = useState(null);
     const [connectionId, setConnectionId] = useState(null);
     const cacheService = useRef(new CacheService()).current;
-    const windowId = useMemo(() => window.command.getWindowId("Price Chart"), []);
+    const windowId = useMemo(() => window.command.getWindowId("Stock Chart"), []);
     const [options, setOptions] = useState({
         data: [],
         series: [
@@ -162,5 +163,12 @@ export const PriceChartApp = ({webWorkerUrl, interval, chartTheme}) =>
         });
     };
 
-    return <AgChartsReact options={options} />;
+    return (
+        <>
+            <TitleBarComponent title="Stock Chart" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
+            <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin: '45px 0px 0px 0px' }}>
+                <AgChartsReact options={options} />
+            </div>
+        </>
+    );
 };

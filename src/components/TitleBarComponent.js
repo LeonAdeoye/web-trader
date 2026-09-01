@@ -6,19 +6,22 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
+import {getLaunchPadIconSrc} from "../assets/launchPadIcons";
 
-const TitleBarComponent = ({title, titleIcon, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
+const TitleBarComponent = ({title, titleIcon, titleIconSrc, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
     const handleMaximize = () => window.command.maximize(windowId);
     const handleClose = () => window.command.close(windowId);
     const [titleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const iconSrc = titleIconSrc || getLaunchPadIconSrc(title);
+    const iconNode = titleIcon || (iconSrc ? <img src={iconSrc} alt="" /> : null);
 
     return(
         <div className="title-bar" style={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
             <span className="title-bar-text">
-                {titleIcon ? <span className="title-bar-label-icon">{titleIcon}</span> : null}
+                {iconNode ? <span className="title-bar-label-icon">{iconNode}</span> : null}
                 {title}
             </span>
             <div className="title-bar-controls">

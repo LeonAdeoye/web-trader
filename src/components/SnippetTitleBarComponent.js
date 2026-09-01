@@ -13,14 +13,17 @@ import RepeatIcon from '@mui/icons-material/Repeat';
 import {useRecoilState} from "recoil";
 import '../styles/css/main.css';
 import {titleBarContextShareColourState} from "../atoms/component-state";
+import {getLaunchPadIconSrc} from "../assets/launchPadIcons";
 
-const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showStats, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit, actionButtonsProps}) =>
+const SnippetTitleBarComponent = ({ title, titleIcon, titleIconSrc, windowId, addButtonProps, showStats, showChannel, showTools, showConfig, snippetPrompt, onSnippetSubmit, actionButtonsProps}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
     const handleMaximize = () => window.command.maximize(windowId);
     const handleClose = () => window.command.close(windowId);
     const [titleBarContextShareColour] = useRecoilState(titleBarContextShareColourState);
+    const iconSrc = titleIconSrc || getLaunchPadIconSrc(title);
+    const iconNode = titleIcon || (iconSrc ? <img src={iconSrc} alt="" /> : null);
 
     const [inputValue, setInputValue] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -78,7 +81,10 @@ const SnippetTitleBarComponent = ({ title, windowId, addButtonProps, showStats, 
 
     return (
         <div className="snippet-title-bar">
-            <span className="title-bar-text">{title}</span>
+            <span className="title-bar-text">
+                {iconNode ? <span className="title-bar-label-icon">{iconNode}</span> : null}
+                {title}
+            </span>
             
             <div className="snippet-input-container">
                 <TextField

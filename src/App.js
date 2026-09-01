@@ -32,6 +32,9 @@ import RfqStatsApp from "./apps/RfqStatsApp";
 import RfqChartsApp from "./apps/RfqChartsApp";
 import {ServicesApp} from "./apps/ServicesApp";
 import {CryptoChartApp} from "./apps/CryptoChartApp";
+import {PriceChartApp} from "./apps/PriceChartApp";
+import {SearchBarApp} from "./apps/SearchBarApp";
+import {PlaceholderApp} from "./apps/PlaceholderApp";
 
 const App = () =>
 {
@@ -68,7 +71,17 @@ const App = () =>
         { name: 'RFQ Workflows', path: '/rfq-workflows', component: RfqWorkflowsApp },
         { name: 'RFQ Stats', path: '/rfq-stats', component: RfqStatsApp },
         { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
-        { name: 'Services', path: '/services', component: ServicesApp }
+        { name: 'Services', path: '/services', component: ServicesApp },
+        { name: 'News', path: '/news', component: PlaceholderApp, props: { title: 'News' } },
+        { name: 'IOIs', path: '/ioi', component: PlaceholderApp, props: { title: 'IOIs' } },
+        { name: 'TCA', path: '/tca', component: PlaceholderApp, props: { title: 'TCA' } },
+        { name: 'Workflow', path: '/workflow', component: PlaceholderApp, props: { title: 'Workflow' } },
+        { name: 'Position Keeping', path: '/positions', component: PlaceholderApp, props: { title: 'Position Keeping' } },
+        { name: 'Index Pricing', path: '/index-pricing', component: PlaceholderApp, props: { title: 'Index Pricing' } },
+        { name: 'Dashboard', path: '/dashboard', component: PlaceholderApp, props: { title: 'Dashboard' } },
+        { name: 'Reports', path: '/reports', component: PlaceholderApp, props: { title: 'Reports' } },
+        { name: 'Stock Chart', path: '/stock-chart', component: PriceChartApp },
+        { name: 'Search Bar', path: '/search-bar', component: SearchBarApp }
     ];
 
     return (
