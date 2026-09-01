@@ -24,10 +24,11 @@
 
   .desk-notionals-tab,
   .trader-notionals-tab,
+  .desk-notional-limits-tab,
+  .trader-notional-limits-tab,
   .price-limits-tab,
   .quantity-limits-tab,
   .adv-limits-tab,
-  .notional-limits-tab,
   .adv-breaches-tab,
   .quantity-breaches-tab,
   .price-breaches-tab,
@@ -35,10 +36,10 @@
     @extend %tab-pill;
   }
 
-  // Content area styling for all tab panels
   .desk-notionals,
   .trader-notionals,
-  .notional-limits,
+  .desk-notional-limits,
+  .trader-notional-limits,
   .adv-limits,
   .price-limits,
   .quantity-limits,
@@ -49,27 +50,6 @@
     margin: 0;
     padding: 0;
     height: calc(100vh - 130px);
-  }
-
-  .notional-limits-stack {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .notional-limits-section {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .notional-limits-section-title {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    background: #656161;
-    color: white;
   }
 }
 

@@ -15,6 +15,9 @@ import PriceBreachesGridComponent from "../components/PriceBreachesGridComponent
 import QuantityBreachesGridComponent from "../components/QuantityBreachesGridComponent";
 import ADVBreachesGridComponent from "../components/ADVBreachesGridComponent";
 
+const tabSx = {minHeight: "25px", height: "25px", textTransform: "none", borderTopLeftRadius: "8px", borderTopRightRadius: "8px", backgroundColor: "#bdbaba", color: "white", "&.Mui-selected": {backgroundColor: "#656161", color: "white"}};
+const tabPanelSx = {padding: 0, margin: 0};
+
 export const LimitsApp = () =>
 {
     const windowId = useMemo(() => window.command.getWindowId("Limits"), []);
@@ -27,54 +30,51 @@ export const LimitsApp = () =>
             <div className="limits-app">
                 <TabContext value={selectedTab}>
                     <Box>
-                        <TabList className="limits-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)}>
-                            <Tab className="notional-limits-tab" label={"Notional Limits"} value="1"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="desk-notionals-tab" label={"Desk Notionals"} value="2" sx={{ marginRight: "5px",  minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161',  color: "white"}}}/>
-                            <Tab className="trader-notionals-tab" label={"Trader Notionals"} value="3"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="notional-breaches-tab" label={"Notional Breaches"} value="4"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="price-limits-tab" label={"Price Difference % Limits"} value="5"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="price-breaches-tab" label={"Price Breaches"} value="6"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="quantity-limits-tab" label={"Quantity Limits"} value="7"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="quantity-breaches-tab" label={"Quantity Breaches"} value="8"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="adv-limits-tab" label={"ADV % Limits"} value="9"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
-                            <Tab className="adv-breaches-tab" label={"ADV% Breaches"} value="10"  sx={{ minHeight: "25px", height: "25px", backgroundColor: "#bdbaba", color: "white", '&.Mui-selected': {backgroundColor: '#656161', color: "white"}}}/>
+                        <TabList className="limits-tab-list" onChange={(event, newValue) => setSelectedTab(newValue)} TabIndicatorProps={{style: {display: "none"}}}>
+                            <Tab className="desk-notional-limits-tab" label={"Desk Notional Limit"} value="1" sx={tabSx}/>
+                            <Tab className="trader-notional-limits-tab" label={"Trader Notional Limit"} value="2" sx={tabSx}/>
+                            <Tab className="desk-notionals-tab" label={"Desk Notionals"} value="3" sx={tabSx}/>
+                            <Tab className="trader-notionals-tab" label={"Trader Notionals"} value="4" sx={tabSx}/>
+                            <Tab className="notional-breaches-tab" label={"Notional Breaches"} value="5" sx={tabSx}/>
+                            <Tab className="price-limits-tab" label={"Price Difference % Limits"} value="6" sx={tabSx}/>
+                            <Tab className="price-breaches-tab" label={"Price Breaches"} value="7" sx={tabSx}/>
+                            <Tab className="quantity-limits-tab" label={"Quantity Limits"} value="8" sx={tabSx}/>
+                            <Tab className="quantity-breaches-tab" label={"Quantity Breaches"} value="9" sx={tabSx}/>
+                            <Tab className="adv-limits-tab" label={"ADV % Limits"} value="10" sx={tabSx}/>
+                            <Tab className="adv-breaches-tab" label={"ADV% Breaches"} value="11" sx={tabSx}/>
                         </TabList>
                     </Box>
-                    <TabPanel value='1' className="notional-limits">
-                        <div className="notional-limits-stack">
-                            <div className="notional-limits-section">
-                                <NotionalLimitsGridComponent/>
-                            </div>
-                            <div className="notional-limits-section">
-                                <TraderNotionalLimitsGridComponent/>
-                            </div>
-                        </div>
+                    <TabPanel value='1' className="desk-notional-limits" sx={tabPanelSx}>
+                        <NotionalLimitsGridComponent/>
                     </TabPanel>
-                    <TabPanel value='2' className="desk-notionals">
+                    <TabPanel value='2' className="trader-notional-limits" sx={tabPanelSx}>
+                        <TraderNotionalLimitsGridComponent/>
+                    </TabPanel>
+                    <TabPanel value='3' className="desk-notionals" sx={tabPanelSx}>
                         <DeskNotionalGridComponent/>
                     </TabPanel>
-                    <TabPanel value='3' className="trader-notionals">
+                    <TabPanel value='4' className="trader-notionals" sx={tabPanelSx}>
                         <TraderNotionalGridComponent/>
                     </TabPanel>
-                    <TabPanel value='4' className="notional-breaches">
+                    <TabPanel value='5' className="notional-breaches" sx={tabPanelSx}>
                         <NotionalBreachesGridComponent/>
                     </TabPanel>
-                    <TabPanel value='5' className="price-limits">
+                    <TabPanel value='6' className="price-limits" sx={tabPanelSx}>
                         <PriceLimitsGridComponent/>
                     </TabPanel>
-                    <TabPanel value='6' className="price-breaches">
+                    <TabPanel value='7' className="price-breaches" sx={tabPanelSx}>
                         <PriceBreachesGridComponent/>
                     </TabPanel>
-                    <TabPanel value='7' className="quantity-limits">
+                    <TabPanel value='8' className="quantity-limits" sx={tabPanelSx}>
                         <QuantityLimitsGridComponent/>
                     </TabPanel>
-                    <TabPanel value='8' className="quantity-breaches">
+                    <TabPanel value='9' className="quantity-breaches" sx={tabPanelSx}>
                         <QuantityBreachesGridComponent/>
                     </TabPanel>
-                    <TabPanel value='9' className="adv-limits">
+                    <TabPanel value='10' className="adv-limits" sx={tabPanelSx}>
                         <ADVLimitsGridComponent/>
                     </TabPanel>
-                    <TabPanel value='10' className="adv-breaches">
+                    <TabPanel value='11' className="adv-breaches" sx={tabPanelSx}>
                         <ADVBreachesGridComponent/>
                     </TabPanel>
                 </TabContext>
