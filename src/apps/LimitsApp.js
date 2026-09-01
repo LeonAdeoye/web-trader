@@ -26,7 +26,7 @@ export const LimitsApp = () =>
     return (
     <>
         <TitleBarComponent title="Limits" windowId={windowId} addButtonProps={undefined} showChannel={true} showTools={false}/>
-        <div style={{ width: '100%', height: 'calc(100vh - 95px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
+        <div style={{ width: '100%', height: 'calc(100vh - 65px)', float: 'left', padding: '0px', margin:'45px 0px 0px 0px'}}>
             <div className="limits-app">
                 <TabContext value={selectedTab}>
                     <Box>
