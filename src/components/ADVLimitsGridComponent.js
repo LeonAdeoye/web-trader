@@ -7,6 +7,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import {Tooltip} from "@mui/material";
 import {LoggerService} from "../services/LoggerService";
+import {LimitsService} from "../services/LimitsService";
 import {AgGridReact} from "ag-grid-react";
 import ErrorMessageComponent from "./ErrorMessageComponent";
 
@@ -17,6 +18,7 @@ const ADVLimitsGridComponent = () =>
     const [originalData, setOriginalData] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
     const exchangeService = useMemo(() => new ExchangeService(), []);
+    const limitsService = useMemo(() => new LimitsService(), []);
     const loggerService = useRef(new LoggerService(ADVLimitsGridComponent.name)).current;
 
     useEffect(() =>
@@ -26,21 +28,19 @@ const ADVLimitsGridComponent = () =>
 
     const loadExchangeData = useCallback(async () =>
     {
-        const url = "http://localhost:20017/limits/adv";
         try
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
-
-            const response = await fetch(url);
             let limitsData = [];
-
-            if (response.ok)
-                limitsData = await response.json(); // Array of ADV limits
-            else
+            try
             {
-                loggerService.logError(`Failed to fetch ADV % limits: ${response.statusText}`);
-                setErrorMessage(`Failed to fetch ADV % limits from REST limits service: ${response.statusText}`);
+                limitsData = await limitsService.getAdvLimits();
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to fetch ADV % limits: ${error.message}`);
+                setErrorMessage(`Failed to fetch ADV % limits from REST limits service: ${error.message}`);
             }
 
             const transformedData = exchanges.map((exchange) =>
@@ -60,9 +60,9 @@ const ADVLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError("Failed to load exchange data: " + error);
-            setErrorMessage(`Failed to load ADV% limits from REST limits service using URL: ${url}`);
+            setErrorMessage("Failed to load ADV% limits from REST limits service");
         }
-    }, [exchangeService, loggerService]);
+    }, [exchangeService, limitsService, loggerService]);
 
     const handleEdit = useCallback((data) =>
     {
@@ -93,32 +93,23 @@ const ADVLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
-        const url = "http://localhost:20017/limits/adv";
         setEditingRow(null);
         setOriginalData({});
         try
         {
-            const response = await fetch(`${url}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    exchangeId: data.exchangeId,
-                    buyADVLimit: data.buyADVLimit,
-                    sellADVLimit: data.sellADVLimit
-                })
+            await limitsService.saveAdvLimit({
+                exchangeId: data.exchangeId,
+                buyADVLimit: data.buyADVLimit,
+                sellADVLimit: data.sellADVLimit
             });
-
-            if (!response.ok)
-            {
-                loggerService.logError(`Failed to save ADV % limits: ${response.status}`);
-                setErrorMessage(`Failed to save ADV % limits to REST limits service: ${response.statusText}`);
-            }
+            await loadExchangeData();
         }
         catch (error)
         {
             loggerService.logError(`Error saving ADV% limits: ${error}`);
+            setErrorMessage(`Failed to save ADV % limits to REST limits service: ${error.message}`);
         }
-    }, [loadExchangeData, loggerService]);
+    }, [loadExchangeData, loggerService, limitsService]);
 
     const ADVLimitsActionRenderer = useCallback(({data}) =>
     {

@@ -48,6 +48,28 @@
   .notional-breaches {
     margin: 0;
     padding: 0;
+    height: calc(100vh - 130px);
+  }
+
+  .notional-limits-stack {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notional-limits-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notional-limits-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    background: #656161;
+    color: white;
   }
 }
 

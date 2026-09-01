@@ -1,12 +1,34 @@
 import {useEffect, useMemo, useState, useCallback} from "react";
 import {getPercentageColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
+import {LimitsService} from "../services/LimitsService";
+import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
 
 const TraderNotionalGridComponent = () =>
 {
     const [traderData, setTraderData] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
+    const limitsService = useMemo(() => new LimitsService(), []);
+    const loggerService = useMemo(() => new LoggerService(TraderNotionalGridComponent.name), []);
+
+    useEffect(() =>
+    {
+        const loadSnapshot = async () =>
+        {
+            try
+            {
+                const snapshot = await limitsService.getTraderUtilizations();
+                if (Array.isArray(snapshot))
+                    setTraderData(snapshot);
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load trader notional snapshot: ${error.message}`);
+            }
+        };
+        loadSnapshot();
+    }, [limitsService, loggerService]);
 
     useEffect(() =>
     {
@@ -30,6 +52,8 @@ const TraderNotionalGridComponent = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const traderNotional = event.data.order;
+        if (!traderNotional?.traderId)
+            return;
         setTraderData(prevData =>
         {
             const updatedData = [...prevData];
@@ -50,10 +74,10 @@ const TraderNotionalGridComponent = () =>
         { headerName: 'Buy Notional Limit', field: 'buyNotionalLimit', valueFormatter: numberFormatter},
         { headerName: 'Current Buy Notional', field: 'currentBuyNotional' , valueFormatter: numberFormatter},
         { headerName: 'Current Buy Utilization %', field: 'buyUtilizationPercentage', cellStyle: (params) => getPercentageColour(params)},
-        { headerName: 'Sell Notional Limit', field: 'sellNotionalLimit' , valueFormatter: numberFormatter},
+        { headerName: 'Sell Notional Limit', field: 'sellNotionalLimit', valueFormatter: numberFormatter},
         { headerName: 'Current Sell Notional', field: 'currentSellNotional' , valueFormatter: numberFormatter},
         { headerName: 'Current Sell Utilization %', field: 'sellUtilizationPercentage', cellStyle: (params) => getPercentageColour(params)},
-        { headerName: 'Gross Notional Limit', field: 'grossNotionalLimit' , valueFormatter: numberFormatter},
+        { headerName: 'Gross Notional Limit', field: 'grossNotionalLimit', valueFormatter: numberFormatter},
         { headerName: 'Current Gross Notional', field: 'currentGrossNotional' , valueFormatter: numberFormatter},
         { headerName: 'Current Gross Utilization %', field: 'grossUtilizationPercentage', width: 220, cellStyle: (params) => getPercentageColour(params)}
     ]), []);

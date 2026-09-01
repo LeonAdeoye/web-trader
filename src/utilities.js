@@ -328,7 +328,7 @@ export const getSideColour = (params) =>
 
 export const getLimitBreachTypeColour = (params) =>
 {
-    if (params.value.includes("Full")) return {fontWeight: 'bold', color: 'olive'};
+    if (typeof params.value === "string" && params.value.includes("Full")) return {fontWeight: 'bold', color: 'olive'};
 }
 
 export const formatTimestamp = (timestamp) =>
@@ -341,6 +341,27 @@ export const formatTimestamp = (timestamp) =>
         const minutes = date.getMinutes().toString().padStart(2, '0');
         const seconds = date.getSeconds().toString().padStart(2, '0');
         return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
+}
+
+export const formatBreachTimestamp = (params) =>
+{
+    const value = params?.value;
+    if (value === null || value === undefined || value === "")
+        return "";
+
+    if (Array.isArray(value) && value.length >= 6)
+    {
+        const hours = String(value[3]).padStart(2, "0");
+        const minutes = String(value[4]).padStart(2, "0");
+        const seconds = String(Math.floor(Number(value[5]))).padStart(2, "0");
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    const date = new Date(value);
+    if (isNaN(date.getTime()))
+        return String(value);
+
+    return date.toLocaleTimeString();
 }
 
 export const formatSettlementType = value => {

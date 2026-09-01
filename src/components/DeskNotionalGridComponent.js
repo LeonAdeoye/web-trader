@@ -1,12 +1,34 @@
 import {useEffect, useMemo, useCallback, useState} from "react";
 import {getPercentageColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
+import {LimitsService} from "../services/LimitsService";
+import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
 
 const DeskNotionalGridComponent = () =>
 {
     const [deskData, setDeskData] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
+    const limitsService = useMemo(() => new LimitsService(), []);
+    const loggerService = useMemo(() => new LoggerService(DeskNotionalGridComponent.name), []);
+
+    useEffect(() =>
+    {
+        const loadSnapshot = async () =>
+        {
+            try
+            {
+                const snapshot = await limitsService.getDeskUtilizations();
+                if (Array.isArray(snapshot))
+                    setDeskData(snapshot);
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load desk notional snapshot: ${error.message}`);
+            }
+        };
+        loadSnapshot();
+    }, [limitsService, loggerService]);
 
     useEffect(() =>
     {
@@ -30,6 +52,8 @@ const DeskNotionalGridComponent = () =>
     const handleWorkerMessage = useCallback((event) =>
     {
         const deskNotional = event.data.order;
+        if (!deskNotional?.deskId)
+            return;
         setDeskData(prevData =>
         {
             const updatedData = [...prevData];

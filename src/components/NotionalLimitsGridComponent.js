@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {numberFormatter} from "../utilities";
 import {DeskService} from "../services/DeskService";
+import {LimitsService} from "../services/LimitsService";
 import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
 import EditIcon from "@mui/icons-material/Edit";
@@ -17,6 +18,7 @@ const NotionalLimitsGridComponent = () =>
     const [originalData, setOriginalData] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
     const deskService = useMemo(() => new DeskService(), []);
+    const limitsService = useMemo(() => new LimitsService(), []);
     const loggerService = useRef(new LoggerService(NotionalLimitsGridComponent.name)).current;
 
     useEffect(() =>
@@ -26,21 +28,18 @@ const NotionalLimitsGridComponent = () =>
 
     const loadDeskData = useCallback(async () =>
     {
-        const url = "http://localhost:20017/limits/desk";
         try
         {
             await deskService.loadDesks();
             const desks = deskService.getDesks();
-
-            const response = await fetch(url);
             let limitsData = [];
-
-            if (response.ok)
-                limitsData = await response.json();
-            else
+            try
             {
-                loggerService.logError(`Failed to fetch desk limits: ${response.statusText}`);
-                setErrorMessage(`Failed to fetch notional limits from REST limits service: ${response.statusText}`);
+                limitsData = await limitsService.getDeskNotionalLimits();
+            }
+            catch (error)
+            {
+                setErrorMessage(`Failed to fetch notional limits from REST limits service: ${error.message}`);
             }
 
             const transformedData = desks.map((desk) =>
@@ -61,9 +60,9 @@ const NotionalLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError(`Failed to load desk data: ${error}`);
-            setErrorMessage(`Failed to load notional limits from REST limits service using URL: ${url}`);
+            setErrorMessage("Failed to load notional limits from REST limits service");
         }
-    }, [deskService, loggerService]);
+    }, [deskService, limitsService, loggerService]);
 
     const handleEdit = useCallback((data) =>
     {
@@ -96,35 +95,25 @@ const NotionalLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
-        const url = "http://localhost:20017/limits/desk";
         setEditingRow(null);
         setOriginalData({});
-        try {
+        try
+        {
             loggerService.logInfo(`Saving notional limits for desk ${data.deskId}`);
-            const response = await fetch(`${url}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    deskId: data.deskId,
-                    buyNotionalLimit: data.buyNotionalLimit,
-                    sellNotionalLimit: data.sellNotionalLimit,
-                    grossNotionalLimit: data.grossNotionalLimit
-                })
+            await limitsService.saveDeskNotionalLimit({
+                deskId: data.deskId,
+                buyNotionalLimit: data.buyNotionalLimit,
+                sellNotionalLimit: data.sellNotionalLimit,
+                grossNotionalLimit: data.grossNotionalLimit
             });
-
-            if (!response.ok)
-            {
-                loggerService.logError(`Failed to save limits: ${response.status}`);
-                setErrorMessage(`Failed to save notional limits to REST limits service: ${response.statusText}`);
-            }
+            await loadDeskData();
         }
         catch (error)
         {
             loggerService.logError(`Error saving limits: ${error}`);
+            setErrorMessage(`Failed to save notional limits to REST limits service: ${error.message}`);
         }
-    }, [loggerService]);
+    }, [loggerService, limitsService, loadDeskData]);
 
     const NotionalLimitsActionRenderer = useCallback(({data}) =>
     {

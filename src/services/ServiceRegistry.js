@@ -12,6 +12,7 @@ import { AlertConfigurationsService } from './AlertConfigurationsService';
 import { MarketDataService } from './MarketDataService';
 import { RfqService } from './RfqService';
 import { DeskService } from "./DeskService";
+import { LimitsService } from "./LimitsService";
 
 class ServiceRegistry
 {
@@ -75,6 +76,11 @@ class ServiceRegistry
     static getDeskService()
     {
         return this.getService(DeskService);
+    }
+
+    static getLimitsService()
+    {
+        return this.getService(LimitsService);
     }
 
     static getExchangeRateService()

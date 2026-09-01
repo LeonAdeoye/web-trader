@@ -1,12 +1,42 @@
 import {useEffect, useMemo, useCallback, useState} from "react";
-import {getLimitBreachTypeColour, getPercentageColour, getSideColour, numberFormatter} from "../utilities";
+import {formatBreachTimestamp, getLimitBreachTypeColour, getPercentageColour, getSideColour, numberFormatter} from "../utilities";
 import {GenericGridComponent} from "./GenericGridComponent";
+import {LimitsService} from "../services/LimitsService";
+import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
+
+const toBreachRow = (breach) =>
+{
+    return {
+        ...breach,
+        breachId: breach.breachId || [breach.orderId, breach.category, breach.limitScope, breach.breachType, breach.limitPercentage].join("|")
+    };
+};
 
 const NotionalBreachesGridComponent = () =>
 {
     const [breaches, setBreaches] = useState([]);
     const [inboundWorker, setInboundWorker] = useState(null);
+    const limitsService = useMemo(() => new LimitsService(), []);
+    const loggerService = useMemo(() => new LoggerService(NotionalBreachesGridComponent.name), []);
+
+    useEffect(() =>
+    {
+        const loadSnapshot = async () =>
+        {
+            try
+            {
+                const snapshot = await limitsService.getBreaches("notional");
+                if (Array.isArray(snapshot))
+                    setBreaches(snapshot.map(toBreachRow));
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to load notional breaches: ${error.message}`);
+            }
+        };
+        loadSnapshot();
+    }, [limitsService, loggerService]);
 
     useEffect(() =>
     {
@@ -29,11 +59,13 @@ const NotionalBreachesGridComponent = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const notionalBreach = event.data.order;
+        const notionalBreach = toBreachRow(event.data.order || {});
+        if (!notionalBreach.breachId)
+            return;
         setBreaches(prevData =>
         {
             const updatedData = [...prevData];
-            const existingIndex = updatedData.findIndex(item => item.orderId === notionalBreach.orderId);
+            const existingIndex = updatedData.findIndex(item => item.breachId === notionalBreach.breachId);
             if (existingIndex >= 0)
                 updatedData[existingIndex] = notionalBreach;
             else
@@ -46,12 +78,14 @@ const NotionalBreachesGridComponent = () =>
     ([
         { headerName: 'Desk', field: 'deskName', filter: true, pinned: 'left'},
         { headerName: 'Trader', field: 'traderName', filter: true, pinned: 'left'},
+        { headerName: 'Scope', field: 'limitScope', filter: true, width: 100},
         { headerName: 'Desk Id', field: 'deskId', hide: true},
         { headerName: 'Trader Id', field: 'traderId', hide: true},
+        { headerName: 'Breach Id', field: 'breachId', hide: true},
         { headerName: 'Breach Type', field: 'breachType', filter: true , width: 180,
             valueFormatter: (params) => `${params.data.limitPercentage} % ${params.data.breachType}`, cellStyle: params => getLimitBreachTypeColour(params)},
         { headerName: 'Order Id', field: 'orderId'},
-        { headerName: 'Timestamp', field: 'tradeTimestamp', filter: true, width: 150, valueFormatter: (params) => `${params.value[3]}:${params.value[4]}:${params.value[5]}`},
+        { headerName: 'Timestamp', field: 'tradeTimestamp', filter: true, width: 150, valueFormatter: formatBreachTimestamp},
         { headerName: 'Instrument', field: 'symbol', filter: true, width: 150},
         { headerName: 'Side', field: 'side', filter: true, width: 100, cellStyle: (params) => getSideColour(params)},
         { headerName: 'Price', field: 'price', width: 150},
@@ -70,7 +104,7 @@ const NotionalBreachesGridComponent = () =>
         { headerName: 'Gross Utilization %', field: 'grossUtilizationPercentage', width: 180, cellStyle: (params) => getPercentageColour(params) },
     ]), []);
 
-    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["orderId"]} columnDefs={columnDefs} gridData={breaches} handleAction={null}/>);
+    return (<GenericGridComponent rowHeight={22} gridTheme={"ag-theme-alpine"} rowIdArray={["breachId"]} columnDefs={columnDefs} gridData={breaches} handleAction={null}/>);
 }
 
 export default NotionalBreachesGridComponent;

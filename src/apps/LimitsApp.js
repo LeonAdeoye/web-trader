@@ -7,9 +7,13 @@ import TraderNotionalGridComponent from "../components/TraderNotionalGridCompone
 import DeskNotionalGridComponent from "../components/DeskNotionalGridComponent";
 import NotionalBreachesGridComponent from "../components/NotionalBreachesGridComponent";
 import NotionalLimitsGridComponent from "../components/NotionalLimitsGridComponent";
+import TraderNotionalLimitsGridComponent from "../components/TraderNotionalLimitsGridComponent";
 import ADVLimitsGridComponent from "../components/ADVLimitsGridComponent";
 import QuantityLimitsGridComponent from "../components/QuantityLimitsGridComponent";
 import PriceLimitsGridComponent from "../components/PriceLimitsGridComponent";
+import PriceBreachesGridComponent from "../components/PriceBreachesGridComponent";
+import QuantityBreachesGridComponent from "../components/QuantityBreachesGridComponent";
+import ADVBreachesGridComponent from "../components/ADVBreachesGridComponent";
 
 export const LimitsApp = () =>
 {
@@ -37,7 +41,14 @@ export const LimitsApp = () =>
                         </TabList>
                     </Box>
                     <TabPanel value='1' className="notional-limits">
-                        <NotionalLimitsGridComponent/>
+                        <div className="notional-limits-stack">
+                            <div className="notional-limits-section">
+                                <NotionalLimitsGridComponent/>
+                            </div>
+                            <div className="notional-limits-section">
+                                <TraderNotionalLimitsGridComponent/>
+                            </div>
+                        </div>
                     </TabPanel>
                     <TabPanel value='2' className="desk-notionals">
                         <DeskNotionalGridComponent/>
@@ -52,19 +63,19 @@ export const LimitsApp = () =>
                         <PriceLimitsGridComponent/>
                     </TabPanel>
                     <TabPanel value='6' className="price-breaches">
-                        {/* <PriceBreachesGridComponent/> */}
+                        <PriceBreachesGridComponent/>
                     </TabPanel>
                     <TabPanel value='7' className="quantity-limits">
                         <QuantityLimitsGridComponent/>
                     </TabPanel>
                     <TabPanel value='8' className="quantity-breaches">
-                        {/* <QuantityBreachesGridComponent/> */}
+                        <QuantityBreachesGridComponent/>
                     </TabPanel>
                     <TabPanel value='9' className="adv-limits">
                         <ADVLimitsGridComponent/>
                     </TabPanel>
                     <TabPanel value='10' className="adv-breaches">
-                        {/* <ADVBreachesGridComponent/> */}
+                        <ADVBreachesGridComponent/>
                     </TabPanel>
                 </TabContext>
             </div>

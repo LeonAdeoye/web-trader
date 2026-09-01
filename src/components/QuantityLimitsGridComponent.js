@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {numberFormatter} from "../utilities";
 import {ExchangeService} from "../services/ExchangeService";
+import {LimitsService} from "../services/LimitsService";
 import {LoggerService} from "../services/LoggerService";
 import * as React from "react";
 import EditIcon from "@mui/icons-material/Edit";
@@ -17,6 +18,7 @@ const QuantityLimitsGridComponent = () =>
     const [originalData, setOriginalData] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
     const exchangeService = useMemo(() => new ExchangeService(), []);
+    const limitsService = useMemo(() => new LimitsService(), []);
     const loggerService = useRef(new LoggerService(QuantityLimitsGridComponent.name)).current;
 
     useEffect(() =>
@@ -26,21 +28,19 @@ const QuantityLimitsGridComponent = () =>
 
     const loadExchangeData = useCallback(async () =>
     {
-        const url = "http://localhost:20017/limits/qty";
         try
         {
             await exchangeService.loadExchanges();
             const exchanges = exchangeService.getExchanges();
-
-            const response = await fetch(url);
             let limitsData = [];
-
-            if (response.ok)
-                limitsData = await response.json();
-            else
+            try
             {
-                loggerService.logError(`Failed to fetch quantity limits: ${response.statusText}`);
-                setErrorMessage(`Failed to fetch quantity limits from REST limits service: ${response.statusText}`);
+                limitsData = await limitsService.getQuantityLimits();
+            }
+            catch (error)
+            {
+                loggerService.logError(`Failed to fetch quantity limits: ${error.message}`);
+                setErrorMessage(`Failed to fetch quantity limits from REST limits service: ${error.message}`);
             }
 
             const transformedData = exchanges.map((exchange) =>
@@ -63,9 +63,9 @@ const QuantityLimitsGridComponent = () =>
         catch (error)
         {
             loggerService.logError(`Failed to load exchange data: ${error}`);
-            setErrorMessage(`Failed to load quantity limits from REST limits service using URL: ${url}`);
+            setErrorMessage("Failed to load quantity limits from REST limits service");
         }
-    }, [exchangeService, loggerService]);
+    }, [exchangeService, limitsService, loggerService]);
 
     const handleEdit = useCallback((data) =>
     {
@@ -103,38 +103,27 @@ const QuantityLimitsGridComponent = () =>
 
     const handleSave = useCallback(async (data) =>
     {
-        const url = "http://localhost:20017/limits/qty";
         setEditingRow(null);
         setOriginalData({});
         try
         {
             loggerService.logInfo(`Saving quantity limits for exchange ${data.exchangeId}`);
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    exchangeId: data.exchangeId,
-                    stockQuantityLimit: data.stockQuantityLimit,
-                    etfQuantityLimit: data.etfQuantityLimit,
-                    futureQuantityLimit: data.futureQuantityLimit,
-                    optionQuantityLimit: data.optionQuantityLimit,
-                    cryptoQuantityLimit: data.cryptoQuantityLimit
-                })
+            await limitsService.saveQuantityLimit({
+                exchangeId: data.exchangeId,
+                stockQuantityLimit: data.stockQuantityLimit,
+                etfQuantityLimit: data.etfQuantityLimit,
+                futureQuantityLimit: data.futureQuantityLimit,
+                optionQuantityLimit: data.optionQuantityLimit,
+                cryptoQuantityLimit: data.cryptoQuantityLimit
             });
-
-            if (!response.ok)
-            {
-                loggerService.logError(`Failed to save quantity limits: ${response.status}`);
-                setErrorMessage(`Failed to save quantity limits to REST limits service: ${response.statusText}`);
-            }
+            await loadExchangeData();
         }
         catch (error)
         {
             loggerService.logError(`Error saving quantity limits: ${error}`);
+            setErrorMessage(`Failed to save quantity limits to REST limits service: ${error.message}`);
         }
-    }, [loggerService]);
+    }, [loggerService, limitsService, loadExchangeData]);
 
     const QuantityLimitsActionRenderer = useCallback(({data}) =>
     {
