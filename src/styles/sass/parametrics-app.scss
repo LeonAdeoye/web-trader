@@ -25,7 +25,8 @@
   // Tab pill styling for parametrics tabs
   .volatility-parametric-tab,
   .interest-rate-parametric-tab,
-  .price-parametric-tab {
+  .price-parametric-tab,
+  .adv-parametric-tab {
     @extend %tab-pill;
     
     // Default tab styling
@@ -42,7 +43,8 @@
   // Content area styling for all tab panels
   .volatility-parametric,
   .interest-rate-parametric,
-  .price-parametric {
+  .price-parametric,
+  .adv-parametric {
     margin: 0;
     padding: 0;
   }
@@ -98,6 +100,26 @@
       // Highlight editable price cells
       .ag-cell[col-id="closePrice"],
       .ag-cell[col-id="openPrice"] {
+        background-color: #f0f8ff !important;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: #e6f3ff !important;
+        }
+      }
+    }
+  }
+
+  // ADV grid styling
+  .adv-parametric {
+    .ag-theme-alpine {
+      // Style for editable cells
+      .ag-cell-edit-input {
+        padding: 2px 4px;
+      }
+
+      // Highlight editable ADV cells
+      .ag-cell[col-id="adv"] {
         background-color: #f0f8ff !important;
         cursor: pointer;
         

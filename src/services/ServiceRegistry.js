@@ -1,6 +1,7 @@
 import { VolatilityService } from './VolatilityService';
 import { PriceService } from './PriceService';
 import { RateService } from './RateService';
+import { AdvService } from './AdvService';
 import { InstrumentService } from './InstrumentService';
 import { BankHolidayService } from './BankHolidayService';
 import { ClientService } from './ClientService';
@@ -51,6 +52,11 @@ class ServiceRegistry
     static getRateService()
     {
         return this.getService(RateService);
+    }
+
+    static getAdvService()
+    {
+        return this.getService(AdvService);
     }
 
     static getInstrumentService()
@@ -115,39 +121,24 @@ class ServiceRegistry
 
     static async preloadAllServices(ownerId = null)
     {
-        const services = [
-            this.getVolatilityService(),
-            this.getPriceService(),
-            this.getRateService(),
-            this.getInstrumentService(),
-            this.getBankHolidayService(),
-            this.getClientService(),
-            this.getTraderService(),
-            this.getExchangeRateService(),
-            this.getConfigurationService(),
-            this.getAlertConfigurationsService(),
-            this.getMarketDataService(),
-            this.getRfqService(),
-            this.getDeskService()
-        ];
-
         const loadPromises = [
-            await services[0].loadVolatilities(),
-            await services[1].loadPrices(),
-            await services[2].loadRates(),
-            await services[3].loadInstruments(),
-            await services[4].loadBankHolidays(),
-            await services[5].loadClients(),
-            await services[6].loadTraders(),
-            await services[7].loadExchangeRates(),
-            await services[9].loadAlertTypes(),
-            await services[10].loadAlertConfigurations(),
-            await services[11].loadDesks()
+            this.getVolatilityService().loadVolatilities(),
+            this.getPriceService().loadPrices(),
+            this.getRateService().loadRates(),
+            this.getAdvService().loadAdvs(),
+            this.getInstrumentService().loadInstruments(),
+            this.getBankHolidayService().loadBankHolidays(),
+            this.getClientService().loadClients(),
+            this.getTraderService().loadTraders(),
+            this.getExchangeRateService().loadExchangeRates(),
+            this.getAlertConfigurationsService().loadAlertTypes(),
+            this.getDeskService().loadDesks()
         ];
 
         if (ownerId)
         {
-            loadPromises.push(services[8].loadConfigurations(ownerId));
+            loadPromises.push(this.getConfigurationService().loadConfigurations(ownerId));
+            loadPromises.push(this.getAlertConfigurationsService().loadAlertConfigurations(ownerId));
         }
 
         await Promise.all(loadPromises);
