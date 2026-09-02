@@ -163,7 +163,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             case "1": // Clients
                 return "300px";
             case "2": // Exchanges
-                return "300px";
+                return "450px";
             case "3": // Brokers
                 return "300px";
             case "4": // Accounts

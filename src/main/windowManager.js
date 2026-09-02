@@ -104,7 +104,7 @@ const createOpenAppHandler = (mainWindow) =>
 
         const childWindowId = childWindow.id;
         childWindow.removeMenu();
-        childWindow.webContents.openDevTools(); // TODO: Remove in production
+        // childWindow.webContents.openDevTools(); // TODO: Remove in production
         childWindow.loadURL(url).then(() => console.log(`Child window created with Id: ${childWindow.id} and title: "${BrowserWindow.fromId(childWindowId).getTitle()}"`));
         childWindowTitleMap.set(tit, childWindow);
 
