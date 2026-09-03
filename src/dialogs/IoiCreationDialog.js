@@ -30,7 +30,7 @@ const fieldSx = {
     "& .MuiInputBase-root": { height: "40px" }
 };
 
-const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}) =>
+const IoiCreationDialog = ({closeHandler, instruments, traders, seed}) =>
 {
     const [ioiCreationDialogOpen, setIoiCreationDialogOpen] = useRecoilState(ioiCreationDialogDisplayState);
     const [ioi, setIoi] = useState(defaultIoi);
@@ -50,7 +50,7 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
             ...prev,
             instrumentCode: value || "",
             ric: instrument?.ric || value || "",
-            originalMarket: instrument?.exchangeAcronym || prev.originalMarket
+            originalMarket: instrument?.exchangeAcronym || ""
         }));
     };
 
@@ -59,8 +59,13 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
         handleInputChange("trader", name === "ownerId" ? value : value);
     };
 
-    const canClear = () => ioi.ric !== "" || ioi.trader !== "" || ioi.quantity !== "" || ioi.comment !== "";
-    const canSubmit = () => ioi.ric !== "" && ioi.quantity !== "" && ioi.side !== "" && ioi.originalMarket !== "";
+    const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== "";
+
+    const canClear = () => ioi.ric !== "" || ioi.trader !== "" || ioi.quantity !== "" || ioi.comment !== "" || ioi.price !== "" || ioi.clientIds !== "";
+
+    const canSubmit = () => hasValue(ioi.instrumentCode) && hasValue(ioi.ric) && hasValue(ioi.trader) && hasValue(ioi.side)
+        && hasValue(ioi.quantity) && hasValue(ioi.price) && hasValue(ioi.originalMarket) && hasValue(ioi.originalOrderType)
+        && hasValue(ioi.lifeTimeInMinutes) && hasValue(ioi.BloombergQualifier) && hasValue(ioi.clientIds) && hasValue(ioi.comment);
 
     const handleClear = () => setIoi(defaultIoi);
     const handleCancel = () => setIoiCreationDialogOpen({open: false, clear: true});
@@ -87,7 +92,7 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
                 quantity: seed.quantity ?? "",
                 side: seed.side || "BUY",
                 price: seed.price ?? "",
-                originalMarket: seed.originalMarket || "",
+                originalMarket: instrument?.exchangeAcronym || seed.originalMarket || "",
                 originalOrderType: seed.originalOrderType || "LIMIT",
                 lifeTimeInMinutes: seed.lifeTimeInMinutes ?? 15,
                 comment: seed.comment || "",
@@ -118,13 +123,9 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
                         <TextField size="small" label="Price" value={ioi.price} onChange={(event) => handleInputChange("price", event.target.value)}
                             InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
                             className="ioi-dialog-control" sx={fieldSx} />
-                        <TextField size="small" select label="Market" value={ioi.originalMarket} onChange={(event) => handleInputChange("originalMarket", event.target.value)}
-                            InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
-                            className="ioi-dialog-control" sx={fieldSx}>
-                            {(exchanges || []).map(exchange => (
-                                <MenuItem key={exchange.exchangeAcronym} value={exchange.exchangeAcronym} style={{ fontSize: "0.75rem" }}>{exchange.exchangeAcronym}</MenuItem>
-                            ))}
-                        </TextField>
+                        <TextField size="small" label="Market" value={ioi.originalMarket} disabled
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" }, readOnly: true }}
+                            className="ioi-dialog-control" sx={fieldSx} />
                         <TextField size="small" select label="Order Type" value={ioi.originalOrderType} onChange={(event) => handleInputChange("originalOrderType", event.target.value)}
                             InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
                             className="ioi-dialog-control" sx={fieldSx}>
@@ -159,7 +160,7 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
                         <Button className="dialog-action-button" color="primary" variant="contained" onClick={handleCancel}>Cancel</Button>
                     </span>
                 </Tooltip>
-                <Tooltip title={<Typography fontSize={12}>Submit IOI.</Typography>}>
+                <Tooltip title={<Typography fontSize={12}>{canSubmit() ? "Submit IOI." : "All fields are mandatory."}</Typography>}>
                     <span>
                         <Button className="dialog-action-button submit" disabled={!canSubmit()} color="primary" variant="contained" onClick={handleSubmit}>Submit</Button>
                     </span>

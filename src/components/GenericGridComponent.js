@@ -5,7 +5,7 @@ import {createRowId, getRowIdValue} from "../utilities";
 import {selectedContextShareState,selectedGenericGridRowState} from "../atoms/component-state";
 import {useRecoilState} from "recoil";
 
-export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction, sortModel}) =>
+export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDefs, gridData, handleAction, sortModel, showDelete}) =>
 {
     const gridApiRef = useRef();
     const gridDimensions = useMemo(() => ({ height: '100%', width: '100%' }), []);
@@ -80,7 +80,7 @@ export const GenericGridComponent = ({rowHeight, gridTheme, rowIdArray, columnDe
                 animateRows={true}
                 getRowId={getRowId}
                 rowHeight={rowHeight}
-                context={{handleAction}}
+                context={{handleAction, showDelete}}
                 headerHeight={rowHeight}/>
         </div>
     );

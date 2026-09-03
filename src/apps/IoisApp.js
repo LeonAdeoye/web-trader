@@ -69,7 +69,8 @@ export const IoisApp = () =>
     const [instruments, setInstruments] = useState([]);
     const [traders, setTraders] = useState([]);
     const [exchanges, setExchanges] = useState([]);
-    const [createdIois, setCreatedIois] = useState([]);
+    const [liveIois, setLiveIois] = useState([]);
+    const [cancelledIois, setCancelledIois] = useState([]);
     const [blockedIois, setBlockedIois] = useState([]);
     const [failures, setFailures] = useState([]);
     const [traderCounts, setTraderCounts] = useState([]);
@@ -87,13 +88,13 @@ export const IoisApp = () =>
     const [, setIoiBlockDialogOpen] = useRecoilState(ioiBlockDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const bulkGridApiRef = useRef(null);
-    const selectedCreatedIoi = createdIois.find(ioi => ioi.requestId === selectedGenericGridRow?.requestId);
-    const isToolbarDeleteDisabled = createdIois.length === 0 || !selectedCreatedIoi || selectedTab !== "1";
+    const selectedLiveIoi = liveIois.find(ioi => ioi.requestId === selectedGenericGridRow?.requestId);
+    const isToolbarDeleteDisabled = liveIois.length === 0 || !selectedLiveIoi || selectedTab !== "1";
 
     const timestampFormatter = (params) => params.value ? transformLocalDataTime(Number(params.value)) : "";
     const listFormatter = (params) => Array.isArray(params.value) ? params.value.join(",") : (params.value || "");
 
-    const createdColumnDefs = useMemo(() => ([
+    const liveColumnDefs = useMemo(() => ([
         { headerName: "", field: "actions", width: 90, sortable: false, filter: false, cellRenderer: IoiActionIconsRenderer },
         { headerName: "Request Id", field: "requestId", width: 260 },
         { headerName: "RIC", field: "ric", width: 110 },
@@ -174,8 +175,9 @@ export const IoisApp = () =>
     {
         try
         {
-            const [created, blocked, failed, createdTraders, unapprovedTraders, createdStocks, unapprovedStocks, createdMarkets, unapprovedMarkets, reasons, createdTotal, unapprovedTotal] = await Promise.all([
-                ioiService.getCreated(),
+            const [live, cancelled, blocked, failed, createdTraders, unapprovedTraders, createdStocks, unapprovedStocks, createdMarkets, unapprovedMarkets, reasons, createdTotal, unapprovedTotal] = await Promise.all([
+                ioiService.getLive(),
+                ioiService.getCancelled(),
                 ioiService.getBlockedIois(),
                 ioiService.getFailures(),
                 ioiService.getCreatedByTrader(),
@@ -189,7 +191,8 @@ export const IoisApp = () =>
                 ioiService.getUnapprovedTotal()
             ]);
 
-            setCreatedIois(created || []);
+            setLiveIois(live || []);
+            setCancelledIois(cancelled || []);
             setBlockedIois(blocked || []);
             setFailures(failed || []);
             setTraderCounts(mergeCountMaps(createdTraders, unapprovedTraders, "trader"));
@@ -200,7 +203,8 @@ export const IoisApp = () =>
                 { metric: "Created IOIs", value: createdTotal?.total || 0 },
                 { metric: "Unapproved IOIs", value: unapprovedTotal?.total || 0 },
                 { metric: "Blocked IOIs", value: (blocked || []).length },
-                { metric: "Live IOIs", value: (created || []).filter(ioi => ioi.status === "LIVE").length }
+                { metric: "Live IOIs", value: (live || []).length },
+                { metric: "Cancelled IOIs", value: (cancelled || []).length }
             ]);
         }
         catch (error)
@@ -268,7 +272,7 @@ export const IoisApp = () =>
         }
     };
 
-    const handleCreatedAction = (action, data) =>
+    const handleLiveAction = (action, data) =>
     {
         if (action === "clone")
             openCreateDialog(data);
@@ -390,28 +394,32 @@ export const IoisApp = () =>
                     <TabContext value={selectedTab}>
                         <Box>
                             <TabList className="ioi-tab-list" onChange={(event, value) => setSelectedTab(value)} TabIndicatorProps={{style: {display: "none"}}}>
-                                <Tab className="ioi-created-tab" label="Created" value="1" sx={tabSx} />
-                                <Tab className="ioi-blocked-tab" label="Blocked" value="2" sx={tabSx} />
-                                <Tab className="ioi-failures-tab" label="Failures" value="3" sx={tabSx} />
-                                <Tab className="ioi-bulk-tab" label="Bulk" value="4" sx={tabSx} />
-                                <Tab className="ioi-trader-tab" label="Trader" value="5" sx={tabSx} />
-                                <Tab className="ioi-stocks-tab" label="Stocks" value="6" sx={tabSx} />
-                                <Tab className="ioi-markets-tab" label="Markets" value="7" sx={tabSx} />
-                                <Tab className="ioi-reasons-tab" label="Reasons" value="8" sx={tabSx} />
-                                <Tab className="ioi-totals-tab" label="Totals" value="9" sx={tabSx} />
-                                <Tab className="ioi-config-tab" label="Configurations" value="10" sx={tabSx} />
+                                <Tab className="ioi-live-tab" label="Live" value="1" sx={tabSx} />
+                                <Tab className="ioi-cancelled-tab" label="Cancelled" value="2" sx={tabSx} />
+                                <Tab className="ioi-blocked-tab" label="Blocked" value="3" sx={tabSx} />
+                                <Tab className="ioi-failures-tab" label="Failures" value="4" sx={tabSx} />
+                                <Tab className="ioi-bulk-tab" label="Bulk" value="5" sx={tabSx} />
+                                <Tab className="ioi-trader-tab" label="Trader" value="6" sx={tabSx} />
+                                <Tab className="ioi-stocks-tab" label="Stocks" value="7" sx={tabSx} />
+                                <Tab className="ioi-markets-tab" label="Markets" value="8" sx={tabSx} />
+                                <Tab className="ioi-reasons-tab" label="Reasons" value="9" sx={tabSx} />
+                                <Tab className="ioi-totals-tab" label="Totals" value="10" sx={tabSx} />
+                                <Tab className="ioi-config-tab" label="Configurations" value="11" sx={tabSx} />
                             </TabList>
                         </Box>
-                        <TabPanel value="1" className="ioi-created-panel" sx={tabPanelSx}>
-                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={createdColumnDefs} gridData={createdIois} handleAction={handleCreatedAction} />
+                        <TabPanel value="1" className="ioi-live-panel" sx={tabPanelSx}>
+                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={liveColumnDefs} gridData={liveIois} handleAction={handleLiveAction} />
                         </TabPanel>
-                        <TabPanel value="2" className="ioi-blocked-panel" sx={tabPanelSx}>
+                        <TabPanel value="2" className="ioi-cancelled-panel" sx={tabPanelSx}>
+                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={liveColumnDefs} gridData={cancelledIois} handleAction={handleLiveAction} showDelete={false} />
+                        </TabPanel>
+                        <TabPanel value="3" className="ioi-blocked-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId", "blockType"]} columnDefs={blockedColumnDefs} gridData={blockedIois} />
                         </TabPanel>
-                        <TabPanel value="3" className="ioi-failures-panel" sx={tabPanelSx}>
+                        <TabPanel value="4" className="ioi-failures-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={failureColumnDefs} gridData={failures} />
                         </TabPanel>
-                        <TabPanel value="4" className="ioi-bulk-panel" sx={tabPanelSx}>
+                        <TabPanel value="5" className="ioi-bulk-panel" sx={tabPanelSx}>
                             <div className="ioi-bulk-actions">
                                 <Button className="dialog-action-button" variant="contained" onClick={handleBulkPaste}>Paste from Excel</Button>
                                 <Button className="dialog-action-button submit" variant="contained" onClick={handleBulkUpload}>Upload</Button>
@@ -428,22 +436,22 @@ export const IoisApp = () =>
                                     getRowId={(params) => params.data.id} />
                             </div>
                         </TabPanel>
-                        <TabPanel value="5" className="ioi-trader-panel" sx={tabPanelSx}>
+                        <TabPanel value="6" className="ioi-trader-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["trader"]} columnDefs={countColumnDefs("Trader", "trader")} gridData={traderCounts} />
                         </TabPanel>
-                        <TabPanel value="6" className="ioi-stocks-panel" sx={tabPanelSx}>
+                        <TabPanel value="7" className="ioi-stocks-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["ric"]} columnDefs={countColumnDefs("Stock", "ric")} gridData={stockCounts} />
                         </TabPanel>
-                        <TabPanel value="7" className="ioi-markets-panel" sx={tabPanelSx}>
+                        <TabPanel value="8" className="ioi-markets-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["market"]} columnDefs={countColumnDefs("Market", "market")} gridData={marketCounts} />
                         </TabPanel>
-                        <TabPanel value="8" className="ioi-reasons-panel" sx={tabPanelSx}>
+                        <TabPanel value="9" className="ioi-reasons-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["reason"]} columnDefs={reasonColumnDefs} gridData={reasonCounts} />
                         </TabPanel>
-                        <TabPanel value="9" className="ioi-totals-panel" sx={tabPanelSx}>
+                        <TabPanel value="10" className="ioi-totals-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["metric"]} columnDefs={totalsColumnDefs} gridData={totals} />
                         </TabPanel>
-                        <TabPanel value="10" className="ioi-config-panel" sx={tabPanelSx}>
+                        <TabPanel value="11" className="ioi-config-panel" sx={tabPanelSx}>
                             <div className="ioi-bulk-actions">
                                 <Button className="dialog-action-button submit" variant="contained" onClick={handleSaveConfigs}>Save & Reconfigure</Button>
                             </div>
@@ -462,7 +470,7 @@ export const IoisApp = () =>
                     </TabContext>
                 </div>
             </div>
-            <IoiCreationDialog closeHandler={handleCreate} instruments={instruments} traders={traders} exchanges={exchanges} seed={cloneSeed} />
+            <IoiCreationDialog closeHandler={handleCreate} instruments={instruments} traders={traders} seed={cloneSeed} />
             <IoiBlockDialog traders={traders} instruments={instruments} exchanges={exchanges} onBlock={handleBlock} onUnblock={handleUnblock} />
             <DeleteConfirmationDialog
                 open={deleteAllOpen}

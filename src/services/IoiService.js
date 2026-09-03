@@ -34,9 +34,14 @@ export class IoiService
         return this.#postJson("/ioi/process/bulk", requests);
     }
 
-    async getCreated()
+    async getLive()
     {
-        return this.#getJson("/ioi/created", []);
+        return this.#getJson("/ioi/live", []);
+    }
+
+    async getCancelled()
+    {
+        return this.#getJson("/ioi/cancelled", []);
     }
 
     async cancelIoi(requestId)
