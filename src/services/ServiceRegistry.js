@@ -12,6 +12,7 @@ import { HealthCheckService } from './HealthCheckService';
 import { AlertConfigurationsService } from './AlertConfigurationsService';
 import { MarketDataService } from './MarketDataService';
 import { RfqService } from './RfqService';
+import { IoiService } from './IoiService';
 import { DeskService } from "./DeskService";
 import { LimitsService } from "./LimitsService";
 
@@ -117,6 +118,11 @@ class ServiceRegistry
     static getRfqService()
     {
         return this.getService(RfqService);
+    }
+
+    static getIoiService()
+    {
+        return this.getService(IoiService);
     }
 
     static async preloadAllServices(ownerId = null)

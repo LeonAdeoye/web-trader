@@ -35,6 +35,7 @@ import {CryptoChartApp} from "./apps/CryptoChartApp";
 import {PriceChartApp} from "./apps/PriceChartApp";
 import {SearchBarApp} from "./apps/SearchBarApp";
 import {PlaceholderApp} from "./apps/PlaceholderApp";
+import {IoisApp} from "./apps/IoisApp";
 
 const App = () =>
 {
@@ -73,7 +74,7 @@ const App = () =>
         { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
         { name: 'Services', path: '/services', component: ServicesApp },
         { name: 'News', path: '/news', component: PlaceholderApp, props: { title: 'News' } },
-        { name: 'IOIs', path: '/ioi', component: PlaceholderApp, props: { title: 'IOIs' } },
+        { name: 'IOIs', path: '/ioi', component: IoisApp },
         { name: 'TCA', path: '/tca', component: PlaceholderApp, props: { title: 'TCA' } },
         { name: 'Workflow', path: '/workflow', component: PlaceholderApp, props: { title: 'Workflow' } },
         { name: 'Position Keeping', path: '/positions', component: PlaceholderApp, props: { title: 'Position Keeping' } },

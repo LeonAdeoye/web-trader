@@ -3,12 +3,14 @@ import {IconButton, Tooltip} from '@mui/material';
 import { Close, Remove, Build, Lan, Settings} from '@mui/icons-material';
 import CropSquareRoundedIcon from '@mui/icons-material/CropSquareRounded';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import DeleteIcon from '@mui/icons-material/Delete';
+import BlockIcon from '@mui/icons-material/Block';
 import '../styles/css/main.css';
 import {useRecoilState} from "recoil";
 import {titleBarContextShareColourState} from "../atoms/component-state";
 import {getLaunchPadIconSrc} from "../assets/launchPadIcons";
 
-const TitleBarComponent = ({title, titleIcon, titleIconSrc, windowId, addButtonProps, showChannel, showTools, showConfig}) =>
+const TitleBarComponent = ({title, titleIcon, titleIconSrc, windowId, addButtonProps, deleteButtonProps, blockButtonProps, showChannel, showTools, showConfig}) =>
 {
     const handleTools = () => window.command.openTools();
     const handleMinimize = () => window.command.minimize(windowId);
@@ -27,6 +29,12 @@ const TitleBarComponent = ({title, titleIcon, titleIconSrc, windowId, addButtonP
             <div className="title-bar-controls">
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
+                </IconButton></Tooltip>}
+                {(deleteButtonProps !== undefined) && <Tooltip title={`${deleteButtonProps.tooltipText}`}><IconButton className="title-bar-action" onClick={deleteButtonProps.handler}>
+                    <DeleteIcon/>
+                </IconButton></Tooltip>}
+                {(blockButtonProps !== undefined) && <Tooltip title={`${blockButtonProps.tooltipText}`}><IconButton className="title-bar-action" onClick={blockButtonProps.handler}>
+                    <BlockIcon/>
                 </IconButton></Tooltip>}
                 {(showConfig !== undefined) && <Tooltip title={"Click to change chart settings of insights"}><IconButton className="title-bar-tools" onClick={showConfig.handler}>
                     <Settings/>

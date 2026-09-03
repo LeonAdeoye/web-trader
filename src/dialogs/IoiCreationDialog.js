@@ -1,0 +1,190 @@
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography} from "@mui/material";
+import React, {useCallback, useEffect, useState} from "react";
+import {useRecoilState} from "recoil";
+import {ioiCreationDialogDisplayState} from "../atoms/dialog-state";
+import {InstrumentAutoCompleteWidget} from "../widgets/InstrumentAutoCompleteWidget";
+import {TraderIdAutoCompleteWidget} from "../widgets/TraderIdAutoCompleteWidget";
+import {SideWidget} from "../widgets/SideWidget";
+import {IOIQualifierWidget} from "../widgets/IOIQualifierWidget";
+import '../styles/css/main.css';
+
+const defaultIoi =
+{
+    ric: "",
+    instrumentCode: "",
+    trader: "",
+    quantity: "",
+    side: "BUY",
+    price: "",
+    originalMarket: "",
+    originalOrderType: "LIMIT",
+    lifeTimeInMinutes: 15,
+    comment: "",
+    BloombergQualifier: "NONE",
+    clientIds: ""
+};
+
+const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}) =>
+{
+    const [ioiCreationDialogOpen, setIoiCreationDialogOpen] = useRecoilState(ioiCreationDialogDisplayState);
+    const [ioi, setIoi] = useState(defaultIoi);
+
+    const handleInputChange = useCallback((name, value) =>
+    {
+        setIoi(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    const handleInstrumentChange = (name, value) =>
+    {
+        if (name !== "instrumentCode")
+            return handleInputChange(name, value);
+
+        const instrument = (instruments || []).find(item => item.instrumentCode === value);
+        setIoi(prev => ({
+            ...prev,
+            instrumentCode: value || "",
+            ric: instrument?.ric || value || "",
+            originalMarket: instrument?.exchangeAcronym || prev.originalMarket
+        }));
+    };
+
+    const handleTraderChange = (name, value) =>
+    {
+        handleInputChange("trader", name === "ownerId" ? value : value);
+    };
+
+    const canClear = () => ioi.ric !== "" || ioi.trader !== "" || ioi.quantity !== "" || ioi.comment !== "";
+    const canSubmit = () => ioi.ric !== "" && ioi.quantity !== "" && ioi.side !== "" && ioi.originalMarket !== "";
+
+    const handleClear = () => setIoi(defaultIoi);
+    const handleCancel = () => setIoiCreationDialogOpen({open: false, clear: true});
+    const handleSubmit = () =>
+    {
+        closeHandler({
+            ...ioi,
+            BloombergQualifier: ioi.BloombergQualifier === "NONE" ? "" : ioi.BloombergQualifier,
+            clientIds: ioi.clientIds ? ioi.clientIds.split(",").map(item => item.trim()).filter(Boolean) : []
+        });
+        handleClear();
+        handleCancel();
+    };
+
+    useEffect(() =>
+    {
+        if (ioiCreationDialogOpen.open && seed && !ioiCreationDialogOpen.clear)
+        {
+            const instrument = (instruments || []).find(item => item.ric === seed.ric || item.instrumentCode === seed.ric);
+            setIoi({
+                ric: seed.ric || "",
+                instrumentCode: instrument?.instrumentCode || seed.ric || "",
+                trader: seed.trader || "",
+                quantity: seed.quantity ?? "",
+                side: seed.side || "BUY",
+                price: seed.price ?? "",
+                originalMarket: seed.originalMarket || "",
+                originalOrderType: seed.originalOrderType || "LIMIT",
+                lifeTimeInMinutes: seed.lifeTimeInMinutes ?? 15,
+                comment: seed.comment || "",
+                BloombergQualifier: seed.BloombergQualifier || "NONE",
+                clientIds: Array.isArray(seed.clientIds) ? seed.clientIds.join(",") : (seed.clientIds || "")
+            });
+        }
+        else if (ioiCreationDialogOpen.clear)
+            setIoi(defaultIoi);
+    }, [ioiCreationDialogOpen, seed, instruments]);
+
+    return (
+        <Dialog className="ioi-creation-dialog" aria-labelledby="dialog-title" maxWidth={false} fullWidth={true} open={ioiCreationDialogOpen.open} onClose={handleCancel} PaperProps={{ style: { width: "520px" } }}>
+            <DialogTitle id="dialog-title" style={{fontSize: 15, backgroundColor: "#404040", color: "white", height: "20px"}}>
+                {seed ? "Clone IOI" : "Create IOI"}
+            </DialogTitle>
+            <DialogContent>
+                <Grid container spacing={1} direction="column" style={{ marginTop: "8px" }}>
+                    <Grid item container spacing={1}>
+                        <Grid item>
+                            <InstrumentAutoCompleteWidget instruments={instruments} handleInputChange={handleInstrumentChange} instrumentCode={ioi.instrumentCode} className="ioi-symbol" />
+                        </Grid>
+                        <Grid item>
+                            <TraderIdAutoCompleteWidget traders={traders} handleInputChange={handleTraderChange} ownerId={ioi.trader} className="ioi-trader" />
+                        </Grid>
+                    </Grid>
+                    <Grid item container spacing={1}>
+                        <Grid item>
+                            <SideWidget handleSideChange={(event) => handleInputChange("side", event.target.value)} sideValue={ioi.side} className="ioi-side" />
+                        </Grid>
+                        <Grid item>
+                            <TextField size="small" label="Quantity" value={ioi.quantity} onChange={(event) => handleInputChange("quantity", event.target.value)}
+                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "120px", marginTop: "15px" }} />
+                        </Grid>
+                        <Grid item>
+                            <TextField size="small" label="Price" value={ioi.price} onChange={(event) => handleInputChange("price", event.target.value)}
+                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "120px", marginTop: "15px" }} />
+                        </Grid>
+                    </Grid>
+                    <Grid item container spacing={1}>
+                        <Grid item>
+                            <TextField size="small" select label="Market" value={ioi.originalMarket} onChange={(event) => handleInputChange("originalMarket", event.target.value)}
+                                InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "160px" }}>
+                                {(exchanges || []).map(exchange => (
+                                    <MenuItem key={exchange.exchangeAcronym} value={exchange.exchangeAcronym} style={{ fontSize: "0.75rem" }}>{exchange.exchangeAcronym}</MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid item>
+                            <TextField size="small" select label="Order Type" value={ioi.originalOrderType} onChange={(event) => handleInputChange("originalOrderType", event.target.value)}
+                                InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "140px" }}>
+                                <MenuItem value="LIMIT" style={{ fontSize: "0.75rem" }}>Limit</MenuItem>
+                                <MenuItem value="MARKET" style={{ fontSize: "0.75rem" }}>Market</MenuItem>
+                                <MenuItem value="IOC" style={{ fontSize: "0.75rem" }}>IOC</MenuItem>
+                                <MenuItem value="STOP_LOSS" style={{ fontSize: "0.75rem" }}>Stop Loss</MenuItem>
+                            </TextField>
+                        </Grid>
+                        <Grid item>
+                            <TextField size="small" label="Lifetime (mins)" value={ioi.lifeTimeInMinutes} onChange={(event) => handleInputChange("lifeTimeInMinutes", event.target.value)}
+                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "140px" }} />
+                        </Grid>
+                    </Grid>
+                    <Grid item container spacing={1}>
+                        <Grid item>
+                            <IOIQualifierWidget handleQualifierChange={(event) => handleInputChange("BloombergQualifier", event.target.value)} qualifier={ioi.BloombergQualifier} className="ioi-qualifier" />
+                        </Grid>
+                        <Grid item>
+                            <TextField size="small" label="Client IDs" value={ioi.clientIds} onChange={(event) => handleInputChange("clientIds", event.target.value)}
+                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                                style={{ width: "250px", marginTop: "15px" }} />
+                        </Grid>
+                    </Grid>
+                    <Grid item>
+                        <TextField size="small" label="Comment" value={ioi.comment} onChange={(event) => handleInputChange("comment", event.target.value)}
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                            fullWidth />
+                    </Grid>
+                </Grid>
+            </DialogContent>
+            <DialogActions style={{height: "35px"}}>
+                <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
+                    <span>
+                        <Button className="dialog-action-button" disabled={!canClear()} variant="contained" onClick={handleClear}>Clear</Button>
+                    </span>
+                </Tooltip>
+                <Tooltip title={<Typography fontSize={12}>Cancel and close IOI dialog window.</Typography>}>
+                    <span>
+                        <Button className="dialog-action-button" color="primary" variant="contained" onClick={handleCancel}>Cancel</Button>
+                    </span>
+                </Tooltip>
+                <Tooltip title={<Typography fontSize={12}>Submit IOI.</Typography>}>
+                    <span>
+                        <Button className="dialog-action-button submit" disabled={!canSubmit()} color="primary" variant="contained" onClick={handleSubmit}>Submit</Button>
+                    </span>
+                </Tooltip>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+export default IoiCreationDialog;

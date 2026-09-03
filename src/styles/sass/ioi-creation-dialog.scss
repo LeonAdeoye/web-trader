@@ -1,0 +1,67 @@
+.ioi-creation-dialog
+{
+    .MuiDialog-paper
+    {
+        background-color: white;
+        color: #333;
+    }
+
+    .MuiDialogTitle-root
+    {
+        background-color: #404040;
+        color: white;
+        font-size: 15px;
+        height: 20px;
+        padding: 8px 16px;
+    }
+
+    .MuiDialogContent-root
+    {
+        background-color: white;
+        color: #333;
+        padding: 16px;
+    }
+
+    .MuiFormLabel-root,
+    .MuiInputLabel-root
+    {
+        color: #404040;
+        font-size: 12px;
+    }
+
+    .MuiInputBase-input,
+    .MuiSelect-select,
+    .MuiMenuItem-root
+    {
+        color: #333;
+        font-size: 12px;
+        background-color: white;
+    }
+
+    .MuiOutlinedInput-root
+    {
+        background-color: white;
+
+        .MuiOutlinedInput-notchedOutline
+        {
+            border-color: #404040;
+        }
+
+        &:hover .MuiOutlinedInput-notchedOutline
+        {
+            border-color: #656161;
+        }
+    }
+
+    .dialog-action-button
+    {
+        text-transform: none;
+        background-color: #404040;
+        color: white;
+
+        &:hover
+        {
+            background-color: #656161;
+        }
+    }
+}

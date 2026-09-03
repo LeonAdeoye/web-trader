@@ -1,0 +1,74 @@
+@import './partials/tab-styles';
+
+.ioi-app {
+  .ioi-tab-list {
+    min-height: 27px;
+    height: 27px;
+    background-color: white;
+    margin-top: 3px;
+
+    .MuiTab-root {
+      margin-right: 5px;
+    }
+
+    .MuiTab-root:last-child {
+      margin-right: 0;
+    }
+
+    .MuiTab-root:first-child {
+      margin-left: 3px;
+    }
+  }
+
+  .ioi-created-tab,
+  .ioi-blocked-tab,
+  .ioi-failures-tab,
+  .ioi-bulk-tab,
+  .ioi-trader-tab,
+  .ioi-stocks-tab,
+  .ioi-markets-tab,
+  .ioi-reasons-tab,
+  .ioi-totals-tab,
+  .ioi-config-tab {
+    @extend %tab-pill;
+    background-color: #bdbaba;
+    color: white;
+
+    &.Mui-selected {
+      background-color: #656161;
+      color: white;
+    }
+  }
+
+  .ioi-created-panel,
+  .ioi-blocked-panel,
+  .ioi-failures-panel,
+  .ioi-trader-panel,
+  .ioi-stocks-panel,
+  .ioi-markets-panel,
+  .ioi-reasons-panel,
+  .ioi-totals-panel {
+    margin: 0;
+    padding: 0;
+    height: calc(100vh - 95px);
+  }
+
+  .ioi-bulk-panel,
+  .ioi-config-panel {
+    margin: 0;
+    padding: 0;
+    height: calc(100vh - 95px);
+  }
+
+  .ioi-bulk-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 6px 8px 4px 8px;
+  }
+
+  .ioi-bulk-grid {
+    height: calc(100vh - 135px);
+    width: 100%;
+  }
+}

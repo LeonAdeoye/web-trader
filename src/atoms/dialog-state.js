@@ -64,3 +64,13 @@ export const batchOrderUploadDialogDisplayState = atom({
     key: 'batchOrderUploadDialogDisplayState',
     default: {open: false, clear: true}
 });
+
+export const ioiCreationDialogDisplayState = atom({
+    key: 'ioiCreationDialogDisplayState',
+    default: {open: false, clear: true}
+});
+
+export const ioiBlockDialogDisplayState = atom({
+    key: 'ioiBlockDialogDisplayState',
+    default: false
+});
