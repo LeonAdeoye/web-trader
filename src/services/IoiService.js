@@ -194,14 +194,14 @@ export class IoiService
             const response = await fetch(`${this.#baseUrl}${path}`);
             if (!response.ok)
             {
-                this.#loggerService.logError(`GET ${path} failed: ${response.status}`);
+                this.#loggerService.logWarn(`GET ${path} failed: ${response.status}`);
                 return fallback;
             }
             return await response.json();
         }
         catch (error)
         {
-            this.#loggerService.logError(`GET ${path} error: ${error.message}`);
+            this.#loggerService.logWarn(`GET ${path} error: ${error.message}`);
             return fallback;
         }
     }
