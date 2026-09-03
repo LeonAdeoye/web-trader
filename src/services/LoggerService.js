@@ -75,7 +75,11 @@ export class LoggerService
 
     logError = (message) =>
     {
-        this.#logMessage(message, "ERROR");
+        const text = message instanceof Error ? `${message.name}: ${message.message}` : String(message ?? "");
+        if (text.includes("Failed to fetch"))
+            this.#logMessage(text, "WARN");
+        else
+            this.#logMessage(text, "ERROR");
     }
 
     #logMessage = (message, logLevel) =>
