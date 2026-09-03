@@ -1,4 +1,4 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, TextField, Tooltip, Typography} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField, Tooltip, Typography} from "@mui/material";
 import React, {useCallback, useEffect, useState} from "react";
 import {useRecoilState} from "recoil";
 import {ioiCreationDialogDisplayState} from "../atoms/dialog-state";
@@ -22,6 +22,12 @@ const defaultIoi =
     comment: "",
     BloombergQualifier: "NONE",
     clientIds: ""
+};
+
+const fieldSx = {
+    width: "220px",
+    marginTop: "0px",
+    "& .MuiInputBase-root": { height: "40px" }
 };
 
 const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}) =>
@@ -94,79 +100,55 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, exchanges, seed}
     }, [ioiCreationDialogOpen, seed, instruments]);
 
     return (
-        <Dialog className="ioi-creation-dialog" aria-labelledby="dialog-title" maxWidth={false} fullWidth={true} open={ioiCreationDialogOpen.open} onClose={handleCancel} PaperProps={{ style: { width: "520px" } }}>
+        <Dialog className="ioi-creation-dialog" aria-labelledby="dialog-title" maxWidth={false} fullWidth={false} open={ioiCreationDialogOpen.open} onClose={handleCancel} PaperProps={{ style: { width: "1040px" } }}>
             <DialogTitle id="dialog-title" style={{fontSize: 15, backgroundColor: "#404040", color: "white", height: "20px"}}>
                 {seed ? "Clone IOI" : "Create IOI"}
             </DialogTitle>
             <DialogContent>
-                <Grid container spacing={1} direction="column" style={{ marginTop: "8px" }}>
-                    <Grid item container spacing={1}>
-                        <Grid item>
-                            <InstrumentAutoCompleteWidget instruments={instruments} handleInputChange={handleInstrumentChange} instrumentCode={ioi.instrumentCode} className="ioi-symbol" />
-                        </Grid>
-                        <Grid item>
-                            <TraderIdAutoCompleteWidget traders={traders} handleInputChange={handleTraderChange} ownerId={ioi.trader} className="ioi-trader" />
-                        </Grid>
-                    </Grid>
-                    <Grid item container spacing={1}>
-                        <Grid item>
-                            <SideWidget handleSideChange={(event) => handleInputChange("side", event.target.value)} sideValue={ioi.side} className="ioi-side" />
-                        </Grid>
-                        <Grid item>
-                            <TextField size="small" label="Quantity" value={ioi.quantity} onChange={(event) => handleInputChange("quantity", event.target.value)}
-                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "120px", marginTop: "15px" }} />
-                        </Grid>
-                        <Grid item>
-                            <TextField size="small" label="Price" value={ioi.price} onChange={(event) => handleInputChange("price", event.target.value)}
-                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "120px", marginTop: "15px" }} />
-                        </Grid>
-                    </Grid>
-                    <Grid item container spacing={1}>
-                        <Grid item>
-                            <TextField size="small" select label="Market" value={ioi.originalMarket} onChange={(event) => handleInputChange("originalMarket", event.target.value)}
-                                InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "160px" }}>
-                                {(exchanges || []).map(exchange => (
-                                    <MenuItem key={exchange.exchangeAcronym} value={exchange.exchangeAcronym} style={{ fontSize: "0.75rem" }}>{exchange.exchangeAcronym}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-                        <Grid item>
-                            <TextField size="small" select label="Order Type" value={ioi.originalOrderType} onChange={(event) => handleInputChange("originalOrderType", event.target.value)}
-                                InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "140px" }}>
-                                <MenuItem value="LIMIT" style={{ fontSize: "0.75rem" }}>Limit</MenuItem>
-                                <MenuItem value="MARKET" style={{ fontSize: "0.75rem" }}>Market</MenuItem>
-                                <MenuItem value="IOC" style={{ fontSize: "0.75rem" }}>IOC</MenuItem>
-                                <MenuItem value="STOP_LOSS" style={{ fontSize: "0.75rem" }}>Stop Loss</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid item>
-                            <TextField size="small" label="Lifetime (mins)" value={ioi.lifeTimeInMinutes} onChange={(event) => handleInputChange("lifeTimeInMinutes", event.target.value)}
-                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "140px" }} />
-                        </Grid>
-                    </Grid>
-                    <Grid item container spacing={1}>
-                        <Grid item>
-                            <IOIQualifierWidget handleQualifierChange={(event) => handleInputChange("BloombergQualifier", event.target.value)} qualifier={ioi.BloombergQualifier} className="ioi-qualifier" />
-                        </Grid>
-                        <Grid item>
-                            <TextField size="small" label="Client IDs" value={ioi.clientIds} onChange={(event) => handleInputChange("clientIds", event.target.value)}
-                                InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
-                                style={{ width: "250px", marginTop: "15px" }} />
-                        </Grid>
-                    </Grid>
-                    <Grid item>
+                <div className="ioi-dialog-body">
+                    <div className="ioi-dialog-row">
+                        <InstrumentAutoCompleteWidget instruments={instruments} handleInputChange={handleInstrumentChange} instrumentCode={ioi.instrumentCode} className="ioi-dialog-control" />
+                        <TraderIdAutoCompleteWidget traders={traders} handleInputChange={handleTraderChange} ownerId={ioi.trader} className="ioi-dialog-control" />
+                        <SideWidget handleSideChange={(event) => handleInputChange("side", event.target.value)} sideValue={ioi.side} className="ioi-dialog-control" />
+                        <TextField size="small" label="Quantity" value={ioi.quantity} onChange={(event) => handleInputChange("quantity", event.target.value)}
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx} />
+                    </div>
+                    <div className="ioi-dialog-row">
+                        <TextField size="small" label="Price" value={ioi.price} onChange={(event) => handleInputChange("price", event.target.value)}
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx} />
+                        <TextField size="small" select label="Market" value={ioi.originalMarket} onChange={(event) => handleInputChange("originalMarket", event.target.value)}
+                            InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx}>
+                            {(exchanges || []).map(exchange => (
+                                <MenuItem key={exchange.exchangeAcronym} value={exchange.exchangeAcronym} style={{ fontSize: "0.75rem" }}>{exchange.exchangeAcronym}</MenuItem>
+                            ))}
+                        </TextField>
+                        <TextField size="small" select label="Order Type" value={ioi.originalOrderType} onChange={(event) => handleInputChange("originalOrderType", event.target.value)}
+                            InputLabelProps={{ style: { fontSize: "0.75rem" } }} SelectProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx}>
+                            <MenuItem value="LIMIT" style={{ fontSize: "0.75rem" }}>Limit</MenuItem>
+                            <MenuItem value="MARKET" style={{ fontSize: "0.75rem" }}>Market</MenuItem>
+                            <MenuItem value="IOC" style={{ fontSize: "0.75rem" }}>IOC</MenuItem>
+                            <MenuItem value="STOP_LOSS" style={{ fontSize: "0.75rem" }}>Stop Loss</MenuItem>
+                        </TextField>
+                        <TextField size="small" label="Lifetime (mins)" value={ioi.lifeTimeInMinutes} onChange={(event) => handleInputChange("lifeTimeInMinutes", event.target.value)}
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx} />
+                    </div>
+                    <div className="ioi-dialog-row">
+                        <IOIQualifierWidget handleQualifierChange={(event) => handleInputChange("BloombergQualifier", event.target.value)} qualifier={ioi.BloombergQualifier} className="ioi-dialog-control" />
+                        <TextField size="small" label="Client IDs" value={ioi.clientIds} onChange={(event) => handleInputChange("clientIds", event.target.value)}
+                            InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
+                            className="ioi-dialog-control" sx={fieldSx} />
                         <TextField size="small" label="Comment" value={ioi.comment} onChange={(event) => handleInputChange("comment", event.target.value)}
                             InputLabelProps={{ shrink: true, style: { fontSize: "0.75rem" } }} inputProps={{ style: { fontSize: "0.75rem" } }}
-                            fullWidth />
-                    </Grid>
-                </Grid>
+                            className="ioi-dialog-control ioi-dialog-comment" sx={{ ...fieldSx, width: "460px" }} />
+                    </div>
+                </div>
             </DialogContent>
-            <DialogActions style={{height: "35px"}}>
+            <DialogActions style={{height: "48px", padding: "8px 24px 16px 24px"}}>
                 <Tooltip title={<Typography fontSize={12}>Clear all entered values.</Typography>}>
                     <span>
                         <Button className="dialog-action-button" disabled={!canClear()} variant="contained" onClick={handleClear}>Clear</Button>

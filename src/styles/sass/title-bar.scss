@@ -72,6 +72,12 @@
   margin-right: 0px;
 }
 
+.title-bar-controls .title-bar-action:disabled
+{
+  color: #222 !important;
+  cursor: not-allowed;
+}
+
 .title-bar-controls .title-bar-close
 {
   color: white;

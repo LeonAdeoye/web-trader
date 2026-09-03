@@ -30,9 +30,22 @@ const TitleBarComponent = ({title, titleIcon, titleIconSrc, windowId, addButtonP
                 {(addButtonProps !== undefined) && <Tooltip title={`${addButtonProps.tooltipText}`}><IconButton className="title-bar-add" onClick={addButtonProps.handler}>
                     <LocalHospitalIcon/>
                 </IconButton></Tooltip>}
-                {(deleteButtonProps !== undefined) && <Tooltip title={`${deleteButtonProps.tooltipText}`}><IconButton className="title-bar-action" onClick={deleteButtonProps.handler}>
-                    <DeleteIcon/>
-                </IconButton></Tooltip>}
+                {(deleteButtonProps !== undefined) && (
+                    <Tooltip title={`${deleteButtonProps.tooltipText}`}>
+                        <span>
+                            <IconButton
+                                className="title-bar-action"
+                                onClick={deleteButtonProps.handler}
+                                disabled={Boolean(deleteButtonProps.disabled)}
+                                style={{
+                                    cursor: deleteButtonProps.disabled ? 'not-allowed' : 'pointer',
+                                    WebkitAppRegion: 'no-drag'
+                                }}>
+                                <DeleteIcon/>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                )}
                 {(blockButtonProps !== undefined) && <Tooltip title={`${blockButtonProps.tooltipText}`}><IconButton className="title-bar-action" onClick={blockButtonProps.handler}>
                     <BlockIcon/>
                 </IconButton></Tooltip>}

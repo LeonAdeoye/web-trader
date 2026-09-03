@@ -11,6 +11,7 @@ import IoiCreationDialog from "../dialogs/IoiCreationDialog";
 import IoiBlockDialog from "../dialogs/IoiBlockDialog";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 import {ioiBlockDialogDisplayState, ioiCreationDialogDisplayState} from "../atoms/dialog-state";
+import {selectedGenericGridRowState} from "../atoms/component-state";
 import {IoiService} from "../services/IoiService";
 import {LoggerService} from "../services/LoggerService";
 import {ServiceRegistry} from "../services/ServiceRegistry";
@@ -84,7 +85,10 @@ export const IoisApp = () =>
     const [ioiToCancel, setIoiToCancel] = useState(null);
     const [, setIoiCreationDialogOpen] = useRecoilState(ioiCreationDialogDisplayState);
     const [, setIoiBlockDialogOpen] = useRecoilState(ioiBlockDialogDisplayState);
+    const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
     const bulkGridApiRef = useRef(null);
+    const selectedCreatedIoi = createdIois.find(ioi => ioi.requestId === selectedGenericGridRow?.requestId);
+    const isToolbarDeleteDisabled = createdIois.length === 0 || !selectedCreatedIoi || selectedTab !== "1";
 
     const timestampFormatter = (params) => params.value ? transformLocalDataTime(Number(params.value)) : "";
     const listFormatter = (params) => Array.isArray(params.value) ? params.value.join(",") : (params.value || "");
@@ -377,7 +381,7 @@ export const IoisApp = () =>
                 title="IOIs"
                 windowId={windowId}
                 addButtonProps={{ handler: () => openCreateDialog(null), tooltipText: "Add new IOI..." }}
-                deleteButtonProps={{ handler: () => setDeleteAllOpen(true), tooltipText: "Delete all IOIs..." }}
+                deleteButtonProps={{ handler: () => setDeleteAllOpen(true), tooltipText: "Delete all IOIs...", disabled: isToolbarDeleteDisabled }}
                 blockButtonProps={{ handler: () => setIoiBlockDialogOpen(true), tooltipText: "Block IOIs by trader, stock, or market..." }}
                 showChannel={false}
                 showTools={false} />

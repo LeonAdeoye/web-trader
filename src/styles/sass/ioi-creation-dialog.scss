@@ -4,6 +4,7 @@
     {
         background-color: white;
         color: #333;
+        width: 1040px;
     }
 
     .MuiDialogTitle-root
@@ -19,7 +20,39 @@
     {
         background-color: white;
         color: #333;
-        padding: 16px;
+        padding: 24px 28px 8px 28px;
+        overflow: visible;
+    }
+
+    .ioi-dialog-body
+    {
+        display: flex;
+        flex-direction: column;
+        gap: 1cm;
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+
+    .ioi-dialog-row
+    {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 1cm;
+    }
+
+    .ioi-dialog-control,
+    .ioi-dialog-control.MuiAutocomplete-root,
+    .ioi-dialog-control.MuiTextField-root
+    {
+        width: 220px !important;
+        margin-top: 0 !important;
+    }
+
+    .ioi-dialog-comment
+    {
+        width: 460px !important;
+        flex-grow: 1;
     }
 
     .MuiFormLabel-root,
@@ -41,6 +74,7 @@
     .MuiOutlinedInput-root
     {
         background-color: white;
+        height: 40px;
 
         .MuiOutlinedInput-notchedOutline
         {
