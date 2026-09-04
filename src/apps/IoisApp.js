@@ -108,6 +108,7 @@ export const IoisApp = () =>
         { headerName: "Qty", field: "quantity", width: 90 },
         { headerName: "Side", field: "side", width: 100 },
         { headerName: "Price", field: "price", width: 90 },
+        { headerName: "Last Price", field: "lastPrice", width: 100 },
         { headerName: "Market", field: "originalMarket", width: 100 },
         { headerName: "Order Type", field: "originalOrderType", width: 110 },
         { headerName: "Lifetime", field: "lifeTimeInMinutes", width: 90 },
@@ -119,6 +120,8 @@ export const IoisApp = () =>
         { headerName: "Comment", field: "comment", width: 180 },
         { headerName: "Timestamp", field: "timestamp", width: 170, valueFormatter: timestampFormatter }
     ]), []);
+
+    const cancelledColumnDefs = useMemo(() => liveColumnDefs.filter(col => col.field !== "lastPrice"), [liveColumnDefs]);
 
     const blockedColumnDefs = useMemo(() => ([
         { headerName: "Request Id", field: "requestId", width: 260 },
@@ -456,7 +459,7 @@ export const IoisApp = () =>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={liveColumnDefs} gridData={liveIois} handleAction={handleLiveAction} />
                         </TabPanel>
                         <TabPanel value="2" className="ioi-cancelled-panel" sx={tabPanelSx}>
-                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={liveColumnDefs} gridData={cancelledIois} handleAction={handleLiveAction} showDelete={false} />
+                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={cancelledColumnDefs} gridData={cancelledIois} handleAction={handleLiveAction} showDelete={false} />
                         </TabPanel>
                         <TabPanel value="3" className="ioi-blocked-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId", "blockType"]} columnDefs={blockedColumnDefs} gridData={blockedIois} />
