@@ -1,8 +1,13 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {AgGridReact} from "ag-grid-react";
+import {useRecoilState} from "recoil";
 import { ServiceRegistry } from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import {formatDate, numberFormatter} from "../utilities";
+import {parametricDialogDisplayState} from "../atoms/dialog-state";
+import ActionIconsRenderer from "./ActionIconsRenderer";
+import ParametricDialog from "../dialogs/ParametricDialog";
+import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 
 export const AdvParametricComponent = () =>
 {
@@ -12,6 +17,9 @@ export const AdvParametricComponent = () =>
     const advService = useRef(ServiceRegistry.getAdvService()).current;
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const loggerService = useRef(new LoggerService(AdvParametricComponent.name)).current;
+    const [, setDialogState] = useRecoilState(parametricDialogDisplayState);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [dataToDelete, setDataToDelete] = useState(null);
 
     useEffect(() =>
     {
@@ -74,6 +82,60 @@ export const AdvParametricComponent = () =>
         }
     }, [advService, loggerService, ownerId]);
 
+    const handleAction = useCallback((action, data) =>
+    {
+        switch (action)
+        {
+            case "add":
+                setDialogState({ open: true, mode: 'add', data: null, kind: 'adv' });
+                break;
+            case "update":
+                setDialogState({ open: true, mode: 'update', data, kind: 'adv' });
+                break;
+            case "clone":
+                setDialogState({ open: true, mode: 'clone', data, kind: 'adv' });
+                break;
+            case "delete":
+                setDataToDelete(data);
+                setDeleteOpen(true);
+                break;
+            default:
+                loggerService.logError(`Unknown action: ${action}`);
+        }
+    }, [loggerService, setDialogState]);
+
+    const handleSave = useCallback(async (formData) =>
+    {
+        try
+        {
+            const adv = parseInt(formData.adv, 10);
+            const updated = await advService.updateAdv(formData.instrumentCode, adv, ownerId);
+            setAdvs(prev =>
+            {
+                const exists = prev.some(item => item.instrumentCode === updated.instrumentCode);
+                if (exists)
+                    return prev.map(item => item.instrumentCode === updated.instrumentCode ? updated : item);
+                return [...prev, updated];
+            });
+        }
+        catch (error)
+        {
+            loggerService.logError(`Error saving ADV: ${error.message}`);
+            throw error;
+        }
+    }, [advService, ownerId, loggerService]);
+
+    const handleDeleteConfirm = useCallback(async () =>
+    {
+        if (!dataToDelete)
+            return;
+
+        await advService.deleteAdv(dataToDelete.instrumentCode);
+        setAdvs(prev => prev.filter(item => item.instrumentCode !== dataToDelete.instrumentCode));
+        setDeleteOpen(false);
+        setDataToDelete(null);
+    }, [dataToDelete, advService]);
+
     const columnDefs = useMemo(() =>
     [
         {
@@ -98,7 +160,7 @@ export const AdvParametricComponent = () =>
             width: 140,
             editable: true,
             type: 'numericColumn',
-            valueFormatter: (params) => numberFormatter(params.value, 0),
+            valueFormatter: numberFormatter,
             cellStyle: { backgroundColor: '#f0f8ff' }
         },
         {
@@ -119,6 +181,15 @@ export const AdvParametricComponent = () =>
             width: 150,
             editable: false,
             valueFormatter: (params) => formatDate(params.value)
+        },
+        {
+            headerName: 'Actions',
+            field: 'actions',
+            sortable: false,
+            width: 140,
+            filter: false,
+            editable: false,
+            cellRenderer: ActionIconsRenderer
         }
     ], [instruments]);
 
@@ -138,6 +209,7 @@ export const AdvParametricComponent = () =>
     }, []);
 
     return (
+        <>
         <div className="ag-theme-alpine adv-parametric" style={{ height: '100%', width: '100%' }}>
             <AgGridReact
                 columnDefs={columnDefs}
@@ -148,9 +220,15 @@ export const AdvParametricComponent = () =>
                 rowHeight={22}
                 headerHeight={22}
                 getRowId={(params) => params.data.instrumentCode}
+                context={{handleAction}}
                 enableCellChangeFlash={true}
                 animateRows={true}
                 suppressRowClickSelection={true}/>
         </div>
+        <ParametricDialog dataName="ADV" kind="adv" instruments={instruments} onSave={handleSave} />
+        <DeleteConfirmationDialog open={deleteOpen} onClose={() => { setDeleteOpen(false); setDataToDelete(null); }}
+            onConfirm={handleDeleteConfirm} dataToDelete={dataToDelete} selectedTab="adv"
+            getDataName={() => "ADV"} getItemDisplayName={(item) => item?.instrumentCode || ''} />
+        </>
     );
 }

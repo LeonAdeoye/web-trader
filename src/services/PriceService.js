@@ -181,6 +181,19 @@ export class PriceService
         }
     }
 
+    deletePrice = async (instrumentCode) =>
+    {
+        this.#loggerService.logDebug(`Deleting price for instrument ${instrumentCode}`);
+        const response = await fetch(`http://localhost:20015/price/${encodeURIComponent(instrumentCode)}`, { method: "DELETE" });
+        if (!response.ok)
+            throw new Error(`Failed to delete price: ${response.status}`);
+
+        if (this.#prices)
+            this.#prices = this.#prices.filter(item => item.instrumentCode !== instrumentCode);
+
+        this.#loggerService.logInfo(`Deleted price for instrument ${instrumentCode}`);
+    }
+
     createDefaultPrices = (instruments, defaultClosePrice = 100.0, defaultOpenPrice = 99.0) =>
     {
         if (!instruments || instruments.length === 0)

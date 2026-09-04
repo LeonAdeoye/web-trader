@@ -2,7 +2,7 @@ import React from "react";
 import '../styles/css/main.css';
 import {Autocomplete, TextField} from "@mui/material";
 
-export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, instrumentCode, className, marginTop}) =>
+export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, instrumentCode, className, marginTop, disabled}) =>
 {
     if(marginTop === undefined || marginTop === null)
         marginTop = '0px';
@@ -32,6 +32,7 @@ export const InstrumentAutoCompleteWidget = ({instruments, handleInputChange, in
             value={instrumentCode || null}
             options={(instruments || []).map(inst => inst.instrumentCode)}
             onChange={(_, newValue) => handleInputChange("instrumentCode", newValue)}
+            disabled={disabled}
             required
             isOptionEqualToValue={(option, value) => option === value}
             ListboxProps={{ style: { fontSize: '0.75rem' } }}

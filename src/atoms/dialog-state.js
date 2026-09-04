@@ -74,3 +74,8 @@ export const ioiBlockDialogDisplayState = atom({
     key: 'ioiBlockDialogDisplayState',
     default: false
 });
+
+export const parametricDialogDisplayState = atom({
+    key: 'parametricDialogDisplayState',
+    default: { open: false, mode: 'add', data: null, kind: null }
+});

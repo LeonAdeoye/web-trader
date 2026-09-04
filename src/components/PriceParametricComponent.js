@@ -1,8 +1,13 @@
 import {useEffect, useMemo, useCallback, useState, useRef} from "react";
 import {AgGridReact} from "ag-grid-react";
+import {useRecoilState} from "recoil";
 import { ServiceRegistry } from "../services/ServiceRegistry";
 import {LoggerService} from "../services/LoggerService";
 import {formatDate, numberFormatter} from "../utilities";
+import {parametricDialogDisplayState} from "../atoms/dialog-state";
+import ActionIconsRenderer from "./ActionIconsRenderer";
+import ParametricDialog from "../dialogs/ParametricDialog";
+import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
 
 export const PriceParametricComponent = () =>
 {
@@ -12,6 +17,9 @@ export const PriceParametricComponent = () =>
     const priceService = useRef(ServiceRegistry.getPriceService()).current;
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const loggerService = useRef(new LoggerService(PriceParametricComponent.name)).current;
+    const [, setDialogState] = useRecoilState(parametricDialogDisplayState);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [dataToDelete, setDataToDelete] = useState(null);
 
     useEffect(() =>
     {
@@ -100,6 +108,61 @@ export const PriceParametricComponent = () =>
         }
     }, [priceService, loggerService, ownerId]);
 
+    const handleAction = useCallback((action, data) =>
+    {
+        switch (action)
+        {
+            case "add":
+                setDialogState({ open: true, mode: 'add', data: null, kind: 'price' });
+                break;
+            case "update":
+                setDialogState({ open: true, mode: 'update', data, kind: 'price' });
+                break;
+            case "clone":
+                setDialogState({ open: true, mode: 'clone', data, kind: 'price' });
+                break;
+            case "delete":
+                setDataToDelete(data);
+                setDeleteOpen(true);
+                break;
+            default:
+                loggerService.logError(`Unknown action: ${action}`);
+        }
+    }, [loggerService, setDialogState]);
+
+    const handleSave = useCallback(async (formData) =>
+    {
+        try
+        {
+            const closePrice = parseFloat(formData.closePrice);
+            const openPrice = parseFloat(formData.openPrice);
+            const updated = await priceService.updatePrice(formData.instrumentCode, closePrice, openPrice, ownerId);
+            setPrices(prev =>
+            {
+                const exists = prev.some(item => item.instrumentCode === updated.instrumentCode);
+                if (exists)
+                    return prev.map(item => item.instrumentCode === updated.instrumentCode ? { ...updated, lastPrice: item.lastPrice } : item);
+                return [...prev, updated];
+            });
+        }
+        catch (error)
+        {
+            loggerService.logError(`Error saving price: ${error.message}`);
+            throw error;
+        }
+    }, [priceService, ownerId, loggerService]);
+
+    const handleDeleteConfirm = useCallback(async () =>
+    {
+        if (!dataToDelete)
+            return;
+
+        await priceService.deletePrice(dataToDelete.instrumentCode);
+        setPrices(prev => prev.filter(item => item.instrumentCode !== dataToDelete.instrumentCode));
+        setDeleteOpen(false);
+        setDataToDelete(null);
+    }, [dataToDelete, priceService]);
+
     const columnDefs = useMemo(() =>
     [
         {
@@ -157,6 +220,15 @@ export const PriceParametricComponent = () =>
             width: 150,
             editable: false,
             valueFormatter: (params) => formatDate(params.value)
+        },
+        {
+            headerName: 'Actions',
+            field: 'actions',
+            sortable: false,
+            width: 140,
+            filter: false,
+            editable: false,
+            cellRenderer: ActionIconsRenderer
         }
     ], [instruments]);
 
@@ -176,6 +248,7 @@ export const PriceParametricComponent = () =>
     }, []);
 
     return (
+        <>
         <div className="ag-theme-alpine price-parametric" style={{ height: '100%', width: '100%' }}>
             <AgGridReact
                 columnDefs={columnDefs}
@@ -186,9 +259,15 @@ export const PriceParametricComponent = () =>
                 rowHeight={22}
                 headerHeight={22}
                 getRowId={(params) => params.data.instrumentCode}
+                context={{handleAction}}
                 enableCellChangeFlash={true}
                 animateRows={true}
                 suppressRowClickSelection={true}/>
         </div>
+        <ParametricDialog dataName="Price" kind="price" instruments={instruments} onSave={handleSave} />
+        <DeleteConfirmationDialog open={deleteOpen} onClose={() => { setDeleteOpen(false); setDataToDelete(null); }}
+            onConfirm={handleDeleteConfirm} dataToDelete={dataToDelete} selectedTab="price"
+            getDataName={() => "Price"} getItemDisplayName={(item) => item?.instrumentCode || ''} />
+        </>
     );
 };

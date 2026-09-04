@@ -112,6 +112,17 @@ export class RateService
         }
     }
 
+    deleteRate = async (currencyCode) =>
+    {
+        this.#loggerService.logDebug(`Deleting interest rate for currency ${currencyCode}`);
+        const response = await fetch(`http://localhost:20015/rate/${encodeURIComponent(currencyCode)}`, { method: "DELETE" });
+        if (!response.ok)
+            throw new Error(`Failed to delete interest rate: ${response.status}`);
+
+        this.#rates = this.#rates.filter(item => item.currencyCode !== currencyCode);
+        this.#loggerService.logInfo(`Deleted interest rate for currency ${currencyCode}`);
+    }
+
     createDefaultRates = (defaultRate = 5.0) =>
     {
         const defaultRates = this.#defaultCurrencies.map(currency => ({

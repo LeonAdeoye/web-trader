@@ -97,6 +97,17 @@ export class VolatilityService
         }
     }
 
+    deleteVolatility = async (instrumentCode) =>
+    {
+        this.#loggerService.logDebug(`Deleting volatility for instrument ${instrumentCode}`);
+        const response = await fetch(`http://localhost:20015/volatility/${encodeURIComponent(instrumentCode)}`, { method: "DELETE" });
+        if (!response.ok)
+            throw new Error(`Failed to delete volatility: ${response.status}`);
+
+        this.#volatilities = this.#volatilities.filter(item => item.instrumentCode !== instrumentCode);
+        this.#loggerService.logInfo(`Deleted volatility for instrument ${instrumentCode}`);
+    }
+
     createDefaultVolatilities = (instruments, defaultVolatility = 20.0) =>
     {
         const defaultVolatilities = instruments.map(instrument =>

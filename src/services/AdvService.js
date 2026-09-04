@@ -96,6 +96,17 @@ export class AdvService
         }
     }
 
+    deleteAdv = async (instrumentCode) =>
+    {
+        this.#loggerService.logDebug(`Deleting ADV for instrument ${instrumentCode}`);
+        const response = await fetch(`http://localhost:20015/adv/${encodeURIComponent(instrumentCode)}`, { method: "DELETE" });
+        if (!response.ok)
+            throw new Error(`Failed to delete ADV: ${response.status}`);
+
+        this.#advs = this.#advs.filter(item => item.instrumentCode !== instrumentCode);
+        this.#loggerService.logInfo(`Deleted ADV for instrument ${instrumentCode}`);
+    }
+
     createDefaultAdvs = async (instruments, lastUpdatedBy = 'System') =>
     {
         const defaultAdvs = [];
