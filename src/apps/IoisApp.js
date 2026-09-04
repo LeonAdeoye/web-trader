@@ -450,7 +450,7 @@ export const IoisApp = () =>
                                 <Tab className="ioi-trader-tab" label="Traders" value="7" sx={tabSx} />
                                 <Tab className="ioi-stocks-tab" label="Stocks" value="8" sx={tabSx} />
                                 <Tab className="ioi-markets-tab" label="Markets" value="9" sx={tabSx} />
-                                <Tab className="ioi-reasons-tab" label="Reasons" value="10" sx={tabSx} />
+                                <Tab className="ioi-reasons-tab" label="Failure Reasons" value="10" sx={tabSx} />
                                 <Tab className="ioi-totals-tab" label="Totals" value="11" sx={tabSx} />
                                 <Tab className="ioi-config-tab" label="Configurations" value="12" sx={tabSx} />
                             </TabList>
