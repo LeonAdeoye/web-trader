@@ -49,39 +49,75 @@ export class InstrumentService
 
     addNewInstrument = async (newInstrument) =>
     {
-        this.#loggerService.logDebug(`Saving new instrument: ${JSON.stringify(newInstrument)}.`);
-        return await fetch("http://localhost:20009/instrument", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(newInstrument)})
-            .then(response => response.json())
-            .then((instrumentResponse) => {
-                this.#instruments.push(instrumentResponse);
-                this.#loggerService.logDebug(`Successfully saved instrument: ${JSON.stringify(instrumentResponse)}.`);
-                return instrumentResponse;
-            })
-            .catch(error => this.#loggerService.logError(error));
+        const payload = { ...newInstrument };
+        if (!payload.instrumentId)
+            delete payload.instrumentId;
+
+        this.#loggerService.logDebug(`Saving new instrument: ${JSON.stringify(payload)}.`);
+        try
+        {
+            const response = await fetch("http://localhost:20009/instrument", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok)
+            {
+                const text = await response.text();
+                const error = new Error(text || `Failed to save instrument: ${response.status}`);
+                this.#loggerService.logError(error);
+                throw error;
+            }
+
+            const instrumentResponse = await response.json();
+            this.#instruments.push(instrumentResponse);
+            this.#loggerService.logDebug(`Successfully saved instrument: ${JSON.stringify(instrumentResponse)}.`);
+            return instrumentResponse;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(error);
+            throw error;
+        }
     }
 
     updateInstrument = async (instrumentToUpdate) =>
     {
         this.#loggerService.logDebug(`Updating instrument: ${JSON.stringify(instrumentToUpdate)}.`);
-        return await fetch(`http://localhost:20009/instrument`, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(instrumentToUpdate)})
-            .then(response => response.json())
-            .then((instrumentResponse) => {
-                for(const current of this.#instruments) {
-                    if(current.instrumentId === instrumentResponse.instrumentId) {
-                        this.#instruments[this.#instruments.indexOf(current)] = instrumentResponse;
-                        break;
-                    }
+        try
+        {
+            const response = await fetch(`http://localhost:20009/instrument`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(instrumentToUpdate)
+            });
+
+            if (!response.ok)
+            {
+                const text = await response.text();
+                const error = new Error(text || `Failed to update instrument: ${response.status}`);
+                this.#loggerService.logError(error);
+                throw error;
+            }
+
+            const instrumentResponse = await response.json();
+            for (const current of this.#instruments)
+            {
+                if (current.instrumentId === instrumentResponse.instrumentId)
+                {
+                    this.#instruments[this.#instruments.indexOf(current)] = instrumentResponse;
+                    break;
                 }
-                this.#loggerService.logDebug(`Updated instrument: ${JSON.stringify(instrumentResponse)}.`);
-                return instrumentResponse;
-            })
-            .catch(error => this.#loggerService.logError(error));
+            }
+            this.#loggerService.logDebug(`Updated instrument: ${JSON.stringify(instrumentResponse)}.`);
+            return instrumentResponse;
+        }
+        catch (error)
+        {
+            this.#loggerService.logError(error);
+            throw error;
+        }
     }
 
     deleteInstrument = async (instrumentId) =>

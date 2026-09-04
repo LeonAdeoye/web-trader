@@ -1,5 +1,12 @@
 import React, {useState, useCallback, useEffect} from 'react';
-import {Grid, TextField} from '@mui/material';
+import {Grid, MenuItem, TextField} from '@mui/material';
+
+const SETTLEMENT_TYPES = [
+    { value: 'T_PLUS_ZERO', label: 'T+0' },
+    { value: 'T_PLUS_ONE', label: 'T+1' },
+    { value: 'T_PLUS_TWO', label: 'T+2' },
+    { value: 'T_PLUS_THREE', label: 'T+3' }
+];
 
 const InstrumentDialogComponent = ({data, onDataChange}) =>
 {
@@ -109,11 +116,16 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
                     style={{ width: '200px' }} />
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
-                <TextField size="small" label="Settlement Type" value={instrumentData.settlementType || ''}
+                <TextField size="small" label="Settlement Type" select value={instrumentData.settlementType || ''}
                     onChange={(e) => handleInputChange('settlementType', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }} />
+                    SelectProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}>
+                    {SETTLEMENT_TYPES.map(option =>
+                        <MenuItem key={option.value} value={option.value} style={{ fontSize: '0.75rem' }}>{option.label}</MenuItem>
+                    )}
+                </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Exchange Acronym" value={instrumentData.exchangeAcronym || ''}

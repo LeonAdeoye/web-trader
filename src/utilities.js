@@ -364,8 +364,19 @@ export const formatBreachTimestamp = (params) =>
     return date.toLocaleTimeString();
 }
 
-export const formatSettlementType = value => {
-    const num = value.split('_').pop();
+export const formatSettlementType = value =>
+{
+    if (value == null || value === "")
+        return "";
+
+    const text = String(value);
+    if (text.startsWith("T+"))
+        return text;
+
+    const num = text.split("_").pop();
     const map = { ZERO: 0, ONE: 1, TWO: 2, THREE: 3 };
+    if (map[num] === undefined)
+        return text;
+
     return `T+${map[num]}`;
 };
