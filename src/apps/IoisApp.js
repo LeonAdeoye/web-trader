@@ -56,6 +56,8 @@ const mergeCountMaps = (createdMap, unapprovedMap, nameField) =>
     }));
 };
 
+const countBlocksByType = (blocks, blockType) => (blocks || []).filter(block => block.blockType === blockType).length;
+
 export const IoisApp = () =>
 {
     const windowId = useMemo(() => window.command.getWindowId("IOIs"), []);
@@ -159,8 +161,8 @@ export const IoisApp = () =>
     ]), []);
 
     const totalsColumnDefs = useMemo(() => ([
-        { headerName: "Metric", field: "metric", width: 280 },
-        { headerName: "Value", field: "value", width: 140 }
+        { headerName: "Metric", field: "metric", width: 320 },
+        { headerName: "Count", field: "value", width: 140 }
     ]), []);
 
     const configColumnDefs = useMemo(() => ([
@@ -214,11 +216,14 @@ export const IoisApp = () =>
             setMarketCounts(mergeCountMaps(createdMarkets, unapprovedMarkets, "market"));
             setReasonCounts(Object.entries(reasons || {}).map(([reason, count]) => ({ reason, count })));
             setTotals([
-                { metric: "Approved IOIs", value: createdTotal?.total || 0 },
-                { metric: "Unapproved IOIs", value: unapprovedTotal?.total || 0 },
+                { metric: "Approved IOIs Running Total", value: createdTotal?.total || 0 },
+                { metric: "Unapproved IOIs Running Total", value: unapprovedTotal?.total || 0 },
                 { metric: "Blocked IOIs", value: (blocked || []).length },
-                { metric: "Live IOIs", value: (live || []).length },
-                { metric: "Cancelled IOIs", value: (cancelled || []).length }
+                { metric: "Blocked Traders", value: countBlocksByType(activeBlocks, "TRADER") },
+                { metric: "Blocked Stocks", value: countBlocksByType(activeBlocks, "STOCK") },
+                { metric: "Blocked Markets", value: countBlocksByType(activeBlocks, "MARKET") },
+                { metric: "Currently Live IOIs", value: (live || []).length },
+                { metric: "Currently Cancelled IOIs", value: (cancelled || []).length }
             ]);
         }
         catch (error)
