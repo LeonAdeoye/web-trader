@@ -109,6 +109,11 @@ export class IoiService
         return this.#getJson("/ioi/block/failures", []);
     }
 
+    async getBlocks()
+    {
+        return this.#getJson("/ioi/block", []);
+    }
+
     async getBlockedTraders()
     {
         return this.#getJson("/ioi/block/traders", []);
@@ -124,9 +129,9 @@ export class IoiService
         return this.#getJson("/ioi/block/markets", []);
     }
 
-    async blockTrader(trader)
+    async blockTrader(trader, userId)
     {
-        return this.#postQuery(`/ioi/block/trader?trader=${encodeURIComponent(trader)}`);
+        return this.#postQuery(`/ioi/block/trader?trader=${encodeURIComponent(trader)}${this.#userQuery(userId)}`);
     }
 
     async unblockTrader(trader)
@@ -134,9 +139,9 @@ export class IoiService
         return this.#delete(`/ioi/block/trader?trader=${encodeURIComponent(trader)}`);
     }
 
-    async blockStock(stock)
+    async blockStock(stock, userId)
     {
-        return this.#postQuery(`/ioi/block/stock?stock=${encodeURIComponent(stock)}`);
+        return this.#postQuery(`/ioi/block/stock?stock=${encodeURIComponent(stock)}${this.#userQuery(userId)}`);
     }
 
     async unblockStock(stock)
@@ -144,9 +149,9 @@ export class IoiService
         return this.#delete(`/ioi/block/stock?stock=${encodeURIComponent(stock)}`);
     }
 
-    async blockMarket(market)
+    async blockMarket(market, userId)
     {
-        return this.#postQuery(`/ioi/block/market?market=${encodeURIComponent(market)}`);
+        return this.#postQuery(`/ioi/block/market?market=${encodeURIComponent(market)}${this.#userQuery(userId)}`);
     }
 
     async unblockMarket(market)
@@ -185,6 +190,11 @@ export class IoiService
             originalOrderType: fields.originalOrderType || "LIMIT",
             source: "REST"
         };
+    }
+
+    #userQuery(userId)
+    {
+        return userId ? `&userId=${encodeURIComponent(userId)}` : "";
     }
 
     async #getJson(path, fallback)

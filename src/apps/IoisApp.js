@@ -7,6 +7,7 @@ import {useRecoilState} from "recoil";
 import TitleBarComponent from "../components/TitleBarComponent";
 import {GenericGridComponent} from "../components/GenericGridComponent";
 import IoiActionIconsRenderer from "../components/IoiActionIconsRenderer";
+import IoiBlockActionIconsRenderer from "../components/IoiBlockActionIconsRenderer";
 import IoiCreationDialog from "../dialogs/IoiCreationDialog";
 import IoiBlockDialog from "../dialogs/IoiBlockDialog";
 import DeleteConfirmationDialog from "../dialogs/DeleteConfirmationDialog";
@@ -72,6 +73,7 @@ export const IoisApp = () =>
     const [liveIois, setLiveIois] = useState([]);
     const [cancelledIois, setCancelledIois] = useState([]);
     const [blockedIois, setBlockedIois] = useState([]);
+    const [blocks, setBlocks] = useState([]);
     const [failures, setFailures] = useState([]);
     const [traderCounts, setTraderCounts] = useState([]);
     const [stockCounts, setStockCounts] = useState([]);
@@ -83,7 +85,9 @@ export const IoisApp = () =>
     const [cloneSeed, setCloneSeed] = useState(null);
     const [deleteAllOpen, setDeleteAllOpen] = useState(false);
     const [deleteRowOpen, setDeleteRowOpen] = useState(false);
+    const [deleteBlockOpen, setDeleteBlockOpen] = useState(false);
     const [ioiToCancel, setIoiToCancel] = useState(null);
+    const [blockToUnblock, setBlockToUnblock] = useState(null);
     const [, setIoiCreationDialogOpen] = useRecoilState(ioiCreationDialogDisplayState);
     const [, setIoiBlockDialogOpen] = useRecoilState(ioiBlockDialogDisplayState);
     const [selectedGenericGridRow] = useRecoilState(selectedGenericGridRowState);
@@ -123,6 +127,14 @@ export const IoisApp = () =>
         { headerName: "Reason", field: "reason", width: 280 },
         { headerName: "Source", field: "source", width: 90 },
         { headerName: "Timestamp", field: "timestamp", width: 170, valueFormatter: timestampFormatter }
+    ]), []);
+
+    const blocksColumnDefs = useMemo(() => ([
+        { headerName: "", field: "actions", width: 50, sortable: false, filter: false, cellRenderer: IoiBlockActionIconsRenderer },
+        { headerName: "User Id", field: "userId", width: 140 },
+        { headerName: "Timestamp", field: "timestamp", width: 170, valueFormatter: timestampFormatter },
+        { headerName: "Type", field: "blockType", width: 110 },
+        { headerName: "Blocked", field: "value", width: 180 }
     ]), []);
 
     const failureColumnDefs = useMemo(() => ([
@@ -175,10 +187,11 @@ export const IoisApp = () =>
     {
         try
         {
-            const [live, cancelled, blocked, failed, createdTraders, unapprovedTraders, createdStocks, unapprovedStocks, createdMarkets, unapprovedMarkets, reasons, createdTotal, unapprovedTotal] = await Promise.all([
+            const [live, cancelled, blocked, activeBlocks, failed, createdTraders, unapprovedTraders, createdStocks, unapprovedStocks, createdMarkets, unapprovedMarkets, reasons, createdTotal, unapprovedTotal] = await Promise.all([
                 ioiService.getLive(),
                 ioiService.getCancelled(),
                 ioiService.getBlockedIois(),
+                ioiService.getBlocks(),
                 ioiService.getFailures(),
                 ioiService.getCreatedByTrader(),
                 ioiService.getUnapprovedByTrader(),
@@ -194,6 +207,7 @@ export const IoisApp = () =>
             setLiveIois(live || []);
             setCancelledIois(cancelled || []);
             setBlockedIois(blocked || []);
+            setBlocks(activeBlocks || []);
             setFailures(failed || []);
             setTraderCounts(mergeCountMaps(createdTraders, unapprovedTraders, "trader"));
             setStockCounts(mergeCountMaps(createdStocks, unapprovedStocks, "ric"));
@@ -301,14 +315,22 @@ export const IoisApp = () =>
         setDeleteAllOpen(false);
     };
 
+    const getLoggedInUserId = async () =>
+    {
+        if (window.configurations?.getLoggedInUserId)
+            return await window.configurations.getLoggedInUserId();
+        return "";
+    };
+
     const handleBlock = async (type, value) =>
     {
+        const userId = await getLoggedInUserId();
         if (type === "trader")
-            await ioiService.blockTrader(value);
+            await ioiService.blockTrader(value, userId);
         else if (type === "stock")
-            await ioiService.blockStock(value);
+            await ioiService.blockStock(value, userId);
         else
-            await ioiService.blockMarket(value);
+            await ioiService.blockMarket(value, userId);
         await loadData();
     };
 
@@ -321,6 +343,23 @@ export const IoisApp = () =>
         else
             await ioiService.unblockMarket(value);
         await loadData();
+    };
+
+    const handleBlockAction = (action, data) =>
+    {
+        if (action === "delete")
+        {
+            setBlockToUnblock(data);
+            setDeleteBlockOpen(true);
+        }
+    };
+
+    const confirmUnblock = async () =>
+    {
+        if (blockToUnblock?.blockType && blockToUnblock?.value)
+            await handleUnblock(blockToUnblock.blockType.toLowerCase(), blockToUnblock.value);
+        setDeleteBlockOpen(false);
+        setBlockToUnblock(null);
     };
 
     const collectBulkRows = () =>
@@ -397,14 +436,15 @@ export const IoisApp = () =>
                                 <Tab className="ioi-live-tab" label="Live" value="1" sx={tabSx} />
                                 <Tab className="ioi-cancelled-tab" label="Cancelled" value="2" sx={tabSx} />
                                 <Tab className="ioi-blocked-tab" label="Blocked" value="3" sx={tabSx} />
-                                <Tab className="ioi-failures-tab" label="Failures" value="4" sx={tabSx} />
-                                <Tab className="ioi-bulk-tab" label="Bulk" value="5" sx={tabSx} />
-                                <Tab className="ioi-trader-tab" label="Trader" value="6" sx={tabSx} />
-                                <Tab className="ioi-stocks-tab" label="Stocks" value="7" sx={tabSx} />
-                                <Tab className="ioi-markets-tab" label="Markets" value="8" sx={tabSx} />
-                                <Tab className="ioi-reasons-tab" label="Reasons" value="9" sx={tabSx} />
-                                <Tab className="ioi-totals-tab" label="Totals" value="10" sx={tabSx} />
-                                <Tab className="ioi-config-tab" label="Configurations" value="11" sx={tabSx} />
+                                <Tab className="ioi-blocks-tab" label="Blocks" value="4" sx={tabSx} />
+                                <Tab className="ioi-failures-tab" label="Failures" value="5" sx={tabSx} />
+                                <Tab className="ioi-bulk-tab" label="Upload" value="6" sx={tabSx} />
+                                <Tab className="ioi-trader-tab" label="Traders" value="7" sx={tabSx} />
+                                <Tab className="ioi-stocks-tab" label="Stocks" value="8" sx={tabSx} />
+                                <Tab className="ioi-markets-tab" label="Markets" value="9" sx={tabSx} />
+                                <Tab className="ioi-reasons-tab" label="Reasons" value="10" sx={tabSx} />
+                                <Tab className="ioi-totals-tab" label="Totals" value="11" sx={tabSx} />
+                                <Tab className="ioi-config-tab" label="Configurations" value="12" sx={tabSx} />
                             </TabList>
                         </Box>
                         <TabPanel value="1" className="ioi-live-panel" sx={tabPanelSx}>
@@ -416,10 +456,13 @@ export const IoisApp = () =>
                         <TabPanel value="3" className="ioi-blocked-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId", "blockType"]} columnDefs={blockedColumnDefs} gridData={blockedIois} />
                         </TabPanel>
-                        <TabPanel value="4" className="ioi-failures-panel" sx={tabPanelSx}>
+                        <TabPanel value="4" className="ioi-blocks-panel" sx={tabPanelSx}>
+                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["blockType", "value"]} columnDefs={blocksColumnDefs} gridData={blocks} handleAction={handleBlockAction} />
+                        </TabPanel>
+                        <TabPanel value="5" className="ioi-failures-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={failureColumnDefs} gridData={failures} />
                         </TabPanel>
-                        <TabPanel value="5" className="ioi-bulk-panel" sx={tabPanelSx}>
+                        <TabPanel value="6" className="ioi-bulk-panel" sx={tabPanelSx}>
                             <div className="ioi-bulk-actions">
                                 <Button className="dialog-action-button" variant="contained" onClick={handleBulkPaste}>Paste from Excel</Button>
                                 <Button className="dialog-action-button submit" variant="contained" onClick={handleBulkUpload}>Upload</Button>
@@ -436,22 +479,22 @@ export const IoisApp = () =>
                                     getRowId={(params) => params.data.id} />
                             </div>
                         </TabPanel>
-                        <TabPanel value="6" className="ioi-trader-panel" sx={tabPanelSx}>
+                        <TabPanel value="7" className="ioi-trader-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["trader"]} columnDefs={countColumnDefs("Trader", "trader")} gridData={traderCounts} />
                         </TabPanel>
-                        <TabPanel value="7" className="ioi-stocks-panel" sx={tabPanelSx}>
+                        <TabPanel value="8" className="ioi-stocks-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["ric"]} columnDefs={countColumnDefs("Stock", "ric")} gridData={stockCounts} />
                         </TabPanel>
-                        <TabPanel value="8" className="ioi-markets-panel" sx={tabPanelSx}>
+                        <TabPanel value="9" className="ioi-markets-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["market"]} columnDefs={countColumnDefs("Market", "market")} gridData={marketCounts} />
                         </TabPanel>
-                        <TabPanel value="9" className="ioi-reasons-panel" sx={tabPanelSx}>
+                        <TabPanel value="10" className="ioi-reasons-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["reason"]} columnDefs={reasonColumnDefs} gridData={reasonCounts} />
                         </TabPanel>
-                        <TabPanel value="10" className="ioi-totals-panel" sx={tabPanelSx}>
+                        <TabPanel value="11" className="ioi-totals-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["metric"]} columnDefs={totalsColumnDefs} gridData={totals} />
                         </TabPanel>
-                        <TabPanel value="11" className="ioi-config-panel" sx={tabPanelSx}>
+                        <TabPanel value="12" className="ioi-config-panel" sx={tabPanelSx}>
                             <div className="ioi-bulk-actions">
                                 <Button className="dialog-action-button submit" variant="contained" onClick={handleSaveConfigs}>Save & Reconfigure</Button>
                             </div>
@@ -488,6 +531,14 @@ export const IoisApp = () =>
                 selectedTab="ioi"
                 getDataName={() => "IOI"}
                 getItemDisplayName={(data) => data ? `${data.ric} (${data.requestId})` : ""} />
+            <DeleteConfirmationDialog
+                open={deleteBlockOpen}
+                onClose={() => { setDeleteBlockOpen(false); setBlockToUnblock(null); }}
+                onConfirm={confirmUnblock}
+                dataToDelete={blockToUnblock}
+                selectedTab="block"
+                getDataName={() => "block"}
+                getItemDisplayName={(data) => data ? `${data.blockType} ${data.value}` : ""} />
         </>
     );
 };
