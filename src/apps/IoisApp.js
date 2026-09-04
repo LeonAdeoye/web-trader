@@ -149,7 +149,7 @@ export const IoisApp = () =>
 
     const countColumnDefs = (nameHeader, nameField) => ([
         { headerName: nameHeader, field: nameField, width: 220 },
-        { headerName: "Created", field: "created", width: 120 },
+        { headerName: "Approved", field: "created", width: 120 },
         { headerName: "Unapproved", field: "unapproved", width: 130 }
     ]);
 
@@ -214,7 +214,7 @@ export const IoisApp = () =>
             setMarketCounts(mergeCountMaps(createdMarkets, unapprovedMarkets, "market"));
             setReasonCounts(Object.entries(reasons || {}).map(([reason, count]) => ({ reason, count })));
             setTotals([
-                { metric: "Created IOIs", value: createdTotal?.total || 0 },
+                { metric: "Approved IOIs", value: createdTotal?.total || 0 },
                 { metric: "Unapproved IOIs", value: unapprovedTotal?.total || 0 },
                 { metric: "Blocked IOIs", value: (blocked || []).length },
                 { metric: "Live IOIs", value: (live || []).length },
