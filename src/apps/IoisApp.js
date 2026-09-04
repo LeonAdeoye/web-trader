@@ -446,11 +446,11 @@ export const IoisApp = () =>
                                 <Tab className="ioi-blocked-tab" label="Blocked" value="3" sx={tabSx} />
                                 <Tab className="ioi-blocks-tab" label="Blocks" value="4" sx={tabSx} />
                                 <Tab className="ioi-failures-tab" label="Failures" value="5" sx={tabSx} />
+                                <Tab className="ioi-reasons-tab" label="Failure Reasons" value="10" sx={tabSx} />
                                 <Tab className="ioi-bulk-tab" label="Upload" value="6" sx={tabSx} />
                                 <Tab className="ioi-trader-tab" label="Traders" value="7" sx={tabSx} />
                                 <Tab className="ioi-stocks-tab" label="Stocks" value="8" sx={tabSx} />
                                 <Tab className="ioi-markets-tab" label="Markets" value="9" sx={tabSx} />
-                                <Tab className="ioi-reasons-tab" label="Failure Reasons" value="10" sx={tabSx} />
                                 <Tab className="ioi-totals-tab" label="Totals" value="11" sx={tabSx} />
                                 <Tab className="ioi-config-tab" label="Configurations" value="12" sx={tabSx} />
                             </TabList>
@@ -469,6 +469,9 @@ export const IoisApp = () =>
                         </TabPanel>
                         <TabPanel value="5" className="ioi-failures-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["requestId"]} columnDefs={failureColumnDefs} gridData={failures} />
+                        </TabPanel>
+                        <TabPanel value="10" className="ioi-reasons-panel" sx={tabPanelSx}>
+                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["reason"]} columnDefs={reasonColumnDefs} gridData={reasonCounts} />
                         </TabPanel>
                         <TabPanel value="6" className="ioi-bulk-panel" sx={tabPanelSx}>
                             <div className="ioi-bulk-actions">
@@ -495,9 +498,6 @@ export const IoisApp = () =>
                         </TabPanel>
                         <TabPanel value="9" className="ioi-markets-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["market"]} columnDefs={countColumnDefs("Market", "market")} gridData={marketCounts} />
-                        </TabPanel>
-                        <TabPanel value="10" className="ioi-reasons-panel" sx={tabPanelSx}>
-                            <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["reason"]} columnDefs={reasonColumnDefs} gridData={reasonCounts} />
                         </TabPanel>
                         <TabPanel value="11" className="ioi-totals-panel" sx={tabPanelSx}>
                             <GenericGridComponent rowHeight={22} gridTheme="ag-theme-alpine" rowIdArray={["metric"]} columnDefs={totalsColumnDefs} gridData={totals} />
