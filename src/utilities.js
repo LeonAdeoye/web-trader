@@ -242,9 +242,12 @@ export const assetTypeConverter = (value) =>
         "STOCK": "Stock",
         "BOND": "Bond",
         "FUT": "Future",
+        "FUTURE": "Future",
         "OPT": "Option",
+        "OPTION": "Option",
         "ETF": "ETF",
         "WARRANT": "Warrant",
+        "SWAPS": "Swaps",
         "CRYPTO": "Crypto"
     };
     return assetTypeMapping[value] || value;

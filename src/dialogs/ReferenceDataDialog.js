@@ -12,7 +12,7 @@ import InstrumentDialogComponent from "./InstrumentDialogComponent";
 import TraderDialogComponent from "./TraderDialogComponent";
 import BankHolidayDialogComponent from "./BankHolidayDialogComponent";
 
-const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', editingData = null, onSave, onClose}) =>
+const ReferenceDataDialog = ({dataName, selectedTab, desks = [], exchanges = [], instruments = [], mode = 'add', editingData = null, onSave, onClose}) =>
 {
     const [referenceDataDialogDisplay, setReferenceDataDialogDisplay] = useRecoilState(referenceDataDialogDisplayState);
     const [formData, setFormData] = useState({});
@@ -37,7 +37,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             case "5": // Desks
                 return <DeskDialogComponent data={formData} onDataChange={handleInputChange} />;
             case "6": // Instruments
-                return <InstrumentDialogComponent data={formData} onDataChange={handleInputChange} />;
+                return <InstrumentDialogComponent data={formData} onDataChange={handleInputChange} exchanges={exchanges} instruments={instruments} />;
             case "7": // Traders
                 return <TraderDialogComponent data={formData} onDataChange={handleInputChange} desks={desks} />;
             case "8": // Bank Holidays
@@ -45,7 +45,7 @@ const ReferenceDataDialog = ({dataName, selectedTab, desks = [], mode = 'add', e
             default:
                 return <div>Please select a tab</div>;
         }
-    }, [selectedTab, formData, desks, handleInputChange]);
+    }, [selectedTab, formData, desks, exchanges, instruments, handleInputChange]);
 
     const handleAdd = useCallback(() =>
     {

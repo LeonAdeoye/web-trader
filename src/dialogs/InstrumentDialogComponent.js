@@ -1,5 +1,6 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useCallback, useEffect, useMemo} from 'react';
 import {Grid, MenuItem, TextField} from '@mui/material';
+import {assetTypeConverter} from '../utilities';
 
 const SETTLEMENT_TYPES = [
     { value: 'T_PLUS_ZERO', label: 'T+0' },
@@ -8,7 +9,37 @@ const SETTLEMENT_TYPES = [
     { value: 'T_PLUS_THREE', label: 'T+3' }
 ];
 
-const InstrumentDialogComponent = ({data, onDataChange}) =>
+const SETTLEMENT_CURRENCIES = [
+    'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD', 'NOK',
+    'KRW', 'INR', 'RUB', 'ZAR', 'MXN', 'BRL', 'AED', 'PLN', 'TRY', 'IDR',
+    'THB', 'MYR', 'PHP', 'VND', 'ARS', 'CLP', 'COP', 'EGP', 'CNY', 'SEK', 'NZD'
+];
+
+const KNOWN_ASSET_TYPES = ['STOCK', 'OPTION', 'FUTURE', 'ETF', 'WARRANT', 'SWAPS'];
+const KNOWN_SECTORS = [
+    'Consumer Discretionary',
+    'Consumer Staples',
+    'Energy',
+    'Health Care',
+    'Information Technology',
+    'Logistics',
+    'Materials',
+    'Software services'
+];
+
+const uniqueValues = (items, field) =>
+{
+    return [...new Set(items.map(item => item[field]).filter(value => value != null && String(value).trim() !== ''))].sort((a, b) => String(a).localeCompare(String(b)));
+};
+
+const mergeCurrentValue = (values, current) =>
+{
+    if (current && !values.includes(current))
+        return [...values, current].sort((a, b) => String(a).localeCompare(String(b)));
+    return values;
+};
+
+const InstrumentDialogComponent = ({data, onDataChange, exchanges = [], instruments = []}) =>
 {
     const [instrumentData, setInstrumentData] = useState(data || {
         instrumentId: '',
@@ -64,6 +95,20 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
 
     }, [instrumentData, onDataChange, isInitializing]);
 
+    const assetTypes = useMemo(() =>
+    {
+        const fromInstruments = uniqueValues(instruments, 'assetType');
+        const merged = [...new Set([...KNOWN_ASSET_TYPES, ...fromInstruments])].sort((a, b) => String(a).localeCompare(String(b)));
+        return mergeCurrentValue(merged, instrumentData.assetType);
+    }, [instruments, instrumentData.assetType]);
+
+    const sectors = useMemo(() =>
+    {
+        const fromInstruments = uniqueValues(instruments, 'sector');
+        const merged = [...new Set([...KNOWN_SECTORS, ...fromInstruments])].sort((a, b) => String(a).localeCompare(String(b)));
+        return mergeCurrentValue(merged, instrumentData.sector);
+    }, [instruments, instrumentData.sector]);
+
     return (
         <Grid container spacing={0.0} alignItems="flex-start">
             <Grid item xs={5}>
@@ -74,18 +119,28 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
                     style={{ width: '200px' }} />
             </Grid>
             <Grid item xs={5}>
-                <TextField size="small" label="Asset Type" value={instrumentData.assetType || ''}
+                <TextField size="small" label="Asset Type" select value={instrumentData.assetType || ''}
                     onChange={(e) => handleInputChange('assetType', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }} />
+                    SelectProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}>
+                    {assetTypes.map(type =>
+                        <MenuItem key={type} value={type} style={{ fontSize: '0.75rem' }}>{assetTypeConverter(type)}</MenuItem>
+                    )}
+                </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
-                <TextField size="small" label="Sector" value={instrumentData.sector || ''}
+                <TextField size="small" label="Sector" select value={instrumentData.sector || ''}
                     onChange={(e) => handleInputChange('sector', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }} />
+                    SelectProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}>
+                    {sectors.map(sector =>
+                        <MenuItem key={sector} value={sector} style={{ fontSize: '0.75rem' }}>{sector}</MenuItem>
+                    )}
+                </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Country" value={instrumentData.country || ''}
@@ -109,11 +164,16 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
                     style={{ width: '200px' }} />
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
-                <TextField size="small" label="Settlement Currency" value={instrumentData.settlementCurrency || ''}
+                <TextField size="small" label="Settlement Currency" select value={instrumentData.settlementCurrency || ''}
                     onChange={(e) => handleInputChange('settlementCurrency', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }} />
+                    SelectProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}>
+                    {SETTLEMENT_CURRENCIES.map(currency =>
+                        <MenuItem key={currency} value={currency} style={{ fontSize: '0.75rem' }}>{currency}</MenuItem>
+                    )}
+                </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Settlement Type" select value={instrumentData.settlementType || ''}
@@ -128,11 +188,16 @@ const InstrumentDialogComponent = ({data, onDataChange}) =>
                 </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
-                <TextField size="small" label="Exchange Acronym" value={instrumentData.exchangeAcronym || ''}
+                <TextField size="small" label="Exchange Acronym" select value={instrumentData.exchangeAcronym || ''}
                     onChange={(e) => handleInputChange('exchangeAcronym', e.target.value)}
                     InputProps={{ style: { fontSize: '0.75rem', height: '32px' } }}
                     InputLabelProps={{ style: { fontSize: '0.75rem' } }}
-                    style={{ width: '200px' }} />
+                    SelectProps={{ style: { fontSize: '0.75rem' } }}
+                    style={{ width: '200px' }}>
+                    {exchanges.map(exchange =>
+                        <MenuItem key={exchange.exchangeId || exchange.exchangeAcronym} value={exchange.exchangeAcronym} style={{ fontSize: '0.75rem' }}>{exchange.exchangeAcronym}</MenuItem>
+                    )}
+                </TextField>
             </Grid>
             <Grid item xs={5} style={{ paddingTop: '10px' }}>
                 <TextField size="small" label="Lot Size" type="number" value={instrumentData.lotSize || ''}

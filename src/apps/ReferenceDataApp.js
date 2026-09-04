@@ -665,7 +665,7 @@ export const ReferenceDataApp = () =>
                 setClients(clientService.getClients());
                 setBrokers(brokerService.getBrokers());
                 setAccounts(accountService.getAccounts());
-                setInstruments(instrumentService.getInstruments());
+                setInstruments([...instrumentService.getInstruments()]);
                 setExchanges(exchangeService.getExchanges());
                 setBankHolidays(bankHolidayService.getBankHolidays());
 
@@ -801,7 +801,7 @@ export const ReferenceDataApp = () =>
             case "6": // Instruments
                 await instrumentService.addNewInstrument(formData);
                 await instrumentService.loadInstruments();
-                setInstruments(instrumentService.getInstruments());
+                setInstruments([...instrumentService.getInstruments()]);
                 break;
             case "7": // Traders
                 await traderService.addNewTrader(formData);
@@ -897,7 +897,7 @@ export const ReferenceDataApp = () =>
             case "6": // Instruments
                 await instrumentService.updateInstrument(formData);
                 await instrumentService.loadInstruments();
-                setInstruments(instrumentService.getInstruments());
+                setInstruments([...instrumentService.getInstruments()]);
                 break;
             case "7": // Traders
                 const originalTrader = traders.find(t => t.traderId === formData.traderId);
@@ -1189,7 +1189,7 @@ export const ReferenceDataApp = () =>
                 </TabPanel>
             </TabContext>
         </div>
-        <ReferenceDataDialog selectedTab={selectedTab} desks={desks} mode={dialogMode} editingData={editingData} onSave={handleSave}
+        <ReferenceDataDialog selectedTab={selectedTab} desks={desks} exchanges={exchanges} instruments={instruments} mode={dialogMode} editingData={editingData} onSave={handleSave}
              onClose={() => { setDialogMode('add'); setEditingData(null); }} dataName={getDataName(selectedTab)}/>
 
         <BookDialog desks={desks} mode={dialogMode} editingData={editingData} onSave={handleSave}/>
