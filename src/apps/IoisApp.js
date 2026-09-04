@@ -99,6 +99,7 @@ export const IoisApp = () =>
 
     const timestampFormatter = (params) => params.value ? transformLocalDataTime(Number(params.value)) : "";
     const listFormatter = (params) => Array.isArray(params.value) ? params.value.join(",") : (params.value || "");
+    const advPercentageFormatter = (params) => params.value == null || params.value === "" ? "" : Number(params.value).toFixed(2);
 
     const liveColumnDefs = useMemo(() => ([
         { headerName: "", field: "actions", width: 90, sortable: false, filter: false, cellRenderer: IoiActionIconsRenderer },
@@ -146,6 +147,10 @@ export const IoisApp = () =>
         { headerName: "Request Id", field: "requestId", width: 260 },
         { headerName: "Trader", field: "trader", width: 110 },
         { headerName: "RIC", field: "ric", width: 110 },
+        { headerName: "Qty", field: "quantity", width: 90 },
+        { headerName: "Price", field: "price", width: 90 },
+        { headerName: "Last Price", field: "lastPrice", width: 100 },
+        { headerName: "ADV%", field: "advPercentage", width: 90, valueFormatter: advPercentageFormatter },
         { headerName: "Market", field: "originalMarket", width: 100 },
         { headerName: "Reason", field: "reason", width: 320 },
         { headerName: "Source", field: "source", width: 90 },
