@@ -100,6 +100,7 @@ export const IoisApp = () =>
     const timestampFormatter = (params) => params.value ? transformLocalDataTime(Number(params.value)) : "";
     const listFormatter = (params) => Array.isArray(params.value) ? params.value.join(",") : (params.value || "");
     const advPercentageFormatter = (params) => params.value == null || params.value === "" ? "" : Number(params.value).toFixed(2);
+    const qualifierValue = (params) => params.data?.BloombergQualifier || params.data?.bloombergQualifier || "";
 
     const liveColumnDefs = useMemo(() => ([
         { headerName: "", field: "actions", width: 90, sortable: false, filter: false, cellRenderer: IoiActionIconsRenderer },
@@ -115,7 +116,7 @@ export const IoisApp = () =>
         { headerName: "Lifetime", field: "lifeTimeInMinutes", width: 90 },
         { headerName: "Source", field: "source", width: 90 },
         { headerName: "Status", field: "status", width: 100 },
-        { headerName: "Qualifier", field: "BloombergQualifier", width: 110 },
+        { headerName: "Qualifier", field: "BloombergQualifier", width: 110, valueGetter: qualifierValue },
         { headerName: "Clients", field: "clientIds", width: 140, valueFormatter: listFormatter },
         { headerName: "Flags", field: "ioiFlags", width: 120, valueFormatter: listFormatter },
         { headerName: "Comment", field: "comment", width: 180 },
@@ -189,7 +190,7 @@ export const IoisApp = () =>
         { headerName: "Market", field: "originalMarket", width: 110, editable: true },
         { headerName: "Order Type", field: "originalOrderType", width: 120, editable: true },
         { headerName: "Lifetime", field: "lifeTimeInMinutes", width: 100, editable: true },
-        { headerName: "Qualifier", field: "BloombergQualifier", width: 120, editable: true },
+        { headerName: "Qualifier", field: "BloombergQualifier", width: 120, editable: true, valueGetter: qualifierValue },
         { headerName: "Comment", field: "comment", width: 180, editable: true }
     ]), []);
 

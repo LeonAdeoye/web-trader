@@ -96,7 +96,7 @@ const IoiCreationDialog = ({closeHandler, instruments, traders, seed}) =>
                 originalOrderType: seed.originalOrderType || "LIMIT",
                 lifeTimeInMinutes: seed.lifeTimeInMinutes ?? 15,
                 comment: seed.comment || "",
-                BloombergQualifier: seed.BloombergQualifier || "NONE",
+                BloombergQualifier: seed.BloombergQualifier || seed.bloombergQualifier || "NONE",
                 clientIds: Array.isArray(seed.clientIds) ? seed.clientIds.join(",") : (seed.clientIds || "")
             });
         }
