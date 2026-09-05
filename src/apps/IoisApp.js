@@ -221,15 +221,14 @@ export const IoisApp = () =>
     {
         try
         {
-            const [live, cancelled, blocked, activeBlocks, failed, reasons, createdTotal, unapprovedTotal] = await Promise.all([
+            const [live, cancelled, blocked, activeBlocks, failed, reasons, createdTotal] = await Promise.all([
                 ioiService.getLive(),
                 ioiService.getCancelled(),
                 ioiService.getBlockedIois(),
                 ioiService.getBlocks(),
                 ioiService.getFailures(),
                 ioiService.getUnapprovedByReason(),
-                ioiService.getCreatedTotal(),
-                ioiService.getUnapprovedTotal()
+                ioiService.getCreatedTotal()
             ]);
 
             setLiveIois(live || []);
@@ -244,7 +243,7 @@ export const IoisApp = () =>
             setReasonCounts(Object.entries(reasons || {}).filter(([reason]) => !isBlockedReason(reason)).map(([reason, count]) => ({ reason, count })));
             setTotals([
                 { metric: "Approved IOIs Running Total", value: createdTotal?.total || 0 },
-                { metric: "Unapproved IOIs Running Total", value: unapprovedTotal?.total || 0 },
+                { metric: "Failed IOIs", value: ruleFailures.length },
                 { metric: "Blocked IOIs", value: (blocked || []).length },
                 { metric: "Blocked Traders", value: countBlocksByType(blocked, "TRADER") },
                 { metric: "Blocked Stocks", value: countBlocksByType(blocked, "STOCK") },
