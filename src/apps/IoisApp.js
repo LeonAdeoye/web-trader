@@ -246,9 +246,9 @@ export const IoisApp = () =>
                 { metric: "Approved IOIs Running Total", value: createdTotal?.total || 0 },
                 { metric: "Unapproved IOIs Running Total", value: unapprovedTotal?.total || 0 },
                 { metric: "Blocked IOIs", value: (blocked || []).length },
-                { metric: "Blocked Traders", value: countBlocksByType(activeBlocks, "TRADER") },
-                { metric: "Blocked Stocks", value: countBlocksByType(activeBlocks, "STOCK") },
-                { metric: "Blocked Markets", value: countBlocksByType(activeBlocks, "MARKET") },
+                { metric: "Blocked Traders", value: countBlocksByType(blocked, "TRADER") },
+                { metric: "Blocked Stocks", value: countBlocksByType(blocked, "STOCK") },
+                { metric: "Blocked Markets", value: countBlocksByType(blocked, "MARKET") },
                 { metric: "Currently Live IOIs", value: (live || []).length },
                 { metric: "Currently Cancelled IOIs", value: (cancelled || []).length }
             ]);
