@@ -46,13 +46,30 @@ const emptyBulkRow = (id) => ({
     BloombergQualifier: ""
 });
 
-const mergeCountMaps = (createdMap, unapprovedMap, nameField) =>
+const countByField = (items, field) =>
 {
-    const keys = new Set([...Object.keys(createdMap || {}), ...Object.keys(unapprovedMap || {})]);
+    return (items || []).reduce((counts, item) =>
+    {
+        const key = item?.[field];
+        if (key == null || key === "")
+            return counts;
+
+        counts[key] = (counts[key] || 0) + 1;
+        return counts;
+    }, {});
+};
+
+const mergeStatusCounts = (liveItems, cancelledItems, failedItems, nameField, itemField) =>
+{
+    const liveMap = countByField(liveItems, itemField);
+    const cancelledMap = countByField(cancelledItems, itemField);
+    const failedMap = countByField(failedItems, itemField);
+    const keys = new Set([...Object.keys(liveMap), ...Object.keys(cancelledMap), ...Object.keys(failedMap)]);
     return Array.from(keys).map(name => ({
         [nameField]: name,
-        created: createdMap?.[name] || 0,
-        unapproved: unapprovedMap?.[name] || 0
+        live: liveMap[name] || 0,
+        cancelled: cancelledMap[name] || 0,
+        failed: failedMap[name] || 0
     }));
 };
 
@@ -160,8 +177,9 @@ export const IoisApp = () =>
 
     const countColumnDefs = (nameHeader, nameField) => ([
         { headerName: nameHeader, field: nameField, width: 220 },
-        { headerName: "Approved", field: "created", width: 120 },
-        { headerName: "Unapproved", field: "unapproved", width: 130 }
+        { headerName: "Live", field: "live", width: 120 },
+        { headerName: "Cancelled", field: "cancelled", width: 130 },
+        { headerName: "Failed", field: "failed", width: 120 }
     ]);
 
     const reasonColumnDefs = useMemo(() => ([
@@ -198,18 +216,12 @@ export const IoisApp = () =>
     {
         try
         {
-            const [live, cancelled, blocked, activeBlocks, failed, createdTraders, unapprovedTraders, createdStocks, unapprovedStocks, createdMarkets, unapprovedMarkets, reasons, createdTotal, unapprovedTotal] = await Promise.all([
+            const [live, cancelled, blocked, activeBlocks, failed, reasons, createdTotal, unapprovedTotal] = await Promise.all([
                 ioiService.getLive(),
                 ioiService.getCancelled(),
                 ioiService.getBlockedIois(),
                 ioiService.getBlocks(),
                 ioiService.getFailures(),
-                ioiService.getCreatedByTrader(),
-                ioiService.getUnapprovedByTrader(),
-                ioiService.getCreatedByStock(),
-                ioiService.getUnapprovedByStock(),
-                ioiService.getCreatedByMarket(),
-                ioiService.getUnapprovedByMarket(),
                 ioiService.getUnapprovedByReason(),
                 ioiService.getCreatedTotal(),
                 ioiService.getUnapprovedTotal()
@@ -220,9 +232,9 @@ export const IoisApp = () =>
             setBlockedIois(blocked || []);
             setBlocks(activeBlocks || []);
             setFailures(failed || []);
-            setTraderCounts(mergeCountMaps(createdTraders, unapprovedTraders, "trader"));
-            setStockCounts(mergeCountMaps(createdStocks, unapprovedStocks, "ric"));
-            setMarketCounts(mergeCountMaps(createdMarkets, unapprovedMarkets, "market"));
+            setTraderCounts(mergeStatusCounts(live, cancelled, failed, "trader", "trader"));
+            setStockCounts(mergeStatusCounts(live, cancelled, failed, "ric", "ric"));
+            setMarketCounts(mergeStatusCounts(live, cancelled, failed, "market", "originalMarket"));
             setReasonCounts(Object.entries(reasons || {}).map(([reason, count]) => ({ reason, count })));
             setTotals([
                 { metric: "Approved IOIs Running Total", value: createdTotal?.total || 0 },

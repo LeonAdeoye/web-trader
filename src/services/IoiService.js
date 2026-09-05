@@ -69,36 +69,6 @@ export class IoiService
         return this.#getJson("/ioi/stats/unapproved", { total: 0 });
     }
 
-    async getCreatedByTrader()
-    {
-        return this.#getJson("/ioi/stats/created/trader", {});
-    }
-
-    async getCreatedByStock()
-    {
-        return this.#getJson("/ioi/stats/created/stock", {});
-    }
-
-    async getCreatedByMarket()
-    {
-        return this.#getJson("/ioi/stats/created/market", {});
-    }
-
-    async getUnapprovedByTrader()
-    {
-        return this.#getJson("/ioi/stats/unapproved/trader", {});
-    }
-
-    async getUnapprovedByStock()
-    {
-        return this.#getJson("/ioi/stats/unapproved/stock", {});
-    }
-
-    async getUnapprovedByMarket()
-    {
-        return this.#getJson("/ioi/stats/unapproved/market", {});
-    }
-
     async getUnapprovedByReason()
     {
         return this.#getJson("/ioi/stats/unapproved/reason", {});
