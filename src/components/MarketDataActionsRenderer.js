@@ -5,9 +5,9 @@ import StopIcon from "@mui/icons-material/Stop";
 
 const MarketDataActionsRenderer = (params) =>
 {
-    const { data, context } = params;
-    const { ric, isSubscribed } = data;
-    const { onSubscribe, onUnsubscribe } = context;
+    const ric = params.data?.ric;
+    const isSubscribed = Boolean(params.data?.isSubscribed);
+    const { onSubscribe, onUnsubscribe } = params.context || {};
 
     const handleSubscribe = () =>
     {

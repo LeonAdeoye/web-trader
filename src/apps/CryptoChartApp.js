@@ -17,6 +17,8 @@ export const CryptoChartApp = () =>
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
     const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
     const loggerService = useRef(new LoggerService(CryptoChartApp.name)).current;
+    const subscribedInstrumentsRef = useRef(subscribedInstruments);
+    subscribedInstrumentsRef.current = subscribedInstruments;
     const windowId = useMemo(() => window.command.getWindowId("Crypto Chart"), []);
     const [options, setOptions] = useState({
         data: [],
@@ -312,10 +314,11 @@ export const CryptoChartApp = () =>
     {
         return () =>
         {
-            if (subscribedInstruments.size > 0)
-                marketDataService.unsubscribeAllCrypto([...subscribedInstruments]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
+            const instruments = [...subscribedInstrumentsRef.current];
+            if (instruments.length > 0)
+                marketDataService.unsubscribeAllCrypto(instruments).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
         };
-    }, [subscribedInstruments]);
+    }, [marketDataService, loggerService]);
 
     return (
         <>

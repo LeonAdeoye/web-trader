@@ -19,6 +19,8 @@ export const CryptoTickerApp = () =>
     const configurationService = useRef(ServiceRegistry.getConfigurationService()).current;
     const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
     const loggerService = useRef(new LoggerService(CryptoTickerApp.name)).current;
+    const subscribedInstrumentsRef = useRef(subscribedInstruments);
+    subscribedInstrumentsRef.current = subscribedInstruments;
     const defaultColDef = useMemo(() => ({resizable: true, filter: true, sortable: true}), []);
     const getRowId = useMemo(() => (row) => row.data.symbol, []);
     const windowId = useMemo(() => window.command.getWindowId("Crypto Ticker"), []);
@@ -135,10 +137,11 @@ export const CryptoTickerApp = () =>
     {
         return () =>
         {
-            if (subscribedInstruments.size > 0)
-                marketDataService.unsubscribeAllCrypto([...subscribedInstruments]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
+            const instruments = [...subscribedInstrumentsRef.current];
+            if (instruments.length > 0)
+                marketDataService.unsubscribeAllCrypto(instruments).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
         };
-    }, [subscribedInstruments]);
+    }, [marketDataService, loggerService]);
 
     return (
         <>

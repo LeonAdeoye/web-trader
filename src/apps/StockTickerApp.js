@@ -10,12 +10,13 @@ import { LoggerService } from '../services/LoggerService';
 export const StockTickerApp = () =>
 {
     const [instruments, setInstruments] = useState([]);
-    const [, setMarketData] = useState(new Map());
     const [subscribedRics, setSubscribedRics] = useState(new Set());
     const [errorMessage, setErrorMessage] = useState(null);
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
     const marketDataService = useRef(ServiceRegistry.getMarketDataService()).current;
     const loggerService = useRef(new LoggerService(StockTickerApp.name)).current;
+    const subscribedRicsRef = useRef(subscribedRics);
+    subscribedRicsRef.current = subscribedRics;
     const windowId = useMemo(() => window.command.getWindowId("Stock Ticker"), []);
     const [inboundWorker, setInboundWorker] = useState(null);
 
@@ -28,9 +29,9 @@ export const StockTickerApp = () =>
           valueFormatter: (params) => params.value ? params.value.toFixed(2) : '--' },
         { headerName: 'Status', field: 'isSubscribed', sortable: true, minWidth: 140, width: 140, filter: true,
           valueGetter: (params) => params.data?.isSubscribed ? 'Subscribed' : 'Not Subscribed' },
-        { headerName: 'Actions', field: 'actions', sortable: false, minWidth: 120, width: 120, filter: false,
+        { headerName: 'Actions', colId: 'actions', valueGetter: (params) => params.data?.isSubscribed, sortable: false, minWidth: 120, width: 120, filter: false,
           cellRenderer: MarketDataActionsRenderer }
-    ]), [instruments, subscribedRics]);
+    ]), []);
 
     useEffect(() =>
     {
@@ -62,14 +63,13 @@ export const StockTickerApp = () =>
 
     const handleWorkerMessage = useCallback((event) =>
     {
-        const { ric, price } = event.data.marketData;
-        setMarketData(prev =>
-        {
-            const newMap = new Map(prev);
-            newMap.set(ric, price);
-            return newMap;
-        });
-    } , []);
+        const marketData = event.data?.marketData;
+        if (!marketData)
+            return;
+
+        const { ric, price } = marketData;
+        setInstruments(prev => prev.map(instrument => instrument.ric === ric ? { ...instrument, price } : instrument));
+    }, []);
 
     useEffect(() =>
     {
@@ -81,7 +81,7 @@ export const StockTickerApp = () =>
             if (inboundWorker)
                 inboundWorker.onmessage = null;
         };
-    }, [inboundWorker]);
+    }, [inboundWorker, handleWorkerMessage]);
 
     const handleSubscribe = useCallback(async (ric) =>
     {
@@ -122,12 +122,20 @@ export const StockTickerApp = () =>
 
     useEffect(() =>
     {
+        const api = gridApiRef.current?.api;
+        if (api)
+            api.refreshCells({ columns: ['actions'], force: true });
+    }, [subscribedRics]);
+
+    useEffect(() =>
+    {
         return () =>
         {
-            if (subscribedRics.size > 0)
-                marketDataService.unsubscribeAll([...subscribedRics]).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
+            const rics = [...subscribedRicsRef.current];
+            if (rics.length > 0)
+                marketDataService.unsubscribeAll(rics).catch(error => loggerService.logError(`Failed to unsubscribe on cleanup: ${error.message}`));
         };
-    }, [subscribedRics]);
+    }, [marketDataService, loggerService]);
 
     const gridContext = useMemo(() =>
     ({
