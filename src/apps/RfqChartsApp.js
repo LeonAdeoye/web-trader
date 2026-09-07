@@ -237,17 +237,16 @@ const RfqChartsApp = () =>
     };
 
     const showExpiryPnl = rangeKey === 'UNDERLYING_PRICE';
-    const greekVisible = rangeKey !== 'UNDERLYING_PRICE';
     const selectedLeg = rfq?.legs?.length ? (activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1]) : null;
     const strike = Number(selectedLeg?.strike);
     const chartOptions = {
         data: chartData,
         series: [
-            { type: 'line', xKey: 'rangeVariable', yKey: 'delta', yName: 'Delta', stroke: '#1f77b4', visible: greekVisible },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'gamma', yName: 'Gamma', stroke: '#ff7f0e', visible: greekVisible },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'rho', yName: 'Rho', stroke: '#2ca02c', visible: greekVisible },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'theta', yName: 'Theta', stroke: '#d62728', visible: greekVisible },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'vega', yName: 'Vega', stroke: '#9467bd', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'delta', yName: 'Delta', stroke: '#1f77b4' },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'gamma', yName: 'Gamma', stroke: '#ff7f0e' },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'rho', yName: 'Rho', stroke: '#2ca02c' },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'theta', yName: 'Theta', stroke: '#d62728' },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'vega', yName: 'Vega', stroke: '#9467bd' },
             { type: 'line', xKey: 'rangeVariable', yKey: 'price', yName: 'Price', stroke: '#8c564b' },
             { type: 'line', xKey: 'rangeVariable', yKey: 'pnl', yName: 'P&L', stroke: '#1565c0', lineDash: [6, 3] },
             ...(showExpiryPnl ? [{ type: 'line', xKey: 'rangeVariable', yKey: 'pnlExpiry', yName: 'P&L at Expiry', stroke: '#2e7d32', strokeWidth: 2 }] : [])
