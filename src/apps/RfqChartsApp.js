@@ -7,6 +7,7 @@ import { FormControl, Select, MenuItem, InputLabel, Tooltip, Typography } from '
 import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
 import { parseRfqConfigParam } from '../config/rfqAppConfig';
 import { getOptionPricingParams } from '../calculations/calculateRfqOptionMetrics';
+import { attachPnlToRangeResults, sumRangeChartRows } from '../calculations/optionPnl';
 
 const RfqChartsApp = () =>
 {
@@ -135,6 +136,17 @@ const RfqChartsApp = () =>
         setRangeKey(value);
         setHasCalculated(false);
         setCalculationError(null);
+        if (value === 'UNDERLYING_PRICE' && rfq?.legs?.length)
+        {
+            const leg = activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1];
+            const strike = Number(leg?.strike || rfq.underlyingPrice);
+            if (strike > 0)
+            {
+                setStartValue(Math.max(0, Math.round(strike * 0.7)));
+                setEndValue(Math.round(strike * 1.5));
+                setIncrement(1);
+            }
+        }
         if (validationErrors.rangeKey)
             setValidationErrors(prev => ({ ...prev, rangeKey: undefined }));
     };
@@ -149,10 +161,10 @@ const RfqChartsApp = () =>
             return;
         }
         
-        const leg = activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1];
-        const baseRequest = getOptionPricingParams(rfq, leg, config);
+        const selectedLegs = activeTab === 0 ? rfq.legs : [rfq.legs[activeTab - 1]];
+        const sampleRequest = getOptionPricingParams(rfq, selectedLegs[0], config);
 
-        if (!baseRequest.underlyingPrice || baseRequest.underlyingPrice <= 0)
+        if (!sampleRequest.underlyingPrice || sampleRequest.underlyingPrice <= 0)
         {
             setChartData([]);
             setHasCalculated(true);
@@ -164,27 +176,35 @@ const RfqChartsApp = () =>
         setCalculationError(null);
         try
         {
-            const rangeRequest =
+            const includeExpiryPnl = rangeKey === 'UNDERLYING_PRICE';
+            const rowsByLeg = await Promise.all(selectedLegs.map(async (leg) =>
             {
-                baseRequest,
-                rangeKey,
-                startValue,
-                endValue,
-                increment
-            };
+                const baseRequest = getOptionPricingParams(rfq, leg, config);
+                const rangeRequest =
+                {
+                    baseRequest,
+                    rangeKey,
+                    startValue,
+                    endValue,
+                    increment
+                };
 
-            const result = await optionPricingService.calculateRange(rangeRequest);
-            const chartData = result.results.map(item => ({
-                rangeVariable: item.rangeVariable,
-                delta: item.delta,
-                gamma: item.gamma,
-                rho: item.rho,
-                theta: item.theta,
-                vega: item.vega,
-                price: item.price
+                const [liveResult, entryResult] = await Promise.all([
+                    optionPricingService.calculateRange(rangeRequest),
+                    optionPricingService.calculateOptionPrice(baseRequest)
+                ]);
+
+                return attachPnlToRangeResults(liveResult.results, {
+                    entryPremium: Number(entryResult.price),
+                    strike: leg.strike,
+                    isCall: leg.optionType === 'CALL',
+                    side: leg.side,
+                    quantity: leg.quantity ?? 1,
+                    includeExpiryPnl
+                });
             }));
-            
-            setChartData(chartData);
+
+            setChartData(sumRangeChartRows(rowsByLeg));
             setHasCalculated(true);
         }
         catch (error)
@@ -216,26 +236,43 @@ const RfqChartsApp = () =>
         await calculateRange();
     };
 
+    const showExpiryPnl = rangeKey === 'UNDERLYING_PRICE';
+    const greekVisible = rangeKey !== 'UNDERLYING_PRICE';
+    const selectedLeg = rfq?.legs?.length ? (activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1]) : null;
+    const strike = Number(selectedLeg?.strike);
     const chartOptions = {
         data: chartData,
         series: [
-            { type: 'line', xKey: 'rangeVariable', yKey: 'delta', yName: 'Delta', stroke: '#1f77b4' },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'gamma', yName: 'Gamma', stroke: '#ff7f0e' },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'rho', yName: 'Rho', stroke: '#2ca02c' },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'theta', yName: 'Theta', stroke: '#d62728' },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'vega', yName: 'Vega', stroke: '#9467bd' },
-            { type: 'line', xKey: 'rangeVariable', yKey: 'price', yName: 'Price', stroke: '#8c564b' }
+            { type: 'line', xKey: 'rangeVariable', yKey: 'delta', yName: 'Delta', stroke: '#1f77b4', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'gamma', yName: 'Gamma', stroke: '#ff7f0e', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'rho', yName: 'Rho', stroke: '#2ca02c', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'theta', yName: 'Theta', stroke: '#d62728', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'vega', yName: 'Vega', stroke: '#9467bd', visible: greekVisible },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'price', yName: 'Price', stroke: '#8c564b' },
+            { type: 'line', xKey: 'rangeVariable', yKey: 'pnl', yName: 'P&L', stroke: '#1565c0', lineDash: [6, 3] },
+            ...(showExpiryPnl ? [{ type: 'line', xKey: 'rangeVariable', yKey: 'pnlExpiry', yName: 'P&L at Expiry', stroke: '#2e7d32', strokeWidth: 2 }] : [])
         ],
         axes: [
             {
                 type: 'number',
                 position: 'bottom',
-                title: { text: rangeKeyOptions.find(opt => opt.value === rangeKey)?.label || 'Range Variable' }
+                title: { text: rangeKeyOptions.find(opt => opt.value === rangeKey)?.label || 'Range Variable' },
+                ...(showExpiryPnl && strike > 0 ? {
+                    crossLines: [{ type: 'line', value: strike, stroke: '#90caf9', lineDash: [4, 4], label: { text: 'Strike', position: 'top' } }]
+                } : {})
             },
             {
                 type: 'number',
                 position: 'left',
-                title: { text: 'Greeks & Premium' }
+                title: { text: 'Greeks & Premium' },
+                keys: ['delta', 'gamma', 'rho', 'theta', 'vega', 'price']
+            },
+            {
+                type: 'number',
+                position: 'right',
+                title: { text: 'Profit / Loss' },
+                keys: ['pnl', 'pnlExpiry'],
+                crossLines: [{ type: 'line', value: 0, stroke: '#9e9e9e', lineDash: [6, 3] }]
             }
         ],
         legend: { enabled: true },
@@ -405,12 +442,12 @@ const RfqChartsApp = () =>
                         <Tooltip 
                             title={
                                 <Typography fontSize={12}>
-                                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Click To Generate Greeks Analysis Chart</div>
+                                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Click To Generate Greeks And P&amp;L Charts</div>
                                     <div style={{ marginBottom: '2px' }}>• Calculates option Greeks (Delta, Gamma, Rho, Theta, Vega) and premium</div>
+                                    <div style={{ marginBottom: '2px' }}>• Adds P&amp;L versus the entry premium from the pricing service</div>
+                                    <div style={{ marginBottom: '2px' }}>• Underlying Price also plots P&amp;L at expiry (hockey-stick payoff)</div>
                                     <div style={{ marginBottom: '2px' }}>• Varies the selected range parameter from start to end value</div>
-                                    <div style={{ marginBottom: '2px' }}>• Uses the specified increment to create data points</div>
-                                    <div style={{ marginBottom: '2px' }}>• Displays results as colored line charts for each Greek</div>
-                                    <div>• Shows how option sensitivity changes with market parameters</div>
+                                    <div>• Toggle series in the legend; P&amp;L uses the right-hand axis</div>
                                 </Typography>
                             }
                             placement="top"
@@ -485,7 +522,7 @@ const RfqChartsApp = () =>
                     ) : !hasCalculated ? (
                         <div style={{ textAlign: 'center', padding: '40px' }}>
                             <div style={{ color: '#666', fontSize: '14px' }}>
-                                Click "Chart" button to generate Greeks analysis
+                                Click "Chart" button to generate Greeks and P&amp;L analysis
                             </div>
                         </div>
                     ) : chartData.length > 0 ? (
