@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useRecoilState } from 'recoil';
-import { selectedContextShareState } from '../atoms/component-state';
 import { LoggerService } from '../services/LoggerService';
 import { OptionPricingService } from '../services/OptionPricingService';
 import TitleBarComponent from "../components/TitleBarComponent";
@@ -8,6 +6,7 @@ import { AgChartsReact } from 'ag-charts-react';
 import { FormControl, Select, MenuItem, InputLabel, Tooltip, Typography } from '@mui/material';
 import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
 import { parseRfqConfigParam } from '../config/rfqAppConfig';
+import { getOptionPricingParams } from '../calculations/calculateRfqOptionMetrics';
 
 const RfqChartsApp = () =>
 {
@@ -26,6 +25,7 @@ const RfqChartsApp = () =>
     const [isLoading, setIsLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const [hasCalculated, setHasCalculated] = useState(false);
+    const [calculationError, setCalculationError] = useState(null);
     const initialConfig = useMemo(() => parseRfqConfigParam(configParam), [configParam]);
     const config = useRfqAppConfig(initialConfig);
     const previousOptionModelRef = useRef(config.defaultOptionModel);
@@ -105,6 +105,7 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setStartValue(isNaN(numValue) ? 0 : numValue);
         setHasCalculated(false);
+        setCalculationError(null);
         if (validationErrors.startValue)
             setValidationErrors(prev => ({ ...prev, startValue: undefined }));
     };
@@ -114,6 +115,7 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setEndValue(isNaN(numValue) ? 0 : numValue);
         setHasCalculated(false);
+        setCalculationError(null);
         if (validationErrors.endValue)
             setValidationErrors(prev => ({ ...prev, endValue: undefined }));
     };
@@ -123,6 +125,7 @@ const RfqChartsApp = () =>
         const numValue = parseFloat(value);
         setIncrement(isNaN(numValue) ? 0.01 : numValue);
         setHasCalculated(false);
+        setCalculationError(null);
         if (validationErrors.increment)
             setValidationErrors(prev => ({ ...prev, increment: undefined }));
     };
@@ -131,6 +134,7 @@ const RfqChartsApp = () =>
     {
         setRangeKey(value);
         setHasCalculated(false);
+        setCalculationError(null);
         if (validationErrors.rangeKey)
             setValidationErrors(prev => ({ ...prev, rangeKey: undefined }));
     };
@@ -145,24 +149,21 @@ const RfqChartsApp = () =>
             return;
         }
         
+        const leg = activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1];
+        const baseRequest = getOptionPricingParams(rfq, leg, config);
+
+        if (!baseRequest.underlyingPrice || baseRequest.underlyingPrice <= 0)
+        {
+            setChartData([]);
+            setHasCalculated(true);
+            setCalculationError('Underlying price must be greater than 0. Set a price on the RFQ before charting.');
+            return;
+        }
+
         setIsLoading(true);
+        setCalculationError(null);
         try
         {
-            const leg = activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1];
-            
-            const baseRequest =
-            {
-                strike: leg.strike,
-                volatility: leg.volatility/100,
-                underlyingPrice: leg.underlyingPrice,
-                daysToExpiry: leg.daysToExpiry || 30,
-                interestRate: leg.interestRate/100,
-                isCall: leg.optionType === 'CALL',
-                isEuropean: true,
-                dayCountConvention: leg.dayCountConvention || 365,
-                modelType: config.defaultOptionModel
-            };
-
             const rangeRequest =
             {
                 baseRequest,
@@ -190,6 +191,8 @@ const RfqChartsApp = () =>
         {
             loggerService.logError(`Error calculating range: ${error.message}`);
             setChartData([]);
+            setHasCalculated(true);
+            setCalculationError(error.message || 'Failed to calculate range');
         }
         finally
         {
@@ -471,6 +474,12 @@ const RfqChartsApp = () =>
                         <div style={{ textAlign: 'center', padding: '40px' }}>
                             <div style={{ color: '#d32f2f', fontSize: '14px' }}>
                                 Please fix validation errors above to generate chart
+                            </div>
+                        </div>
+                    ) : calculationError ? (
+                        <div style={{ textAlign: 'center', padding: '40px' }}>
+                            <div style={{ color: '#d32f2f', fontSize: '14px' }}>
+                                {calculationError}
                             </div>
                         </div>
                     ) : !hasCalculated ? (

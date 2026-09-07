@@ -1,5 +1,21 @@
 import {LoggerService} from "./LoggerService";
 
+const parsePricingServiceError = (status, errorText) =>
+{
+    if (!errorText)
+        return `Pricing service error: ${status}`;
+
+    try
+    {
+        const parsed = JSON.parse(errorText);
+        return parsed.message || parsed.error || errorText;
+    }
+    catch (error)
+    {
+        return errorText;
+    }
+};
+
 export class OptionPricingService
 {
     #loggerService;
@@ -37,8 +53,9 @@ export class OptionPricingService
             if (!response.ok)
             {
                 const errorText = await response.text();
-                this.#loggerService.logError(`Pricing service returned error: ${response.status} - ${errorText}`);
-                throw new Error(`Pricing service error: ${response.status} - ${errorText}`);
+                const errorMessage = parsePricingServiceError(response.status, errorText);
+                this.#loggerService.logError(`Pricing service returned error: ${response.status} - ${errorMessage}`);
+                throw new Error(errorMessage);
             }
 
             const optionPriceResult = await response.json();
@@ -78,8 +95,9 @@ export class OptionPricingService
             if (!response.ok)
             {
                 const errorText = await response.text();
-                this.#loggerService.logError(`Range pricing service returned error: ${response.status} - ${errorText}`);
-                throw new Error(`Range pricing service error: ${response.status} - ${errorText}`);
+                const errorMessage = parsePricingServiceError(response.status, errorText);
+                this.#loggerService.logError(`Range pricing service returned error: ${response.status} - ${errorMessage}`);
+                throw new Error(errorMessage);
             }
 
             const optionPriceResultSet = await response.json();

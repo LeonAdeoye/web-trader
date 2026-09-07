@@ -2,6 +2,7 @@ import {
     calculatePortfolioMetrics,
     calculatePortfolioDerivedValues,
     buildRfqPricingFieldUpdates,
+    getOptionPricingParams,
     getRfqRecalculationIntervalMs,
     prepareRfqForPricing,
     DEFAULT_RFQ_RECALCULATION_PERIOD_SECONDS
@@ -85,6 +86,24 @@ describe('prepareRfqForPricing', () =>
         const priceService = { getLastTradePrice: () => 112.5 };
 
         expect(prepareRfqForPricing(rfq, { priceService, optionRequestParserService })).toBe(rfq);
+    });
+});
+
+describe('getOptionPricingParams', () =>
+{
+    it('uses RFQ-level underlyingPrice, volatility and interestRate rather than leg fields', () =>
+    {
+        const rfq = createMockRfq();
+        const leg = { strike: 100, optionType: 'CALL', underlyingPrice: undefined, volatility: 0.25, interestRate: 0.05 };
+        const request = getOptionPricingParams(rfq, leg, { defaultOptionModel: 'binomial' });
+
+        expect(request.underlyingPrice).toBe(78);
+        expect(request.volatility).toBeCloseTo(0.21);
+        expect(request.interestRate).toBeCloseTo(0.0748);
+        expect(request.strike).toBe(100);
+        expect(request.isCall).toBe(true);
+        expect(request.daysToExpiry).toBe(493);
+        expect(request.modelType).toBe('binomial');
     });
 });
 
