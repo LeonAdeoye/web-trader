@@ -482,7 +482,7 @@ const RfqChartsApp = () =>
                                 key={index}
                                 onClick={() => handleTabChange(null, index + 1)}
                                 className={`rfq-charts-leg-tab ${activeTab === index + 1 ? 'selected' : ''}`}
-                                title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}
+                                title={`${leg.optionType} ${leg.side} ${leg.underlying || rfq.underlying} @ $${leg.strike}`}
                             >
                                 <div className="leg-content">
                                     <span className="leg-id">{leg.legId}</span>

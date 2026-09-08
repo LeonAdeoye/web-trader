@@ -177,7 +177,7 @@ const RfqDetailsContent = ({ initialRfq, config, editable, windowId }) =>
                                 key={legIndex}
                                 onClick={() => setActiveTab(getLegTabIndex(legIndex))}
                                 className={`rfq-details-leg-tab ${activeTab === getLegTabIndex(legIndex) ? 'selected' : ''}`}
-                                title={`${leg.optionType} ${leg.side} ${leg.underlying} @ $${leg.strike}`}>
+                                title={`${leg.optionType} ${leg.side} ${leg.underlying || rfq.underlying} @ $${leg.strike}`}>
                                 <div className="leg-content">
                                     <span className="leg-id">{leg.legId}</span>
                                     <div className="leg-badges">
