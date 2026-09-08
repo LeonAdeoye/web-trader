@@ -7,7 +7,7 @@ import { FormControl, Select, MenuItem, InputLabel, Tooltip, Typography } from '
 import { useRfqAppConfig } from '../hooks/useRfqAppConfig';
 import { parseRfqConfigParam } from '../config/rfqAppConfig';
 import { getOptionPricingParams } from '../calculations/calculateRfqOptionMetrics';
-import { attachPnlToRangeResults, sumRangeChartRows } from '../calculations/optionPnl';
+import { attachPnlToRangeResults, selectRangeChartRows } from '../calculations/optionPnl';
 
 const RfqChartsApp = () =>
 {
@@ -22,7 +22,7 @@ const RfqChartsApp = () =>
     const [endValue, setEndValue] = useState(0.5);
     const [increment, setIncrement] = useState(0.01);
     const [activeTab, setActiveTab] = useState(0);
-    const [chartData, setChartData] = useState([]);
+    const [rowsByLeg, setRowsByLeg] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const [hasCalculated, setHasCalculated] = useState(false);
@@ -161,12 +161,11 @@ const RfqChartsApp = () =>
             return;
         }
         
-        const selectedLegs = activeTab === 0 ? rfq.legs : [rfq.legs[activeTab - 1]];
-        const sampleRequest = getOptionPricingParams(rfq, selectedLegs[0], config);
+        const sampleRequest = getOptionPricingParams(rfq, rfq.legs[0], config);
 
         if (!sampleRequest.underlyingPrice || sampleRequest.underlyingPrice <= 0)
         {
-            setChartData([]);
+            setRowsByLeg([]);
             setHasCalculated(true);
             setCalculationError('Underlying price must be greater than 0. Set a price on the RFQ before charting.');
             return;
@@ -177,7 +176,7 @@ const RfqChartsApp = () =>
         try
         {
             const includeExpiryPnl = rangeKey === 'UNDERLYING_PRICE';
-            const rowsByLeg = await Promise.all(selectedLegs.map(async (leg) =>
+            const calculatedRowsByLeg = await Promise.all(rfq.legs.map(async (leg) =>
             {
                 const baseRequest = getOptionPricingParams(rfq, leg, config);
                 const rangeRequest =
@@ -204,13 +203,13 @@ const RfqChartsApp = () =>
                 });
             }));
 
-            setChartData(sumRangeChartRows(rowsByLeg));
+            setRowsByLeg(calculatedRowsByLeg);
             setHasCalculated(true);
         }
         catch (error)
         {
             loggerService.logError(`Error calculating range: ${error.message}`);
-            setChartData([]);
+            setRowsByLeg([]);
             setHasCalculated(true);
             setCalculationError(error.message || 'Failed to calculate range');
         }
@@ -239,6 +238,7 @@ const RfqChartsApp = () =>
     const showExpiryPnl = rangeKey === 'UNDERLYING_PRICE';
     const selectedLeg = rfq?.legs?.length ? (activeTab === 0 ? rfq.legs[0] : rfq.legs[activeTab - 1]) : null;
     const strike = Number(selectedLeg?.strike);
+    const chartData = useMemo(() => selectRangeChartRows(rowsByLeg, activeTab), [rowsByLeg, activeTab]);
     const chartOptions = {
         data: chartData,
         series: [

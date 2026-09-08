@@ -77,3 +77,14 @@ export const sumRangeChartRows = (rowsByLeg) =>
         return summed;
     });
 };
+
+export const selectRangeChartRows = (rowsByLeg, activeTab) =>
+{
+    if (!rowsByLeg.length)
+        return [];
+
+    if (activeTab === 0)
+        return sumRangeChartRows(rowsByLeg);
+
+    return rowsByLeg[activeTab - 1] ?? [];
+};

@@ -3,6 +3,7 @@ import {
     calculateExpirationPnl,
     calculateMarkToMarketPnl,
     getExpirationPayoff,
+    selectRangeChartRows,
     sumRangeChartRows
 } from '../calculations/optionPnl';
 
@@ -131,5 +132,60 @@ describe('sumRangeChartRows', () =>
         expect(summed[0].pnl).toBe(5);
         expect(summed[0].pnlExpiry).toBe(7);
         expect(summed[0].price).toBe(16);
+    });
+});
+
+describe('selectRangeChartRows', () =>
+{
+    const callRows = attachPnlToRangeResults(
+        [
+            { rangeVariable: 90, delta: 0.2, gamma: 0.01, rho: 0.1, theta: -0.02, vega: 0.3, price: 1.5 },
+            { rangeVariable: 110, delta: 0.8, gamma: 0.01, rho: 0.2, theta: -0.03, vega: 0.25, price: 12 }
+        ],
+        { entryPremium: 5, strike: 100, isCall: true, side: 'BUY', includeExpiryPnl: true }
+    );
+    const putRows = attachPnlToRangeResults(
+        [
+            { rangeVariable: 90, delta: -0.8, gamma: 0.01, rho: -0.2, theta: -0.02, vega: 0.3, price: 11 },
+            { rangeVariable: 110, delta: -0.2, gamma: 0.01, rho: -0.1, theta: -0.03, vega: 0.25, price: 1.5 }
+        ],
+        { entryPremium: 5, strike: 100, isCall: false, side: 'BUY', includeExpiryPnl: true }
+    );
+    const rowsByLeg = [callRows, putRows];
+
+    it('returns the summed straddle series for the All Legs tab', () =>
+    {
+        const allLegs = selectRangeChartRows(rowsByLeg, 0);
+
+        expect(allLegs[0].delta).toBeCloseTo(-0.6);
+        expect(allLegs[0].pnlExpiry).toBe(0);
+        expect(allLegs[1].delta).toBeCloseTo(0.6);
+        expect(allLegs[1].pnlExpiry).toBe(0);
+    });
+
+    it('returns the call-only series for the Call tab without another Chart click', () =>
+    {
+        const callTab = selectRangeChartRows(rowsByLeg, 1);
+
+        expect(callTab).toBe(callRows);
+        expect(callTab[0].pnlExpiry).toBe(-5);
+        expect(callTab[1].pnlExpiry).toBe(5);
+        expect(callTab[0].delta).toBe(0.2);
+    });
+
+    it('returns the put-only series for the Put tab without another Chart click', () =>
+    {
+        const putTab = selectRangeChartRows(rowsByLeg, 2);
+
+        expect(putTab).toBe(putRows);
+        expect(putTab[0].pnlExpiry).toBe(5);
+        expect(putTab[1].pnlExpiry).toBe(-5);
+        expect(putTab[0].delta).toBe(-0.8);
+    });
+
+    it('returns an empty series when there is no cached data', () =>
+    {
+        expect(selectRangeChartRows([], 0)).toEqual([]);
+        expect(selectRangeChartRows([], 1)).toEqual([]);
     });
 });
