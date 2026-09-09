@@ -36,6 +36,7 @@ import {PriceChartApp} from "./apps/PriceChartApp";
 import {SearchBarApp} from "./apps/SearchBarApp";
 import {PlaceholderApp} from "./apps/PlaceholderApp";
 import {IoisApp} from "./apps/IoisApp";
+import {NewsApp} from "./apps/NewsApp";
 
 const App = () =>
 {
@@ -73,7 +74,7 @@ const App = () =>
         { name: 'RFQ Stats', path: '/rfq-stats', component: RfqStatsApp },
         { name: 'Parametrics', path: '/parametrics', component: ParametricsApp },
         { name: 'Services', path: '/services', component: ServicesApp },
-        { name: 'News', path: '/news', component: PlaceholderApp, props: { title: 'News' } },
+        { name: 'News', path: '/news', component: NewsApp, props: { title: 'News' } },
         { name: 'IOIs', path: '/ioi', component: IoisApp },
         { name: 'TCA', path: '/tca', component: PlaceholderApp, props: { title: 'TCA' } },
         { name: 'Workflow', path: '/workflow', component: PlaceholderApp, props: { title: 'Workflow' } },
