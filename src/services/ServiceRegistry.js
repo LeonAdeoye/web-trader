@@ -15,6 +15,7 @@ import { RfqService } from './RfqService';
 import { IoiService } from './IoiService';
 import { DeskService } from "./DeskService";
 import { LimitsService } from "./LimitsService";
+import {NewsService} from "./NewsService";
 
 class ServiceRegistry
 {
@@ -125,6 +126,11 @@ class ServiceRegistry
         return this.getService(IoiService);
     }
 
+    static getNewsService()
+    {
+        return this.getService(NewsService);
+    }
+
     static async preloadAllServices(ownerId = null)
     {
         const loadPromises = [
@@ -138,7 +144,8 @@ class ServiceRegistry
             this.getTraderService().loadTraders(),
             this.getExchangeRateService().loadExchangeRates(),
             this.getAlertConfigurationsService().loadAlertTypes(),
-            this.getDeskService().loadDesks()
+            this.getDeskService().loadDesks(),
+            this.getNewsService().loadNews()
         ];
 
         if (ownerId)
@@ -157,6 +164,7 @@ class ServiceRegistry
             { name: 'Configuration Service', port: 20001, actuatorUrl: 'http://localhost:20001/health' },
             { name: 'Logging Service', port: 20002, actuatorUrl: 'http://localhost:20002/health' },
             { name: 'Users Service', port: 20003, actuatorUrl: 'http://localhost:20003/health' },
+            { name: 'News Service', port: 20004, actuatorUrl: 'http://localhost:20004/health' },
             { name: 'Domain Service', port: 20009, actuatorUrl: 'http://localhost:20009/health' },
             { name: 'Alert Service', port: 20012, actuatorUrl: 'http://localhost:20012/health' },
             { name: 'Order Service', port: 20013, actuatorUrl: 'http://localhost:20013/health' },
