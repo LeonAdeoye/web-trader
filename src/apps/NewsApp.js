@@ -10,6 +10,7 @@ export const NewsApp = () =>
 {
     const [instruments, setInstruments] = useState([]);
     const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
+    const newsService = useRef(ServiceRegistry.getNewsService()).current;
     const loggerService = useRef(new LoggerService(NewsApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("News"), []);
 
@@ -26,10 +27,9 @@ export const NewsApp = () =>
         {
             try
             {
-                await instrumentService.loadInstruments();
-                const instrumentsData = instrumentService.getInstruments();
-                const initialData = instrumentsData.map(instrument => ({ ric: instrument.instrumentCode, price: null, isSubscribed: false }));
-                setInstruments(initialData);
+                await newsService.loadSymbolsWithNews()
+                const instrumentsData = newsService.getInstruments().map(ric => ({ ric }));
+                setInstruments(instrumentsData);
             }
             catch (error)
             {

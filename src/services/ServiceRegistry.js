@@ -144,8 +144,7 @@ class ServiceRegistry
             this.getTraderService().loadTraders(),
             this.getExchangeRateService().loadExchangeRates(),
             this.getAlertConfigurationsService().loadAlertTypes(),
-            this.getDeskService().loadDesks(),
-            this.getNewsService().loadNews()
+            this.getDeskService().loadDesks()
         ];
 
         if (ownerId)
