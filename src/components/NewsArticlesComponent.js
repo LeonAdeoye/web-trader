@@ -14,18 +14,12 @@ export const NewsArticlesComponent = ({newsService}) =>
     const [, setOwnerId] = useState('');
     const loggerService = useRef(new LoggerService(NewsArticlesComponent.name)).current;
 
-    //     val title: String,
-    //     val url: String,
-    //     val source: String,
-    //     val provider: NewsProvider,
-    //     val publishedAt: Instant,
-    //     val summary: String? = null
     const columnDefs = useMemo(() => ([
-        {headerName: "Provider", field: "provider", width: 105 },
-        {headerName: "Source", field: "source", width: 105 },
-        {headerName: "Published On", field: "publishedAt", width: 105 },
-        {headerName: "Title", field: "title", width: 105 },
-        {headerName: "Summary", field: "summary", width: 455 }
+        {headerName: "Provider", field: "provider", width: 135 },
+        {headerName: "Source", field: "source", width: 135 },
+        {headerName: "Published On", field: "publishedAt", width: 135 },
+        {headerName: "Title", field: "title", width: 355 },
+        {headerName: "Summary", field: "summary", width: 555 }
     ]), []);
 
     useEffect(() =>
