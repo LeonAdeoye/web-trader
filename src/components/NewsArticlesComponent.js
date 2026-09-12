@@ -32,14 +32,13 @@ export const NewsArticlesComponent = ({newsService}) =>
 
     useEffect(() =>
     {
-        loggerService.logInfo("Result: " + (!selectedSymbol || !newsSymbolChanged))
         if(!selectedSymbol || !newsSymbolChanged)
             return;
 
         newsService.loadArticlesForSymbol(selectedSymbol).then(() =>
         {
-            loggerService.logInfo("Loading articles for symbol: " + selectedSymbol)
-            setArticles(newsService.getArticles())
+            loggerService.logInfo("Loaded articles for symbol: " + selectedSymbol);
+            setArticles(newsService.getArticles());
         })
 
     }, [selectedSymbol, newsSymbolChanged]);

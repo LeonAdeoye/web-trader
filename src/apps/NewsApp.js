@@ -17,7 +17,7 @@ export const NewsApp = () =>
     const newsService = useRef(ServiceRegistry.getNewsService()).current;
     const loggerService = useRef(new LoggerService(NewsApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("News"), []);
-    const [newsSymbolChanged, setNewsSymbolChanged] = useRecoilState(newsSymbolChangedState);
+    const [, setNewsSymbolChanged] = useRecoilState(newsSymbolChangedState);
     const gridApiRef = useRef();
 
     useEffect(() =>
@@ -26,8 +26,8 @@ export const NewsApp = () =>
         {
             try
             {
-                await newsService.loadSymbolsWithNews()
-                const symbols = newsService.getInstruments().map(ric => ({ ric }))
+                await newsService.loadSymbolsWithNews();
+                const symbols = newsService.getInstruments().map(ric => ({ ric }));
                 loggerService.logInfo("Count of symbols loaded: " + symbols.length);
                 setSymbolsWithNews(symbols);
                 setNewsSymbolChanged(true);
@@ -60,7 +60,7 @@ export const NewsApp = () =>
             <Grid container direction="column"
                   style={{margin: '45px 0px 0px 0px', height: 'calc(100vh - 65px)', overflow: 'hidden'}}>
                 <Grid container direction="row" style={{flexGrow: 1, overflow: 'hidden', height: '100%'}}>
-                    <Resizable defaultSize={{width: '250px', height: '100%'}}>
+                    <Resizable defaultSize={{width: '230px', height: '100%'}}>
                         <NewsSymbolsComponent symbolsWithNews={symbolsWithNews}/>
                     </Resizable>
                     <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
