@@ -1,44 +1,45 @@
-import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import TitleBarComponent from "../components/TitleBarComponent";
 import { ServiceRegistry } from '../services/ServiceRegistry';
 import { LoggerService } from '../services/LoggerService';
+import {Divider, Grid} from "@mui/material";
+import {Resizable} from "re-resizable";
+import {NewsSymbolsComponent} from "../components/NewsSymbolsComponent";
+import {NewsArticlesComponent} from "../components/NewsArticlesComponent";
+import {useRecoilState} from "recoil";
+import {newsSymbolChangedState} from "../atoms/component-state";
 
 export const NewsApp = () =>
 {
-    const [instruments, setInstruments] = useState([]);
-    const instrumentService = useRef(ServiceRegistry.getInstrumentService()).current;
+    const [symbolsWithNews, setSymbolsWithNews] = useState([]);
     const newsService = useRef(ServiceRegistry.getNewsService()).current;
     const loggerService = useRef(new LoggerService(NewsApp.name)).current;
     const windowId = useMemo(() => window.command.getWindowId("News"), []);
-
+    const [newsSymbolChanged, setNewsSymbolChanged] = useRecoilState(newsSymbolChangedState);
     const gridApiRef = useRef();
-
-    const columnDefs = useMemo(() =>
-        ([
-            { headerName: 'RIC', field: 'ric', sortable: true, minWidth: 120, width: 120, filter: true },
-        ]), []);
 
     useEffect(() =>
     {
-        const loadInstruments = async () =>
+        const loadSymbols = async () =>
         {
             try
             {
                 await newsService.loadSymbolsWithNews()
-                const instrumentsData = newsService.getInstruments().map(ric => ({ ric }));
-                setInstruments(instrumentsData);
+                const symbols = newsService.getInstruments().map(ric => ({ ric }))
+                loggerService.logInfo("Count of symbols loaded: " + symbols.length);
+                setSymbolsWithNews(symbols);
+                setNewsSymbolChanged(true);
             }
             catch (error)
             {
-                loggerService.logError(`Failed to load instruments: ${error.message}`);
+                loggerService.logError(`Failed to load symbols: ${error.message}`);
             }
         };
 
-        loadInstruments().then(() => loggerService.logInfo("Instruments loaded successfully."));
-    }, [instrumentService]);
+        loadSymbols().then(() => loggerService.logInfo("Symbols with news loaded successfully."));
+    }, [newsService]);
 
     useEffect(() =>
     {
@@ -56,22 +57,18 @@ export const NewsApp = () =>
                 showChannel={false}
                 showTools={false}/>
 
-            <div className="ag-theme-alpine" style={{
-                width: '100%',
-                height: 'calc(100vh - 65px)',
-                float: 'left',
-                padding: '0px',
-                margin: '45px 0px 0px 0px'
-            }}>
-                <AgGridReact
-                    columnDefs={columnDefs}
-                    ref={gridApiRef}
-                    rowSelection={'single'}
-                    rowHeight={25}
-                    rowData={instruments}
-                    getRowId={({ data: { ric } }) => ric}
-                    defaultColDef={{ resizable: true, sortable: true, filter: true, floatingFilter: false }}/>
-            </div>
+            <Grid container direction="column"
+                  style={{margin: '45px 0px 0px 0px', height: 'calc(100vh - 65px)', overflow: 'hidden'}}>
+                <Grid container direction="row" style={{flexGrow: 1, overflow: 'hidden', height: '100%'}}>
+                    <Resizable defaultSize={{width: '250px', height: '100%'}}>
+                        <NewsSymbolsComponent symbolsWithNews={symbolsWithNews}/>
+                    </Resizable>
+                    <Divider orientation="vertical" style={{backgroundColor: '#404040', width: '1px'}}/>
+                    <Grid item style={{flexGrow: 1, overflow: 'hidden'}}>
+                        <NewsArticlesComponent newsService={newsService}/>
+                    </Grid>
+                </Grid>
+            </Grid>
         </div>
     );
 };

@@ -72,3 +72,13 @@ export const rfqsConfigPanelOpenState = atom({
     key: 'rfqsConfigPanelOpenState',
     default: false
 });
+
+export const selectedNewsSymbolState = atom({
+    key: 'selectedNewsSymbolState',
+    default: ''
+});
+
+export const newsSymbolChangedState = atom({
+    key: 'newsSymbolChangedState',
+    default: false
+});

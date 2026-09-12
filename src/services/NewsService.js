@@ -51,5 +51,7 @@ export class NewsService
 
     getInstruments = () => this.#symbolsWithNews
 
+    getArticles = () => this.#news
+
     clear = () => this.#news.clear();
 }
